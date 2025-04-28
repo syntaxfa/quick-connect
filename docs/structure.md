@@ -9,22 +9,39 @@ This document defines the **Quick Connect** project structure, which is designed
 
 ```
 ├── adapter
+
 ├── app
+
 ├── cli
+
 ├── cmd
+
 ├── config
+
 ├── deploy
+
 ├── docs
+
 ├── event
+
 ├── example
+
 ├── go.mod
+
 ├── logger
+
 ├── logs
+
 ├── Makefile
+
 ├── outbox
+
 ├── pkg
+
 ├── protobuf
+
 ├── README.md
+
 └── types
 ```
 
@@ -43,8 +60,11 @@ This document defines the **Quick Connect** project structure, which is designed
 - **Structure Example:**
   ```
 app/
+
 ├── userapp
+
 ├── orderapp
+
 └── paymentapp
   ```
 
@@ -60,12 +80,18 @@ app/
 - **Structure Example:**
   ```
 cmd/
+
 ├── user
+
 │   └── main.go
+
 ├── order
+
 │   └── main.go
+
 └── payment
-└── main.go
+
+│   └── main.go
   ```
 
 ---
@@ -80,11 +106,17 @@ cmd/
 - **Structure Example:**
   ```
 deploy/
+
 ├── user
+
 │   ├── development
+
 │   ├── production
+
 │   └── stage
+
 ├── order
+
 └── payment
   ```
 
@@ -100,8 +132,11 @@ deploy/
 - **Structure Example:**
   ```
 event/
+
 ├── v1/
+
 │   ├── user_created_event.go
+
 │   └── order_placed_event.go
   ```
 
@@ -133,8 +168,11 @@ event/
 - **Structure Example:**
   ```
 pkg/
+
 ├── logger
+
 ├── middleware
+
 └── utils
   ```
 
@@ -145,8 +183,11 @@ pkg/
 - **Structure Example:**
   ```
 protobuf/
+
 ├── v1/
+
 │   ├── user.proto
+
 │   └── order.proto
   ```
 
