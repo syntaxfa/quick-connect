@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package example;
+option go_package = "github.com/quick-connect/example/proto/pub";
+
+service Greeter { rpc SayHello(HelloRequest) returns (HelloReply); }
+
+message HelloRequest { string name = 1; }
+
+message HelloReply { string message = 1; }
