@@ -25,7 +25,7 @@ func L() *slog.Logger {
 	return globalLogger
 }
 
-func SetDefault(cfg Config, opt *slog.HandlerOptions, writeInConsole bool) {
+func SetDefault(cfg Config, opt *slog.HandlerOptions, writeInConsole bool, serviceName string) {
 	workingDir, wErr := os.Getwd()
 	if wErr != nil {
 		log.Fatalf("error getting current working directory, %s", wErr.Error())
@@ -46,9 +46,11 @@ func SetDefault(cfg Config, opt *slog.HandlerOptions, writeInConsole bool) {
 	}
 
 	globalLogger = slog.New(slog.NewJSONHandler(io.MultiWriter(writers...), opt))
+
+	globalLogger = globalLogger.With("service_name", serviceName)
 }
 
-func New(cfg Config, opt *slog.HandlerOptions, writeInConsole bool) *slog.Logger {
+func New(cfg Config, opt *slog.HandlerOptions, writeInConsole bool, serviceName string) *slog.Logger {
 	workingDir, wErr := os.Getwd()
 	if wErr != nil {
 		log.Fatalf("error getting current working directory, %s", wErr.Error())
@@ -68,5 +70,7 @@ func New(cfg Config, opt *slog.HandlerOptions, writeInConsole bool) *slog.Logger
 		writers = append(writers, os.Stdout)
 	}
 
-	return slog.New(slog.NewJSONHandler(io.MultiWriter(writers...), opt))
+	logger := slog.New(slog.NewJSONHandler(io.MultiWriter(writers...), opt))
+
+	return logger.With("service_name", serviceName)
 }
