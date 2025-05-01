@@ -3,6 +3,7 @@ module github.com/syntaxfa/quick-connect
 go 1.24.2
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/knadh/koanf/parsers/yaml v1.0.0
 	github.com/knadh/koanf/providers/env v1.1.0
 	github.com/knadh/koanf/providers/file v1.2.0
@@ -18,7 +19,6 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
