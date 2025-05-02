@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/pkg/logger"
 	"github.com/syntaxfa/quick-connect/pkg/migrator"
 )
 
@@ -25,6 +26,15 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	logger.SetDefault(logger.Config{
+		FilePath:         "logs.json",
+		UseLocalTime:     false,
+		FileMaxSizeInMB:  1,
+		FileMaxAgeInDays: 10,
+		MaxBackup:        0,
+		Compress:         false,
+	}, nil, true, "example")
+
 	db := postgres.New(postgres.Config{
 		Host:     "localhost",
 		Port:     5432,
@@ -34,7 +44,7 @@ func init() {
 		SSLMode:  "disable",
 	})
 
-	migrator := migrator.NewMigrator(db.Conn(), embedMigrations, migrator.Config{
+	migrator := migrator.NewMigrator(db.Conn(), embedMigrations, logger.L(), migrator.Config{
 		Dialect: "postgres",
 		Dir:     "migrations",
 	})

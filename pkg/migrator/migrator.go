@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"log/slog"
 
 	"github.com/pressly/goose/v3"
 	"github.com/spf13/cobra"
@@ -22,13 +23,15 @@ type Config struct {
 type Migrator struct {
 	db         *sql.DB
 	migrations embed.FS
+	log        *slog.Logger
 	cfg        Config
 }
 
-func NewMigrator(db *sql.DB, migrations embed.FS, cfg Config) Migrator {
+func NewMigrator(db *sql.DB, migrations embed.FS, log *slog.Logger, cfg Config) Migrator {
 	return Migrator{
 		db:         db,
 		migrations: migrations,
+		log:        log,
 		cfg:        cfg,
 	}
 }
@@ -45,7 +48,7 @@ func (m *Migrator) UpCommand() *cobra.Command {
 	}
 
 	upCommand.Flags().IntVarP(&opts.Version, "version", "v", 0, "Target version to migrate to (0 means all unapplied migrations)")
-	upCommand.Flags().BoolVarP(&opts.ByOne, "by-one", "b", false, "Apply migrations one at a time")
+	upCommand.Flags().BoolVarP(&opts.ByOne, "by-one", "b", false, "Apply the latest migration")
 
 	return upCommand
 }
@@ -70,15 +73,33 @@ func (m *Migrator) Up(ctx context.Context, opts Options) error {
 	goose.SetBaseFS(m.migrations)
 
 	if err := goose.SetDialect(m.cfg.Dialect); err != nil {
+		m.log.Error("invalid dialect", slog.String("error", err.Error()))
 		return err
 	}
 
 	if opts.ByOne {
-		return goose.UpByOneContext(ctx, m.db, m.cfg.Dir)
+		if err := goose.UpByOneContext(ctx, m.db, m.cfg.Dir); err != nil {
+			m.log.Error("error at applying migration by one", slog.String("error", err.Error()))
+			return err
+		}
+
+		m.log.Info("applied migration by one successfully")
+		return nil
 	}
 
 	if opts.Version != 0 {
-		return goose.UpToContext(ctx, m.db, m.cfg.Dir, int64(opts.Version))
+		if err := goose.UpToContext(ctx, m.db, m.cfg.Dir, int64(opts.Version)); err != nil {
+			m.log.Error(
+				"error at applying migration to a specific version",
+				slog.String("error", err.Error()),
+				slog.Int("version", opts.Version),
+			)
+
+			return err
+		}
+
+		m.log.Info("applied migration to version successfully", slog.Int("version", opts.Version))
+		return nil
 	}
 
 	return goose.UpContext(ctx, m.db, m.cfg.Dir)
@@ -92,7 +113,18 @@ func (m *Migrator) Down(ctx context.Context, opts Options) error {
 	}
 
 	if opts.Version != 0 {
-		return goose.DownToContext(ctx, m.db, m.cfg.Dir, int64(opts.Version))
+		if err := goose.DownToContext(ctx, m.db, m.cfg.Dir, int64(opts.Version)); err != nil {
+			m.log.Error(
+				"error at downgrading migration to a specific version",
+				slog.String("error", err.Error()),
+				slog.Int("version", opts.Version),
+			)
+
+			return err
+		}
+
+		m.log.Info("downgraded migration to version successfully", slog.Int("version", opts.Version))
+		return nil
 	}
 
 	return goose.UpContext(ctx, m.db, m.cfg.Dir)
