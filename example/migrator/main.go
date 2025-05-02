@@ -13,8 +13,6 @@ import (
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
 
-var version string
-
 var rootCmd = &cobra.Command{
 	Use:   "example",
 	Short: "A brief description of your application",
