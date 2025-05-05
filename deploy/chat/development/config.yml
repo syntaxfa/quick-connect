@@ -4,7 +4,7 @@ http_server:
   cors:
     allow_origins: localhost
 logger:
-  file_path: "/logs/chat/logger.json"
+  file_path: "/logs/chat/logs.json"
   use_local_time: false
   file_max_size_in_mb: 10
   file_max_age_in_days: 30
