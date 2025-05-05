@@ -1,7 +1,18 @@
 package http
 
-type Handler struct{}
+import (
+	"github.com/gorilla/websocket"
+	"log/slog"
+)
 
-func NewHandler() Handler {
-	return Handler{}
+type Handler struct {
+	upgrader websocket.Upgrader
+	logger   *slog.Logger
+}
+
+func NewHandler(upgrader websocket.Upgrader, logger *slog.Logger) Handler {
+	return Handler{
+		upgrader: upgrader,
+		logger:   logger,
+	}
 }

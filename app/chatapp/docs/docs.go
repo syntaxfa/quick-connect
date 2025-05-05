@@ -15,6 +15,22 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/chats/clients": {
+            "get": {
+                "description": "chat websocket",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chats"
+                ],
+                "summary": "chat websocket",
+                "responses": {}
+            }
+        },
         "/health-check": {
             "get": {
                 "description": "health check chat service",

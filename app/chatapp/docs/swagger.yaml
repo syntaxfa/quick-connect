@@ -1,6 +1,17 @@
 info:
   contact: {}
 paths:
+  /chats/clients:
+    get:
+      consumes:
+      - application/json
+      description: chat websocket
+      produces:
+      - application/json
+      responses: {}
+      summary: chat websocket
+      tags:
+      - Chats
   /health-check:
     get:
       consumes:

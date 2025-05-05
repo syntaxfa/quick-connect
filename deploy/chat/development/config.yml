@@ -2,7 +2,7 @@ shutdown_timeout: 120s
 http_server:
   port: 2525
   cors:
-    allow_origins: localhost
+    allow_origins:
 logger:
   file_path: "/logs/chat/logs.json"
   use_local_time: false

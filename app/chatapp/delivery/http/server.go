@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/syntaxfa/quick-connect/app/chatapp/docs"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
@@ -34,7 +35,10 @@ func (s Server) RegisterRoutes() {
 
 	s.httpServer.Router.GET("/health-check", s.handler.healthCheck)
 
-	//v1 := s.httpServer.Router.Group("/v1")
+	v1 := s.httpServer.Router.Group("/v1")
+
+	chats := v1.Group("/chats")
+	chats.GET("/clients", s.handler.chatWSHandler)
 }
 
 func (s Server) registerSwagger() {
