@@ -29,3 +29,6 @@ generate-proto:
 			--proto_path=$(PROTO_DIR) \
 			$$file; \
 	done
+
+chat-swag-init:
+	swag init -g cmd/chat/main.go -o app/chatapp/docs/

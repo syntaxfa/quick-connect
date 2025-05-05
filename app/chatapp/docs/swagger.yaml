@@ -1,0 +1,55 @@
+info:
+  contact: {}
+paths:
+  /chats/clients:
+    get:
+      consumes:
+      - application/json
+      description: chat websocket
+      produces:
+      - application/json
+      responses: {}
+      summary: chat websocket
+      tags:
+      - Chats
+  /chats/supports:
+    get:
+      consumes:
+      - application/json
+      description: support chat websocket
+      produces:
+      - application/json
+      responses: {}
+      summary: support chat websocket
+      tags:
+      - Chats
+  /health-check:
+    get:
+      consumes:
+      - application/json
+      description: health check chat service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: everything is good
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: health check
+      tags:
+      - General
+schemes:
+- http
+- https
+securityDefinitions:
+  JWT:
+    description: JWT security accessToken. Please add it in the format "Bearer {AccessToken}"
+      to authorize your requests.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
