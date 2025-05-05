@@ -2,6 +2,7 @@ package chatapp
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 
@@ -32,12 +33,12 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 
 func (a Application) Start() {
 	go func() {
-		a.logger.Info("http server started on %d", a.cfg.HTTPServer.Port)
+		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.HTTPServer.Port))
 
 		if sErr := a.httpServer.Start(); sErr != nil {
-			a.logger.Error("error in http server on %d", a.cfg.HTTPServer.Port, slog.String("error", sErr.Error()))
+			a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.HTTPServer.Port), slog.String("error", sErr.Error()))
 		}
-		a.logger.Info("http server stopped %d", a.cfg.HTTPServer.Port)
+		a.logger.Info(fmt.Sprintf("http server stopped %d", a.cfg.HTTPServer.Port))
 	}()
 
 	<-a.trap

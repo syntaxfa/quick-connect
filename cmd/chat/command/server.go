@@ -15,6 +15,7 @@ type Server struct {
 
 func (s Server) Command(cfg chatapp.Config, logger *slog.Logger, trap chan os.Signal) *cobra.Command {
 	s.cfg = cfg
+	s.logger = logger
 
 	run := func(_ *cobra.Command, _ []string) {
 		s.run(trap)

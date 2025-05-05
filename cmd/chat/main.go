@@ -1,25 +1,32 @@
-package chat
+package main
 
 import (
+	"log/slog"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+
 	"github.com/spf13/cobra"
 	"github.com/syntaxfa/quick-connect/app/chatapp"
 	"github.com/syntaxfa/quick-connect/cmd/chat/command"
 	"github.com/syntaxfa/quick-connect/config"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
-	"log/slog"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 func main() {
 	var cfg chatapp.Config
 
+	workingDir, gErr := os.Getwd()
+	if gErr != nil {
+		panic(gErr)
+	}
+
 	options := config.Option{
 		Prefix:       "CHAT_",
 		Delimiter:    ".",
 		Separator:    "__",
-		YamlFilePath: "",
+		YamlFilePath: filepath.Join(workingDir, "deploy", "chat", "development", "config.yml"),
 		CallBackEnv:  nil,
 	}
 	config.Load(options, &cfg, nil)
