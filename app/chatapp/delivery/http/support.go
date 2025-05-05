@@ -6,15 +6,15 @@ import (
 	"net/http"
 )
 
-// chatWSHandler docs
+// supportChatWSHandler docs
 //
-//	@Summary		chat websocket
-//	@Description	chat websocket
+//	@Summary		support chat websocket
+//	@Description	support chat websocket
 //	@Tags			Chats
 //	@Accept			json
 //	@Produce		json
-//	@Router			/chats/clients [GET].
-func (h Handler) clientChatWSHandler(c echo.Context) error {
+//	@Router			/chats/supports [GET].
+func (h Handler) supportChatWSHandler(c echo.Context) error {
 	conn, uErr := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if uErr != nil {
 		h.logger.Error("failed to upgrade connection",
@@ -24,7 +24,7 @@ func (h Handler) clientChatWSHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not upgrade connection")
 	}
 
-	h.svc.ClientStartChat(conn)
+	h.svc.SupportStartChat(conn)
 
 	return nil
 }

@@ -38,7 +38,8 @@ func (s Server) RegisterRoutes() {
 	v1 := s.httpServer.Router.Group("/v1")
 
 	chats := v1.Group("/chats")
-	chats.GET("/clients", s.handler.chatWSHandler)
+	chats.GET("/clients", s.handler.clientChatWSHandler)
+	chats.GET("/supports", s.handler.supportChatWSHandler)
 }
 
 func (s Server) registerSwagger() {

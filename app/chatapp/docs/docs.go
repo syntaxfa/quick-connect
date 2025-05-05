@@ -31,6 +31,22 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/chats/supports": {
+            "get": {
+                "description": "support chat websocket",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chats"
+                ],
+                "summary": "support chat websocket",
+                "responses": {}
+            }
+        },
         "/health-check": {
             "get": {
                 "description": "health check chat service",

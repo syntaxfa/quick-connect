@@ -12,6 +12,17 @@ paths:
       summary: chat websocket
       tags:
       - Chats
+  /chats/supports:
+    get:
+      consumes:
+      - application/json
+      description: support chat websocket
+      produces:
+      - application/json
+      responses: {}
+      summary: support chat websocket
+      tags:
+      - Chats
   /health-check:
     get:
       consumes:

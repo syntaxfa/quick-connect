@@ -3,6 +3,7 @@ package chatapp
 import (
 	"context"
 	"fmt"
+	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"log/slog"
 	http2 "net/http"
 	"net/url"
@@ -30,7 +31,8 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 		CheckOrigin:      checkOrigin(cfg.HTTPServer.Cors.AllowOrigins, logger),
 	}
 
-	chatHandler := http.NewHandler(upgrader, logger)
+	chatSvc := service.New(logger)
+	chatHandler := http.NewHandler(upgrader, logger, chatSvc)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), chatHandler)
 
 	return Application{
