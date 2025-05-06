@@ -1,6 +1,7 @@
 package chatapp
 
 import (
+	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"time"
 
 	"github.com/syntaxfa/quick-connect/adapter/websocket"
@@ -13,4 +14,5 @@ type Config struct {
 	HTTPServer      httpserver.Config `koanf:"http_server"`
 	Logger          logger.Config     `koanf:"logger"`
 	Websocket       websocket.Config  `koanf:"websocket"`
+	ChatService     service.Config    `koanf:"chat"`
 }

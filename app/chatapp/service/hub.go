@@ -85,7 +85,7 @@ func (h *Hub) Run() {
 			if message.Recipient == "" {
 				h.BroadcastToAllClient(message)
 			} else {
-
+				h.SendPrivateMessageToClient(message)
 			}
 		}
 	}

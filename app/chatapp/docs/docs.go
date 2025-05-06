@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/chats/clients": {
             "get": {
-                "description": "chat websocket",
+                "description": "client chat websocket",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,15 +25,15 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Chats"
+                    "Websocket"
                 ],
-                "summary": "chat websocket",
+                "summary": "client chat websocket",
                 "responses": {}
             }
         },
         "/chats/supports": {
             "get": {
-                "description": "support chat websocket",
+                "description": "client chat websocket",
                 "consumes": [
                     "application/json"
                 ],
@@ -41,9 +41,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Chats"
+                    "Websocket"
                 ],
-                "summary": "support chat websocket",
+                "summary": "client chat websocket",
                 "responses": {}
             }
         },
