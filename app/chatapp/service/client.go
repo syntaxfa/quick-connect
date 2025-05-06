@@ -2,51 +2,114 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"log/slog"
 	"time"
 )
 
-func (s Service) ClientStartChat(conn *websocket.Conn) {
-	id := uuid.New().String()
-	s.clients[id] = conn
+type WSClient struct {
+	id       string
+	hub      *Hub
+	conn     Connection
+	send     chan Message
+	username string
+	logger   *slog.Logger
+	cfg      Config
+}
 
-	message := Message{
-		Type:      MessageTypeNewID,
-		Body:      id,
-		Meta:      nil,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+func NewClient(cfg Config, id string, hub *Hub, conn Connection, username string, logger *slog.Logger) *WSClient {
+	return &WSClient{
+		cfg:      cfg,
+		id:       id,
+		hub:      hub,
+		conn:     conn,
+		send:     make(chan Message, 256),
+		username: username,
+		logger:   logger,
 	}
-	data, mErr := json.Marshal(message)
-	if mErr != nil {
-		s.logger.Error(mErr.Error())
+}
 
-		delete(s.clients, id)
+func (c *WSClient) GetID() string {
+	return c.id
+}
 
-		return
-	}
+func (c *WSClient) Send(message Message) {
+	c.send <- message
+}
 
-	if wErr := conn.WriteMessage(websocket.TextMessage, data); wErr != nil {
-		s.logger.Error(mErr.Error())
+func (c *WSClient) Close() {
+	close(c.send)
+}
 
-		delete(s.clients, id)
+func (c *WSClient) ReadPump() {
+	const op = "service.client.ReadPump"
 
-		return
-	}
-
-	if bErr := s.BroadcastNewClientJoin(id); bErr != nil {
-		s.logger.Error(bErr.Error())
-	}
+	defer func() {
+		c.hub.UnregisterClient(c)
+		if cErr := c.conn.Close(); cErr != nil {
+			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
+		}
+	}()
 
 	for {
-		messageType, data, rErr := conn.ReadMessage()
+		_, message, rErr := c.conn.ReadMessage()
 		if rErr != nil {
-			s.logger.Error(rErr.Error())
+			errlog.ErrLog(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected), c.logger)
+			break
 		}
 
-		if wErr := conn.WriteMessage(messageType, data); wErr != nil {
-			s.logger.Error(wErr.Error())
+		var msg Message
+		if uErr := json.Unmarshal(message, &msg); uErr != nil {
+			errlog.ErrLog(richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected), c.logger)
+			continue
+		}
+
+		msg.Sender = c.id
+
+		c.hub.broadcastToSupport <- msg
+	}
+}
+
+func (c *WSClient) WritePump() {
+	const op = "service.client.WritePump"
+
+	ticker := time.NewTicker(c.cfg.PingPeriod)
+
+	defer func() {
+		ticker.Stop()
+		if cErr := c.conn.Close(); cErr != nil {
+			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
+		}
+	}()
+
+	for {
+		select {
+		case message, ok := <-c.send:
+			if !ok {
+				if wErr := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); wErr != nil {
+					errlog.ErrLog(richerror.New(op).WithMessage("error sending websocket close message").WithKind(richerror.KindUnexpected), c.logger)
+				}
+
+				return
+			}
+
+			msgBytes, mErr := json.Marshal(message)
+			if mErr != nil {
+				errlog.ErrLog(richerror.New(op).WithWrapError(mErr).WithMessage("error marshalling message"), c.logger)
+
+				continue
+			}
+
+			if wErr := c.conn.WriteMessage(websocket.TextMessage, msgBytes); wErr != nil {
+				errlog.ErrLog(richerror.New(op).WithWrapError(wErr).WithMessage("error writing message"), c.logger)
+			}
+
+		case <-ticker.C:
+			if wErr := c.conn.WriteMessage(websocket.PingMessage, nil); wErr != nil {
+				return
+			}
 		}
 	}
 }

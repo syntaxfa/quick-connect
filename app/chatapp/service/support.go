@@ -2,90 +2,114 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"log/slog"
 	"time"
 )
 
-func (s Service) BroadcastNewClientJoin(requestID string) error {
-	message := Message{
-		Type:      MessageTypeNewClientJoin,
-		Body:      "new client join to chat",
-		Meta:      map[string]string{"request_id": requestID},
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	data, mErr := json.Marshal(message)
-	if mErr != nil {
-		s.logger.Error(mErr.Error())
-	}
-
-	for key, conn := range s.supports {
-		if wErr := conn.WriteMessage(websocket.TextMessage, data); wErr != nil {
-			s.logger.Error(wErr.Error())
-
-			delete(s.supports, key)
-
-			if cErr := conn.Close(); cErr != nil {
-				s.logger.Error(cErr.Error())
-			}
-		}
-	}
-
-	return nil
+type WSSupport struct {
+	id       string
+	hub      *Hub
+	conn     Connection
+	send     chan Message
+	username string
+	logger   *slog.Logger
+	cfg      Config
 }
 
-func (s Service) SupportStartChat(conn *websocket.Conn) {
-	id := uuid.New().String()
-	s.supports[id] = conn
-
-	message := Message{
-		Type:      MessageTypeNewID,
-		Body:      id,
-		Meta:      nil,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+func NewSupport(cfg Config, id string, hub *Hub, conn Connection, username string, logger *slog.Logger) *WSSupport {
+	return &WSSupport{
+		cfg:      cfg,
+		id:       id,
+		hub:      hub,
+		conn:     conn,
+		send:     make(chan Message, 256),
+		username: username,
+		logger:   logger,
 	}
-	data, mErr := json.Marshal(message)
-	if mErr != nil {
-		s.logger.Error(mErr.Error())
+}
 
-		delete(s.supports, id)
+func (c *WSSupport) GetID() string {
+	return c.id
+}
 
-		return
-	}
+func (c *WSSupport) Send(message Message) {
+	c.send <- message
+}
 
-	if wErr := conn.WriteMessage(websocket.TextMessage, data); wErr != nil {
-		s.logger.Error(mErr.Error())
+func (c *WSSupport) Close() {
+	close(c.send)
+}
 
-		delete(s.clients, id)
+func (c *WSSupport) ReadPump() {
+	const op = "service.support.ReadPump"
 
-		return
-	}
+	defer func() {
+		c.hub.UnregisterClient(c)
+		if cErr := c.conn.Close(); cErr != nil {
+			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
+		}
+	}()
 
 	for {
-		_, data, rErr := conn.ReadMessage()
+		_, message, rErr := c.conn.ReadMessage()
 		if rErr != nil {
-			s.logger.Error(rErr.Error())
+			errlog.ErrLog(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected), c.logger)
+			break
 		}
 
-		var message Message
-		if uErr := json.Unmarshal(data, &message); uErr != nil {
-			s.logger.Error(uErr.Error())
+		var msg Message
+		if uErr := json.Unmarshal(message, &msg); uErr != nil {
+			errlog.ErrLog(richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected), c.logger)
+			continue
 		}
 
-		clientID, _ := message.Meta["id"]
+		msg.Sender = c.id
 
-		s.SendMessageToClient(clientID, data)
+		c.hub.broadcastToClient <- msg
 	}
 }
 
-func (s Service) SendMessageToClient(id string, data []byte) {
-	conn, ok := s.clients[id]
-	if ok {
-		if wErr := conn.WriteMessage(websocket.TextMessage, data); wErr != nil {
-			s.logger.Error(wErr.Error())
+func (c *WSSupport) WritePump() {
+	const op = "service.support.WritePump"
+
+	ticker := time.NewTicker(c.cfg.PingPeriod)
+
+	defer func() {
+		ticker.Stop()
+		if cErr := c.conn.Close(); cErr != nil {
+			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
+		}
+	}()
+
+	for {
+		select {
+		case message, ok := <-c.send:
+			if !ok {
+				if wErr := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); wErr != nil {
+					errlog.ErrLog(richerror.New(op).WithMessage("error sending websocket close message").WithKind(richerror.KindUnexpected), c.logger)
+				}
+
+				return
+			}
+
+			msgBytes, mErr := json.Marshal(message)
+			if mErr != nil {
+				errlog.ErrLog(richerror.New(op).WithWrapError(mErr).WithMessage("error marshalling message"), c.logger)
+
+				continue
+			}
+
+			if wErr := c.conn.WriteMessage(websocket.TextMessage, msgBytes); wErr != nil {
+				errlog.ErrLog(richerror.New(op).WithWrapError(wErr).WithMessage("error writing message"), c.logger)
+			}
+
+		case <-ticker.C:
+			if wErr := c.conn.WriteMessage(websocket.PingMessage, nil); wErr != nil {
+				return
+			}
 		}
 	}
 }

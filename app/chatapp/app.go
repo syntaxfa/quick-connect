@@ -3,7 +3,6 @@ package chatapp
 import (
 	"context"
 	"fmt"
-	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"log/slog"
 	http2 "net/http"
 	"net/url"
