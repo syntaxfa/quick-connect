@@ -124,6 +124,7 @@ func (h *Hub) SendMessageToSupport(message Message) {
 	}
 
 	if sender, ok := h.clients[message.Sender]; ok {
+		message.Type = MessageTypeEcho
 		sender.Send(message)
 	}
 }
@@ -137,6 +138,7 @@ func (h *Hub) BroadcastToAllClient(message Message) {
 	}
 
 	if sender, ok := h.supports[message.Sender]; ok {
+		message.Type = MessageTypeEcho
 		sender.Send(message)
 	}
 }
@@ -147,9 +149,10 @@ func (h *Hub) SendPrivateMessageToClient(message Message) {
 
 	if client, ok := h.clients[message.Recipient]; ok {
 		client.Send(message)
-	}
 
-	if sender, ok := h.supports[message.Sender]; ok {
-		sender.Send(message)
+		if sender, ok := h.supports[message.Sender]; ok {
+			message.Type = MessageTypeEcho
+			sender.Send(message)
+		}
 	}
 }

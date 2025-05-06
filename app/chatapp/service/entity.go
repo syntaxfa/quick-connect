@@ -6,3 +6,10 @@ type Message struct {
 	Sender    string `json:"sender"`
 	Recipient string `json:"recipient"`
 }
+
+type MessageType string
+
+const (
+	MessageTypeEcho = "echo"
+	MessageTypeNew  = "new_message"
+)
