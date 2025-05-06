@@ -5,24 +5,24 @@ paths:
     get:
       consumes:
       - application/json
-      description: chat websocket
+      description: client chat websocket
       produces:
       - application/json
       responses: {}
-      summary: chat websocket
+      summary: client chat websocket
       tags:
-      - Chats
+      - Websocket
   /chats/supports:
     get:
       consumes:
       - application/json
-      description: support chat websocket
+      description: client chat websocket
       produces:
       - application/json
       responses: {}
-      summary: support chat websocket
+      summary: client chat websocket
       tags:
-      - Chats
+      - Websocket
   /health-check:
     get:
       consumes:
