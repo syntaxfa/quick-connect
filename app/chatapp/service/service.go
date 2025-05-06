@@ -5,6 +5,12 @@ import (
 	"log/slog"
 )
 
+type Connection interface {
+	ReadMessage() (messageType int, p []byte, err error)
+	WriteMessage(messageType int, data []byte) error
+	Close() error
+}
+
 type Service struct {
 	logger   *slog.Logger
 	clients  map[string]*websocket.Conn
