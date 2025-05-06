@@ -3,6 +3,7 @@ package chatapp
 import (
 	"context"
 	"fmt"
+	"github.com/syntaxfa/quick-connect/adapter/websocket"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"log/slog"
 	http2 "net/http"
@@ -10,7 +11,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gorilla/websocket"
 	"github.com/syntaxfa/quick-connect/app/chatapp/delivery/http"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 )
@@ -24,14 +24,13 @@ type Application struct {
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
-	upgrader := websocket.Upgrader{
-		HandshakeTimeout: 0,
-		ReadBufferSize:   1024,
-		WriteBufferSize:  1024,
-		CheckOrigin:      checkOrigin(cfg.HTTPServer.Cors.AllowOrigins, logger),
-	}
+	cfg.ChatService.PingPeriod = (cfg.ChatService.PongWait * 9) / 10
 
-	chatSvc := service.New(logger)
+	fmt.Printf("%+v", cfg)
+
+	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.HTTPServer.Cors.AllowOrigins, logger))
+
+	chatSvc := service.New(cfg.ChatService, nil, logger)
 	chatHandler := http.NewHandler(upgrader, logger, chatSvc)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), chatHandler)
 

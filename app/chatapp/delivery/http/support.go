@@ -2,29 +2,24 @@ package http
 
 import (
 	"github.com/labstack/echo/v4"
-	"log/slog"
 	"net/http"
 )
 
-// supportChatWSHandler docs
+// WSSupportHandler docs
 //
-//	@Summary		support chat websocket
-//	@Description	support chat websocket
-//	@Tags			Chats
+//	@Summary		client chat websocket
+//	@Description	client chat websocket
+//	@Tags			Websocket
 //	@Accept			json
 //	@Produce		json
 //	@Router			/chats/supports [GET].
-func (h Handler) supportChatWSHandler(c echo.Context) error {
-	conn, uErr := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
+func (h Handler) WSSupportHandler(c echo.Context) error {
+	conn, uErr := h.upgrader.Upgrade(c.Response(), c.Request())
 	if uErr != nil {
-		h.logger.Error("failed to upgrade connection",
-			slog.String("error", uErr.Error()),
-			slog.String("remote_addr", c.Request().RemoteAddr))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not upgrade connection")
+		return echo.NewHTTPError(http.StatusNotAcceptable, "could not upgrade connection")
 	}
 
-	h.svc.SupportStartChat(conn)
+	h.svc.JoinSupport(conn, "support")
 
 	return nil
 }
