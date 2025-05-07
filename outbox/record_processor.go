@@ -2,6 +2,7 @@ package outbox
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/syntaxfa/quick-connect/outbox/internal/time"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
@@ -14,15 +15,17 @@ type defaultRecordProcessor struct {
 	time          time.Provider
 	machineID     string
 	retrialPolicy RetrialPolicy
+	logger        *slog.Logger
 }
 
-func newProcessor(retrialPolicy RetrialPolicy, store Store, messageBroker MessageBroker, machineID string) *defaultRecordProcessor {
+func newProcessor(retrialPolicy RetrialPolicy, store Store, messageBroker MessageBroker, machineID string, logger *slog.Logger) *defaultRecordProcessor {
 	return &defaultRecordProcessor{
 		messageBroker: messageBroker,
 		store:         store,
 		time:          time.NewTimeProvider(),
 		machineID:     machineID,
 		retrialPolicy: retrialPolicy,
+		logger:        logger,
 	}
 }
 
@@ -31,7 +34,7 @@ func (d defaultRecordProcessor) ProcessRecords() error {
 
 	defer func() {
 		if cErr := d.store.ClearLocksByLockID(d.machineID); cErr != nil {
-			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected))
+			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), d.logger)
 		}
 	}()
 

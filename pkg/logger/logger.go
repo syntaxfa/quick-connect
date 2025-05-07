@@ -54,7 +54,7 @@ func New(cfg Config, opt *slog.HandlerOptions, writeInConsole bool, serviceName 
 	if cfg.FilePath == "" {
 		panic("filepath can be blank")
 	}
-	
+
 	workingDir, wErr := os.Getwd()
 	if wErr != nil {
 		log.Fatalf("error getting current working directory, %s", wErr.Error())

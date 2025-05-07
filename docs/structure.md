@@ -153,7 +153,7 @@ event/
 ---
 
 #### **11. `logs`**
-- **Purpose:** Stores log files for each service in a dedicated subdirectory (e.g., `logs/user`). 
+- **Purpose:** Stores log files for each service in a dedicated subdirectory (e.g., `logs/user`).
 - **Note:** In the future, logs will be stored in `/var/log/{app_name}/logs.json` following standard practices.
 
 ---

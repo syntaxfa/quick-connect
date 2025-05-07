@@ -21,7 +21,7 @@ WHERE state=$3;
 func (d *DB) UpdateRecordLockByState(lockID string, lockedOn time.Time, state outbox.RecordState) error {
 	const op = "outbox.repository.outboxpsq.update.UpdateRecordLockByState"
 
-	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementUpdateRecordLockByState, queryUpdateRecordLockeByState)
+	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementUpdateRecordLockByState, queryUpdateRecordLockeByState) //nolint:sqlclosecheck // finally closed, but not here
 	if pErr != nil {
 		return richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected)
 	}
@@ -50,7 +50,7 @@ WHERE id = $9
 func (d *DB) UpdateRecordByID(rec outbox.Record) error {
 	const op = "outbox.repository.outboxpsq.update.UpdateRecordByID"
 
-	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementUpdateRecordByID, queryUpdateRecordByID)
+	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementUpdateRecordByID, queryUpdateRecordByID) //nolint:sqlclosecheck // finally closed, but not here
 	if pErr != nil {
 		return richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected)
 	}

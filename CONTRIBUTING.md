@@ -1,7 +1,7 @@
 # Contributing to Quick Connect
 
-Thank you for your interest in contributing to **Quick Connect**!  
-We take code quality, maintainability, and scalability very seriously.  
+Thank you for your interest in contributing to **Quick Connect**!
+We take code quality, maintainability, and scalability very seriously.
 Please carefully follow these guidelines to ensure a smooth contribution process.
 
 ---
@@ -22,8 +22,8 @@ Please carefully follow these guidelines to ensure a smooth contribution process
       ```
       {type}/{short-description}
       ```
-        - Example:  
-          `feat/add-user-authentication`  
+        - Example:
+          `feat/add-user-authentication`
           `fix/fix-order-validation`
           `docs/update-api-docs`
 
@@ -55,7 +55,7 @@ We strictly follow the [Conventional Commits](https://www.conventionalcommits.or
 - `chore`: Miscellaneous chores
 - `revert`: Revert a previous commit
 
-**Example:**  
+**Example:**
 `feat(userapp): add JWT authentication`
 
 ---
@@ -88,7 +88,7 @@ We strictly follow the [Conventional Commits](https://www.conventionalcommits.or
 
 ## 📜 Code of Conduct
 
-We are committed to providing a welcoming and respectful environment for all contributors.  
+We are committed to providing a welcoming and respectful environment for all contributors.
 Please:
 - Be respectful and considerate.
 - Provide constructive feedback.

@@ -1,10 +1,12 @@
 package outbox
 
 import (
-	"github.com/syntaxfa/quick-connect/pkg/errlog"
-	"github.com/syntaxfa/quick-connect/pkg/logger"
+	"log/slog"
 	"os"
 	"time"
+
+	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/logger"
 )
 
 type processor interface {
@@ -24,14 +26,16 @@ type Dispatcher struct {
 	recordUnlocker  unlocker
 	recordCleaner   cleaner
 	cfg             Config
+	logger          *slog.Logger
 }
 
-func NewDispatcher(cfg Config, store Store, broker MessageBroker, machineID string) Dispatcher {
+func NewDispatcher(cfg Config, store Store, broker MessageBroker, machineID string, logger *slog.Logger) Dispatcher {
 	return Dispatcher{
-		recordProcessor: newProcessor(cfg.RetrialPolicy, store, broker, machineID),
+		recordProcessor: newProcessor(cfg.RetrialPolicy, store, broker, machineID, logger),
 		recordUnlocker:  newRecordUnlocker(store, cfg.MaxLockTimeDuration),
 		recordCleaner:   newRecordCleaner(store, cfg.MessagesRetentionDuration),
 		cfg:             cfg,
+		logger:          logger,
 	}
 }
 
@@ -53,7 +57,7 @@ func (d Dispatcher) runRecordProcessor(trap chan os.Signal) {
 
 		pErr := d.recordProcessor.ProcessRecords()
 		if pErr != nil {
-			errlog.ErrLog(pErr)
+			errlog.ErrLog(pErr, d.logger)
 		}
 
 		logger.L().Info("record processing finished")
@@ -77,7 +81,7 @@ func (d Dispatcher) runRecordUnlocker(trap chan os.Signal) {
 		logger.L().Info("record unlocker running")
 
 		if uErr := d.recordUnlocker.UnlockExpiredMessages(); uErr != nil {
-			errlog.ErrLog(uErr)
+			errlog.ErrLog(uErr, d.logger)
 		}
 
 		logger.L().Info("record unlocker finished")
@@ -101,7 +105,7 @@ func (d Dispatcher) runRecordCleaner(trap chan os.Signal) {
 		logger.L().Info("record retention cleaner running")
 
 		if rErr := d.recordCleaner.RemoveExpiredMessages(); rErr != nil {
-			errlog.ErrLog(rErr)
+			errlog.ErrLog(rErr, d.logger)
 		}
 
 		logger.L().Info("record retention cleaner finished")

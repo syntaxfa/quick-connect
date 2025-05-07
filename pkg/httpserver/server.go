@@ -3,9 +3,10 @@ package httpserver
 import (
 	"context"
 	"fmt"
+	"log/slog"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"log/slog"
 )
 
 type Cors struct {
@@ -85,5 +86,6 @@ func (s Server) Start() error {
 
 func (s Server) Stop(ctx context.Context) error {
 	s.log.Info("http server gracefully shutdown", slog.Int("port", s.cfg.Port))
+
 	return s.Router.Shutdown(ctx)
 }
