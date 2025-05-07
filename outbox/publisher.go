@@ -2,6 +2,7 @@ package outbox
 
 import (
 	"database/sql"
+
 	"github.com/syntaxfa/quick-connect/outbox/internal/time"
 	"github.com/syntaxfa/quick-connect/outbox/internal/uuid"
 )

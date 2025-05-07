@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/gob"
+
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/outbox"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
@@ -14,10 +15,10 @@ const queryAddRecordTx = `INSERT INTO outbox
 (id, data, state, created_on, locked_by, locked_on, processed_on, number_of_attempts, last_attempted_on, error)
 VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`
 
-func (d *DB) AddRecordTX(rec outbox.Record, tx *sql.Tx) error {
+func (d *DB) AddRecordTX(rec outbox.Record, _ *sql.Tx) error {
 	const op = "outbox.repository.outboxpsq.add.AddRecordTX"
 
-	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementAddRecordTX, queryAddRecordTx)
+	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementAddRecordTX, queryAddRecordTx) //nolint:sqlclosecheck // finally closed, but not here
 	if pErr != nil {
 		return richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected)
 	}

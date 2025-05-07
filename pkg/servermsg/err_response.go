@@ -2,10 +2,11 @@ package servermsg
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
-	"net/http"
 )
 
 type ErrorResponse struct {
@@ -31,7 +32,7 @@ func mapKindToHTTPStatusCode(kind richerror.Kind) int {
 }
 
 func HTTPMsg(c echo.Context, err error, t *translation.Translate) error {
-	var serverErrCode = http.StatusInternalServerError
+	serverErrCode := http.StatusInternalServerError
 
 	var message string
 	var code int
