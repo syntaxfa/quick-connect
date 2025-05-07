@@ -2,11 +2,12 @@ package service
 
 import (
 	"encoding/json"
+	"log/slog"
+	"time"
+
 	"github.com/gorilla/websocket"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
-	"log/slog"
-	"time"
 )
 
 type WSSupport struct {
@@ -57,12 +58,14 @@ func (c *WSSupport) ReadPump() {
 		_, message, rErr := c.conn.ReadMessage()
 		if rErr != nil {
 			errlog.ErrLog(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected), c.logger)
+
 			break
 		}
 
 		var msg Message
 		if uErr := json.Unmarshal(message, &msg); uErr != nil {
 			errlog.ErrLog(richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected), c.logger)
+
 			continue
 		}
 

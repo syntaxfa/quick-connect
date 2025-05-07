@@ -3,15 +3,15 @@ package chatapp
 import (
 	"context"
 	"fmt"
-	"github.com/syntaxfa/quick-connect/adapter/websocket"
-	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"log/slog"
 	http2 "net/http"
 	"net/url"
 	"os"
 	"strings"
 
+	"github.com/syntaxfa/quick-connect/adapter/websocket"
 	"github.com/syntaxfa/quick-connect/app/chatapp/delivery/http"
+	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 )
 

@@ -2,9 +2,10 @@ package outboxpsq
 
 import (
 	"context"
+	"time"
+
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
-	"time"
 )
 
 const queryClearLocksWithDurationBeforeDate = `UPDATE outbox
@@ -17,7 +18,7 @@ WHERE locked_on < $1;
 func (d *DB) ClearLocksWithDurationBeforeDate(time time.Time) error {
 	const op = "outbox.repository.outboxpsq.remove.ClearLocksWithDurationBeforeDate"
 
-	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementClearLocksWithDurationBeforeDate, queryClearLocksWithDurationBeforeDate)
+	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementClearLocksWithDurationBeforeDate, queryClearLocksWithDurationBeforeDate) //nolint:sqlclosecheck // finally closed, but not here
 	if pErr != nil {
 		return richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected)
 	}
@@ -40,7 +41,7 @@ WHERE locked_by = $1;
 func (d *DB) ClearLocksByLockID(lockID string) error {
 	const op = "outbox.repository.outboxpsq.remove.ClearLocksByLockID"
 
-	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementClearLocksByLockID, queryClearLocksByLockID)
+	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementClearLocksByLockID, queryClearLocksByLockID) //nolint:sqlclosecheck // finally closed, but not here
 	if pErr != nil {
 		return richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected)
 	}

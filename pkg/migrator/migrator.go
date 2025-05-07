@@ -42,7 +42,7 @@ func (m *Migrator) UpCommand() *cobra.Command {
 	upCommand := &cobra.Command{
 		Use:   "migrate",
 		Short: "Apply migrations to the database",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return m.Up(cmd.Context(), opts)
 		},
 	}
@@ -59,7 +59,7 @@ func (m *Migrator) DownCommand() *cobra.Command {
 	upCommand := &cobra.Command{
 		Use:   "migrate",
 		Short: "Apply migrations to the database",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return m.Down(cmd.Context(), opts)
 		},
 	}
@@ -74,16 +74,19 @@ func (m *Migrator) Up(ctx context.Context, opts Options) error {
 
 	if err := goose.SetDialect(m.cfg.Dialect); err != nil {
 		m.log.Error("invalid dialect", slog.String("error", err.Error()))
+
 		return err
 	}
 
 	if opts.ByOne {
 		if err := goose.UpByOneContext(ctx, m.db, m.cfg.Dir); err != nil {
 			m.log.Error("error at applying migration by one", slog.String("error", err.Error()))
+
 			return err
 		}
 
 		m.log.Info("applied migration by one successfully")
+
 		return nil
 	}
 
@@ -99,6 +102,7 @@ func (m *Migrator) Up(ctx context.Context, opts Options) error {
 		}
 
 		m.log.Info("applied migration to version successfully", slog.Int("version", opts.Version))
+
 		return nil
 	}
 
@@ -124,6 +128,7 @@ func (m *Migrator) Down(ctx context.Context, opts Options) error {
 		}
 
 		m.log.Info("downgraded migration to version successfully", slog.Int("version", opts.Version))
+
 		return nil
 	}
 

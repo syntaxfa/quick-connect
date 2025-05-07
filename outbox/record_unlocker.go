@@ -1,10 +1,10 @@
 package outbox
 
 import (
-	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	time2 "time"
 
 	"github.com/syntaxfa/quick-connect/outbox/internal/time"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
 )
 
 type recordUnlocker struct {

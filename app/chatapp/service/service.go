@@ -1,10 +1,11 @@
 package service
 
 import (
+	"log/slog"
+
 	"github.com/google/uuid"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
-	"log/slog"
 )
 
 type Connection interface {

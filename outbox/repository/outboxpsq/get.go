@@ -6,13 +6,14 @@ import (
 	"database/sql"
 	"encoding/gob"
 	"errors"
+
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/outbox"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 )
 
-const queryGetRecordsByLockID = `SELECT 
+const queryGetRecordsByLockID = `SELECT
 id, data, state, created_on, locked_by, locked_on, processed_on, number_of_attempts, last_attempted_on, error
 FROM outbox
 WHERE locked_by=$1;
@@ -21,7 +22,7 @@ WHERE locked_by=$1;
 func (d *DB) GetRecordsByLockID(lockID string) ([]outbox.Record, error) {
 	const op = "outbox.repository.outboxpsq.get.GetRecordsByLockID"
 
-	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementGetRecordsByLockID, queryGetRecordsByLockID)
+	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementGetRecordsByLockID, queryGetRecordsByLockID) //nolint:sqlclosecheck // finally closed, but not here
 	if pErr != nil {
 		return nil, richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected)
 	}

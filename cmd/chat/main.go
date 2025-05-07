@@ -14,6 +14,8 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 )
 
+// main
+//
 //	@schemes					http https
 //	@securityDefinitions.apiKey	JWT
 //	@in							header

@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/syntaxfa/quick-connect/pkg/errlog"
-	"github.com/syntaxfa/quick-connect/pkg/logger"
-	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/syntaxfa/quick-connect/pkg/logger"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
 )
 
 type Database struct {
@@ -19,8 +19,6 @@ type Database struct {
 }
 
 func New(cfg Config) *Database {
-	op := "repository.postgres.New"
-
 	conn, err := sql.Open("postgres",
 		fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 			cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode))
@@ -29,10 +27,7 @@ func New(cfg Config) *Database {
 	}
 
 	if err = conn.Ping(); err != nil {
-		richErr := richerror.New(op).WithWrapError(err).WithKind(richerror.KindUnexpected)
-		errlog.ErrLog(richErr)
-
-		panic(richErr.Message())
+		panic(err)
 	}
 
 	conn.SetMaxIdleConns(cfg.MaxIdleConns)
@@ -65,7 +60,6 @@ func (db *Database) PrepareStatement(ctx context.Context, key statementKey, quer
 	if pErr != nil {
 		richErr := richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected).
 			WithMeta(map[string]interface{}{"key": key, "query": query})
-		errlog.ErrLog(richErr)
 
 		return nil, richErr
 	}
@@ -85,7 +79,6 @@ func (db *Database) CloseStatements() error {
 		cErr := stmt.Close()
 		if cErr != nil {
 			richErr := richerror.New(op).WithWrapError(cErr).WithMeta(map[string]interface{}{"key": key})
-			errlog.ErrLog(richErr)
 
 			return richErr
 		}
