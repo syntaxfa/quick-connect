@@ -10,7 +10,7 @@ import (
 )
 
 type Config struct {
-	ShutdownTimeout time.Duration     `koanf:"shutdown_timeout"`
+	ShutdownTimeout time.Duration     `koanf:"shutdown_timeou"`
 	HTTPServer      httpserver.Config `koanf:"http_server"`
 	Logger          logger.Config     `koanf:"logger"`
 	Websocket       websocket.Config  `koanf:"websocket"`
