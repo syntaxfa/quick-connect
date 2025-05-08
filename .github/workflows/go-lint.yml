@@ -1,9 +1,20 @@
-name: CI Chat Service
+name: Go Lint
 
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize, ready_for_review]
     branches: [main]
+    paths:
+      - 'adapter/**'
+      - 'app/**'
+      - 'cli/**'
+      - 'cmd/**'
+      - 'config/**'
+      - 'event/**'
+      - 'outbox/**'
+      - 'pkg/**'
+      - 'protobuf/**'
+      - 'types/**'
 
 jobs:
   test:

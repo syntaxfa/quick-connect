@@ -1,4 +1,4 @@
-name: Test General Codes
+name: Test General Go
 
 on:
   pull_request:
