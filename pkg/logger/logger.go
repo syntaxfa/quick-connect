@@ -12,7 +12,7 @@ import (
 
 type Config struct {
 	FilePath         string `koanf:"file_path"`
-	UseLocalTime     bool   `koanf:"use_local_tim"`
+	UseLocalTime     bool   `koanf:"use_local_time"`
 	FileMaxSizeInMB  int    `koanf:"file_max_size_in_mb"`
 	FileMaxAgeInDays int    `koanf:"file_max_age_in_days"`
 	MaxBackup        int    `koanf:"max_backup"`
