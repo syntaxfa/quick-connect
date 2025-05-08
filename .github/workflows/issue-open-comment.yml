@@ -12,7 +12,23 @@ jobs:
   comment:
     runs-on: ubuntu-latest
     steps:
-      - run: gh issue comment $ISSUE --body "Thank you for opening this issue!"
+      - name: add comment to issue
+        run: gh issue comment $ISSUE --body "$MESSAGE"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE: ${{ github.event.issue.html_url }}
+          MESSAGE: |
+            Thank you for opening this issue! 🎉
+
+            We truly appreciate your contributions and the time you've taken to share your ideas or report a problem. To help us keep things organized and ensure we're focusing on active discussions, here’s how we handle issues and pull requests:
+
+              - If an issue hasn’t had any activity in the past **year**, it will automatically be marked as **stale**. Don’t worry—this is just a gentle nudge to see if it’s still relevant. You’ll have **30 days** to leave a comment or update it to prevent it from being closed.
+              - If no further activity occurs within those **30 days**, the issue will be automatically closed.
+
+            For pull requests:
+              - PRs that haven’t had activity in **30 days** will also be marked as **stale**. This is a reminder to provide updates or request a review if needed.
+              - If there’s no activity within **2 weeks** after being marked stale, the PR will be closed.
+
+            To keep certain issues or PRs from being marked as stale, we use the **`no stalebot`** label—feel free to apply it where appropriate!
+
+            Thank you again for your efforts in making this project better. If you have any questions or concerns about this process, don’t hesitate to reach out! 😊
