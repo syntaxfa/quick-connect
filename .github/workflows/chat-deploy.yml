@@ -40,3 +40,6 @@ jobs:
 
       - name: build
         run: make chat-build IMAGE_NAME=quick-connect/${GITHUB_REF#refs/tags/}
+
+      - name: push image to docker hub
+        run: docker push quick-connect/${GITHUB_REF#refs/tags/}
