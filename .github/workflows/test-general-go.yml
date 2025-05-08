@@ -12,10 +12,6 @@ on:
       - 'cli/**'
       - 'adapter/**'
 
-  push:
-    tags:
-      - '*/v*'
-
 jobs:
   test_general_codes:
     runs-on: ubuntu-latest

@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'chat/v*'
-  workflow_dispatch:
 
 jobs:
   build_and_deploy:

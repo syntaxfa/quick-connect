@@ -15,10 +15,6 @@ on:
       - 'protobuf/**'
       - 'types/**'
 
-  push:
-    tags:
-      - 'chat/v*'
-
 jobs:
   test:
     runs-on: ubuntu-latest
