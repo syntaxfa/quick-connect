@@ -33,7 +33,7 @@ func main() {
 		Prefix:       "CHAT_",
 		Delimiter:    ".",
 		Separator:    "__",
-		YamlFilePath: filepath.Join(workingDir, "deploy", "chat", "development", "config.yml"),
+		YamlFilePath: filepath.Join(workingDir, "deploy", "chat", "config.yml"),
 		CallBackEnv:  nil,
 	}
 	config.Load(options, &cfg, nil)

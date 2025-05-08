@@ -1,0 +1,14 @@
+.idea
+README.md
+/example
+/logs
+/docs
+.golangci.yml
+.pre-commit-config.yaml
+CONTRIBUTING.md
+Makefile
+renovate.json5
+/cli
+.gitlint
+.github
+.gitignore
