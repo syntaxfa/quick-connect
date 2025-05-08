@@ -1,0 +1,35 @@
+name: CI Chat Service
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+    branches: [main]
+    paths:
+      - 'app/chatapp'
+      - 'cmd/chat'
+      - 'pkg/**'
+      - 'adapter/**'
+      - 'outbox/**'
+      - 'protobuf/**'
+      - 'config/**'
+
+jobs:
+  test:
+    if: github.event_name == `pull_request`
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.2'
+          cache: true
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: test
+        run: make chat-test
+
+      - name: lint
+        run: make lint
