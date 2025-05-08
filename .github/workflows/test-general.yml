@@ -22,4 +22,3 @@ jobs:
         with:
           go-version: '1.24.2'
           cache: true
-
