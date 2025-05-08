@@ -39,7 +39,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: build
-        run: make chat-build IMAGE_NAME=quickconnect/chat:${GITHUB_REF#refs/tags/chat/v}
+        run: make chat-build IMAGE_NAME=syntaxfa/quickconnect/chat:${GITHUB_REF#refs/tags/chat/v}
 
       - name: push image to docker hub
-        run: docker push quickconnect/chat:${GITHUB_REF#refs/tags/chat/v}
+        run: docker push syntaxfa/quickconnect/chat:${GITHUB_REF#refs/tags/chat/v}
