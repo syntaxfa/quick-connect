@@ -27,4 +27,4 @@ jobs:
         run: go mod tidy
 
       - name: lint
-        run: make lint
+        run: make test-general
