@@ -1,9 +1,9 @@
-name: Chat Build AND Deploy On Docker
+name: Chat Build And Deploy On Docker
 
 on:
   push:
-    tags:
-      - 'chat/v*'
+#    tags:
+#      - 'chat/v*'
 
   workflow_dispatch:
 
