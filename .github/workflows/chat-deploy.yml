@@ -2,8 +2,8 @@ name: Chat Build And Deploy On Docker
 
 on:
   push:
-#    tags:
-#      - 'chat/v*'
+    tags:
+      - 'chat/v*'
 
   workflow_dispatch:
 
@@ -37,3 +37,6 @@ jobs:
         with:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: build
+        run: make chat-build IMAGE_NAME=quick-connect/${GITHUB_REF#refs/tags/}
