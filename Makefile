@@ -42,3 +42,5 @@ test-general:
 
 chat-test:
 	go test ./app/chatapp/...
+
+chat-deploy:
