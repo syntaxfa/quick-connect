@@ -1,0 +1,34 @@
+name: Go Lint
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+    branches: [main]
+    paths:
+      - 'adapter/**'
+      - 'app/**'
+      - 'cli/**'
+      - 'cmd/**'
+      - 'config/**'
+      - 'event/**'
+      - 'outbox/**'
+      - 'pkg/**'
+      - 'protobuf/**'
+      - 'types/**'
+
+jobs:
+  lint-go:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./go.mod
+
+      - name: Lint
+        run: make lint
