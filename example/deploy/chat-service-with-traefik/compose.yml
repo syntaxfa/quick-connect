@@ -1,0 +1,31 @@
+name: "chat"
+
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+services:
+  chat:
+    image: syntaxfa/quickconnect-chat:0.0.1
+    container_name: chat
+    restart: on-failure
+    networks:
+      - app_net
+      - web_net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web_net
+      - traefik.http.routers.node.entrypoints=http
+      - traefik.http.routers.node.rule=Host(`${CHAT_SUB_DOMAIN}.${DOMAIN_ADDRESS}`)
+      - traefik.http.routers.node.middlewares=https-redirect
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.node-secure.entrypoints=https
+      - traefik.http.routers.node-secure.rule=Host(`${CHAT_SUB_DOMAIN}.${DOMAIN_ADDRESS}`)
+      - traefik.http.routers.node-secure.tls=true
+      - traefik.http.routers.node-secure.tls.options=default
+      - traefik.http.routers.node-secure.tls.certresolver=mycert
+      - traefik.http.services.node.loadbalancer.server.port=2525

@@ -174,3 +174,5 @@ fabric.properties
 *log.log
 *logs.json
 *log.json
+
+.env
