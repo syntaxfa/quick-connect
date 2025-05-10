@@ -8,9 +8,9 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
-	"github.com/syntaxfa/quick-connect/app/chatapp"
-	_ "github.com/syntaxfa/quick-connect/app/chatapp/docs"
-	"github.com/syntaxfa/quick-connect/cmd/chat/command"
+	"github.com/syntaxfa/quick-connect/app/managerapp"
+	_ "github.com/syntaxfa/quick-connect/app/managerapp/docs"
+	"github.com/syntaxfa/quick-connect/cmd/manager/command"
 	"github.com/syntaxfa/quick-connect/config"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 )
@@ -23,7 +23,7 @@ import (
 //	@name						Authorization
 //	@description				JWT security accessToken. Please add it in the format "Bearer {AccessToken}" to authorize your requests.
 func main() {
-	var cfg chatapp.Config
+	var cfg managerapp.Config
 
 	workingDir, gErr := os.Getwd()
 	if gErr != nil {
@@ -31,19 +31,21 @@ func main() {
 	}
 
 	options := config.Option{
-		Prefix:       "CHAT_",
+		Prefix:       "MANAGER_",
 		Delimiter:    ".",
 		Separator:    "__",
-		YamlFilePath: filepath.Join(workingDir, "deploy", "chat", "config.yml"),
+		YamlFilePath: filepath.Join(workingDir, "deploy", "manager", "config.yml"),
 		CallBackEnv:  nil,
 	}
 	config.Load(options, &cfg, nil)
 
-	log := logger.New(cfg.Logger, nil, true, "chat")
+	log := logger.New(cfg.Logger, nil, true, "manager")
 
 	root := &cobra.Command{
-		Use:     "chat",
-		Short:   "chat application",
+		Use:   "manager",
+		Short: "manager application",
+		Long: "The application manager is used for managing Quick-Connect, and it also includes a back-office" +
+			" that controls the access management of administrators.",
 		Version: "1.0.0",
 	}
 

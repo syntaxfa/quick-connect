@@ -23,7 +23,7 @@ func (s Server) Command(cfg chatapp.Config, logger *slog.Logger, trap chan os.Si
 
 	return &cobra.Command{
 		Use:   "start",
-		Short: "run http server",
+		Short: "start chat application",
 		Run:   run,
 	}
 }

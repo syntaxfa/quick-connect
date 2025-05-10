@@ -15,41 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/chats/clients": {
-            "get": {
-                "description": "client chat websocket",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Websocket"
-                ],
-                "summary": "client chat websocket",
-                "responses": {}
-            }
-        },
-        "/chats/supports": {
-            "get": {
-                "description": "client chat websocket",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Websocket"
-                ],
-                "summary": "client chat websocket",
-                "responses": {}
-            }
-        },
         "/health-check": {
             "get": {
-                "description": "health check chat service",
+                "description": "health check managers service",
                 "consumes": [
                     "application/json"
                 ],
@@ -57,9 +25,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Chat"
+                    "manager"
                 ],
-                "summary": "health check chat service",
+                "summary": "health check",
                 "responses": {
                     "200": {
                         "description": "everything is good",
