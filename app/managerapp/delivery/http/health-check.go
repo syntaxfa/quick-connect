@@ -9,7 +9,7 @@ import (
 // healthCheck docs
 //
 //	@Summary		health check
-//	@Description	health check managers service
+//	@Description	health check manager service
 //	@Tags			manager
 //	@Accept			json
 //	@Produce		json
