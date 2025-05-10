@@ -1,0 +1,12 @@
+shutdown_timeout: 120s
+http_server:
+  port: 3535
+  cors:
+    allow_origins:
+logger:
+  file_path: "/logs/manager/logs.json"
+  use_local_time: false
+  file_max_size_in_mb: 10
+  file_max_age_in_days: 30
+  max_backup: 0
+  compress: false
