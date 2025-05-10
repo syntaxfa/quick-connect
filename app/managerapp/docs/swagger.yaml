@@ -1,33 +1,11 @@
 info:
   contact: {}
 paths:
-  /chats/clients:
-    get:
-      consumes:
-      - application/json
-      description: client chat websocket
-      produces:
-      - application/json
-      responses: {}
-      summary: client chat websocket
-      tags:
-      - Websocket
-  /chats/supports:
-    get:
-      consumes:
-      - application/json
-      description: client chat websocket
-      produces:
-      - application/json
-      responses: {}
-      summary: client chat websocket
-      tags:
-      - Websocket
   /health-check:
     get:
       consumes:
       - application/json
-      description: health check chat service
+      description: health check managers service
       produces:
       - application/json
       responses:
@@ -39,9 +17,9 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: health check chat service
+      summary: health check
       tags:
-      - Chat
+      - manager
 schemes:
 - http
 - https
