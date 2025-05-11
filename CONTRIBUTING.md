@@ -100,9 +100,5 @@ Toxic behavior, disrespect, or harassment will not be tolerated.
 
 ## 📚 Useful Commands
 
-Before submitting a pull request, run:
-
-```bash
-make build    # Build the project
-make test     # Run all tests
-make lint     # Run linters and format checks
+In your local environment, I highly recommend enabling pre-commit.
+Additionally, make sure to thoroughly test your project before submitting a pull request.
