@@ -1,12 +1,14 @@
 package outboxpsq
 
-import "github.com/syntaxfa/quick-connect/adapter/postgres"
+import (
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type DB struct {
-	conn *postgres.Database
+	conn *pgxpool.Pool
 }
 
-func New(conn *postgres.Database) *DB {
+func New(conn *pgxpool.Pool) *DB {
 	return &DB{
 		conn: conn,
 	}

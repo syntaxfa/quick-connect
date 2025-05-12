@@ -6,7 +6,6 @@ import (
 	"encoding/gob"
 	"time"
 
-	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/outbox"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 )
@@ -21,12 +20,7 @@ WHERE state=$3;
 func (d *DB) UpdateRecordLockByState(lockID string, lockedOn time.Time, state outbox.RecordState) error {
 	const op = "outbox.repository.outboxpsq.update.UpdateRecordLockByState"
 
-	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementUpdateRecordLockByState, queryUpdateRecordLockeByState) //nolint:sqlclosecheck // finally closed, but not here
-	if pErr != nil {
-		return richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected)
-	}
-
-	if _, eErr := stmt.Exec(lockID, lockedOn, state); eErr != nil {
+	if _, eErr := d.conn.Exec(context.Background(), queryUpdateRecordLockeByState, lockID, lockedOn, state); eErr != nil {
 		return richerror.New(op).WithWrapError(eErr).WithKind(richerror.KindUnexpected)
 	}
 
@@ -50,18 +44,13 @@ WHERE id = $9
 func (d *DB) UpdateRecordByID(rec outbox.Record) error {
 	const op = "outbox.repository.outboxpsq.update.UpdateRecordByID"
 
-	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementUpdateRecordByID, queryUpdateRecordByID) //nolint:sqlclosecheck // finally closed, but not here
-	if pErr != nil {
-		return richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected)
-	}
-
 	msgData := new(bytes.Buffer)
 	enc := gob.NewEncoder(msgData)
 	if eErr := enc.Encode(rec.Message); eErr != nil {
 		return richerror.New(op).WithWrapError(eErr).WithKind(richerror.KindUnexpected)
 	}
 
-	_, eErr := stmt.Exec(msgData, rec.State, rec.CreatedOn, rec.LockID, rec.LockedOn,
+	_, eErr := d.conn.Exec(context.Background(), queryUpdateRecordByID, msgData, rec.State, rec.CreatedOn, rec.LockID, rec.LockedOn,
 		rec.ProcessedOn, rec.NumberOfAttempts, rec.LastAttemptOn, rec.Error, rec.ID)
 	if eErr != nil {
 		return richerror.New(op).WithWrapError(eErr).WithKind(richerror.KindUnexpected)

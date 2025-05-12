@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"encoding/gob"
 
-	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/outbox"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 )
@@ -18,18 +17,13 @@ VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`
 func (d *DB) AddRecordTX(rec outbox.Record, _ *sql.Tx) error {
 	const op = "outbox.repository.outboxpsq.add.AddRecordTX"
 
-	stmt, pErr := d.conn.PrepareStatement(context.Background(), postgres.StatementAddRecordTX, queryAddRecordTx) //nolint:sqlclosecheck // finally closed, but not here
-	if pErr != nil {
-		return richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected)
-	}
-
 	msgBuf := new(bytes.Buffer)
 	msgEnc := gob.NewEncoder(msgBuf)
 	if eErr := msgEnc.Encode(rec.Message); eErr != nil {
 		return richerror.New(op).WithWrapError(eErr).WithKind(richerror.KindUnexpected)
 	}
 
-	if _, eErr := stmt.Exec(rec.ID, msgBuf.Bytes(), rec.State, rec.CreatedOn, rec.LockID, rec.LockedOn, rec.ProcessedOn,
+	if _, eErr := d.conn.Exec(context.Background(), queryAddRecordTx, rec.ID, msgBuf.Bytes(), rec.State, rec.CreatedOn, rec.LockID, rec.LockedOn, rec.ProcessedOn,
 		rec.NumberOfAttempts, rec.LastAttemptOn, rec.Error); eErr != nil {
 		return richerror.New(op).WithWrapError(eErr).WithKind(richerror.KindUnexpected)
 	}
