@@ -2,11 +2,11 @@ package migrator
 
 import (
 	"context"
-	"database/sql"
 	"embed"
 	"log/slog"
 
-	"github.com/pressly/goose/v3"
+	"github.com/TheAmirhosssein/goose/v3"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/spf13/cobra"
 )
 
@@ -21,13 +21,13 @@ type Config struct {
 }
 
 type Migrator struct {
-	db         *sql.DB
+	db         *pgxpool.Pool
 	migrations embed.FS
 	log        *slog.Logger
 	cfg        Config
 }
 
-func NewMigrator(db *sql.DB, migrations embed.FS, log *slog.Logger, cfg Config) Migrator {
+func NewMigrator(db *pgxpool.Pool, migrations embed.FS, log *slog.Logger, cfg Config) Migrator {
 	return Migrator{
 		db:         db,
 		migrations: migrations,
@@ -79,7 +79,7 @@ func (m *Migrator) Up(ctx context.Context, opts Options) error {
 	}
 
 	if opts.ByOne {
-		if err := goose.UpByOneContext(ctx, m.db, m.cfg.Dir); err != nil {
+		if err := goose.UpByOneContextPGX(ctx, m.db, m.cfg.Dir); err != nil {
 			m.log.Error("error at applying migration by one", slog.String("error", err.Error()))
 
 			return err
@@ -91,7 +91,7 @@ func (m *Migrator) Up(ctx context.Context, opts Options) error {
 	}
 
 	if opts.Version != 0 {
-		if err := goose.UpToContext(ctx, m.db, m.cfg.Dir, int64(opts.Version)); err != nil {
+		if err := goose.UpToContextPGX(ctx, m.db, m.cfg.Dir, int64(opts.Version)); err != nil {
 			m.log.Error(
 				"error at applying migration to a specific version",
 				slog.String("error", err.Error()),
@@ -106,7 +106,7 @@ func (m *Migrator) Up(ctx context.Context, opts Options) error {
 		return nil
 	}
 
-	return goose.UpContext(ctx, m.db, m.cfg.Dir)
+	return goose.UpContextPGX(ctx, m.db, m.cfg.Dir)
 }
 
 func (m *Migrator) Down(ctx context.Context, opts Options) error {
@@ -117,7 +117,7 @@ func (m *Migrator) Down(ctx context.Context, opts Options) error {
 	}
 
 	if opts.Version != 0 {
-		if err := goose.DownToContext(ctx, m.db, m.cfg.Dir, int64(opts.Version)); err != nil {
+		if err := goose.DownToContextPGX(ctx, m.db, m.cfg.Dir, int64(opts.Version)); err != nil {
 			m.log.Error(
 				"error at downgrading migration to a specific version",
 				slog.String("error", err.Error()),
@@ -132,5 +132,5 @@ func (m *Migrator) Down(ctx context.Context, opts Options) error {
 		return nil
 	}
 
-	return goose.UpContext(ctx, m.db, m.cfg.Dir)
+	return goose.UpContextPGX(ctx, m.db, m.cfg.Dir)
 }
