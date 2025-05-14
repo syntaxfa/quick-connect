@@ -46,5 +46,8 @@ test-general:
 chat-test:
 	go test ./app/chatapp/...
 
+manager-test:
+	go test ./app/managerapp/...
+
 chat-build:
 	docker build -t $(IMAGE_NAME) -f deploy/chat/deploy/Dockerfile .
