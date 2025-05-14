@@ -34,6 +34,10 @@ func (s Server) registerRoutes() {
 	s.registerSwagger()
 
 	s.httpserver.Router.GET("/health-check", s.handler.healthCheck)
+
+	token := s.httpserver.Router.Group("/tokens")
+	token.POST("/refresh", s.handler.RefreshToken)
+	token.POST("/validate", s.handler.ValidateToken)
 }
 
 func (s Server) registerSwagger() {

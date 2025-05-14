@@ -1,7 +1,18 @@
 package http
 
-type Handler struct{}
+import (
+	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
+	"github.com/syntaxfa/quick-connect/pkg/translation"
+)
 
-func NewHandler() Handler {
-	return Handler{}
+type Handler struct {
+	t        *translation.Translate
+	tokenSvc tokenservice.Service
+}
+
+func NewHandler(t *translation.Translate, tokenSvc tokenservice.Service) Handler {
+	return Handler{
+		t:        t,
+		tokenSvc: tokenSvc,
+	}
 }
