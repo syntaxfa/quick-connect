@@ -1,0 +1,71 @@
+name: "chat"
+
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+volumes:
+  postgres_data:
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: quick_connect_postgres
+    hostname: manager_postgres
+    command: -p ${MANAGER_POSTGRES__PORT}
+    restart: always
+    environment:
+      - POSTGRES_DB=${MANAGER_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${MANAGER_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${MANAGER_POSTGRES__PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_net
+
+  chat:
+    image: syntaxfa/quickconnect-chat:0.0.1
+    container_name: chat
+    restart: on-failure
+    networks:
+      - app_net
+      - web_net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web_net
+      - traefik.http.routers.quick-chat.entrypoints=http
+      - traefik.http.routers.quick-chat.rule=Host(`${CHAT_SUB_DOMAIN}.${DOMAIN_ADDRESS}`)
+      - traefik.http.routers.quick-chat.middlewares=https-redirect
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.quick-chat-secure.entrypoints=https
+      - traefik.http.routers.quick-chat-secure.rule=Host(`${CHAT_SUB_DOMAIN}.${DOMAIN_ADDRESS}`)
+      - traefik.http.routers.quick-chat-secure.tls=true
+      - traefik.http.routers.quick-chat-secure.tls.options=default
+      - traefik.http.routers.quick-chat-secure.tls.certresolver=mycert
+      - traefik.http.services.quick-chat.loadbalancer.server.port=2525
+
+  manager:
+    image: syntaxfa/quickconnect-manager:0.0.1
+    container_name: manager
+    restart: on-failure
+    networks:
+      - app_net
+      - web_net
+    env_file: .env
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web_net
+      - traefik.http.routers.quick-manager.entrypoints=http
+      - traefik.http.routers.quick-manager.rule=Host(`${MANAGER_SUB_DOMAIN}.${DOMAIN_ADDRESS}`)
+      - traefik.http.routers.quick-manager.middlewares=https-redirect
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.quick-manager-secure.entrypoints=https
+      - traefik.http.routers.quick-manager-secure.rule=Host(`${MANAGER_SUB_DOMAIN}.${DOMAIN_ADDRESS}`)
+      - traefik.http.routers.quick-manager-secure.tls=true
+      - traefik.http.routers.quick-manager-secure.tls.options=default
+      - traefik.http.routers.quick-manager-secure.tls.certresolver=mycert
+      - traefik.http.services.quick-manager.loadbalancer.server.port=3535
