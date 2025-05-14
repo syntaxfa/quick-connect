@@ -50,7 +50,7 @@ func (c *WSClient) ReadPump() {
 	defer func() {
 		c.hub.UnregisterClient(c)
 		if cErr := c.conn.Close(); cErr != nil {
-			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
+			errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
 		}
 	}()
 
@@ -58,7 +58,7 @@ func (c *WSClient) ReadPump() {
 		_, message, rErr := c.conn.ReadMessage()
 
 		if rErr != nil {
-			errlog.ErrLog(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected), c.logger)
+			errlog.WithoutErr(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected), c.logger)
 
 			break
 		}
@@ -66,7 +66,7 @@ func (c *WSClient) ReadPump() {
 		var msg Message
 
 		if uErr := json.Unmarshal(message, &msg); uErr != nil {
-			errlog.ErrLog(richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected), c.logger)
+			errlog.WithoutErr(richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected), c.logger)
 
 			continue
 		}
@@ -85,7 +85,7 @@ func (c *WSClient) WritePump() {
 	defer func() {
 		ticker.Stop()
 		if cErr := c.conn.Close(); cErr != nil {
-			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
+			errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
 		}
 	}()
 
@@ -94,7 +94,7 @@ func (c *WSClient) WritePump() {
 		case message, ok := <-c.send:
 			if !ok {
 				if wErr := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); wErr != nil {
-					errlog.ErrLog(richerror.New(op).WithMessage("error sending websocket close message").WithKind(richerror.KindUnexpected), c.logger)
+					errlog.WithoutErr(richerror.New(op).WithMessage("error sending websocket close message").WithKind(richerror.KindUnexpected), c.logger)
 				}
 
 				return
@@ -102,13 +102,13 @@ func (c *WSClient) WritePump() {
 
 			msgBytes, mErr := json.Marshal(message)
 			if mErr != nil {
-				errlog.ErrLog(richerror.New(op).WithWrapError(mErr).WithMessage("error marshalling message"), c.logger)
+				errlog.WithoutErr(richerror.New(op).WithWrapError(mErr).WithMessage("error marshalling message"), c.logger)
 
 				continue
 			}
 
 			if wErr := c.conn.WriteMessage(websocket.TextMessage, msgBytes); wErr != nil {
-				errlog.ErrLog(richerror.New(op).WithWrapError(wErr).WithMessage("error writing message"), c.logger)
+				errlog.WithoutErr(richerror.New(op).WithWrapError(wErr).WithMessage("error writing message"), c.logger)
 			}
 
 		case <-ticker.C:

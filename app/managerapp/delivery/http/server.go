@@ -38,6 +38,9 @@ func (s Server) registerRoutes() {
 	token := s.httpserver.Router.Group("/tokens")
 	token.POST("/refresh", s.handler.RefreshToken)
 	token.POST("/validate", s.handler.ValidateToken)
+
+	user := s.httpserver.Router.Group("/users")
+	user.POST("/login", s.handler.UserLogin)
 }
 
 func (s Server) registerSwagger() {

@@ -18,7 +18,7 @@ func SayHello(ctx context.Context, in *pub.HelloRequest) (*pub.HelloReply, error
 }
 
 func main() {
-	logger.SetDefault(logger.Config{
+	log := logger.New(logger.Config{
 		FilePath:         "logs.json",
 		UseLocalTime:     false,
 		FileMaxSizeInMB:  1,
@@ -30,7 +30,7 @@ func main() {
 	server := grpc.New(grpc.Config{
 		Host: "localhost",
 		Port: "50051",
-	}, logger.L())
+	}, log)
 
 	go server.Start()
 	pub.RegisterGreeterServer(server.GrpcServer, greeterServer{})

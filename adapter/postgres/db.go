@@ -18,7 +18,7 @@ func New(cfg Config) *Database {
 
 	config, pErr := pgxpool.ParseConfig(connStr)
 	if pErr != nil {
-		log.Fatalf("unable to parse config: %s", pErr.Error())
+		log.Fatalf("unable to parse config: %s\n", pErr.Error())
 	}
 
 	config.MaxConns = cfg.MaxOpenConns
@@ -27,7 +27,11 @@ func New(cfg Config) *Database {
 
 	pool, cErr := pgxpool.NewWithConfig(context.Background(), config)
 	if cErr != nil {
-		log.Fatalf("unable to create connection pool: %s", cErr.Error())
+		log.Fatalf("unable to create connection pool: %s\n", cErr.Error())
+	}
+
+	if pErr := pool.Ping(context.Background()); pErr != nil {
+		log.Fatalf("connection with postgres is not estabslish!, %s\n", pErr.Error())
 	}
 
 	return &Database{

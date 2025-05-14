@@ -34,7 +34,7 @@ func (d defaultRecordProcessor) ProcessRecords() error {
 
 	defer func() {
 		if cErr := d.store.ClearLocksByLockID(d.machineID); cErr != nil {
-			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), d.logger)
+			errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), d.logger)
 		}
 	}()
 

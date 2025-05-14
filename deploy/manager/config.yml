@@ -18,3 +18,14 @@ token:
   issuer: quick-connect-auth-service
   access_audience: all-quick-connect-service
   refresh_audience: all-quick-connect-service
+postgres:
+  host: "localhost"
+  port: 11579
+  db_name: defaultdb
+  password: "8SHDSgdihmMH9EQsXfRZzLHes3F3kgxa"
+  username: LoPgYJqYGZ53
+  ssl_mode: disable
+  max_idle_conns: 10
+  max_open_conns: 20
+  conn_max_lifetime: 600
+  path_of_migration: "app/managerapp/repository/migrations"

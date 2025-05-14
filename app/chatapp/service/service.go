@@ -82,7 +82,7 @@ func (s *Service) CloseConnection(userID string) {
 
 	if conn, exists := s.websocketConns[userID]; exists {
 		if cErr := conn.Close(); cErr != nil {
-			errlog.ErrLog(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), s.logger)
+			errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), s.logger)
 		}
 		delete(s.websocketConns, userID)
 	}

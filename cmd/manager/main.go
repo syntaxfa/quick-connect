@@ -54,10 +54,11 @@ func main() {
 
 	root.AddCommand(
 		command.Server{}.Command(cfg, log, trap),
+		command.Migrate{}.Command(cfg.Postgres, log),
 	)
 
 	if eErr := root.Execute(); eErr != nil {
-		logger.L().Error("failed to execute root command", slog.String("error", eErr.Error()))
+		log.Error("failed to execute root command", slog.String("error", eErr.Error()))
 
 		os.Exit(1)
 	}
