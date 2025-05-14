@@ -12,7 +12,7 @@ require (
 	github.com/knadh/koanf/providers/structs v1.0.0
 	github.com/knadh/koanf/v2 v2.2.0
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/lib/pq v1.10.7
+	github.com/lib/pq v1.10.9
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/rubenv/sql-migrate v1.8.0
 	github.com/spf13/cobra v1.9.1
