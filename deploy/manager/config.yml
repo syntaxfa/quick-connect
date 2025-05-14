@@ -10,3 +10,11 @@ logger:
   file_max_age_in_days: 30
   max_backup: 0
   compress: false
+token:
+  private_key_string: "2bcb815ceffc35f2bcdc527743ba5ec1ea14774ab5e57623c9a6957d7b4153b1aa7b488970bd035e8e0c21b8a60322cf92267d010f4df751fe383b3af49e6f8b"
+  public_key_string: "aa7b488970bd035e8e0c21b8a60322cf92267d010f4df751fe383b3af49e6f8b"
+  access_expiry: 120s
+  refresh_expiry: 168h
+  issuer: quick-connect-auth-service
+  access_audience: all-quick-connect-service
+  refresh_audience: all-quick-connect-service

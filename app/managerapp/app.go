@@ -7,7 +7,9 @@ import (
 	"os"
 
 	"github.com/syntaxfa/quick-connect/app/managerapp/delivery/http"
+	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
+	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
 
 type Application struct {
@@ -18,7 +20,13 @@ type Application struct {
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
-	handler := http.NewHandler()
+	t, tErr := translation.New(translation.DefaultLanguages...)
+	if tErr != nil {
+		panic(tErr)
+	}
+
+	tokenSvc := tokenservice.New(cfg.Token, logger)
+	handler := http.NewHandler(t, tokenSvc)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
 
 	return Application{

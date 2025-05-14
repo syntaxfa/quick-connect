@@ -13,6 +13,11 @@ type Language struct {
 	FilePath string
 }
 
+var DefaultLanguages = []Language{
+	{language.English, "pkg/translation/en.json"},
+	{language.Persian, "pkg/translation/fa.json"},
+}
+
 type Translate struct {
 	bundle *i18n.Bundle
 }
