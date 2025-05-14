@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"time"
+
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
-	"time"
 )
 
 func main() {
-	logger.SetDefault(logger.Config{
+	log := logger.New(logger.Config{
 		FilePath:         "logs.json",
 		UseLocalTime:     false,
 		FileMaxSizeInMB:  1,
@@ -20,7 +21,7 @@ func main() {
 	server := httpserver.New(httpserver.Config{
 		Port: 5050,
 		Cors: httpserver.Cors{AllowOrigins: []string{"localhost"}},
-	}, logger.L())
+	}, log)
 
 	go server.Start()
 

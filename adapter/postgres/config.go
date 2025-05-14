@@ -12,4 +12,5 @@ type Config struct {
 	MaxIdleConns    int32         `koanf:"max_idle_conns"`
 	MaxOpenConns    int32         `koanf:"max_open_conns"`
 	ConnMaxLifetime time.Duration `koanf:"conn_max_lifetime"`
+	PathOfMigration string        `koanf:"path_of_migration"`
 }

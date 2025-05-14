@@ -19,37 +19,6 @@ type Config struct {
 	Compress         bool   `koanf:"compress"`
 }
 
-var globalLogger *slog.Logger
-
-func L() *slog.Logger {
-	return globalLogger
-}
-
-func SetDefault(cfg Config, opt *slog.HandlerOptions, writeInConsole bool, serviceName string) {
-	workingDir, wErr := os.Getwd()
-	if wErr != nil {
-		log.Fatalf("error getting current working directory, %s", wErr.Error())
-	}
-
-	fileWriter := &lumberjack.Logger{
-		Filename:   filepath.Join(workingDir, cfg.FilePath),
-		MaxSize:    cfg.FileMaxSizeInMB,
-		MaxAge:     cfg.FileMaxAgeInDays,
-		MaxBackups: cfg.MaxBackup,
-		LocalTime:  cfg.UseLocalTime,
-		Compress:   cfg.Compress,
-	}
-
-	writers := []io.Writer{fileWriter}
-	if writeInConsole {
-		writers = append(writers, os.Stdout)
-	}
-
-	globalLogger = slog.New(slog.NewJSONHandler(io.MultiWriter(writers...), opt))
-
-	globalLogger = globalLogger.With("service_name", serviceName)
-}
-
 func New(cfg Config, opt *slog.HandlerOptions, writeInConsole bool, serviceName string) *slog.Logger {
 	if cfg.FilePath == "" {
 		panic("filepath can be blank")

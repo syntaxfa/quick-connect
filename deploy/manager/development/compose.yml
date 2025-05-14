@@ -1,0 +1,46 @@
+name: "manager-development"
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: web_net
+    external: true
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: manager_postgres
+    hostname: manager_postgres
+    command: -p ${MANAGER_POSTGRES__PORT}
+    restart: always
+    environment:
+      - POSTGRES_DB=${MANAGER_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${MANAGER_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${MANAGER_POSTGRES__PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - ${MANAGER_POSTGRES__PORT}:${MANAGER_POSTGRES__PORT}
+    networks:
+      - app_net
+
+  pgadmin:
+    image: dpage/pgadmin4:9.3
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - 5565:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@manager.club
+      PGADMIN_DEFAULT_PASSWORD: pgadmin_password
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - app_net
+      - web_net

@@ -6,8 +6,11 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/managerapp/delivery/http"
+	postgres2 "github.com/syntaxfa/quick-connect/app/managerapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
+	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
@@ -25,8 +28,14 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 		panic(tErr)
 	}
 
+	postgresAdapter := postgres.New(cfg.Postgres)
+
 	tokenSvc := tokenservice.New(cfg.Token, logger)
-	handler := http.NewHandler(t, tokenSvc)
+	vldUser := userservice.NewValidate(t)
+
+	userRepo := postgres2.New(postgresAdapter)
+	userSvc := userservice.New(tokenSvc, vldUser, userRepo, logger)
+	handler := http.NewHandler(t, tokenSvc, userSvc)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
 
 	return Application{
