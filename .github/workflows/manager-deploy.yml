@@ -29,7 +29,7 @@ jobs:
       - name: Run general test
         run: make test-general
 
-      - name: Run Chat Test
+      - name: Run manager Test
         run: make manager-test
 
       - name: Log in to Docker Registry
