@@ -51,3 +51,6 @@ manager-test:
 
 chat-build:
 	docker build -t $(IMAGE_NAME) -f deploy/chat/deploy/Dockerfile .
+
+manager-build:
+	docker build -t $(IMAGE_NAME) -f deploy/manager/deploy/Dockerfile .
