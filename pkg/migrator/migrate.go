@@ -33,7 +33,7 @@ func New(cfg Config, path string) Migrate {
 }
 
 // Up migrate
-// Will apply at the target `version` of migration. Cannot be a negative value.
+// Will apply at most `max` migrations. Pass 0 for no limit (or use Exec).
 func (m Migrate) Up(maxM int) (n int, err error) {
 	n, err = migrate.ExecMax(m.db, "postgres", m.migrations, migrate.Up, maxM)
 	if err != nil {

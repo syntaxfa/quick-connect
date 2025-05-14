@@ -28,3 +28,4 @@ postgres:
   max_idle_conns: 10
   max_open_conns: 20
   conn_max_lifetime: 600
+  path_of_migration: "app/managerapp/repository/migrations"
