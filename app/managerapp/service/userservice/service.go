@@ -2,6 +2,7 @@ package userservice
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	"github.com/syntaxfa/quick-connect/types"
@@ -20,12 +21,14 @@ type Service struct {
 	tokenSvc TokenSvc
 	vld      Validate
 	repo     Repository
+	logger   *slog.Logger
 }
 
-func New(tokenSvc TokenSvc, vld Validate, repo Repository) Service {
+func New(tokenSvc TokenSvc, vld Validate, repo Repository, logger *slog.Logger) Service {
 	return Service{
 		tokenSvc: tokenSvc,
 		vld:      vld,
 		repo:     repo,
+		logger:   logger,
 	}
 }

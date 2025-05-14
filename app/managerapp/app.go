@@ -34,7 +34,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	vldUser := userservice.NewValidate(t)
 
 	userRepo := postgres2.New(postgresAdapter)
-	userSvc := userservice.New(tokenSvc, vldUser, userRepo)
+	userSvc := userservice.New(tokenSvc, vldUser, userRepo, logger)
 	handler := http.NewHandler(t, tokenSvc, userSvc)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
 

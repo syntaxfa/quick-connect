@@ -8,4 +8,5 @@ const (
 	MsgInvalidLengthOfUsername = "the username must be between 6 and 191 characters"
 	MsgInvalidInput            = "invalid input"
 	MsgInvalidLengthOfPassword = "the password must be between 8 and 191 characters"
+	MsgRecordNotFound          = "record not found"
 )

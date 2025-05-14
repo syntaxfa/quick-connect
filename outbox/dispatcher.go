@@ -56,7 +56,7 @@ func (d Dispatcher) runRecordProcessor(trap chan os.Signal) {
 
 		pErr := d.recordProcessor.ProcessRecords()
 		if pErr != nil {
-			errlog.ErrLog(pErr, d.logger)
+			errlog.WithoutErr(pErr, d.logger)
 		}
 
 		d.logger.Info("record processing finished")
@@ -80,7 +80,7 @@ func (d Dispatcher) runRecordUnlocker(trap chan os.Signal) {
 		d.logger.Info("record unlocker running")
 
 		if uErr := d.recordUnlocker.UnlockExpiredMessages(); uErr != nil {
-			errlog.ErrLog(uErr, d.logger)
+			errlog.WithoutErr(uErr, d.logger)
 		}
 
 		d.logger.Info("record unlocker finished")
@@ -104,7 +104,7 @@ func (d Dispatcher) runRecordCleaner(trap chan os.Signal) {
 		d.logger.Info("record retention cleaner running")
 
 		if rErr := d.recordCleaner.RemoveExpiredMessages(); rErr != nil {
-			errlog.ErrLog(rErr, d.logger)
+			errlog.WithoutErr(rErr, d.logger)
 		}
 
 		d.logger.Info("record retention cleaner finished")

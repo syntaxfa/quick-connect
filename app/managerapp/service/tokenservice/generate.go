@@ -16,18 +16,12 @@ func (s Service) GenerateTokenPair(userID types.ID, role types.Role) (*TokenGene
 
 	accessToken, gaErr := s.generateToken(userID, role, types.TokenTypeAccess, s.cfg.AccessExpiry, s.cfg.AccessAudience)
 	if gaErr != nil {
-		richErr := richerror.New(op).WithWrapError(gaErr).WithKind(richerror.KindUnexpected)
-		errlog.ErrLog(richErr, s.logger)
-
-		return nil, richErr
+		return nil, errlog.ErrLog(richerror.New(op).WithWrapError(gaErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
 	refreshToken, grErr := s.generateToken(userID, role, types.TokenTypeRefresh, s.cfg.RefreshExpiry, s.cfg.RefreshAudience)
 	if grErr != nil {
-		richErr := richerror.New(op).WithWrapError(grErr).WithKind(richerror.KindUnexpected)
-		errlog.ErrLog(richErr, s.logger)
-
-		return nil, richErr
+		return nil, errlog.ErrLog(richerror.New(op).WithWrapError(grErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
 	return &TokenGenerateResponse{
@@ -45,10 +39,7 @@ func (s Service) generateToken(userID types.ID, role types.Role, tokenType types
 	// unique token id
 	tokenID, uErr := uuid.NewRandom()
 	if uErr != nil {
-		richErr := richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected)
-		errlog.ErrLog(richErr, s.logger)
-
-		return "", richErr
+		return "", errlog.ErrLog(richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
 	claims := types.UserClaims{
@@ -69,10 +60,7 @@ func (s Service) generateToken(userID types.ID, role types.Role, tokenType types
 	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims)
 	signedToken, err := token.SignedString(s.cfg.privateKey)
 	if err != nil {
-		richErr := richerror.New(op).WithMessage(err.Error()).WithWrapError(err).WithKind(richerror.KindUnAuthorized)
-		errlog.ErrLog(richErr, s.logger)
-
-		return "", richErr
+		return "", errlog.ErrLog(richerror.New(op).WithMessage(err.Error()).WithWrapError(err).WithKind(richerror.KindUnAuthorized), s.logger)
 	}
 
 	return signedToken, nil

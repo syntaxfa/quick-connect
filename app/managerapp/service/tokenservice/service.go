@@ -30,7 +30,7 @@ func New(cfg Config, logger *slog.Logger) Service {
 	cfg.privateKey, cfg.publicKey, lErr = LoadKeyPair(KeyPair{
 		PrivateKeyHex: cfg.PrivateKeyString,
 		PublicKeyHex:  cfg.PublicKeyString,
-	}, logger)
+	})
 	if lErr != nil {
 		logger.Error("token keys not valid", slog.String("error", lErr.Error()))
 

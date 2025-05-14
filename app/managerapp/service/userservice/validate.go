@@ -28,7 +28,7 @@ func (v Validate) ValidateLoginRequest(req UserLoginRequest) error {
 			validation.Length(6, 191).Error(servermsg.MsgInvalidLengthOfUsername)),
 		validation.Field(&req.Password,
 			validation.Required,
-			validation.Length(8, 191).Error(servermsg.MsgInvalidLengthOfPassword)),
+			validation.Length(7, 191).Error(servermsg.MsgInvalidLengthOfPassword)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
 
@@ -41,7 +41,7 @@ func (v Validate) ValidateLoginRequest(req UserLoginRequest) error {
 			}
 		}
 
-		return richerror.New(op).WithMessage(servermsg.MsgInvalidInput).WithKind(richerror.KindUnexpected).
+		return richerror.New(op).WithMessage(servermsg.MsgInvalidInput).WithKind(richerror.KindInvalid).
 			WithMeta(map[string]interface{}{"req": req}).WithErrorFields(fieldErrors)
 	}
 
