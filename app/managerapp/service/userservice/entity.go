@@ -1,4 +1,4 @@
-package service
+package userservice
 
 import (
 	"time"
@@ -12,13 +12,13 @@ type User struct {
 	HashedPassword string    `json:"-"`
 	Fullname       string    `json:"fullname"`
 	Avatar         string    `json:"avatar"`
+	Role           Role      `json:"role"`
 	LastOnlineAt   time.Time `json:"last_online_at"`
-	Role           UserRole  `json:"role"`
 }
 
-type UserRole uint8
+type Role uint8
 
 const (
-	UserRoleSuperUser = iota + 1
-	UserRoleAdmin
+	RoleSuperUser = iota + 1
+	RoleAdmin
 )

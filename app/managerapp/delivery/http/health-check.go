@@ -10,7 +10,7 @@ import (
 //
 //	@Summary		health check
 //	@Description	health check manager service
-//	@Tags			manager
+//	@Tags			Manager
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{string}	string "everything is good"

@@ -34,7 +34,7 @@ chat-swag-init:
 	swag init -g cmd/chat/main.go -o app/chatapp/docs/ --tags=Websocket,Chat
 
 manager-swag-init:
-	swag init -g cmd/manager/main.go -o app/managerapp/docs/ --tags=manager,User
+	swag init -g cmd/manager/main.go -o app/managerapp/docs/ --tags=Manager,User,Token
 
 test-general:
 	go test ./pkg/...

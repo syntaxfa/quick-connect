@@ -1,3 +1,33 @@
+definitions:
+  servermsg.ErrorResponse:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      message:
+        type: string
+    type: object
+  tokenservice.TokenGenerateResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        description: in seconds
+        type: integer
+      refresh_token:
+        type: string
+    type: object
+  tokenservice.TokenRefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  tokenservice.TokenVerifyRequest:
+    properties:
+      token:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -5,7 +35,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: health check managers service
+      description: health check manager service
       produces:
       - application/json
       responses:
@@ -19,7 +49,83 @@ paths:
             type: string
       summary: health check
       tags:
-      - manager
+      - Manager
+  /tokens/refresh:
+    post:
+      consumes:
+      - application/json
+      description: This API endpoint refresh JSON Web Token (JWT).
+      parameters:
+      - description: generate pair(refresh & access) tokens
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/tokenservice.TokenRefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tokenservice.TokenGenerateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: invalid or expired jwt
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: RefreshToken JWT
+      tags:
+      - Token
+  /tokens/validate:
+    post:
+      consumes:
+      - application/json
+      description: This API endpoint validates a JSON Web Token (JWT) to ensure its
+        authenticity and integrity. It checks the token's signature, expiration, and
+        claims.
+      parameters:
+      - description: check token validation
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/tokenservice.TokenVerifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: jwt token is valid
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: invalid or expired jwt
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: ValidateToken JWT
+      tags:
+      - Token
 schemes:
 - http
 - https
