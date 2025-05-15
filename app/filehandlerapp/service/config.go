@@ -11,7 +11,8 @@ type LocalStorageConfig struct {
 }
 
 type Config struct {
-	StorageType string             `koanf:"storage_type"`
-	Local       LocalStorageConfig `koanf:"local"`
-	S3          S3Config           `koanf:"s3"`
+	StorageType        string             `koanf:"storage_type"`
+	TempDeleteDuration int                `koanf:"temp_delete_duration"`
+	Local              LocalStorageConfig `koanf:"local"`
+	S3                 S3Config           `koanf:"s3"`
 }

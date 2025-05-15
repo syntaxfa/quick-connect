@@ -1,23 +1,34 @@
 package entity
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/syntaxfa/quick-connect/types"
 )
 
 const (
+	// type field
 	FileTypeChat = "chat"
 
-	StorageTypeLocal = "local"
-	StorageTypeS3    = "s3"
+	// storage field
+	FileStorageTypeLocal = "local"
+	FileStorageTypeS3    = "s3"
 )
 
 type File struct {
-	Id          types.ID
+	ID          types.ULID
 	Type        string
-	TypeId      types.ID
+	TypeID      types.ID
 	Uploaded    time.Time
-	Name        string
+	Extension   string
 	StorageType string
+	Size        int // in megabytes
+	ContentType string
+	IsPublic    bool
+	IsDeleted   bool
+}
+
+func (f *File) GetFileName() string {
+	return fmt.Sprintf("%v.%v", f.ID, f.Extension)
 }

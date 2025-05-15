@@ -10,7 +10,7 @@ const (
 )
 
 type FileAccess struct {
-	ClientId    types.ID
+	ClientID    types.ID
 	File        types.ID
 	Permissions []string
 }
