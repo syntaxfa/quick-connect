@@ -8,10 +8,8 @@ import (
 )
 
 const (
-	// type field
 	FileTypeChat = "chat"
 
-	// storage field
 	FileStorageTypeLocal = "local"
 	FileStorageTypeS3    = "s3"
 )
