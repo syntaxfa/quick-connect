@@ -1,0 +1,60 @@
+name: "quick-connect-development"
+
+networks:
+  app_net:
+    name: app_net
+    external: true
+
+volumes:
+  postgres_data:
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    hostname: manager_postgres
+    command: -p ${MANAGER_POSTGRES__PORT}
+    restart: always
+    environment:
+      - POSTGRES_DB=${MANAGER_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${MANAGER_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${MANAGER_POSTGRES__PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - ${MANAGER_POSTGRES__PORT}:${MANAGER_POSTGRES__PORT}
+    networks:
+      - app_net
+    healthcheck:
+      test: [CMD-SHELL, "sh -c 'pg_isready -U ${MANAGER_POSTGRES__USERNAME} -d ${MANAGER_POSTGRES__DB_NAME} -p ${MANAGER_POSTGRES__PORT}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  chat:
+    build:
+      context: .
+      dockerfile: deploy/chat/development/Dockerfile
+    container_name: chat
+    ports:
+      - ${CHAT_HTTP_SERVER__PORT}:${CHAT_HTTP_SERVER__PORT}
+    volumes:
+      - .:/app
+    networks:
+      - app_net
+    env_file:
+      - .env
+
+  manager:
+    build:
+      context: .
+      dockerfile: deploy/manager/development/Dockerfile
+    container_name: manager
+    ports:
+      - ${MANAGER_HTTP_SERVER__PORT}:${MANAGER_HTTP_SERVER__PORT}
+    volumes:
+      - .:/app
+    networks:
+      - app_net
+    env_file:
+      - .env

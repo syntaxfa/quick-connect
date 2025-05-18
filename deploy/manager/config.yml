@@ -1,6 +1,6 @@
 shutdown_timeout: 120s
 http_server:
-  port: 3535
+  port: 2526
   cors:
     allow_origins:
 logger:
