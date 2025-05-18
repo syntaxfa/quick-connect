@@ -17,5 +17,5 @@ import (
 //	@Failure		500	{string}	something	went	wrong
 //	@Router			/health-check [GET].
 func (h Handler) healthCheck(c echo.Context) error {
-	return c.JSON(http.StatusOK, "everything is ok")
+	return c.JSON(http.StatusOK, "everything is ok!")
 }
