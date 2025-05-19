@@ -1,0 +1,52 @@
+info:
+  contact: {}
+paths:
+  /health-check:
+    get:
+      consumes:
+      - application/json
+      description: health check chat service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: everything is good
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: health check chat service
+      tags:
+      - Micro1
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: get user des
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: everything is good
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get user
+      tags:
+      - Micro1
+schemes:
+- http
+- https
+securityDefinitions:
+  JWT:
+    description: JWT security accessToken. Please add it in the format "Bearer {AccessToken}"
+      to authorize your requests.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
