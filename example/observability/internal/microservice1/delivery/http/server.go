@@ -42,6 +42,7 @@ func (s Server) registerRoutes() {
 	})))
 
 	s.httpServer.Router.GET("/health-check", s.handler.healthCheck)
+	s.httpServer.Router.GET("/user", s.handler.GetUser)
 }
 
 func (s Server) registerSwagger() {

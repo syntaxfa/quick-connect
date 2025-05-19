@@ -3,6 +3,7 @@ package microservice1
 import (
 	"github.com/syntaxfa/quick-connect/adapter/observability/otelcore"
 	"github.com/syntaxfa/quick-connect/adapter/observability/traceotela"
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 	"time"
@@ -18,4 +19,5 @@ type Config struct {
 	ShutdownTimeout time.Duration     `koanf:"shutdown_timeout"`
 	Logger          logger.Config     `koanf:"logger"`
 	Observability   Observability     `koanf:"observability"`
+	Postgres        postgres.Config   `koanf:"postgres"`
 }

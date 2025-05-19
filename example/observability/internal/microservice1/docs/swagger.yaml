@@ -20,6 +20,25 @@ paths:
       summary: health check chat service
       tags:
       - Micro1
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: get user des
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: everything is good
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get user
+      tags:
+      - Micro1
 schemes:
 - http
 - https

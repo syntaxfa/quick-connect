@@ -36,6 +36,35 @@
                     }
                 }
             }
+        },
+        "/user": {
+            "get": {
+                "description": "get user des",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Micro1"
+                ],
+                "summary": "get user",
+                "responses": {
+                    "200": {
+                        "description": "everything is good",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "securityDefinitions": {

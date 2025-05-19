@@ -29,3 +29,18 @@ services:
       test: [CMD, wget, -q, -S, -O, "-", "localhost:14269"]
     networks:
       - web_app
+
+  postgres:
+    image: postgres:17
+    container_name: manager_postgres
+    hostname: manager_postgres
+    command: -p ${MANAGER_POSTGRES__PORT}
+    restart: always
+    environment:
+      - POSTGRES_DB=${MANAGER_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${MANAGER_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${MANAGER_POSTGRES__PASSWORD}
+    ports:
+      - ${MANAGER_POSTGRES__PORT}:${MANAGER_POSTGRES__PORT}
+    networks:
+      - web_app
