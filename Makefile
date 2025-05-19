@@ -36,6 +36,9 @@ chat-swag-init:
 manager-swag-init:
 	swag init -g cmd/manager/main.go -o app/managerapp/docs/ --tags=Manager,User,Token
 
+example-micro1-swag-init:
+	swag init -g example/observability/microservice1/main.go -o example/observability/internal/microservice1/docs --tags=Micro1
+
 test-general:
 	go test ./pkg/...
 	go test ./adapter/...
@@ -54,3 +57,9 @@ chat-build:
 
 manager-build:
 	docker build -t $(IMAGE_NAME) -f deploy/manager/deploy/Dockerfile .
+
+generate-example-proto:
+	@protoc \
+		--proto_path=protobuf "protobuf/example/proto/example.proto" \
+		--go_out=. \
+  		--go-grpc_out=.

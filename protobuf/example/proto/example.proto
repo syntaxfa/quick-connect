@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package micro;
+option go_package = "protobuf/example/golang/examplepb";
+
+message GetCommentByIDRequest {
+  uint64 comment_id = 1;
+}
+
+message GetCommentResponse {
+  uint64 comment_id = 1;
+  string body = 2;
+}
+
+service CommentService {
+  rpc GetComment (GetCommentByIDRequest) returns (GetCommentResponse);
+}
