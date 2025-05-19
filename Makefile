@@ -36,6 +36,9 @@ chat-swag-init:
 manager-swag-init:
 	swag init -g cmd/manager/main.go -o app/managerapp/docs/ --tags=Manager,User,Token
 
+example-micro1-swag-init:
+	swag init -g example/observability/main.go -o example/observability/internal/microservice1/docs --tags=Micro1
+
 test-general:
 	go test ./pkg/...
 	go test ./adapter/...

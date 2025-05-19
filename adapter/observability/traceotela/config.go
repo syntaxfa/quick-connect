@@ -1,7 +1,6 @@
 package traceotela
 
 import (
-	"crypto/tls"
 	"time"
 )
 
@@ -12,7 +11,6 @@ type Config struct {
 	BatchTimeout           time.Duration `koanf:"batch_timeout"`
 	BatchSize              int           `koanf:"batch_size"`
 	SSLMode                bool          `koanf:"ssl_mode"`
-	TLSConfig              *tls.Config   `koanf:"tls_config"`
 	SamplingRatio          float64       `koanf:"sampling_ratio"`
 }
 

@@ -11,10 +11,14 @@ var tracer trace.Tracer
 
 var once sync.Once
 
-func Tracer(name string) trace.Tracer {
+func SetTracer(name string) trace.Tracer {
 	once.Do(func() {
 		tracer = otel.Tracer(name)
 	})
 
+	return tracer
+}
+
+func Tracer() trace.Tracer {
 	return tracer
 }
