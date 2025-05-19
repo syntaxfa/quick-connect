@@ -1,0 +1,23 @@
+shutdown_timeout: 120s
+http_server:
+  port: 12300
+  cors:
+    allow_origins:
+logger:
+  file_path: "/logs/example/microservice1/logs.json"
+  use_local_time: false
+  file_max_size_in_mb: 10
+  file_max_age_in_days: 30
+  max_backup: 0
+  compress: false
+observability:
+  core:
+    service_name: micro1
+  trace:
+    mode: console
+    http_collection_endpoint:
+    grpc_collection_endpoint:
+    batch_timeout: 5s # for test default its can 5 minutes!
+    batch_size: 1024
+    ssl_mode: false
+    sampling_ratio: 1
