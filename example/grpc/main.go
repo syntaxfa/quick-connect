@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/syntaxfa/quick-connect/example/grpc/proto/pub"
-	"github.com/syntaxfa/quick-connect/pkg/grpc"
+	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 )
 
@@ -27,9 +27,9 @@ func main() {
 		Compress:         false,
 	}, nil, true, "example")
 
-	server := grpc.New(grpc.Config{
+	server := grpcserver.New(grpcserver.Config{
 		Host: "localhost",
-		Port: "50051",
+		Port: 50051,
 	}, log)
 
 	go server.Start()

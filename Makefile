@@ -57,3 +57,9 @@ chat-build:
 
 manager-build:
 	docker build -t $(IMAGE_NAME) -f deploy/manager/deploy/Dockerfile .
+
+generate-example-proto:
+	@protoc \
+		--proto_path=protobuf "protobuf/example/proto/example.proto" \
+		--go_out=. \
+  		--go-grpc_out=.
