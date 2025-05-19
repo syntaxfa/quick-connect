@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -21,6 +22,8 @@ func New(cfg Config) *Database {
 		log.Fatalf("unable to parse config: %s\n", pErr.Error())
 	}
 
+	config.ConnConfig.Tracer = otelpgx.NewTracer()
+
 	config.MaxConns = cfg.MaxOpenConns
 	config.MinConns = cfg.MaxIdleConns
 	config.MaxConnLifetime = cfg.ConnMaxLifetime
@@ -32,6 +35,10 @@ func New(cfg Config) *Database {
 
 	if pErr := pool.Ping(context.Background()); pErr != nil {
 		log.Fatalf("connection with postgres is not estabslish!, %s\n", pErr.Error())
+	}
+
+	if oErr := otelpgx.RecordStats(pool); oErr != nil {
+		log.Fatalf("unable to record database stats, %s\n", oErr.Error())
 	}
 
 	return &Database{
