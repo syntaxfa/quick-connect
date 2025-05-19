@@ -1,0 +1,31 @@
+name: "example-observability"
+
+networks:
+  web_app:
+
+services:
+  collector:
+    container_name: collector
+    image: otel/opentelemetry-collector:0.126.0
+    volumes:
+      - ./otelcol.yaml:/etc/otelcol/config.yaml
+    depends_on:
+      jaeger:
+        condition: service_healthy
+    ports:
+      - 4317:4317
+      - 4318:4318
+    networks:
+      - web_app
+
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:1.69.0
+    environment:
+      JAEGER_PROPAGATION: w3c
+    ports:
+      - 16686:16686
+    healthcheck:
+      test: [CMD, wget, -q, -S, -O, "-", "localhost:14269"]
+    networks:
+      - web_app

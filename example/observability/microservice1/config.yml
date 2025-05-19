@@ -14,9 +14,9 @@ observability:
   core:
     service_name: micro1
   trace:
-    mode: console
-    http_collection_endpoint:
-    grpc_collection_endpoint:
+    mode: remote
+    http_collection_endpoint: localhost:4318
+    grpc_collection_endpoint: localhost:4317
     batch_timeout: 5s # for test default its can 5 minutes!
     batch_size: 1024
     ssl_mode: false
