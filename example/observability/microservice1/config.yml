@@ -21,6 +21,8 @@ observability:
     batch_size: 1024
     ssl_mode: false
     sampling_ratio: 1
+  metric:
+    mode: pull
 postgres:
   host: "localhost"
   port: 11579
