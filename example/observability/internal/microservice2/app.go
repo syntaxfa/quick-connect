@@ -26,7 +26,7 @@ func New(cfg Config) Application {
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
-	ps := postgres.New(cfg.Postgres)
+	ps := postgres.New(cfg.Postgres, logger)
 	repo := repository.New(ps)
 	svc := service.New(repo)
 	handler := grpc.NewHandler(svc)

@@ -21,7 +21,7 @@ func SetMeter(name string) {
 }
 
 // Meter returns the current meter.
-// If the meter has not been set previously, returns a default meter.
+// If the meter has not been set previously, nil pointer error.
 func Meter() metric.Meter {
 	return meter
 }

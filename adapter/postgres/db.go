@@ -3,7 +3,8 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -13,13 +14,19 @@ type Database struct {
 	pool *pgxpool.Pool
 }
 
-func New(cfg Config) *Database {
+func New(cfg Config, logger *slog.Logger) *Database {
+	if logger == nil {
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	}
+
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode)
 
 	config, pErr := pgxpool.ParseConfig(connStr)
 	if pErr != nil {
-		log.Fatalf("unable to parse config: %s\n", pErr.Error())
+		logger.Error("unable ro parse postgres config", slog.String("error", pErr.Error()))
+
+		panic(pErr)
 	}
 
 	config.ConnConfig.Tracer = otelpgx.NewTracer()
@@ -30,15 +37,21 @@ func New(cfg Config) *Database {
 
 	pool, cErr := pgxpool.NewWithConfig(context.Background(), config)
 	if cErr != nil {
-		log.Fatalf("unable to create connection pool: %s\n", cErr.Error())
+		logger.Error("unable ro create connection pool", slog.String("error", cErr.Error()))
+
+		panic(pErr)
 	}
 
 	if pErr := pool.Ping(context.Background()); pErr != nil {
-		log.Fatalf("connection with postgres is not estabslish!, %s\n", pErr.Error())
+		logger.Error("connection with postgres is not establish!", slog.String("error", pErr.Error()))
+
+		panic(pErr)
 	}
 
 	if oErr := otelpgx.RecordStats(pool); oErr != nil {
-		log.Fatalf("unable to record database stats, %s\n", oErr.Error())
+		logger.Error("unable to record database stats", slog.String("error", oErr.Error()))
+
+		panic(oErr)
 	}
 
 	return &Database{

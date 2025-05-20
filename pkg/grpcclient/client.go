@@ -35,3 +35,7 @@ func New(cfg Config) (Client, error) {
 func (c *Client) Conn() *grpc.ClientConn {
 	return c.conn
 }
+
+func (c *Client) Close() error {
+	return c.conn.Close()
+}

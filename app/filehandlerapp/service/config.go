@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/syntaxfa/quick-connect/adapter/aws"
-	"github.com/syntaxfa/quick-connect/adapter/file"
+	"github.com/syntaxfa/quick-connect/adapter/storage/aws"
+	"github.com/syntaxfa/quick-connect/adapter/storage/file"
 )
 
 type Config struct {
