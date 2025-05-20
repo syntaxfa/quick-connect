@@ -3,16 +3,29 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/syntaxfa/quick-connect/adapter/observability/metricotela"
 	"github.com/syntaxfa/quick-connect/adapter/observability/otelcore"
 	"github.com/syntaxfa/quick-connect/adapter/observability/traceotela"
 	"github.com/syntaxfa/quick-connect/config"
 	"github.com/syntaxfa/quick-connect/example/observability/internal/microservice1"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
+	"go.opentelemetry.io/otel/metric"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"syscall"
 )
+
+func getMemoryUsage() uint64 {
+	var memStats runtime.MemStats
+
+	runtime.ReadMemStats(&memStats)
+
+	currentMemoryUsage := memStats.HeapAlloc
+
+	return currentMemoryUsage
+}
 
 // main
 //
@@ -45,17 +58,38 @@ func main() {
 		panic(sErr)
 	}
 
+	trap := make(chan os.Signal, 1)
+	signal.Notify(trap, syscall.SIGINT, syscall.SIGTERM)
+
+	log := logger.New(cfg.Logger, nil, true, "microservice1")
+
+	if mErr := metricotela.InitMetric(cfg.Observability.Metric, resource, trap, log); mErr != nil {
+		log.Error(mErr.Error())
+	}
+
+	metricotela.SetMeter(cfg.Observability.Core.ServiceName)
+
+	_, err := metricotela.Meter().Int64ObservableGauge(
+		"system.memory.heap",
+		metric.WithDescription("Memory usage of the allocated heap objects khekhe"),
+		metric.WithUnit("By"),
+		metric.WithInt64Callback(func(ctx context.Context, o metric.Int64Observer) error {
+			memoryUsage := getMemoryUsage()
+			o.Observe(int64(memoryUsage))
+
+			return nil
+		}),
+	)
+	if err != nil {
+		panic(err)
+	}
+
 	traceCtx, tErr := traceotela.InitTracer(ctx, cfg.Observability.Trace, resource)
 	if tErr != nil {
 		panic(tErr)
 	}
 
 	traceotela.SetTracer(cfg.Observability.Core.ServiceName)
-
-	log := logger.New(cfg.Logger, nil, true, "microservice1")
-
-	trap := make(chan os.Signal, 1)
-	signal.Notify(trap, syscall.SIGINT, syscall.SIGTERM)
 
 	app := microservice1.Setup(cfg, log, trap)
 
@@ -67,7 +101,7 @@ func main() {
 		panic(tErr)
 	}
 
-	cancelFunc()
+	defer cancelFunc()
 
 	fmt.Println("stopped")
 }
