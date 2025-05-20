@@ -28,7 +28,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 		panic(tErr)
 	}
 
-	postgresAdapter := postgres.New(cfg.Postgres)
+	postgresAdapter := postgres.New(cfg.Postgres, logger)
 
 	tokenSvc := tokenservice.New(cfg.Token, logger)
 	vldUser := userservice.NewValidate(t)

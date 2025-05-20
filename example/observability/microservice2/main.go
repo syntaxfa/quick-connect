@@ -38,14 +38,14 @@ func main() {
 		panic(sErr)
 	}
 
+	log := logger.New(cfg.Logger, nil, true, "microservice2")
+
 	traceCtx, tErr := traceotela.InitTracer(ctx, cfg.Observability.Trace, resource)
 	if tErr != nil {
 		panic(tErr)
 	}
 
 	traceotela.SetTracer(cfg.Observability.Core.ServiceName)
-
-	log := logger.New(cfg.Logger, nil, true, "microservice2")
 
 	trap := make(chan os.Signal, 1)
 	signal.Notify(trap, syscall.SIGINT, syscall.SIGTERM)

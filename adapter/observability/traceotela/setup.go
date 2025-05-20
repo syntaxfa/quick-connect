@@ -15,13 +15,19 @@ import (
 	"go.opentelemetry.io/otel/trace/noop"
 )
 
+var (
+	ErrHTTPCollectionEndpointRequired = errors.New("http collection endpoint is required for remote mode")
+	ErrBatchTimeoutMustBePositive     = errors.New("http collection endpoint is required for remote mode")
+)
+
+// validateConfig validates configuration.
 func validateConfig(cfg Config) error {
 	if cfg.Mode == ModeRemote && cfg.GRPCCollectionEndpoint == "" && cfg.HTTPCollectionEndpoint == "" {
-		return errors.New("http collection endpoint is required for remote mode")
+		return ErrHTTPCollectionEndpointRequired
 	}
 
 	if cfg.BatchTimeout <= 0 {
-		return errors.New("batch timeout must be positive")
+		return ErrBatchTimeoutMustBePositive
 	}
 
 	return nil
