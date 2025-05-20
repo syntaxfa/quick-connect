@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"sync"
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/managerapp/delivery/http"
@@ -22,18 +23,16 @@ type Application struct {
 	httpServer http.Server
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database) Application {
 	t, tErr := translation.New(translation.DefaultLanguages...)
 	if tErr != nil {
 		panic(tErr)
 	}
 
-	postgresAdapter := postgres.New(cfg.Postgres)
-
 	tokenSvc := tokenservice.New(cfg.Token, logger)
 	vldUser := userservice.NewValidate(t)
 
-	userRepo := postgres2.New(postgresAdapter)
+	userRepo := postgres2.New(psqAdapter)
 	userSvc := userservice.New(tokenSvc, vldUser, userRepo, logger)
 	handler := http.NewHandler(t, tokenSvc, userSvc)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
@@ -47,29 +46,58 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 }
 
 func (a Application) Start() {
+	httpServerChan := make(chan error, 1)
+
 	go func() {
-		a.logger.Info(fmt.Sprintf("http server started in %d", a.cfg.HTTPServer.Port))
+		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.HTTPServer.Port))
 
 		if sErr := a.httpServer.Start(); sErr != nil {
-			a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.HTTPServer.Port), slog.String("error", sErr.Error()))
+			httpServerChan <- sErr
 		}
-		a.logger.Info(fmt.Sprintf("http server stopped %d", a.cfg.HTTPServer.Port))
 	}()
 
-	<-a.trap
+	select {
+	case err := <-httpServerChan:
+		a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.HTTPServer.Port), slog.String("error", err.Error()))
+	case <-a.trap:
+		a.logger.Info("received http server shutdown signal!!!")
+	}
 
-	a.logger.Info("shutdown signal received")
+	shutdownTimeoutCtx, cancel := context.WithTimeout(context.Background(), a.cfg.ShutdownTimeout)
+	defer cancel()
 
-	ctx, cancelFunc := context.WithTimeout(context.Background(), a.cfg.ShutdownTimeout)
-	defer cancelFunc()
+	if a.Stop(shutdownTimeoutCtx) {
+		a.logger.Info("servers shutdown gracefully")
+	} else {
+		a.logger.Warn("shutdown timed out, existing application")
+	}
 
-	a.Stop(ctx)
+	a.logger.Info("manager app stopped")
 }
 
-func (a Application) Stop(ctx context.Context) {
+func (a Application) Stop(ctx context.Context) bool {
+	shutdownDone := make(chan struct{})
+
+	go func() {
+		var shutdownWg sync.WaitGroup
+		shutdownWg.Add(1)
+		go a.StopHTTPServer(ctx, &shutdownWg)
+
+		shutdownWg.Wait()
+		close(shutdownDone)
+	}()
+
+	select {
+	case <-shutdownDone:
+		return true
+	case <-ctx.Done():
+		return false
+	}
+}
+
+func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
 	if sErr := a.httpServer.Stop(ctx); sErr != nil {
 		a.logger.Error("http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
-
-	a.logger.Info("http server gracefully shutdown")
 }
