@@ -8,10 +8,8 @@ import (
 	"github.com/syntaxfa/quick-connect/example/observability/internal/microservice1/delivery/http"
 	"github.com/syntaxfa/quick-connect/example/observability/internal/microservice1/repository"
 	"github.com/syntaxfa/quick-connect/example/observability/internal/microservice1/service"
+	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 	"os"
 )
@@ -28,16 +26,15 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	ps := postgres.New(cfg.Postgres)
 	repo := repository.New(ps)
 
-	address := fmt.Sprintf("%s:%d", "localhost", 12301)
-	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
-	)
+	grpcClient, gErr := grpcclient.New(cfg.GRPCClient)
 
-	if err != nil {
-		panic(err)
+	if gErr != nil {
+		logger.Error(gErr.Error())
+
+		panic(gErr)
 	}
 
-	micro := micro2.New(conn)
+	micro := micro2.New(grpcClient.Conn())
 	svc := service.New(repo, micro)
 
 	handler := http.NewHandler(svc)
