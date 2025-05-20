@@ -4,6 +4,7 @@ import (
 	"github.com/syntaxfa/quick-connect/adapter/observability/otelcore"
 	"github.com/syntaxfa/quick-connect/adapter/observability/traceotela"
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 	"time"
@@ -20,4 +21,5 @@ type Config struct {
 	Logger          logger.Config     `koanf:"logger"`
 	Observability   Observability     `koanf:"observability"`
 	Postgres        postgres.Config   `koanf:"postgres"`
+	GRPCClient      grpcclient.Config `koanf:"grpc_client"`
 }

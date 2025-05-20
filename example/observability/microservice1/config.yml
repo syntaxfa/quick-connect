@@ -32,3 +32,8 @@ postgres:
   max_open_conns: 20
   conn_max_lifetime: 600
   path_of_migration: "app/managerapp/repository/migrations"
+grpc_client:
+  host: localhost
+  port: 12301
+  ssl_mode: false
+  use_otel: true

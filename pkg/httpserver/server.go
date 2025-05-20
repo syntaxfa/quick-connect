@@ -9,15 +9,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-type Cors struct {
-	AllowOrigins []string `koanf:"allow_origins"`
-}
-
-type Config struct {
-	Port int  `koanf:"port"`
-	Cors Cors `koang:"cors"`
-}
-
 type Server struct {
 	Router *echo.Echo
 	cfg    Config
