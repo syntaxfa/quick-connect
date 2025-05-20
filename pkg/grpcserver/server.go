@@ -9,11 +9,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Config struct {
-	Host string `koanf:"host"`
-	Port int    `koanf:"port"`
-}
-
 type Server struct {
 	cfg        Config
 	log        *slog.Logger
