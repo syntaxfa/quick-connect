@@ -30,5 +30,6 @@ func (s Server) Command(cfg chatapp.Config, logger *slog.Logger, trap chan os.Si
 
 func (s Server) run(trap <-chan os.Signal) {
 	app := chatapp.Setup(s.cfg, s.logger, trap)
+
 	app.Start()
 }
