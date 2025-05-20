@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/managerapp"
 )
 
@@ -29,6 +30,11 @@ func (s Server) Command(cfg managerapp.Config, logger *slog.Logger, trap chan os
 }
 
 func (s Server) run(trap chan os.Signal) {
-	app := managerapp.Setup(s.cfg, s.logger, trap)
+	psqAdapter := postgres.New(s.cfg.Postgres, s.logger)
+
+	app := managerapp.Setup(s.cfg, s.logger, trap, psqAdapter)
 	app.Start()
+
+	psqAdapter.Close()
+	s.logger.Info("postgres connection closed.")
 }
