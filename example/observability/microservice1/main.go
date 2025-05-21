@@ -63,7 +63,7 @@ func main() {
 
 	log := logger.New(cfg.Logger, nil, true, "microservice1")
 
-	if mErr := metricotela.InitMetric(cfg.Observability.Metric, resource, trap, log); mErr != nil {
+	if mErr := metricotela.InitMetric(ctx, cfg.Observability.Metric, resource, log); mErr != nil {
 		log.Error(mErr.Error())
 	}
 

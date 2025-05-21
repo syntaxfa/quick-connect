@@ -56,7 +56,7 @@ func newServer(port int) *server {
 	}
 }
 
-func initPullBaseMetric(cfg Config, resource *resource.Resource, trap <-chan os.Signal, logger *slog.Logger) error {
+func initPullBaseMetric(ctx context.Context, cfg Config, resource *resource.Resource, logger *slog.Logger) error {
 	exporter, eErr := otelprom.New()
 	if eErr != nil {
 		return fmt.Errorf("faliled to create prometheus exporte: %w", eErr)
@@ -101,16 +101,17 @@ func initPullBaseMetric(cfg Config, resource *resource.Resource, trap <-chan os.
 	}()
 
 	select {
-	case <-trap:
+	case <-ctx.Done():
 		logger.Info("received shutdown signal, stopping metrics server...")
 	case err := <-serverErrCh:
 		logger.Error("metrics server error", slog.String("error", err.Error()))
 	}
 
-	ctx, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelFunc()
 
-	if sErr := httpserver.s.Shutdown(ctx); sErr != nil {
+	//nolint:contextcheck // Parent context is Done
+	if sErr := httpserver.s.Shutdown(shutdownCtx); sErr != nil {
 		logger.Error("metric http server shutdown error", slog.String("error", sErr.Error()))
 
 		return fmt.Errorf("metrics server shutdown error: %w", sErr)
@@ -122,7 +123,7 @@ func initPullBaseMetric(cfg Config, resource *resource.Resource, trap <-chan os.
 }
 
 // InitMetric initializes the metrics system based on the provided configuration.
-func InitMetric(cfg Config, resource *resource.Resource, trap <-chan os.Signal, logger *slog.Logger) error {
+func InitMetric(ctx context.Context, cfg Config, resource *resource.Resource, logger *slog.Logger) error {
 	if logger == nil {
 		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	}
@@ -138,7 +139,7 @@ func InitMetric(cfg Config, resource *resource.Resource, trap <-chan os.Signal, 
 	switch cfg.Mode {
 	case ModePullBase:
 		go func() {
-			if err := initPullBaseMetric(cfg, resource, trap, logger); err != nil {
+			if err := initPullBaseMetric(ctx, cfg, resource, logger); err != nil {
 				logger.Error(err.Error())
 			}
 		}()
