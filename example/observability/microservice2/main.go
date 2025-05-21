@@ -51,7 +51,7 @@ func main() {
 	trap := make(chan os.Signal, 1)
 	signal.Notify(trap, syscall.SIGINT, syscall.SIGTERM)
 
-	if mErr := metricotela.InitMetric(cfg.Observability.Metric, resource, trap, log); mErr != nil {
+	if mErr := metricotela.InitMetric(ctx, cfg.Observability.Metric, resource, log); mErr != nil {
 		log.Error(mErr.Error())
 	}
 
