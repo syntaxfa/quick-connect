@@ -1,3 +1,5 @@
+http_server:
+  port: 12303
 shutdown_timeout: 120s
 grpc_server:
   port: 12301
@@ -20,6 +22,10 @@ observability:
     batch_size: 1024
     ssl_mode: false
     sampling_ratio: 1
+  metric:
+    mode: pull
+    pull_config:
+      port: 12304
 postgres:
   host: "localhost"
   port: 11579
