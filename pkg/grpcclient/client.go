@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -19,7 +20,10 @@ func New(cfg Config) (Client, error) {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 	if cfg.UseOtel {
-		opts = append(opts, grpc.WithStatsHandler(otelgrpc.NewClientHandler()))
+		opts = append(opts, grpc.WithStatsHandler(otelgrpc.NewClientHandler(
+			otelgrpc.WithTracerProvider(otel.GetTracerProvider()),
+			otelgrpc.WithMeterProvider(otel.GetMeterProvider()),
+		)))
 	}
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), opts...)

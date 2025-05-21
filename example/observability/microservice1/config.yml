@@ -1,6 +1,6 @@
 shutdown_timeout: 120s
 http_server:
-  port: 12300
+  port: 12306
   cors:
     allow_origins:
 logger:
@@ -23,6 +23,8 @@ observability:
     sampling_ratio: 1
   metric:
     mode: pull
+    pull_config:
+      port: 12309
 postgres:
   host: "localhost"
   port: 11579
