@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 )
 
@@ -17,7 +18,10 @@ type Server struct {
 
 func New(conf Config, log *slog.Logger) Server {
 	gr := grpc.NewServer(
-		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+		grpc.StatsHandler(otelgrpc.NewServerHandler(
+			otelgrpc.WithTracerProvider(otel.GetTracerProvider()),
+			otelgrpc.WithMeterProvider(otel.GetMeterProvider()),
+		)),
 	)
 
 	return Server{cfg: conf, log: log, GrpcServer: gr}

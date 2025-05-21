@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/syntaxfa/quick-connect/adapter/observability/metricotela"
 	"github.com/syntaxfa/quick-connect/adapter/observability/otelcore"
 	"github.com/syntaxfa/quick-connect/adapter/observability/traceotela"
 	"github.com/syntaxfa/quick-connect/config"
@@ -49,6 +50,12 @@ func main() {
 
 	trap := make(chan os.Signal, 1)
 	signal.Notify(trap, syscall.SIGINT, syscall.SIGTERM)
+
+	if mErr := metricotela.InitMetric(cfg.Observability.Metric, resource, trap, log); mErr != nil {
+		log.Error(mErr.Error())
+	}
+
+	metricotela.SetMeter(cfg.Observability.Core.ServiceName)
 
 	app := microservice2.Setup(cfg, log, trap)
 

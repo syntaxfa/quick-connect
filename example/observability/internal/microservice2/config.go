@@ -1,6 +1,7 @@
 package microservice2
 
 import (
+	"github.com/syntaxfa/quick-connect/adapter/observability/metricotela"
 	"github.com/syntaxfa/quick-connect/adapter/observability/otelcore"
 	"github.com/syntaxfa/quick-connect/adapter/observability/traceotela"
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
@@ -9,8 +10,9 @@ import (
 )
 
 type Observability struct {
-	Core  otelcore.Config   `koanf:"core"`
-	Trace traceotela.Config `koanf:"trace"`
+	Core   otelcore.Config    `koanf:"core"`
+	Trace  traceotela.Config  `koanf:"trace"`
+	Metric metricotela.Config `koanf:"metric"`
 }
 
 type Config struct {
