@@ -5,12 +5,10 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-type (
-	PermissionType string
-)
+type PermissionType string
 
 const (
-	// Permissions
+	// Permissions.
 	PermissionsRead  PermissionType = "r"
 	PermissionWrite  PermissionType = "w"
 	PermissionUpdate PermissionType = "u"

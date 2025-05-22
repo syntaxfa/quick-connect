@@ -8,15 +8,15 @@ import (
 )
 
 type (
-	FileType    string
+	FileType    string // revive:disable-line:exported
 	StorageType string
 )
 
 const (
-	// File types
+	// File types.
 	FileTypeChat FileType = "chat"
 
-	// File storage
+	// File storage.
 	FileStorageTypeLocal StorageType = "local"
 	FileStorageTypeS3    StorageType = "s3"
 )
