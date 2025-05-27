@@ -1,4 +1,4 @@
-package entity
+package file
 
 import (
 	"fmt"
@@ -7,24 +7,31 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-const (
-	FileTypeChat = "chat"
+type (
+	FileType    string // revive:disable-line:exported
+	StorageType string
+)
 
-	FileStorageTypeLocal = "local"
-	FileStorageTypeS3    = "s3"
+const (
+	// File types.
+	FileTypeChat FileType = "chat"
+
+	// File storage.
+	FileStorageTypeLocal StorageType = "local"
+	FileStorageTypeS3    StorageType = "s3"
 )
 
 type File struct {
 	ID          types.ULID
-	Type        string
+	Type        FileType
 	TypeID      types.ID
-	Uploaded    time.Time
 	Extension   string
-	StorageType string
+	StorageType StorageType
 	Size        int // in megabytes
 	ContentType string
 	IsPublic    bool
 	IsDeleted   bool
+	CreatedAt   time.Time
 }
 
 func (f *File) GetFileName() string {

@@ -1,0 +1,44 @@
+name: "filehandler-development"
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: filehandler_postgres
+    hostname: filehandler_postgres
+    command: -p ${FILEHANDLER_POSTGRES__PORT}
+    environment:
+      - POSTGRES_DB=${FILEHANDLER_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${FILEHANDLER_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${FILEHANDLER_POSTGRES__PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - ${FILEHANDLER_POSTGRES__PORT}:${FILEHANDLER_POSTGRES__PORT}
+    networks:
+      - app_net
+
+  pgadmin:
+    image: dpage/pgadmin4:9.3
+    container_name: pgadmin4_container
+    ports:
+      - 5565:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@filehandler.club
+      PGADMIN_DEFAULT_PASSWORD: pgadmin_password
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - app_net
+      - web_net
