@@ -1,4 +1,4 @@
-package service
+package filehandlerapp
 
 import (
 	"github.com/syntaxfa/quick-connect/adapter/aws"

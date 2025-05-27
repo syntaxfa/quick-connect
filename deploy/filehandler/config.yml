@@ -1,0 +1,18 @@
+logger:
+  file_path: "/logs/filehandler/logs.json"
+  use_local_time: false
+  file_max_size_in_mb: 10
+  file_max_age_in_days: 30
+  max_backup: 0
+  compress: false
+postgres:
+  host: "localhost"
+  port: 11575
+  db_name: defaultdb
+  password: "8SHDSgdihmMH9EQsXfRZzLHes3F3kgxa"
+  username: LoPgYJqYGZ53
+  ssl_mode: disable
+  max_idle_conns: 10
+  max_open_conns: 20
+  conn_max_lifetime: 600
+  path_of_migration: "app/filehandlerapp/repository/migrations"
