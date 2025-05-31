@@ -3,8 +3,8 @@ package http
 import (
 	"log/slog"
 
-	"github.com/syntaxfa/quick-connect/adapter/websocket"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
+	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
 type Handler struct {

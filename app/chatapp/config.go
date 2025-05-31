@@ -3,10 +3,10 @@ package chatapp
 import (
 	"time"
 
-	"github.com/syntaxfa/quick-connect/adapter/websocket"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
+	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
 type Config struct {
