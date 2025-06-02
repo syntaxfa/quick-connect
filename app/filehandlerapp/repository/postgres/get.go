@@ -16,7 +16,7 @@ WHERE id = $1 AND is_deleted = false
 `
 
 func (d *DB) Get(ctx context.Context, id types.ULID) (file.File, error) {
-	const op = "repository.postgres.Create"
+	const op = "repository.postgres.Get"
 
 	var f file.File
 	qErr := d.conn.Conn().QueryRow(ctx, createQuery, id).Scan(
