@@ -1,6 +1,6 @@
 -- +migrate Up
 CREATE TABLE IF NOT EXISTS users (
-    "id" SERIAL PRIMARY KEY,
+    "id" VARCHAR(26) PRIMARY KEY,
     "username" VARCHAR(191) UNIQUE NOT NULL,
     "hashed_password" VARCHAR(255),
     "fullname" VARCHAR(191) NULL,
