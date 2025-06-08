@@ -48,7 +48,7 @@ func (s Service) generateToken(userID types.ID, role types.Role, tokenType types
 		TokenType: tokenType,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    s.cfg.Issuer,
-			Subject:   fmt.Sprintf("%s token for user %d", tokenType, userID),
+			Subject:   fmt.Sprintf("%s token for user %s", tokenType, userID),
 			Audience:  jwt.ClaimStrings{audience},
 			ExpiresAt: jwt.NewNumericDate(now.Add(expiry)),
 			NotBefore: jwt.NewNumericDate(now),

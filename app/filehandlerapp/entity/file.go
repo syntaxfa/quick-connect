@@ -15,7 +15,7 @@ const (
 )
 
 type File struct {
-	ID          types.ULID
+	ID          types.ID
 	Type        string
 	TypeID      types.ID
 	Uploaded    time.Time
