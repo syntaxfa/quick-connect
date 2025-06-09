@@ -35,7 +35,7 @@ This interface defines how pagination and filtering data can be fetched from the
 
 type Filter struct {
 	Operation FilterOperation
-	Value     []interface{}
+	Values    []interface{}
 }
 
 type FilterOperation int
