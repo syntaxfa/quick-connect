@@ -49,6 +49,12 @@ func (m Migrate) run(args []string) {
 		SSLMode:  m.cfg.SSLMode,
 	}, m.cfg.PathOfMigration)
 
+	defer func() {
+		if err := mgr.Close(); err != nil {
+			m.logger.Error("migrator close failed", slog.String("error", err.Error()))
+		}
+	}()
+
 	limit := m.limit
 	if limit < 0 {
 		m.logger.Error("invalid limit value", slog.Int("limit", limit))
