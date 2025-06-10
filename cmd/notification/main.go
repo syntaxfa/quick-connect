@@ -14,6 +14,13 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 )
 
+// main
+//
+//	@schemes					http https
+//	@securityDefinitions.apiKey	JWT
+//	@in							header
+//	@name						Authorization
+//	@description				JWT security accessToken. Please add it in the format "Bearer {AccessToken}" to authorize your requests.
 func main() {
 	var cfg notificationapp.Config
 

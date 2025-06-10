@@ -3,6 +3,8 @@ package http
 import (
 	"context"
 
+	echoSwagger "github.com/swaggo/echo-swagger"
+	"github.com/syntaxfa/quick-connect/app/notificationapp/docs"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 )
 
@@ -28,4 +30,16 @@ func (s Server) Stop(ctx context.Context) error {
 	return s.httpServer.Stop(ctx)
 }
 
-func (s Server) registerRoutes() {}
+func (s Server) registerRoutes() {
+	s.registerSwagger()
+
+	s.httpServer.Router.GET("/health-check", s.handler.healthCheck)
+}
+
+func (s Server) registerSwagger() {
+	docs.SwaggerInfo.Title = "Notification API"
+	docs.SwaggerInfo.Description = "Notification restfull API documentation"
+	docs.SwaggerInfo.Version = "1.0.0"
+
+	s.httpServer.Router.GET("/swagger/*any", echoSwagger.WrapHandler)
+}
