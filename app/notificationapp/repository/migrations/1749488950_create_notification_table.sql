@@ -2,7 +2,6 @@
 CREATE TABLE IF NOT EXISTS notifications (
     "id" VARCHAR(26) PRIMARY KEY,
     "user_id" VARCHAR(26) NOT NULL,
-    "external_user_id" VARCHAR(255) NOT NULL,
     "type" notification_type NOT NULL,
     "title" VARCHAR(255) NOT NULL,
     "body" TEXT NOT NULL,
@@ -17,7 +16,6 @@ CREATE INDEX idx_type_notification ON notifications(type);
 CREATE INDEX idx_is_read_notification ON notifications(is_read);
 CREATE INDEX idx_created_at_notification ON notifications(created_at);
 CREATE INDEX idx_overall_status_notifications ON notifications(overall_status);
-CREATE INDEX idx_external_user_id_notification ON notifications(external_user_id);
 
 -- +migrate Down
 DROP INDEX idx_user_id_notification;
@@ -25,5 +23,4 @@ DROP INDEX idx_type_notification;
 DROP INDEX idx_is_read_notification;
 DROP INDEX idx_created_at_notification
 DROP INDEX idx_overall_status_notifications;
-DROP INDEX idx_external_user_id_notification;
 DROP TABLE IF EXISTS notifications;
