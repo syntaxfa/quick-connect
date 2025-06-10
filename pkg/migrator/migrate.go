@@ -53,3 +53,8 @@ func (m Migrate) Down(maxM int) (n int, err error) {
 
 	return n, nil
 }
+
+// Close DB connection.
+func (m Migrate) Close() error {
+	return m.db.Close()
+}
