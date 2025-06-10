@@ -21,6 +21,8 @@ func New(httpServer httpserver.Server, handler Handler) Server {
 func (s Server) Start() error {
 	s.registerRoutes()
 
+	s.httpServer.Router.GET("/health-check", s.handler.healthCheck)
+
 	return s.httpServer.Start()
 }
 
