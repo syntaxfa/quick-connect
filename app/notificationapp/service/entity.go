@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/syntaxfa/quick-connect/types"
@@ -38,6 +39,36 @@ const (
 // This helps in distinguishing different kinds of messages and can be used for
 // user preferences or specific business logic.
 type NotificationType uint8
+
+func NotificationTypeToInt(notificationType string) (NotificationType, error) {
+	switch notificationType {
+	case "optional":
+		return NotificationTypeOptional, nil
+	case "info":
+		return NotificationTypeInfo, nil
+	case "promotion":
+		return NotificationTypePromotion, nil
+	case "critical":
+		return NotificationTypeCritical, nil
+	default:
+		return 0, errors.New("invalid notification type")
+	}
+}
+
+func NotificationTypeToString(notificationType NotificationType) (string, error) {
+	switch notificationType {
+	case NotificationTypeOptional:
+		return "optional", nil
+	case NotificationTypeInfo:
+		return "info", nil
+	case NotificationTypePromotion:
+		return "promotion", nil
+	case NotificationTypeCritical:
+		return "critical", nil
+	default:
+		return "", errors.New("invalid notification type")
+	}
+}
 
 const (
 	NotificationTypeOptional  NotificationType = iota + 1 // Can be opted out by user preferences
