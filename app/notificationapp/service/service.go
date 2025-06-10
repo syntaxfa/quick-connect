@@ -12,3 +12,13 @@ type Repository interface {
 	MarkAsRead(ctx context.Context, notificationID types.ID) error
 	MarkAllAsReadByUserID(ctx context.Context, userID types.ID) error
 }
+
+type Service struct {
+	vld Validate
+}
+
+func New(vld Validate) Service {
+	return Service{
+		vld: vld,
+	}
+}
