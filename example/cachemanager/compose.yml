@@ -1,0 +1,16 @@
+name: example-cache-manager
+
+services:
+  redis:
+    image: redis:7.4.2
+    container_name: redis
+    hostname: redis
+    restart: always
+    command: redis-server --requirepass ${EXAMPLE_REDIS__PASSWORD} --port ${EXAMPLE_REDIS__PORT}
+    environment:
+      REDIS_PASSWORD: ${EXAMPLE_REDIS__PASSWORD}
+      REDIS_PORT: ${EXAMPLE_REDIS__PORT}
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis.conf
+    ports:
+      - ${EXAMPLE_REDIS__PORT}:${EXAMPLE_REDIS__PORT}
