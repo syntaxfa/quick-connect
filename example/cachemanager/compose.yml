@@ -2,7 +2,7 @@ name: example-cache-manager
 
 services:
   redis:
-    image: redis:7.4.2
+    image: redis:7.4.4
     container_name: redis
     hostname: redis
     restart: always
