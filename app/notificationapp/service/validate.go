@@ -23,7 +23,7 @@ func (v Validate) ValidateSendNotificationRequest(req SendNotificationRequest) e
 	const op = "service.validate.ValidateSendNotificationRequest"
 
 	if err := validation.ValidateStruct(&req,
-		validation.Field(&req.UserID,
+		validation.Field(&req.ExternalUserID,
 			validation.Required.Error(servermsg.MsgFieldRequired),
 			validation.Length(1, 255).Error(servermsg.MsgInvalidLengthOfUserID),
 		),
@@ -62,12 +62,12 @@ func (v Validate) ValidateSendNotificationRequest(req SendNotificationRequest) e
 }
 
 func (v Validate) ValidateNotificationType(value interface{}) error {
-	notificationType, ok := value.(string)
+	notificationType, ok := value.(NotificationType)
 	if !ok {
 		return errors.New(servermsg.MsgInvalidNotificationType)
 	}
 
-	if !IsValidNotificationType(notificationType) {
+	if !IsValidNotificationType(string(notificationType)) {
 		return errors.New(servermsg.MsgInvalidNotificationType)
 	}
 
@@ -75,7 +75,7 @@ func (v Validate) ValidateNotificationType(value interface{}) error {
 }
 
 func (v Validate) ValidateNotificationChannelDeliveries(value interface{}) error {
-	channelDeliveries, ok := value.([]ChannelDelivery)
+	channelDeliveries, ok := value.([]ChannelDeliveryRequest)
 	if !ok {
 		return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
 	}

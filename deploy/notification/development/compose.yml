@@ -1,4 +1,4 @@
-name: "manager-development"
+name: "NOTIFICATION-development"
 
 volumes:
   notification_postgres_data:
@@ -15,18 +15,18 @@ networks:
 services:
   postgres:
     image: postgres:17
-    container_name: manager_postgres
-    hostname: manager_postgres
-    command: -p ${MANAGER_POSTGRES__PORT}
+    container_name: notification_postgres
+    hostname: notification_postgres
+    command: -p ${NOTIFICATION_POSTGRES__PORT}
     restart: always
     environment:
-      - POSTGRES_DB=${MANAGER_POSTGRES__DB_NAME}
-      - POSTGRES_USER=${MANAGER_POSTGRES__USERNAME}
-      - POSTGRES_PASSWORD=${MANAGER_POSTGRES__PASSWORD}
+      - POSTGRES_DB=${NOTIFICATION_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${NOTIFICATION_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${NOTIFICATION_POSTGRES__PASSWORD}
     volumes:
       - notification_postgres_data:/var/lib/postgresql/data
     ports:
-      - ${MANAGER_POSTGRES__PORT}:${MANAGER_POSTGRES__PORT}
+      - ${NOTIFICATION_POSTGRES__PORT}:${NOTIFICATION_POSTGRES__PORT}
     networks:
       - app_net
 
@@ -37,10 +37,26 @@ services:
     ports:
       - 5565:80
     environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin@manager.club
+      PGADMIN_DEFAULT_EMAIL: pgadmin@NOTIFICATION.club
       PGADMIN_DEFAULT_PASSWORD: pgadmin_password
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
       - app_net
       - web_net
+
+  redis:
+    image: redis:8.0.2
+    container_name: redis
+    hostname: redis
+    restart: always
+    command: redis-server --requirepass ${NOTIFICATION_REDIS__PASSWORD} --port ${NOTIFICATION_REDIS__PORT}
+    environment:
+      REDIS_PASSWORD: ${NOTIFICATION_REDIS__PASSWORD}
+      REDIS_PORT: ${NOTIFICATION_REDIS__PORT}
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis.conf
+    ports:
+      - ${NOTIFICATION_REDIS__PORT}:${NOTIFICATION_REDIS__PORT}
+    networks:
+      - app_net
