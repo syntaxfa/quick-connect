@@ -10,3 +10,14 @@ logger:
   file_max_age_in_days: 30
   max_backup: 0
   compress: false
+postgres:
+  host: "localhost"
+  port: 11580
+  db_name: defaultdb
+  password: "8SHDSgdihmMH9EQsXfRZzLHes3F3kgxa"
+  username: LoPgYJqYGZ53
+  ssl_mode: disable
+  max_idle_conns: 10
+  max_open_conns: 20
+  conn_max_lifetime: 600
+  path_of_migration: "app/notificationapp/repository/migrations"
