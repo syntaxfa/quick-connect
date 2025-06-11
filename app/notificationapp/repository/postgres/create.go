@@ -15,23 +15,13 @@ func (d *DB) Save(ctx context.Context, req service.SendNotificationRequest) (ser
 	const op = "repository.postgres.create.Save"
 
 	var notification service.Notification
-	notificationTypeStr, err := service.NotificationTypeToString(req.Type)
-	if err != nil {
-		return service.Notification{}, richerror.New(op).WithWrapError(err).WithKind(richerror.KindUnexpected)
-	}
-	if qErr := d.conn.Conn().QueryRow(ctx, queryCreateNotification, req.UserID, notificationTypeStr, req.Title, req.Body, req.Data, req.ChannelDeliveries).Scan(
-		&notification.ID, &notification.UserID, &notificationTypeStr,
-		&notification.Title, notification.Body, notification.Data,
-		notification.IsRead, notification.CreatedAt, notification.OverallStatus,
-		notification.ChannelDeliveries); qErr != nil {
+	if qErr := d.conn.Conn().QueryRow(ctx, queryCreateNotification, req.UserID, req.Type, req.Title, req.Body, req.Data, req.ChannelDeliveries).Scan(
+		&notification.ID, &notification.UserID, &notification.Type,
+		&notification.Title, &notification.Body, &notification.Data,
+		&notification.IsRead, &notification.CreatedAt, &notification.OverallStatus,
+		&notification.ChannelDeliveries); qErr != nil {
 		return service.Notification{}, richerror.New(op).WithMessage("can't insert into notifications table").WithWrapError(qErr).WithKind(richerror.KindUnexpected)
 	}
-
-	notificationType, err := service.NotificationTypeToInt(notificationTypeStr)
-	if err != nil {
-		return service.Notification{}, richerror.New(op).WithWrapError(err).WithKind(richerror.KindUnexpected)
-	}
-	notification.Type = notificationType
 
 	return notification, nil
 }
