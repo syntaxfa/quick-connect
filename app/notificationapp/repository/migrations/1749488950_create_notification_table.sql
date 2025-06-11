@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     "created_at" TIMESTAMP DEFAULT NOW(),
     "overall_status" notification_status NOT NULL DEFAULT 'pending',
     "channel_deliveries" JSONB NOT NULL DEFAULT '[]'::jsonb
-)
+);
 CREATE INDEX idx_user_id_notification ON notifications(user_id);
 CREATE INDEX idx_type_notification ON notifications(type);
 CREATE INDEX idx_is_read_notification ON notifications(is_read);
@@ -21,6 +21,6 @@ CREATE INDEX idx_overall_status_notifications ON notifications(overall_status);
 DROP INDEX idx_user_id_notification;
 DROP INDEX idx_type_notification;
 DROP INDEX idx_is_read_notification;
-DROP INDEX idx_created_at_notification
+DROP INDEX idx_created_at_notification;
 DROP INDEX idx_overall_status_notifications;
 DROP TABLE IF EXISTS notifications;
