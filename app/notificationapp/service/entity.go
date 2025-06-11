@@ -32,6 +32,7 @@ const (
 	OverallStatusFailed   OverallStatus = "failed"   // Delivery to all critical/requested channels failed after all retries
 	OverallStatusRetrying OverallStatus = "retrying" // At least one channel is still in a retrying state
 	OverallStatusIgnored  OverallStatus = "ignored"  // Some channels succeeded, while others failed or are still pending (partial success)
+	OverallStatusMixed    OverallStatus = "mixed"
 )
 
 func IsValidOverallStatus(overallStatus string) bool {
