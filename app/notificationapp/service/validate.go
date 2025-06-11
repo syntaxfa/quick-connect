@@ -40,6 +40,7 @@ func (v Validate) ValidateSendNotificationRequest(req SendNotificationRequest) e
 		),
 		validation.Field(&req.ChannelDeliveries,
 			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.By(v.ValidateNotificationChannelDeliveries),
 		),
 	); err != nil {
 		fieldErrors := make(map[string]string)
@@ -61,13 +62,32 @@ func (v Validate) ValidateSendNotificationRequest(req SendNotificationRequest) e
 }
 
 func (v Validate) ValidateNotificationType(value interface{}) error {
-	notificationType, ok := value.(NotificationType)
+	notificationType, ok := value.(string)
 	if !ok {
 		return errors.New(servermsg.MsgInvalidNotificationType)
 	}
 
-	if _, err := NotificationTypeToString(notificationType); err != nil {
+	if !IsValidNotificationType(notificationType) {
 		return errors.New(servermsg.MsgInvalidNotificationType)
+	}
+
+	return nil
+}
+
+func (v Validate) ValidateNotificationChannelDeliveries(value interface{}) error {
+	channelDeliveries, ok := value.([]ChannelDelivery)
+	if !ok {
+		return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
+	}
+
+	if len(channelDeliveries) < 1 {
+		return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
+	}
+
+	for _, channel := range channelDeliveries {
+		if !IsValidChannelType(string(channel.Channel)) {
+			return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
+		}
 	}
 
 	return nil
