@@ -34,6 +34,9 @@ func (s Server) registerRoutes() {
 	s.registerSwagger()
 
 	s.httpServer.Router.GET("/health-check", s.handler.healthCheck)
+
+	notifications := s.httpServer.Router.Group("/notifications")
+	notifications.POST("", s.handler.sendNotification)
 }
 
 func (s Server) registerSwagger() {

@@ -36,6 +36,271 @@
                     }
                 }
             }
+        },
+        "/notifications": {
+            "post": {
+                "description": "This API endpoint send a new notification.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notification"
+                ],
+                "summary": "send notification",
+                "parameters": [
+                    {
+                        "description": "generate pair(refresh \u0026 access) tokens",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.SendNotificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.SendNotificationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "servermsg.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ChannelDelivery": {
+            "type": "object",
+            "properties": {
+                "attempt_count": {
+                    "description": "Number of times delivery has been attempted for this channel",
+                    "type": "integer"
+                },
+                "channel": {
+                    "description": "The type of communication channel",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/service.ChannelType"
+                        }
+                    ]
+                },
+                "error": {
+                    "description": "Optional: Error message if the last delivery attempt failed",
+                    "type": "string"
+                },
+                "last_attempt_at": {
+                    "description": "Timestamp of the last delivery attempt",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "The current delivery status for this channel",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/service.DeliveryStatus"
+                        }
+                    ]
+                }
+            }
+        },
+        "service.ChannelDeliveryRequest": {
+            "type": "object",
+            "properties": {
+                "channel": {
+                    "$ref": "#/definitions/service.ChannelType"
+                }
+            }
+        },
+        "service.ChannelType": {
+            "type": "string",
+            "enum": [
+                "sms",
+                "email",
+                "web_push"
+            ],
+            "x-enum-comments": {
+                "ChannelTypeEmail": "Electronic mail",
+                "ChannelTypeSMS": "Short Message Service (text messages)",
+                "ChannelTypeWebPush": "Browser-based push notifications (e.g., via FCM, Web Push API)"
+            },
+            "x-enum-varnames": [
+                "ChannelTypeSMS",
+                "ChannelTypeEmail",
+                "ChannelTypeWebPush"
+            ]
+        },
+        "service.DeliveryStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "sent",
+                "failed",
+                "retrying",
+                "ignored"
+            ],
+            "x-enum-comments": {
+                "DeliveryStatusFailed": "Delivery through this channel failed (after exhausting all retries)",
+                "DeliveryStatusIgnored": "Delivery to this channel was ignored (e.g., user opted out, channel not configured, or a business rule prevented sending)",
+                "DeliveryStatusPending": "Delivery for this channel has not been attempted yet, or is awaiting processing",
+                "DeliveryStatusRetrying": "Delivery for this channel is currently being retried",
+                "DeliveryStatusSent": "The notification was successfully sent through this channel"
+            },
+            "x-enum-varnames": [
+                "DeliveryStatusPending",
+                "DeliveryStatusSent",
+                "DeliveryStatusFailed",
+                "DeliveryStatusRetrying",
+                "DeliveryStatusIgnored"
+            ]
+        },
+        "service.NotificationType": {
+            "type": "string",
+            "enum": [
+                "optional ",
+                "info",
+                "promotion",
+                "critical"
+            ],
+            "x-enum-comments": {
+                "NotificationTypeCritical": "High-priority messages that usually cannot be opted out of (e.g., security alerts, password resets)",
+                "NotificationTypeInfo": "General informational messages",
+                "NotificationTypeOptional": "Can be opted out by user preferences",
+                "NotificationTypePromotion": "Marketing or promotional messages"
+            },
+            "x-enum-varnames": [
+                "NotificationTypeOptional",
+                "NotificationTypeInfo",
+                "NotificationTypePromotion",
+                "NotificationTypeCritical"
+            ]
+        },
+        "service.OverallStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "sent",
+                "failed",
+                "retrying",
+                "ignored",
+                "mixed"
+            ],
+            "x-enum-comments": {
+                "OverallStatusFailed": "Delivery to all critical/requested channels failed after all retries",
+                "OverallStatusIgnored": "Some channels succeeded, while others failed or are still pending (partial success)",
+                "OverallStatusPending": "Notification is newly created and processing/delivery attempts are pending",
+                "OverallStatusRetrying": "At least one channel is still in a retrying state",
+                "OverallStatusSent": "All requested channels have successfully delivered the notification"
+            },
+            "x-enum-varnames": [
+                "OverallStatusPending",
+                "OverallStatusSent",
+                "OverallStatusFailed",
+                "OverallStatusRetrying",
+                "OverallStatusIgnored",
+                "OverallStatusMixed"
+            ]
+        },
+        "service.SendNotificationRequest": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "channel_deliveries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.ChannelDeliveryRequest"
+                    }
+                },
+                "data": {
+                    "type": "string"
+                },
+                "external_user_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/service.NotificationType"
+                }
+            }
+        },
+        "service.SendNotificationResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "channel_deliveries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.ChannelDelivery"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_read": {
+                    "type": "boolean"
+                },
+                "overall_status": {
+                    "$ref": "#/definitions/service.OverallStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/service.NotificationType"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {

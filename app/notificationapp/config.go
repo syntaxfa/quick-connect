@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/redis"
+	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 )
@@ -13,4 +15,6 @@ type Config struct {
 	HTTPServer      httpserver.Config `koanf:"http_server"`
 	Logger          logger.Config     `koanf:"logger"`
 	Postgres        postgres.Config   `koanf:"postgres"`
+	Notification    service.Config    `koanf:"notification"`
+	Redis           redis.Config      `koanf:"redis"`
 }
