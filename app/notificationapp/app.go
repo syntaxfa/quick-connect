@@ -7,8 +7,14 @@ import (
 	"os"
 	"sync"
 
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/redis"
 	"github.com/syntaxfa/quick-connect/app/notificationapp/delivery/http"
+	postgres2 "github.com/syntaxfa/quick-connect/app/notificationapp/repository/postgres"
+	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
+	"github.com/syntaxfa/quick-connect/pkg/cachemanager"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
+	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
 
 type Application struct {
@@ -19,7 +25,19 @@ type Application struct {
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
-	handler := http.NewHandler()
+	t, tErr := translation.New(translation.DefaultLanguages...)
+	if tErr != nil {
+		panic(tErr)
+	}
+
+	redisAdapter := redis.New(cfg.Redis, logger)
+	psAdapter := postgres.New(cfg.Postgres, logger)
+
+	cache := cachemanager.New(redisAdapter)
+	notificationVld := service.NewValidate(t)
+	notificationRepo := postgres2.New(psAdapter)
+	notificationSvc := service.New(cfg.Notification, notificationVld, cache, notificationRepo, logger)
+	handler := http.NewHandler(notificationSvc, t)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
 
 	return Application{

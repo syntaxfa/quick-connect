@@ -1,3 +1,163 @@
+definitions:
+  servermsg.ErrorResponse:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      message:
+        type: string
+    type: object
+  service.ChannelDelivery:
+    properties:
+      attempt_count:
+        description: Number of times delivery has been attempted for this channel
+        type: integer
+      channel:
+        allOf:
+        - $ref: '#/definitions/service.ChannelType'
+        description: The type of communication channel
+      error:
+        description: 'Optional: Error message if the last delivery attempt failed'
+        type: string
+      last_attempt_at:
+        description: Timestamp of the last delivery attempt
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/service.DeliveryStatus'
+        description: The current delivery status for this channel
+    type: object
+  service.ChannelDeliveryRequest:
+    properties:
+      channel:
+        $ref: '#/definitions/service.ChannelType'
+    type: object
+  service.ChannelType:
+    enum:
+    - sms
+    - email
+    - web_push
+    type: string
+    x-enum-comments:
+      ChannelTypeEmail: Electronic mail
+      ChannelTypeSMS: Short Message Service (text messages)
+      ChannelTypeWebPush: Browser-based push notifications (e.g., via FCM, Web Push
+        API)
+    x-enum-varnames:
+    - ChannelTypeSMS
+    - ChannelTypeEmail
+    - ChannelTypeWebPush
+  service.DeliveryStatus:
+    enum:
+    - pending
+    - sent
+    - failed
+    - retrying
+    - ignored
+    type: string
+    x-enum-comments:
+      DeliveryStatusFailed: Delivery through this channel failed (after exhausting
+        all retries)
+      DeliveryStatusIgnored: Delivery to this channel was ignored (e.g., user opted
+        out, channel not configured, or a business rule prevented sending)
+      DeliveryStatusPending: Delivery for this channel has not been attempted yet,
+        or is awaiting processing
+      DeliveryStatusRetrying: Delivery for this channel is currently being retried
+      DeliveryStatusSent: The notification was successfully sent through this channel
+    x-enum-varnames:
+    - DeliveryStatusPending
+    - DeliveryStatusSent
+    - DeliveryStatusFailed
+    - DeliveryStatusRetrying
+    - DeliveryStatusIgnored
+  service.NotificationType:
+    enum:
+    - 'optional '
+    - info
+    - promotion
+    - critical
+    type: string
+    x-enum-comments:
+      NotificationTypeCritical: High-priority messages that usually cannot be opted
+        out of (e.g., security alerts, password resets)
+      NotificationTypeInfo: General informational messages
+      NotificationTypeOptional: Can be opted out by user preferences
+      NotificationTypePromotion: Marketing or promotional messages
+    x-enum-varnames:
+    - NotificationTypeOptional
+    - NotificationTypeInfo
+    - NotificationTypePromotion
+    - NotificationTypeCritical
+  service.OverallStatus:
+    enum:
+    - pending
+    - sent
+    - failed
+    - retrying
+    - ignored
+    - mixed
+    type: string
+    x-enum-comments:
+      OverallStatusFailed: Delivery to all critical/requested channels failed after
+        all retries
+      OverallStatusIgnored: Some channels succeeded, while others failed or are still
+        pending (partial success)
+      OverallStatusPending: Notification is newly created and processing/delivery
+        attempts are pending
+      OverallStatusRetrying: At least one channel is still in a retrying state
+      OverallStatusSent: All requested channels have successfully delivered the notification
+    x-enum-varnames:
+    - OverallStatusPending
+    - OverallStatusSent
+    - OverallStatusFailed
+    - OverallStatusRetrying
+    - OverallStatusIgnored
+    - OverallStatusMixed
+  service.SendNotificationRequest:
+    properties:
+      body:
+        type: string
+      channel_deliveries:
+        items:
+          $ref: '#/definitions/service.ChannelDeliveryRequest'
+        type: array
+      data:
+        type: string
+      external_user_id:
+        type: string
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/service.NotificationType'
+    type: object
+  service.SendNotificationResponse:
+    properties:
+      body:
+        type: string
+      channel_deliveries:
+        items:
+          $ref: '#/definitions/service.ChannelDelivery'
+        type: array
+      created_at:
+        type: string
+      data:
+        items:
+          type: integer
+        type: array
+      id:
+        type: string
+      is_read:
+        type: boolean
+      overall_status:
+        $ref: '#/definitions/service.OverallStatus'
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/service.NotificationType'
+      user_id:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -18,6 +178,40 @@ paths:
           schema:
             type: string
       summary: health check
+      tags:
+      - Notification
+  /notifications:
+    post:
+      consumes:
+      - application/json
+      description: This API endpoint send a new notification.
+      parameters:
+      - description: generate pair(refresh & access) tokens
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/service.SendNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.SendNotificationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: send notification
       tags:
       - Notification
 schemes:
