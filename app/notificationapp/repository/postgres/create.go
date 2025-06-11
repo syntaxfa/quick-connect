@@ -1,0 +1,37 @@
+package postgres
+
+import (
+	"context"
+
+	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
+)
+
+const queryCreateNotification = `INSERT INTO notifications (user_id, type, title, body, data, channel_deliveries)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, user_id, type, title, body, data, is_read, created_at, overall_status, channel_deliveries;`
+
+func (d *DB) Save(ctx context.Context, req service.SendNotificationRequest) (service.Notification, error) {
+	const op = "repository.postgres.create.Save"
+
+	var notification service.Notification
+	notificationTypeStr, err := service.NotificationTypeToString(req.Type)
+	if err != nil {
+		return service.Notification{}, richerror.New(op).WithWrapError(err).WithKind(richerror.KindUnexpected)
+	}
+	if qErr := d.conn.Conn().QueryRow(ctx, queryCreateNotification, req.UserID, notificationTypeStr, req.Title, req.Body, req.Data, req.ChannelDeliveries).Scan(
+		&notification.ID, &notification.UserID, &notificationTypeStr,
+		&notification.Title, notification.Body, notification.Data,
+		notification.IsRead, notification.CreatedAt, notification.OverallStatus,
+		notification.ChannelDeliveries); qErr != nil {
+		return service.Notification{}, richerror.New(op).WithMessage("can't insert into notifications table").WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+
+	notificationType, err := service.NotificationTypeToInt(notificationTypeStr)
+	if err != nil {
+		return service.Notification{}, richerror.New(op).WithWrapError(err).WithKind(richerror.KindUnexpected)
+	}
+	notification.Type = notificationType
+
+	return notification, nil
+}
