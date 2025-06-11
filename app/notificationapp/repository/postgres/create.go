@@ -5,6 +5,7 @@ import (
 
 	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/types"
 )
 
 const queryCreateNotification = `INSERT INTO notifications (id, user_id, type, title, body, data, channel_deliveries)
@@ -24,4 +25,18 @@ func (d *DB) Save(ctx context.Context, req service.SendNotificationRequest) (ser
 	}
 
 	return notification, nil
+}
+
+const queryCreateUserFromExternalUserID = `INSERT INTO external_users (user_id, external_user_id)
+VALUES ($1, $2);`
+
+func (d *DB) CreateUserIDFromExternalUserID(ctx context.Context, externalUserID string, userID types.ID) error {
+	const op = "repository.postgres.create.CreateUserIDFromExternalUserID"
+
+	_, eErr := d.conn.Conn().Exec(ctx, queryCreateUserFromExternalUserID, userID, externalUserID)
+	if eErr != nil {
+		return richerror.New(op).WithWrapError(eErr).WithKind(richerror.KindUnexpected)
+	}
+
+	return nil
 }

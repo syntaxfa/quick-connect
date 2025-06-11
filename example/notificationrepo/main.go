@@ -2,17 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	postgres2 "github.com/syntaxfa/quick-connect/app/notificationapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"log/slog"
 	"os"
-
-	"github.com/oklog/ulid/v2"
-	"github.com/syntaxfa/quick-connect/adapter/postgres"
-	postgres2 "github.com/syntaxfa/quick-connect/app/notificationapp/repository/postgres"
-	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
-	"github.com/syntaxfa/quick-connect/types"
 )
 
 func main() {
@@ -34,33 +29,77 @@ func main() {
 	ctx := context.Background()
 	repo := postgres2.New(psAdapter)
 
-	data := map[string]string{
-		"service": "account",
-	}
-	dataJson, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
-	}
+	//data := map[string]string{
+	//	"service": "account",
+	//}
+	//dataJson, err := json.Marshal(data)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//channelDeliveries := []service.ChannelDeliveryRequest{
+	//	{Channel: service.ChannelTypeEmail},
+	//	{Channel: service.ChannelTypeWebPush},
+	//}
+	//
+	//notification, err := repo.Save(ctx, service.SendNotificationRequest{
+	//	ID:                types.ID(ulid.Make().String()),
+	//	UserID:            types.ID(ulid.Make().String()),
+	//	Type:              service.NotificationTypeInfo,
+	//	Title:             "message title 2",
+	//	Body:              "message body 2",
+	//	Data:              dataJson,
+	//	ChannelDeliveries: channelDeliveries,
+	//})
+	//if err != nil {
+	//	errlog.WithoutErr(err, slog.Default())
+	//
+	//	os.Exit(1)
+	//}
+	//
+	//fmt.Printf("%+v", notification)
 
-	channelDeliveries := []service.ChannelDeliveryRequest{
-		{Channel: service.ChannelTypeEmail},
-		{Channel: service.ChannelTypeWebPush},
-	}
+	var externalUserID = "1"
+	//exists, err := repo.IsExistUserIDFromExternalUserID(ctx, externalUserID)
+	//if err != nil {
+	//	errlog.WithoutErr(err, slog.Default())
+	//
+	//	os.Exit(1)
+	//}
+	//
+	//if exists {
+	//	fmt.Printf("externalUserID %s exists", externalUserID)
+	//} else {
+	//	fmt.Printf("externalUserID %s not exists", externalUserID)
+	//}
+	//
+	//if err := repo.CreateUserIDFromExternalUserID(ctx, externalUserID, types.ID(ulid.Make().String())); err != nil {
+	//	errlog.WithoutErr(err, slog.Default())
+	//
+	//	os.Exit(1)
+	//} else {
+	//	fmt.Printf("user id created!!!")
+	//}
+	//
+	//exists, err = repo.IsExistUserIDFromExternalUserID(ctx, externalUserID)
+	//if err != nil {
+	//	errlog.WithoutErr(err, slog.Default())
+	//
+	//	os.Exit(1)
+	//}
+	//
+	//if exists {
+	//	fmt.Printf("externalUserID %s exists", externalUserID)
+	//} else {
+	//	fmt.Printf("externalUserID %s not exists", externalUserID)
+	//}
 
-	notification, err := repo.Save(ctx, service.SendNotificationRequest{
-		ID:                types.ID(ulid.Make().String()),
-		UserID:            types.ID(ulid.Make().String()),
-		Type:              service.NotificationTypeInfo,
-		Title:             "message title 2",
-		Body:              "message body 2",
-		Data:              dataJson,
-		ChannelDeliveries: channelDeliveries,
-	})
+	userID, err := repo.GetUserIDFromExternalUserID(ctx, externalUserID)
 	if err != nil {
 		errlog.WithoutErr(err, slog.Default())
 
 		os.Exit(1)
 	}
 
-	fmt.Printf("%+v", notification)
+	fmt.Printf("userID is %s", userID)
 }
