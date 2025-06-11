@@ -11,8 +11,9 @@ type ChannelDeliveryRequest struct {
 }
 
 type SendNotificationRequest struct {
-	UserID            types.ID                 `json:"user_id"`
-	ExternalUserID    string                   `json:"-"`
+	ID                types.ID                 `json:"-"`
+	UserID            types.ID                 `json:"-"`
+	ExternalUserID    string                   `json:"external_user_id"`
 	Type              NotificationType         `json:"type"`
 	Title             string                   `json:"title"`
 	Body              string                   `json:"body"`
