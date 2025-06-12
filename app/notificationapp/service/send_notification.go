@@ -38,7 +38,15 @@ func (s Service) SendNotification(ctx context.Context, req SendNotificationReque
 			WithKind(richerror.KindUnexpected), s.logger)
 	}
 
-	// TODO: check notification type if is critical, send it and return response
+	s.hub.notification <- &NotificationMessage{
+		NotificationID: notification.ID,
+		UserID:         notification.UserID,
+		Type:           notification.Type,
+		Title:          notification.Title,
+		Body:           notification.Body,
+		Data:           notification.Data,
+		Timestamp:      notification.CreatedAt.Unix(),
+	}
 
 	return SendNotificationResponse{Notification: notification}, nil
 }

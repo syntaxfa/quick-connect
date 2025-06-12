@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"sync"
@@ -20,7 +21,10 @@ type Connection interface {
 
 type HubConfig struct {
 	UserConnectionLimit int           `koanf:"user_connection_limit"`
-	PingPeriod          time.Duration `koanf:"ping_period"`
+	WriteWait           time.Duration `koanf:"write_wait"`
+	PongWait            time.Duration `koanf:"pong_wait"`
+	PingPeriod          time.Duration
+	MaxMessageSize      int `koanf:"max_message_size"`
 }
 
 type Hub struct {
@@ -135,6 +139,7 @@ func (c *Client) WritePump() {
 			errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected).
 				WithMessage("failed to stop client websocket connection"), c.hub.logger)
 		}
+		c.hub.unregistered <- c
 	}()
 
 	for {
@@ -167,5 +172,22 @@ func (c *Client) WritePump() {
 				return
 			}
 		}
+	}
+}
+
+// NewClient created a new Client for websocket connection.
+func (s Service) NewClient(ctx context.Context, conn Connection, externalUserID string) *Client {
+	const op = "service.service.NewClient"
+
+	userID, err := s.getUserIDFromExternalUserID(ctx, externalUserID)
+	if err != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(err).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return &Client{
+		hub:    s.hub,
+		conn:   conn,
+		send:   make(chan *NotificationMessage),
+		userID: userID,
 	}
 }

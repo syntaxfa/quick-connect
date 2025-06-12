@@ -24,14 +24,25 @@ type Service struct {
 	cache  *cachemanager.CacheManager
 	repo   Repository
 	logger *slog.Logger
+	hub    *Hub
 }
 
-func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Repository, logger *slog.Logger) Service {
+func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Repository, logger *slog.Logger, hub *Hub) Service {
+	go hub.Run()
+
 	return Service{
 		cfg:    cfg,
 		vld:    vld,
 		cache:  cache,
 		repo:   repo,
 		logger: logger,
+		hub:    hub,
 	}
+}
+
+func (s Service) JoinClient(ctx context.Context, conn Connection, externalUserID string) {
+	client := s.NewClient(ctx, conn, externalUserID)
+
+	s.hub.register <- client
+	go client.WritePump()
 }

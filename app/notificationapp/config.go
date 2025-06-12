@@ -8,6 +8,7 @@ import (
 	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
+	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
 type Config struct {
@@ -17,4 +18,6 @@ type Config struct {
 	Postgres        postgres.Config   `koanf:"postgres"`
 	Notification    service.Config    `koanf:"notification"`
 	Redis           redis.Config      `koanf:"redis"`
+	Hub             service.HubConfig `koanf:"hub"`
+	Websocket       websocket.Config  `koanf:"websocket"`
 }

@@ -25,3 +25,11 @@ redis:
   host: "localhost"
   port: 12434
   password: "Z9265UQfrFiCYWMMJF4uvTEmJA7rEauJ"
+websocket:
+  read_buffer_size: 1024
+  write_buffer_size: 1024
+hub:
+  write_wait: 10s
+  pong_wait: 60s
+  max_message_size: 512
+  user_connection_limit: 5
