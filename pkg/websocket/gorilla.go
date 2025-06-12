@@ -18,6 +18,10 @@ func (c *GorillaConnection) WriteMessage(messageType int, data []byte) error {
 	return c.conn.WriteMessage(messageType, data)
 }
 
+func (c *GorillaConnection) RemoteAddr() string {
+	return c.conn.RemoteAddr().String()
+}
+
 func (c *GorillaConnection) Close() error {
 	return c.conn.Close()
 }
