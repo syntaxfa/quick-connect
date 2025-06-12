@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	http2 "net/http"
 	"os"
 	"sync"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/cachemanager"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
+	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
 type Application struct {
@@ -30,14 +32,20 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 		panic(tErr)
 	}
 
+	cfg.Hub.PingPeriod = (cfg.Hub.PongWait * 9) / 10
+
 	redisAdapter := redis.New(cfg.Redis, logger)
 	psAdapter := postgres.New(cfg.Postgres, logger)
-
 	cache := cachemanager.New(redisAdapter)
+
 	notificationVld := service.NewValidate(t)
 	notificationRepo := postgres2.New(psAdapter)
-	notificationSvc := service.New(cfg.Notification, notificationVld, cache, notificationRepo, logger)
-	handler := http.NewHandler(notificationSvc, t)
+
+	hub := service.NewHub(cfg.Hub, logger)
+	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.HTTPServer.Cors.AllowOrigins, logger))
+	notificationSvc := service.New(cfg.Notification, notificationVld, cache, notificationRepo, logger, hub)
+
+	handler := http.NewHandler(notificationSvc, t, upgrader)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
 
 	return Application{
@@ -103,5 +111,13 @@ func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 
 	if sErr := a.httpServer.Stop(ctx); sErr != nil {
 		a.logger.Error("http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+	}
+}
+
+func checkOrigin(allowOrigins []string, logger *slog.Logger) func(r *http2.Request) bool {
+	return func(r *http2.Request) bool {
+		_, _, _ = allowOrigins, logger, r
+
+		return true
 	}
 }
