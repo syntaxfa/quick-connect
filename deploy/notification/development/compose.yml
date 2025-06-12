@@ -1,4 +1,4 @@
-name: "NOTIFICATION-development"
+name: "notification-development"
 
 volumes:
   notification_postgres_data:
@@ -37,7 +37,7 @@ services:
     ports:
       - 5565:80
     environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin@NOTIFICATION.club
+      PGADMIN_DEFAULT_EMAIL: pgadmin@notification.club
       PGADMIN_DEFAULT_PASSWORD: pgadmin_password
     volumes:
       - pgadmin_data:/var/lib/pgadmin
