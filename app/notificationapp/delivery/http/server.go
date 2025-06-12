@@ -37,6 +37,7 @@ func (s Server) registerRoutes() {
 
 	notifications := s.httpServer.Router.Group("/notifications")
 	notifications.POST("", s.handler.sendNotification)
+	notifications.GET("/ws", s.handler.wsNotification)
 }
 
 func (s Server) registerSwagger() {
