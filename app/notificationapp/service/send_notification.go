@@ -24,12 +24,13 @@ func (s Service) SendNotification(ctx context.Context, req SendNotificationReque
 	req.UserID = userID
 
 	notification, sErr := s.repo.Save(ctx, SendNotificationRequest{
-		ID:     types.ID(ulid.Make().String()),
-		UserID: req.UserID,
-		Type:   req.Type,
-		Title:  req.Title,
-		Body:   req.Body,
-		Data:   req.Data,
+		ID:                types.ID(ulid.Make().String()),
+		UserID:            req.UserID,
+		Type:              req.Type,
+		Title:             req.Title,
+		Body:              req.Body,
+		Data:              req.Data,
+		ChannelDeliveries: req.ChannelDeliveries,
 	})
 	if sErr != nil {
 		return SendNotificationResponse{}, errlog.ErrLog(richerror.New(op).
