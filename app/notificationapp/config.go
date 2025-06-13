@@ -20,4 +20,5 @@ type Config struct {
 	Redis           redis.Config      `koanf:"redis"`
 	Hub             service.HubConfig `koanf:"hub"`
 	Websocket       websocket.Config  `koanf:"websocket"`
+	GetUserIDURL    string            `koanf:"get_user_id_url"`
 }

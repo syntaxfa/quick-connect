@@ -2,6 +2,9 @@ package http
 
 import (
 	"context"
+	"log/slog"
+	"net/http"
+	"time"
 
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/syntaxfa/quick-connect/app/notificationapp/docs"
@@ -9,14 +12,18 @@ import (
 )
 
 type Server struct {
-	httpServer httpserver.Server
-	handler    Handler
+	httpServer        httpserver.Server
+	handler           Handler
+	getExternalUserID string
+	logger            *slog.Logger
 }
 
-func New(httpServer httpserver.Server, handler Handler) Server {
+func New(httpServer httpserver.Server, handler Handler, getExternalUserID string, logger *slog.Logger) Server {
 	return Server{
-		httpServer: httpServer,
-		handler:    handler,
+		httpServer:        httpServer,
+		handler:           handler,
+		getExternalUserID: getExternalUserID,
+		logger:            logger,
 	}
 }
 
@@ -37,7 +44,9 @@ func (s Server) registerRoutes() {
 
 	notifications := s.httpServer.Router.Group("/notifications")
 	notifications.POST("", s.handler.sendNotification)
-	notifications.GET("/ws", s.handler.wsNotification)
+
+	httpClient := &http.Client{Timeout: time.Second * 10}
+	notifications.GET("/ws", s.handler.wsNotification, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 }
 
 func (s Server) registerSwagger() {
