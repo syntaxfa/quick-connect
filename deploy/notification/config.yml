@@ -33,3 +33,4 @@ hub:
   pong_wait: 60s
   max_message_size: 512
   user_connection_limit: 5
+get_user_id_url: "http://localhost:8000/api/v1/accounts/get-user-id/"
