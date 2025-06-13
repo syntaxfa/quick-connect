@@ -12,7 +12,12 @@ func (h Handler) wsNotification(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotAcceptable, "could not upgrade connection")
 	}
 
-	h.svc.JoinClient(c.Request().Context(), conn, "1")
+	userID, ok := c.Get("user_id").(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "user id is not valid")
+	}
+
+	h.svc.JoinClient(c.Request().Context(), conn, userID)
 
 	return nil
 }

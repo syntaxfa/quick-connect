@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 	http2 "net/http"
+	"net/url"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
@@ -46,7 +48,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	notificationSvc := service.New(cfg.Notification, notificationVld, cache, notificationRepo, logger, hub)
 
 	handler := http.NewHandler(notificationSvc, t, upgrader)
-	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
+	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler, cfg.GetUserIDURL, logger)
 
 	return Application{
 		cfg:        cfg,
@@ -114,10 +116,51 @@ func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	}
 }
 
-func checkOrigin(allowOrigins []string, logger *slog.Logger) func(r *http2.Request) bool {
+func checkOrigin(allowedOrigins []string, logger *slog.Logger) func(r *http2.Request) bool {
 	return func(r *http2.Request) bool {
-		_, _, _ = allowOrigins, logger, r
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			logger.Warn("ws connection attempt without header")
 
-		return true
+			// TODO: change it to false in production
+			return true
+		}
+
+		if len(allowedOrigins) == 0 {
+			logger.Debug("accepting all origins because allowedOrigins is empty", slog.String("origin", origin))
+
+			return true
+		}
+
+		u, pErr := url.Parse(origin)
+		if pErr != nil {
+			logger.Warn("invalid origin header", slog.String("origin", origin))
+
+			return false
+		}
+
+		hostname := u.Hostname()
+		for _, allowed := range allowedOrigins {
+			if strings.HasPrefix(allowed, "*.") {
+				domain := strings.TrimPrefix(allowed, "*.")
+				if strings.HasSuffix(hostname, domain) {
+					logger.Debug("origin accepted (wildcard match)",
+						slog.String("origin", origin),
+						slog.String("pattern", allowed))
+
+					return true
+				}
+			} else if hostname == allowed || origin == allowed {
+				logger.Debug("origin accepted (exact match)",
+					slog.String("origin", origin),
+					slog.String("allowed", allowed))
+
+				return true
+			}
+		}
+
+		logger.Warn("origin rejected", slog.String("origin", origin))
+
+		return false
 	}
 }
