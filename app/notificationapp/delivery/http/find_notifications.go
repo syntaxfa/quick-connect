@@ -8,29 +8,29 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 )
 
-// sendNotification docs
-// @Summary send notification
-// @Description This API endpoint send a new notification.
+// FindNotifications docs
+// @Summary find user notifications
+// @Description This API endpoint find an userID notifications.
 // @Tags Notification
 // @Accept json
 // @Produce json
-// @Param Request body service.SendNotificationRequestSchema true "generate pair(refresh & access) tokens"
-// @Success 200 {object} service.SendNotificationResponse
+// @Param Request body service.ListNotificationRequest true "find user notifications"
+// @Success 200 {object} service.ListNotificationResponse
 // @Failure 400 {string} string Bad Request
 // @Failure 422 {object} servermsg.ErrorResponse
 // @Failure 500 {string} something went wrong
-// @Router /v1/notifications [POST].
-func (h Handler) sendNotification(c echo.Context) error {
-	var req service.SendNotificationRequest
+// @Router /v1/notifications/list [POST].
+func (h Handler) FindNotifications(c echo.Context) error {
+	var req service.ListNotificationRequest
 
 	if bErr := c.Bind(&req); bErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	resp, sErr := h.svc.SendNotification(c.Request().Context(), req)
+	resp, sErr := h.svc.FindNotificationByUserID(c.Request().Context(), req)
 	if sErr != nil {
 		return servermsg.HTTPMsg(c, sErr, h.t)
 	}
 
-	return c.JSON(http.StatusCreated, resp)
+	return c.JSON(http.StatusOK, resp)
 }

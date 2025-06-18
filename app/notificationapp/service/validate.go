@@ -92,3 +92,29 @@ func (v Validate) ValidateNotificationChannelDeliveries(value interface{}) error
 
 	return nil
 }
+
+func (v Validate) ValidateListNotificationRequest(req ListNotificationRequest) error {
+	const op = "validate.ValidateListNotificationRequest"
+
+	if err := validation.ValidateStruct(&req,
+		validation.Field(&req.ExternalUserID,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+		),
+	); err != nil {
+		fieldErrors := make(map[string]string)
+
+		vErr := validation.Errors{}
+		if errors.As(err, &vErr) {
+			for key, value := range vErr {
+				if value != nil {
+					fieldErrors[key] = v.t.TranslateMessage(value.Error())
+				}
+			}
+		}
+
+		return richerror.New(op).WithMessage(servermsg.MsgInvalidInput).WithKind(richerror.KindInvalid).
+			WithErrorFields(fieldErrors).WithMeta(map[string]interface{}{"req": req})
+	}
+
+	return nil
+}

@@ -44,7 +44,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notifications": {
+        "/v1/notifications": {
             "post": {
                 "description": "This API endpoint send a new notification.",
                 "consumes": [
@@ -64,7 +64,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.SendNotificationRequest"
+                            "$ref": "#/definitions/service.SendNotificationRequestSchema"
                         }
                     }
                 ],
@@ -95,9 +95,78 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/notifications/list": {
+            "post": {
+                "description": "This API endpoint find an userID notifications.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notification"
+                ],
+                "summary": "find user notifications",
+                "parameters": [
+                    {
+                        "description": "find user notifications",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.ListNotificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.ListNotificationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "paginate.ResponseBase": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "total_numbers": {
+                    "type": "integer"
+                },
+                "total_page": {
+                    "type": "integer"
+                }
+            }
+        },
         "servermsg.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -195,13 +264,83 @@ const docTemplate = `{
                 "DeliveryStatusIgnored"
             ]
         },
+        "service.ListNotificationRequest": {
+            "type": "object",
+            "properties": {
+                "external_user_id": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.ListNotificationResponse": {
+            "type": "object",
+            "properties": {
+                "paginate": {
+                    "$ref": "#/definitions/paginate.ResponseBase"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.Notification"
+                    }
+                }
+            }
+        },
+        "service.Notification": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "channel_deliveries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.ChannelDelivery"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_read": {
+                    "type": "boolean"
+                },
+                "overall_status": {
+                    "$ref": "#/definitions/service.OverallStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/service.NotificationType"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "service.NotificationType": {
             "type": "string",
             "enum": [
                 "optional ",
                 "info",
                 "promotion",
-                "critical"
+                "critical",
+                "direct"
             ],
             "x-enum-comments": {
                 "NotificationTypeCritical": "High-priority messages that usually cannot be opted out of (e.g., security alerts, password resets)",
@@ -213,7 +352,8 @@ const docTemplate = `{
                 "NotificationTypeOptional",
                 "NotificationTypeInfo",
                 "NotificationTypePromotion",
-                "NotificationTypeCritical"
+                "NotificationTypeCritical",
+                "NotificationTypeDirect"
             ]
         },
         "service.OverallStatus": {
@@ -242,7 +382,7 @@ const docTemplate = `{
                 "OverallStatusMixed"
             ]
         },
-        "service.SendNotificationRequest": {
+        "service.SendNotificationRequestSchema": {
             "type": "object",
             "properties": {
                 "body": {

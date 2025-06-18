@@ -13,4 +13,6 @@ const (
 	MsgInvalidLengthOfNotificationTitle   = "the title must be less than 255 characters"
 	MsgInvalidNotificationType            = "invalid notification type"
 	MsgInvalidNotificationChannelDelivery = "invalid notification channel delivery"
+	MsgPageSizeMin                        = "page size must be greater than 0"
+	MsgPageMin                            = "page must be greater than 0"
 )
