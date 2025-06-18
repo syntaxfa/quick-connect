@@ -48,7 +48,7 @@ func WriteQuery(parameters Parameters) (query, countQuery string, args []interfa
 		}
 	}
 
-	query = " WHERE"
+	query += " WHERE "
 	conditions := make([]string, 0)
 	paramIndex := len(args) + 1 // Start parameter numbering after pagination arguments
 
@@ -110,8 +110,8 @@ func WriteQuery(parameters Parameters) (query, countQuery string, args []interfa
 	}
 
 	// Add sorting and pagination
-	query += fmt.Sprintf("ORDER BY %s %s", parameters.SortColumn, orderDirection(parameters.Descending))
-	query += fmt.Sprintf("LIMIT $%d OFFSET $%d", paramIndex, paramIndex+1)
+	query += fmt.Sprintf(" ORDER BY %s %s", parameters.SortColumn, orderDirection(parameters.Descending))
+	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", paramIndex, paramIndex+1)
 	countQuery += fmt.Sprintf(" WHERE %s;", strings.Join(conditions, " AND "))
 
 	// Add pagination arguments

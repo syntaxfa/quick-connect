@@ -5,12 +5,13 @@ import (
 	"log/slog"
 
 	"github.com/syntaxfa/quick-connect/pkg/cachemanager"
+	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
 type Repository interface {
 	Save(ctx context.Context, req SendNotificationRequest) (Notification, error)
-	FindNotificationByUserID(ctx context.Context, userID types.ID) ([]Notification, error)
+	FindNotificationByUserID(ctx context.Context, userID types.ID, paginated paginate.RequestBase, isRead *bool) (ListNotificationResponse, error)
 	MarkAsRead(ctx context.Context, notificationID types.ID) error
 	MarkAllAsReadByUserID(ctx context.Context, userID types.ID) error
 	IsExistUserIDFromExternalUserID(ctx context.Context, externalUserID string) (bool, error)

@@ -2,7 +2,9 @@ package service
 
 import (
 	"encoding/json"
+	"time"
 
+	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
@@ -21,6 +23,39 @@ type SendNotificationRequest struct {
 	ChannelDeliveries []ChannelDeliveryRequest `json:"channel_deliveries"`
 }
 
+type SendNotificationRequestSchema struct {
+	ID                types.ID                 `json:"-"`
+	UserID            types.ID                 `json:"-"`
+	ExternalUserID    string                   `json:"external_user_id"`
+	Type              NotificationType         `json:"type"`
+	Title             string                   `json:"title"`
+	Body              string                   `json:"body"`
+	Data              string                   `json:"data"`
+	ChannelDeliveries []ChannelDeliveryRequest `json:"channel_deliveries"`
+}
+
 type SendNotificationResponse struct {
 	Notification
+}
+
+type ListNotificationRequest struct {
+	ExternalUserID string               `json:"external_user_id"`
+	IsRead         *bool                `json:"is_read"`
+	Paginated      paginate.RequestBase `json:"paginated"`
+}
+
+type ListNotificationResult struct {
+	ID        types.ID         `json:"id"`
+	UserID    types.ID         `json:"user_id"`
+	Type      NotificationType `json:"type"`
+	Title     string           `json:"title"`
+	Body      string           `json:"body"`
+	Data      json.RawMessage  `json:"data,omitempty"`
+	IsRead    bool             `json:"is_read"`
+	CreatedAt time.Time        `json:"created_at"`
+}
+
+type ListNotificationResponse struct {
+	Results  []ListNotificationResult `json:"results"`
+	Paginate paginate.ResponseBase    `json:"paginate"`
 }
