@@ -55,7 +55,23 @@ type ListNotificationResult struct {
 	CreatedAt time.Time        `json:"created_at"`
 }
 
+type ListNotificationResultSchema struct {
+	ID        types.ID         `json:"id"`
+	UserID    types.ID         `json:"user_id"`
+	Type      NotificationType `json:"type"`
+	Title     string           `json:"title"`
+	Body      string           `json:"body"`
+	Data      string           `json:"data,omitempty"`
+	IsRead    bool             `json:"is_read"`
+	CreatedAt time.Time        `json:"created_at"`
+}
+
 type ListNotificationResponse struct {
 	Results  []ListNotificationResult `json:"results"`
 	Paginate paginate.ResponseBase    `json:"paginate"`
+}
+
+type ListNotificationResponseSchema struct {
+	Results  []ListNotificationResultSchema `json:"results"`
+	Paginate paginate.ResponseBase          `json:"paginate"`
 }

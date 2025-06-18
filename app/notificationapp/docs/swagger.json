@@ -117,7 +117,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/service.ListNotificationResponse"
+                            "$ref": "#/definitions/service.ListNotificationResponseSchema"
                         }
                     },
                     "400": {
@@ -140,9 +140,145 @@
                     }
                 }
             }
+        },
+        "/v1/notifications/{externalUserID}/mark-all-as-read": {
+            "get": {
+                "description": "mark all  notification as read.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notification"
+                ],
+                "summary": "mark all notification as read",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "external user id",
+                        "name": "externalUserID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "marked all as read",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/notifications/{notificationID}/mark-as-read": {
+            "get": {
+                "description": "mark notification as read.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notification"
+                ],
+                "summary": "mark notification as read",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "notification id",
+                        "name": "notificationID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "marked as read",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "paginate.Filter": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "$ref": "#/definitions/paginate.FilterOperation"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "paginate.FilterOperation": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ],
+            "x-enum-varnames": [
+                "FilterOperationEqual",
+                "FilterOperationNotEqual",
+                "FilterOperationGreater",
+                "FilterOperationGreaterEqual",
+                "FilterOperationLess",
+                "FilterOperationLessEqual",
+                "FilterOperationIn",
+                "FilterOperationNotIn",
+                "FilterOperationBetween"
+            ]
+        },
+        "paginate.RequestBase": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "descending": {
+                    "type": "boolean"
+                },
+                "filters": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/paginate.Filter"
+                    }
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "sort_column": {
+                    "type": "string"
+                }
+            }
+        },
         "paginate.ResponseBase": {
             "type": "object",
             "properties": {
@@ -263,15 +399,15 @@
                 "external_user_id": {
                     "type": "string"
                 },
-                "page": {
-                    "type": "integer"
+                "is_read": {
+                    "type": "boolean"
                 },
-                "page_size": {
-                    "type": "integer"
+                "paginated": {
+                    "$ref": "#/definitions/paginate.RequestBase"
                 }
             }
         },
-        "service.ListNotificationResponse": {
+        "service.ListNotificationResponseSchema": {
             "type": "object",
             "properties": {
                 "paginate": {
@@ -280,40 +416,28 @@
                 "results": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/service.Notification"
+                        "$ref": "#/definitions/service.ListNotificationResultSchema"
                     }
                 }
             }
         },
-        "service.Notification": {
+        "service.ListNotificationResultSchema": {
             "type": "object",
             "properties": {
                 "body": {
                     "type": "string"
                 },
-                "channel_deliveries": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/service.ChannelDelivery"
-                    }
-                },
                 "created_at": {
                     "type": "string"
                 },
                 "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
                 "is_read": {
                     "type": "boolean"
-                },
-                "overall_status": {
-                    "$ref": "#/definitions/service.OverallStatus"
                 },
                 "title": {
                     "type": "string"

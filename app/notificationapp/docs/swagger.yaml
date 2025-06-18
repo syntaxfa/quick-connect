@@ -1,4 +1,49 @@
 definitions:
+  paginate.Filter:
+    properties:
+      operation:
+        $ref: '#/definitions/paginate.FilterOperation'
+      values:
+        items: {}
+        type: array
+    type: object
+  paginate.FilterOperation:
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    type: integer
+    x-enum-varnames:
+    - FilterOperationEqual
+    - FilterOperationNotEqual
+    - FilterOperationGreater
+    - FilterOperationGreaterEqual
+    - FilterOperationLess
+    - FilterOperationLessEqual
+    - FilterOperationIn
+    - FilterOperationNotIn
+    - FilterOperationBetween
+  paginate.RequestBase:
+    properties:
+      current_page:
+        type: integer
+      descending:
+        type: boolean
+      filters:
+        additionalProperties:
+          $ref: '#/definitions/paginate.Filter'
+        type: object
+      page_size:
+        type: integer
+      sort_column:
+        type: string
+    type: object
   paginate.ResponseBase:
     properties:
       current_page:
@@ -86,40 +131,32 @@ definitions:
     properties:
       external_user_id:
         type: string
-      page:
-        type: integer
-      page_size:
-        type: integer
+      is_read:
+        type: boolean
+      paginated:
+        $ref: '#/definitions/paginate.RequestBase'
     type: object
-  service.ListNotificationResponse:
+  service.ListNotificationResponseSchema:
     properties:
       paginate:
         $ref: '#/definitions/paginate.ResponseBase'
       results:
         items:
-          $ref: '#/definitions/service.Notification'
+          $ref: '#/definitions/service.ListNotificationResultSchema'
         type: array
     type: object
-  service.Notification:
+  service.ListNotificationResultSchema:
     properties:
       body:
         type: string
-      channel_deliveries:
-        items:
-          $ref: '#/definitions/service.ChannelDelivery'
-        type: array
       created_at:
         type: string
       data:
-        items:
-          type: integer
-        type: array
+        type: string
       id:
         type: string
       is_read:
         type: boolean
-      overall_status:
-        $ref: '#/definitions/service.OverallStatus'
       title:
         type: string
       type:
@@ -272,6 +309,56 @@ paths:
       summary: send notification
       tags:
       - Notification
+  /v1/notifications/{externalUserID}/mark-all-as-read:
+    get:
+      consumes:
+      - application/json
+      description: mark all  notification as read.
+      parameters:
+      - description: external user id
+        in: path
+        name: externalUserID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: marked all as read
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: mark all notification as read
+      tags:
+      - Notification
+  /v1/notifications/{notificationID}/mark-as-read:
+    get:
+      consumes:
+      - application/json
+      description: mark notification as read.
+      parameters:
+      - description: notification id
+        in: path
+        name: notificationID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: marked as read
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: mark notification as read
+      tags:
+      - Notification
   /v1/notifications/list:
     post:
       consumes:
@@ -290,7 +377,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.ListNotificationResponse'
+            $ref: '#/definitions/service.ListNotificationResponseSchema'
         "400":
           description: Bad Request
           schema:

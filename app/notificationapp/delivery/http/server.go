@@ -48,7 +48,9 @@ func (s Server) registerRoutes() {
 
 	notifications := v1.Group("/notifications")
 	notifications.POST("", s.handler.sendNotification)
-	notifications.POST("/list", s.handler.FindNotifications)
+	notifications.POST("/list", s.handler.findNotifications)
+	notifications.GET("/:notificationID/mark-as-read", s.handler.markNotificationAsRead)
+	notifications.GET("/:externalUserID/mark-all-as-read", s.handler.markAllNotificationAsRead)
 
 	notifications.GET("/ws", s.handler.wsNotification, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 }
