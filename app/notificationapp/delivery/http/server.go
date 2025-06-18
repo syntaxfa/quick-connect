@@ -42,10 +42,14 @@ func (s Server) registerRoutes() {
 
 	s.httpServer.Router.GET("/health-check", s.handler.healthCheck)
 
-	notifications := s.httpServer.Router.Group("/notifications")
-	notifications.POST("", s.handler.sendNotification)
+	v1 := s.httpServer.Router.Group("/v1")
 
 	httpClient := &http.Client{Timeout: time.Second * 10}
+
+	notifications := v1.Group("/notifications")
+	notifications.POST("", s.handler.sendNotification)
+	notifications.POST("/list", s.handler.FindNotifications)
+
 	notifications.GET("/ws", s.handler.wsNotification, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 }
 

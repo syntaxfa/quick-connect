@@ -1,4 +1,15 @@
 definitions:
+  paginate.ResponseBase:
+    properties:
+      current_page:
+        type: integer
+      page_size:
+        type: integer
+      total_numbers:
+        type: integer
+      total_page:
+        type: integer
+    type: object
   servermsg.ErrorResponse:
     properties:
       errors:
@@ -71,12 +82,58 @@ definitions:
     - DeliveryStatusFailed
     - DeliveryStatusRetrying
     - DeliveryStatusIgnored
+  service.ListNotificationRequest:
+    properties:
+      external_user_id:
+        type: string
+      page:
+        type: integer
+      page_size:
+        type: integer
+    type: object
+  service.ListNotificationResponse:
+    properties:
+      paginate:
+        $ref: '#/definitions/paginate.ResponseBase'
+      results:
+        items:
+          $ref: '#/definitions/service.Notification'
+        type: array
+    type: object
+  service.Notification:
+    properties:
+      body:
+        type: string
+      channel_deliveries:
+        items:
+          $ref: '#/definitions/service.ChannelDelivery'
+        type: array
+      created_at:
+        type: string
+      data:
+        items:
+          type: integer
+        type: array
+      id:
+        type: string
+      is_read:
+        type: boolean
+      overall_status:
+        $ref: '#/definitions/service.OverallStatus'
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/service.NotificationType'
+      user_id:
+        type: string
+    type: object
   service.NotificationType:
     enum:
     - 'optional '
     - info
     - promotion
     - critical
+    - direct
     type: string
     x-enum-comments:
       NotificationTypeCritical: High-priority messages that usually cannot be opted
@@ -89,6 +146,7 @@ definitions:
     - NotificationTypeInfo
     - NotificationTypePromotion
     - NotificationTypeCritical
+    - NotificationTypeDirect
   service.OverallStatus:
     enum:
     - pending
@@ -114,7 +172,7 @@ definitions:
     - OverallStatusRetrying
     - OverallStatusIgnored
     - OverallStatusMixed
-  service.SendNotificationRequest:
+  service.SendNotificationRequestSchema:
     properties:
       body:
         type: string
@@ -180,7 +238,7 @@ paths:
       summary: health check
       tags:
       - Notification
-  /notifications:
+  /v1/notifications:
     post:
       consumes:
       - application/json
@@ -191,7 +249,7 @@ paths:
         name: Request
         required: true
         schema:
-          $ref: '#/definitions/service.SendNotificationRequest'
+          $ref: '#/definitions/service.SendNotificationRequestSchema'
       produces:
       - application/json
       responses:
@@ -212,6 +270,40 @@ paths:
           schema:
             type: string
       summary: send notification
+      tags:
+      - Notification
+  /v1/notifications/list:
+    post:
+      consumes:
+      - application/json
+      description: This API endpoint find an userID notifications.
+      parameters:
+      - description: find user notifications
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ListNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ListNotificationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: find user notifications
       tags:
       - Notification
 schemes:
