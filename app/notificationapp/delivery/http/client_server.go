@@ -11,15 +11,15 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 )
 
-type Server struct {
+type ClientServer struct {
 	httpServer        httpserver.Server
 	handler           Handler
 	getExternalUserID string
 	logger            *slog.Logger
 }
 
-func New(httpServer httpserver.Server, handler Handler, getExternalUserID string, logger *slog.Logger) Server {
-	return Server{
+func NewClientServer(httpServer httpserver.Server, handler Handler, getExternalUserID string, logger *slog.Logger) ClientServer {
+	return ClientServer{
 		httpServer:        httpServer,
 		handler:           handler,
 		getExternalUserID: getExternalUserID,
@@ -27,17 +27,17 @@ func New(httpServer httpserver.Server, handler Handler, getExternalUserID string
 	}
 }
 
-func (s Server) Start() error {
+func (s ClientServer) Start() error {
 	s.registerRoutes()
 
 	return s.httpServer.Start()
 }
 
-func (s Server) Stop(ctx context.Context) error {
+func (s ClientServer) Stop(ctx context.Context) error {
 	return s.httpServer.Stop(ctx)
 }
 
-func (s Server) registerRoutes() {
+func (s ClientServer) registerRoutes() {
 	s.registerSwagger()
 
 	s.httpServer.Router.GET("/health-check", s.handler.healthCheck)
@@ -55,7 +55,7 @@ func (s Server) registerRoutes() {
 	notifications.GET("/ws", s.handler.wsNotification, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 }
 
-func (s Server) registerSwagger() {
+func (s ClientServer) registerSwagger() {
 	docs.SwaggerInfo.Title = "Notification API"
 	docs.SwaggerInfo.Description = "Notification restfull API documentation"
 	docs.SwaggerInfo.Version = "1.0.0"
