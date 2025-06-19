@@ -19,7 +19,12 @@ import (
 // @Failure 500 {string} something went wrong
 // @Router /v1/notifications/{notificationID}/mark-as-read [GET].
 func (h Handler) markNotificationAsRead(c echo.Context) error {
-	if sErr := h.svc.MarkNotificationAsRead(c.Request().Context(), types.ID(c.Param("notificationID"))); sErr != nil {
+	userID, ok := c.Get("user_id").(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "user id is not valid")
+	}
+
+	if sErr := h.svc.MarkNotificationAsRead(c.Request().Context(), types.ID(c.Param("notificationID")), userID); sErr != nil {
 		return servermsg.HTTPMsg(c, sErr, h.t)
 	}
 
@@ -35,9 +40,14 @@ func (h Handler) markNotificationAsRead(c echo.Context) error {
 // @Param externalUserID path string true "external user id"
 // @Success 200 {string} string "marked all as read"
 // @Failure 500 {string} something went wrong
-// @Router /v1/notifications/{externalUserID}/mark-all-as-read [GET].
+// @Router /v1/notifications/mark-all-as-read [GET].
 func (h Handler) markAllNotificationAsRead(c echo.Context) error {
-	if sErr := h.svc.MarkAllNotificationAsRead(c.Request().Context(), c.Param("externalUserID")); sErr != nil {
+	userID, ok := c.Get("user_id").(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "user id is not valid")
+	}
+
+	if sErr := h.svc.MarkAllNotificationAsRead(c.Request().Context(), userID); sErr != nil {
 		return servermsg.HTTPMsg(c, sErr, h.t)
 	}
 

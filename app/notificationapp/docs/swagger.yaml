@@ -129,8 +129,6 @@ definitions:
     - DeliveryStatusIgnored
   service.ListNotificationRequest:
     properties:
-      external_user_id:
-        type: string
       is_read:
         type: boolean
       paginated:
@@ -307,31 +305,6 @@ paths:
       summary: send notification
       tags:
       - NotificationAdmin
-  /v1/notifications/{externalUserID}/mark-all-as-read:
-    get:
-      consumes:
-      - application/json
-      description: mark all  notification as read.
-      parameters:
-      - description: external user id
-        in: path
-        name: externalUserID
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: marked all as read
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: mark all notification as read
-      tags:
-      - NotificationClient
   /v1/notifications/{notificationID}/mark-as-read:
     get:
       consumes:
@@ -389,6 +362,31 @@ paths:
           schema:
             type: string
       summary: find user notifications
+      tags:
+      - NotificationClient
+  /v1/notifications/mark-all-as-read:
+    get:
+      consumes:
+      - application/json
+      description: mark all  notification as read.
+      parameters:
+      - description: external user id
+        in: path
+        name: externalUserID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: marked all as read
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: mark all notification as read
       tags:
       - NotificationClient
 schemes:

@@ -24,12 +24,12 @@ func (d *DB) MarkAllAsReadByUserID(ctx context.Context, userID types.ID) error {
 
 const queryMarkAsRead = `UPDATE notifications
 SET is_read = true
-WHERE id = $1;`
+WHERE id = $1 AND user_id = $2;`
 
-func (d *DB) MarkAsRead(ctx context.Context, notificationID types.ID) error {
+func (d *DB) MarkAsRead(ctx context.Context, notificationID, userID types.ID) error {
 	const op = "repository.mark.MarkAsRead"
 
-	_, eErr := d.conn.Conn().Exec(ctx, queryMarkAsRead, notificationID)
+	_, eErr := d.conn.Conn().Exec(ctx, queryMarkAsRead, notificationID, userID)
 	if eErr != nil {
 		return richerror.New(op).WithWrapError(eErr).WithKind(richerror.KindUnexpected)
 	}
