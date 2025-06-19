@@ -148,7 +148,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/notifications/{externalUserID}/mark-all-as-read": {
+        "/v1/notifications/mark-all-as-read": {
             "get": {
                 "description": "mark all  notification as read.",
                 "consumes": [
@@ -403,9 +403,6 @@ const docTemplate = `{
         "service.ListNotificationRequest": {
             "type": "object",
             "properties": {
-                "external_user_id": {
-                    "type": "string"
-                },
                 "is_read": {
                     "type": "boolean"
                 },

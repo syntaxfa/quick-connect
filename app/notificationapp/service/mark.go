@@ -8,10 +8,15 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-func (s Service) MarkNotificationAsRead(ctx context.Context, notificationID types.ID) error {
+func (s Service) MarkNotificationAsRead(ctx context.Context, notificationID types.ID, externalUserID string) error {
 	const op = "service.mark.MarkNotificationAsRead"
 
-	if mErr := s.repo.MarkAsRead(ctx, notificationID); mErr != nil {
+	userID, gErr := s.getUserIDFromExternalUserID(ctx, externalUserID)
+	if gErr != nil {
+		return errlog.ErrLog(richerror.New(op).WithWrapError(gErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	if mErr := s.repo.MarkAsRead(ctx, notificationID, userID); mErr != nil {
 		return errlog.ErrLog(richerror.New(op).WithWrapError(mErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 

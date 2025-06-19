@@ -47,9 +47,9 @@ func (s ClientServer) registerRoutes() {
 	httpClient := &http.Client{Timeout: time.Second * 10}
 
 	notifications := v1.Group("/notifications")
-	notifications.POST("/list", s.handler.findNotifications)
-	notifications.GET("/:notificationID/mark-as-read", s.handler.markNotificationAsRead)
-	notifications.GET("/:externalUserID/mark-all-as-read", s.handler.markAllNotificationAsRead)
+	notifications.POST("/list", s.handler.findNotifications, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
+	notifications.GET("/:notificationID/mark-as-read", s.handler.markNotificationAsRead, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
+	notifications.GET("/mark-all-as-read", s.handler.markAllNotificationAsRead, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 
 	notifications.GET("/ws", s.handler.wsNotification, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 }

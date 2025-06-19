@@ -27,6 +27,13 @@ func (h Handler) findNotifications(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
+	userID, ok := c.Get("user_id").(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "user id is not valid")
+	}
+
+	req.ExternalUserID = userID
+
 	resp, sErr := h.svc.FindNotificationByUserID(c.Request().Context(), req)
 	if sErr != nil {
 		return servermsg.HTTPMsg(c, sErr, h.t)

@@ -52,7 +52,7 @@ type SendNotificationResponseSchema struct {
 }
 
 type ListNotificationRequest struct {
-	ExternalUserID string               `json:"external_user_id"`
+	ExternalUserID string               `json:"-"`
 	IsRead         *bool                `json:"is_read"`
 	Paginated      paginate.RequestBase `json:"paginated"`
 }
