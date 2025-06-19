@@ -12,13 +12,13 @@ import (
 )
 
 type Config struct {
-	ShutdownTimeout time.Duration     `koanf:"shutdown_timeout"`
-	HTTPServer      httpserver.Config `koanf:"http_server"`
-	Logger          logger.Config     `koanf:"logger"`
-	Postgres        postgres.Config   `koanf:"postgres"`
-	Notification    service.Config    `koanf:"notification"`
-	Redis           redis.Config      `koanf:"redis"`
-	Hub             service.HubConfig `koanf:"hub"`
-	Websocket       websocket.Config  `koanf:"websocket"`
-	GetUserIDURL    string            `koanf:"get_user_id_url"`
+	ShutdownTimeout  time.Duration     `koanf:"shutdown_timeout"`
+	ClientHTTPServer httpserver.Config `koanf:"client_http_server"`
+	Logger           logger.Config     `koanf:"logger"`
+	Postgres         postgres.Config   `koanf:"postgres"`
+	Notification     service.Config    `koanf:"notification"`
+	Redis            redis.Config      `koanf:"redis"`
+	Hub              service.HubConfig `koanf:"hub"`
+	Websocket        websocket.Config  `koanf:"websocket"`
+	GetUserIDURL     string            `koanf:"get_user_id_url"`
 }

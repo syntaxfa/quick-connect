@@ -25,7 +25,7 @@ type Application struct {
 	cfg        Config
 	trap       <-chan os.Signal
 	logger     *slog.Logger
-	httpServer http.Server
+	httpServer http.ClientServer
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
@@ -44,11 +44,11 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	notificationRepo := postgres2.New(psAdapter)
 
 	hub := service.NewHub(cfg.Hub, logger)
-	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.HTTPServer.Cors.AllowOrigins, logger))
+	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.ClientHTTPServer.Cors.AllowOrigins, logger))
 	notificationSvc := service.New(cfg.Notification, notificationVld, cache, notificationRepo, logger, hub)
 
 	handler := http.NewHandler(notificationSvc, t, upgrader)
-	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler, cfg.GetUserIDURL, logger)
+	httpServer := http.NewClientServer(httpserver.New(cfg.ClientHTTPServer, logger), handler, cfg.GetUserIDURL, logger)
 
 	return Application{
 		cfg:        cfg,
@@ -62,7 +62,7 @@ func (a Application) Start() {
 	httpServerChan := make(chan error, 1)
 
 	go func() {
-		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.HTTPServer.Port))
+		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.ClientHTTPServer.Port))
 
 		if sErr := a.httpServer.Start(); sErr != nil {
 			httpServerChan <- sErr
@@ -71,7 +71,7 @@ func (a Application) Start() {
 
 	select {
 	case err := <-httpServerChan:
-		a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.HTTPServer.Port), slog.String("error", err.Error()))
+		a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.ClientHTTPServer.Port), slog.String("error", err.Error()))
 	case <-a.trap:
 		a.logger.Info("received http server shutdown signal!!!")
 	}
