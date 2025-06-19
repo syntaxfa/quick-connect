@@ -54,7 +54,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification"
+                    "NotificationAdmin"
                 ],
                 "summary": "send notification",
                 "parameters": [
@@ -72,7 +72,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/service.SendNotificationResponse"
+                            "$ref": "#/definitions/service.SendNotificationResponseSchema"
                         }
                     },
                     "400": {
@@ -106,7 +106,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification"
+                    "NotificationClient"
                 ],
                 "summary": "find user notifications",
                 "parameters": [
@@ -158,7 +158,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification"
+                    "NotificationClient"
                 ],
                 "summary": "mark all notification as read",
                 "parameters": [
@@ -196,7 +196,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification"
+                    "NotificationClient"
                 ],
                 "summary": "mark notification as read",
                 "parameters": [
@@ -532,7 +532,7 @@ const docTemplate = `{
                 }
             }
         },
-        "service.SendNotificationResponse": {
+        "service.SendNotificationResponseSchema": {
             "type": "object",
             "properties": {
                 "body": {
@@ -548,10 +548,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"

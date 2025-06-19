@@ -14,6 +14,7 @@ import (
 type Config struct {
 	ShutdownTimeout  time.Duration     `koanf:"shutdown_timeout"`
 	ClientHTTPServer httpserver.Config `koanf:"client_http_server"`
+	AdminHTTPServer  httpserver.Config `koanf:"admin_http_server"`
 	Logger           logger.Config     `koanf:"logger"`
 	Postgres         postgres.Config   `koanf:"postgres"`
 	Notification     service.Config    `koanf:"notification"`

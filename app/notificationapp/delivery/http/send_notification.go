@@ -11,11 +11,11 @@ import (
 // sendNotification docs
 // @Summary send notification
 // @Description This API endpoint send a new notification.
-// @Tags Notification
+// @Tags NotificationAdmin
 // @Accept json
 // @Produce json
 // @Param Request body service.SendNotificationRequestSchema true "generate pair(refresh & access) tokens"
-// @Success 200 {object} service.SendNotificationResponse
+// @Success 200 {object} service.SendNotificationResponseSchema
 // @Failure 400 {string} string Bad Request
 // @Failure 422 {object} servermsg.ErrorResponse
 // @Failure 500 {string} something went wrong

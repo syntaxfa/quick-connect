@@ -226,7 +226,7 @@ definitions:
       type:
         $ref: '#/definitions/service.NotificationType'
     type: object
-  service.SendNotificationResponse:
+  service.SendNotificationResponseSchema:
     properties:
       body:
         type: string
@@ -237,9 +237,7 @@ definitions:
       created_at:
         type: string
       data:
-        items:
-          type: integer
-        type: array
+        type: string
       id:
         type: string
       is_read:
@@ -293,7 +291,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.SendNotificationResponse'
+            $ref: '#/definitions/service.SendNotificationResponseSchema'
         "400":
           description: Bad Request
           schema:
@@ -308,7 +306,7 @@ paths:
             type: string
       summary: send notification
       tags:
-      - Notification
+      - NotificationAdmin
   /v1/notifications/{externalUserID}/mark-all-as-read:
     get:
       consumes:
@@ -333,7 +331,7 @@ paths:
             type: string
       summary: mark all notification as read
       tags:
-      - Notification
+      - NotificationClient
   /v1/notifications/{notificationID}/mark-as-read:
     get:
       consumes:
@@ -358,7 +356,7 @@ paths:
             type: string
       summary: mark notification as read
       tags:
-      - Notification
+      - NotificationClient
   /v1/notifications/list:
     post:
       consumes:
@@ -392,7 +390,7 @@ paths:
             type: string
       summary: find user notifications
       tags:
-      - Notification
+      - NotificationClient
 schemes:
 - http
 - https

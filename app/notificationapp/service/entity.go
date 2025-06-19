@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/syntaxfa/quick-connect/types"
@@ -14,7 +15,7 @@ type Notification struct {
 	Type              NotificationType  `json:"type"`
 	Title             string            `json:"title"`
 	Body              string            `json:"body"`
-	Data              []byte            `json:"data,omitempty"`
+	Data              json.RawMessage   `json:"data,omitempty"`
 	IsRead            bool              `json:"is_read"`
 	CreatedAt         time.Time         `json:"created_at"`
 	ChannelDeliveries []ChannelDelivery `json:"channel_deliveries"`

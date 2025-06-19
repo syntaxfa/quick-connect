@@ -11,7 +11,7 @@ import (
 // MarkNotificationAsRead docs
 // @Summary mark notification as read
 // @Description mark notification as read.
-// @Tags Notification
+// @Tags NotificationClient
 // @Accept json
 // @Produce json
 // @Param notificationID path string true "notification id"
@@ -29,7 +29,7 @@ func (h Handler) markNotificationAsRead(c echo.Context) error {
 // MarkNotificationAsRead docs
 // @Summary mark all notification as read
 // @Description mark all  notification as read.
-// @Tags Notification
+// @Tags NotificationClient
 // @Accept json
 // @Produce json
 // @Param externalUserID path string true "external user id"

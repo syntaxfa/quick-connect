@@ -11,7 +11,7 @@ import (
 // FindNotifications docs
 // @Summary find user notifications
 // @Description This API endpoint find an userID notifications.
-// @Tags Notification
+// @Tags NotificationClient
 // @Accept json
 // @Produce json
 // @Param Request body service.ListNotificationRequest true "find user notifications"
