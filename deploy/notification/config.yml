@@ -3,6 +3,10 @@ client_http_server:
   port: 2534
   cors:
     allow_origins:
+admin_http_server:
+  port: 2535
+  cors:
+    allow_origins:
 logger:
   file_path: "/logs/notification/logs.json"
   use_local_time: false

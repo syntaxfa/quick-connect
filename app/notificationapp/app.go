@@ -22,10 +22,11 @@ import (
 )
 
 type Application struct {
-	cfg        Config
-	trap       <-chan os.Signal
-	logger     *slog.Logger
-	httpServer http.ClientServer
+	cfg              Config
+	trap             <-chan os.Signal
+	logger           *slog.Logger
+	clientHTTPServer http.ClientServer
+	adminHTTPServer  http.AdminServer
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
@@ -48,30 +49,44 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	notificationSvc := service.New(cfg.Notification, notificationVld, cache, notificationRepo, logger, hub)
 
 	handler := http.NewHandler(notificationSvc, t, upgrader)
-	httpServer := http.NewClientServer(httpserver.New(cfg.ClientHTTPServer, logger), handler, cfg.GetUserIDURL, logger)
+	clientHTTPServer := http.NewClientServer(httpserver.New(cfg.ClientHTTPServer, logger), handler, cfg.GetUserIDURL, logger)
+
+	adminHTTPServer := http.NewAdminServer(httpserver.New(cfg.AdminHTTPServer, logger), handler, logger)
 
 	return Application{
-		cfg:        cfg,
-		trap:       trap,
-		logger:     logger,
-		httpServer: httpServer,
+		cfg:              cfg,
+		trap:             trap,
+		logger:           logger,
+		clientHTTPServer: clientHTTPServer,
+		adminHTTPServer:  adminHTTPServer,
 	}
 }
 
 func (a Application) Start() {
-	httpServerChan := make(chan error, 1)
+	clientHTTPServerChan := make(chan error, 1)
+	adminHTTPServerChan := make(chan error, 1)
 
 	go func() {
-		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.ClientHTTPServer.Port))
+		a.logger.Info(fmt.Sprintf("client http server started on %d", a.cfg.ClientHTTPServer.Port))
 
-		if sErr := a.httpServer.Start(); sErr != nil {
-			httpServerChan <- sErr
+		if sErr := a.clientHTTPServer.Start(); sErr != nil {
+			clientHTTPServerChan <- sErr
+		}
+	}()
+
+	go func() {
+		a.logger.Info(fmt.Sprintf("admin http server started on %d", a.cfg.AdminHTTPServer.Port))
+
+		if sErr := a.adminHTTPServer.Start(); sErr != nil {
+			adminHTTPServerChan <- sErr
 		}
 	}()
 
 	select {
-	case err := <-httpServerChan:
-		a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.ClientHTTPServer.Port), slog.String("error", err.Error()))
+	case err := <-clientHTTPServerChan:
+		a.logger.Error(fmt.Sprintf("error in client http server on %d", a.cfg.ClientHTTPServer.Port), slog.String("error", err.Error()))
+	case err := <-adminHTTPServerChan:
+		a.logger.Error(fmt.Sprintf("error in admin http server on %d", a.cfg.AdminHTTPServer.Port), slog.String("error", err.Error()))
 	case <-a.trap:
 		a.logger.Info("received http server shutdown signal!!!")
 	}
@@ -111,8 +126,12 @@ func (a Application) Stop(ctx context.Context) bool {
 func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	if sErr := a.httpServer.Stop(ctx); sErr != nil {
-		a.logger.Error("http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+	if sErr := a.clientHTTPServer.Stop(ctx); sErr != nil {
+		a.logger.Error("client http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+	}
+
+	if sErr := a.adminHTTPServer.Stop(ctx); sErr != nil {
+		a.logger.Error("admin http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
 }
 

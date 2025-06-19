@@ -37,7 +37,7 @@ manager-swag-init:
 	swag init -g cmd/manager/main.go -o app/managerapp/docs/ --tags=Manager,User,Token
 
 notification-swag-init:
-	swag init -g cmd/notification/main.go -o app/notificationapp/docs/ --tags=Notification
+	swag init -g cmd/notification/main.go -o app/notificationapp/docs/ --tags=Notification,NotificationClient,NotificationAdmin
 
 example-micro1-swag-init:
 	swag init -g example/observability/microservice1/main.go -o example/observability/internal/microservice1/docs --tags=Micro1

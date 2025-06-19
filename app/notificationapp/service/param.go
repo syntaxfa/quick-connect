@@ -38,6 +38,19 @@ type SendNotificationResponse struct {
 	Notification
 }
 
+type SendNotificationResponseSchema struct {
+	ID                types.ID          `json:"id"`
+	UserID            types.ID          `json:"user_id"`
+	Type              NotificationType  `json:"type"`
+	Title             string            `json:"title"`
+	Body              string            `json:"body"`
+	Data              string            `json:"data,omitempty"`
+	IsRead            bool              `json:"is_read"`
+	CreatedAt         time.Time         `json:"created_at"`
+	ChannelDeliveries []ChannelDelivery `json:"channel_deliveries"`
+	OverallStatus     OverallStatus     `json:"overall_status"`
+}
+
 type ListNotificationRequest struct {
 	ExternalUserID string               `json:"external_user_id"`
 	IsRead         *bool                `json:"is_read"`

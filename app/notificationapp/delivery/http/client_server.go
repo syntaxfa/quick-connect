@@ -47,7 +47,6 @@ func (s ClientServer) registerRoutes() {
 	httpClient := &http.Client{Timeout: time.Second * 10}
 
 	notifications := v1.Group("/notifications")
-	notifications.POST("", s.handler.sendNotification)
 	notifications.POST("/list", s.handler.findNotifications)
 	notifications.GET("/:notificationID/mark-as-read", s.handler.markNotificationAsRead)
 	notifications.GET("/:externalUserID/mark-all-as-read", s.handler.markAllNotificationAsRead)
@@ -56,8 +55,8 @@ func (s ClientServer) registerRoutes() {
 }
 
 func (s ClientServer) registerSwagger() {
-	docs.SwaggerInfo.Title = "Notification API"
-	docs.SwaggerInfo.Description = "Notification restfull API documentation"
+	docs.SwaggerInfo.Title = "Notification Client API"
+	docs.SwaggerInfo.Description = "Notification client restfull API documentation"
 	docs.SwaggerInfo.Version = "1.0.0"
 
 	s.httpServer.Router.GET("/swagger/*any", echoSwagger.WrapHandler)
