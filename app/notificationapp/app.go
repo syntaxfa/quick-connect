@@ -30,7 +30,7 @@ type Application struct {
 	adminHTTPServer  http.AdminServer
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, re *redis.Adapter, pg *postgres.Database) Application {
 	t, tErr := translation.New(translation.DefaultLanguages...)
 	if tErr != nil {
 		panic(tErr)
@@ -38,14 +38,12 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 
 	cfg.Notification.PingPeriod = (cfg.Notification.PongWait * 9) / 10
 
-	redisAdapter := redis.New(cfg.Redis, logger)
-	psAdapter := postgres.New(cfg.Postgres, logger)
-	cache := cachemanager.New(redisAdapter)
+	cache := cachemanager.New(re)
 
 	notificationVld := service.NewValidate(t)
-	notificationRepo := postgres2.New(psAdapter)
+	notificationRepo := postgres2.New(pg)
 
-	pubSub := redispubsub.New(redisAdapter)
+	pubSub := redispubsub.New(re)
 
 	hub := service.NewHub(cfg.Notification, logger, pubSub)
 	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.ClientHTTPServer.Cors.AllowOrigins, logger))
