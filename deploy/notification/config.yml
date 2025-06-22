@@ -32,9 +32,12 @@ redis:
 websocket:
   read_buffer_size: 1024
   write_buffer_size: 1024
-hub:
+notification:
+  user_id_cache_expiration: 3600
+  channel_name: notification
   write_wait: 10s
   pong_wait: 60s
   max_message_size: 512
   user_connection_limit: 5
+  publish_timeout: 10s
 get_user_id_url: "http://localhost:8000/api/v1/accounts/get-user-id/"

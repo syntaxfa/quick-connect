@@ -19,7 +19,6 @@ type Config struct {
 	Postgres         postgres.Config   `koanf:"postgres"`
 	Notification     service.Config    `koanf:"notification"`
 	Redis            redis.Config      `koanf:"redis"`
-	Hub              service.HubConfig `koanf:"hub"`
 	Websocket        websocket.Config  `koanf:"websocket"`
 	GetUserIDURL     string            `koanf:"get_user_id_url"`
 }
