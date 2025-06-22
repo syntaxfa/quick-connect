@@ -13,7 +13,7 @@ jobs:
     environment: quick_connect
     steps:
       - name: Check Triggering Tag
-        if: startsWith(github.ref, 'refs/tags/chat/v')
+        if: startsWith(github.ref, 'refs/tags/notification/v')
         run: echo "Tag ${GITHUB_REF#refs/tags/}"
 
       - name: Checkout code
@@ -39,7 +39,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: build
-        run: make notification-build IMAGE_NAME=syntaxfa/quickconnect-notification:${GITHUB_REF#refs/tags/chat/v}
+        run: make notification-build IMAGE_NAME=syntaxfa/quickconnect-notification:${GITHUB_REF#refs/tags/notification/v}
 
       - name: push image to docker hub
-        run: docker push syntaxfa/quickconnect-notification:${GITHUB_REF#refs/tags/chat/v}
+        run: docker push syntaxfa/quickconnect-notification:${GITHUB_REF#refs/tags/notification/v}
