@@ -64,6 +64,9 @@ chat-build:
 manager-build:
 	docker build -t $(IMAGE_NAME) -f deploy/manager/deploy/Dockerfile .
 
+notification-build:
+	docker build -t $(IMAGE_NAME) -f deploy/notification/deploy/Dockerfile .
+
 generate-example-proto:
 	@protoc \
 		--proto_path=protobuf "protobuf/example/proto/example.proto" \
