@@ -68,7 +68,7 @@ func (a Application) Start() {
 	adminHTTPServerChan := make(chan error, 1)
 
 	go func() {
-		a.logger.Info(fmt.Sprintf("client http server started on %d", a.cfg.ClientHTTPServer.Port))
+		a.logger.Info(fmt.Sprintf("client http server started on %d port", a.cfg.ClientHTTPServer.Port))
 
 		if sErr := a.clientHTTPServer.Start(); sErr != nil {
 			clientHTTPServerChan <- sErr
