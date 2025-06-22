@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/pubsub/redispubsub"
 	"github.com/syntaxfa/quick-connect/adapter/redis"
 	"github.com/syntaxfa/quick-connect/app/notificationapp/delivery/http"
 	postgres2 "github.com/syntaxfa/quick-connect/app/notificationapp/repository/postgres"
@@ -35,7 +36,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 		panic(tErr)
 	}
 
-	cfg.Hub.PingPeriod = (cfg.Hub.PongWait * 9) / 10
+	cfg.Notification.PingPeriod = (cfg.Notification.PongWait * 9) / 10
 
 	redisAdapter := redis.New(cfg.Redis, logger)
 	psAdapter := postgres.New(cfg.Postgres, logger)
@@ -44,9 +45,11 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	notificationVld := service.NewValidate(t)
 	notificationRepo := postgres2.New(psAdapter)
 
-	hub := service.NewHub(cfg.Hub, logger)
+	pubSub := redispubsub.New(redisAdapter)
+
+	hub := service.NewHub(cfg.Notification, logger, pubSub)
 	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.ClientHTTPServer.Cors.AllowOrigins, logger))
-	notificationSvc := service.New(cfg.Notification, notificationVld, cache, notificationRepo, logger, hub)
+	notificationSvc := service.New(cfg.Notification, notificationVld, cache, notificationRepo, logger, hub, pubSub)
 
 	handler := http.NewHandler(notificationSvc, t, upgrader)
 	clientHTTPServer := http.NewClientServer(httpserver.New(cfg.ClientHTTPServer, logger), handler, cfg.GetUserIDURL, logger)

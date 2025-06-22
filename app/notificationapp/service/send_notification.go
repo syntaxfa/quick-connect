@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"time"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
@@ -38,7 +40,18 @@ func (s Service) SendNotification(ctx context.Context, req SendNotificationReque
 			WithKind(richerror.KindUnexpected), s.logger)
 	}
 
-	s.hub.notification <- &NotificationMessage{
+	go s.publishNotification(s.cfg.PublishTimeout, notification) //nolint:contextcheck // This function run asynchronously
+
+	return SendNotificationResponse{Notification: notification}, nil
+}
+
+func (s Service) publishNotification(ctxTimeout time.Duration, notification Notification) {
+	const op = "service.send_notification.publishNotification"
+
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
+	defer cancel()
+
+	notificationMsg := &NotificationMessage{
 		NotificationID: notification.ID,
 		UserID:         notification.UserID,
 		Type:           notification.Type,
@@ -48,5 +61,12 @@ func (s Service) SendNotification(ctx context.Context, req SendNotificationReque
 		Timestamp:      notification.CreatedAt.Unix(),
 	}
 
-	return SendNotificationResponse{Notification: notification}, nil
+	jsonData, mErr := json.Marshal(notificationMsg)
+	if mErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithMessage("can't marshalling notification message").WithWrapError(mErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	if pErr := s.publisher.Publish(ctx, s.cfg.ChannelName, jsonData); pErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithMessage("can't publish notification message").WithWrapError(mErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/syntaxfa/quick-connect/pkg/cachemanager"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
+	"github.com/syntaxfa/quick-connect/pkg/pubsub"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
@@ -20,24 +21,26 @@ type Repository interface {
 }
 
 type Service struct {
-	cfg    Config
-	vld    Validate
-	cache  *cachemanager.CacheManager
-	repo   Repository
-	logger *slog.Logger
-	hub    *Hub
+	cfg       Config
+	vld       Validate
+	cache     *cachemanager.CacheManager
+	repo      Repository
+	logger    *slog.Logger
+	hub       *Hub
+	publisher pubsub.Publisher
 }
 
-func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Repository, logger *slog.Logger, hub *Hub) Service {
-	go hub.Run()
+func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Repository, logger *slog.Logger, hub *Hub, publisher pubsub.Publisher) Service {
+	go hub.Run(context.Background())
 
 	return Service{
-		cfg:    cfg,
-		vld:    vld,
-		cache:  cache,
-		repo:   repo,
-		logger: logger,
-		hub:    hub,
+		cfg:       cfg,
+		vld:       vld,
+		cache:     cache,
+		repo:      repo,
+		logger:    logger,
+		hub:       hub,
+		publisher: publisher,
 	}
 }
 
