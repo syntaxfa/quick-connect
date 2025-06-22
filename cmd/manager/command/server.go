@@ -36,5 +36,5 @@ func (s Server) run(trap chan os.Signal) {
 	app.Start()
 
 	psqAdapter.Close()
-	s.logger.Info("postgres connection closed.")
+	s.logger.Info("postgres connection closed")
 }
