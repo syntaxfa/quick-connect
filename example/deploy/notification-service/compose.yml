@@ -47,8 +47,20 @@ services:
     networks:
       - app_net
 
+  init:
+    container_name: init_notification
+    image: syntaxfa/quickconnect-notification:0.0.2
+    restart: on-failure
+    networks:
+      - app_net
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["./notification", "migrate", "up"]
+
   notification:
-    image: syntaxfa/quickconnect-notification:0.0.1
+    image: syntaxfa/quickconnect-notification:0.0.2
     container_name: notification
     restart: on-failure
     networks:
