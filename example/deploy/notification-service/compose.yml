@@ -1,0 +1,62 @@
+networks:
+  web_net:
+    name: web_net
+    external: true
+
+  app_net:
+
+volumes:
+  notification_postgres_data:
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: notification_postgres
+    hostname: notification_postgres
+    command: -p ${NOTIFICATION_POSTGRES__PORT}
+    restart: always
+    environment:
+      - POSTGRES_DB=${NOTIFICATION_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${NOTIFICATION_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${NOTIFICATION_POSTGRES__PASSWORD}
+    volumes:
+      - notification_postgres_data:/var/lib/postgresql/data
+    ports:
+      - ${NOTIFICATION_POSTGRES__PORT}:${NOTIFICATION_POSTGRES__PORT}
+    networks:
+      - app_net
+    healthcheck:
+      test: [CMD-SHELL, "sh -c 'pg_isready -U ${NOTIFICATION_POSTGRES__USERNAME} -d ${NOTIFICATION_POSTGRES__DB_NAME} -p ${NOTIFICATION_POSTGRES__PORT}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8.0.2
+    container_name: redis
+    hostname: redis
+    restart: always
+    command: redis-server --requirepass ${NOTIFICATION_REDIS__PASSWORD} --port ${NOTIFICATION_REDIS__PORT}
+    environment:
+      REDIS_PASSWORD: ${NOTIFICATION_REDIS__PASSWORD}
+      REDIS_PORT: ${NOTIFICATION_REDIS__PORT}
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis.conf
+    ports:
+      - ${NOTIFICATION_REDIS__PORT}:${NOTIFICATION_REDIS__PORT}
+    networks:
+      - app_net
+
+  notification:
+    image: syntaxfa/quickconnect-notification:0.0.1
+    container_name: notification
+    restart: on-failure
+    networks:
+      - app_net
+    env_file: .env
+    ports:
+      - ${NOTIFICATION_CLIENT_HTTP_SERVER__PORT}:${NOTIFICATION_CLIENT_HTTP_SERVER__PORT}
+      - ${NOTIFICATION_ADMIN_HTTP_SERVER__PORT}:${NOTIFICATION_ADMIN_HTTP_SERVER__PORT} # in production, recommended using gateway authentication
+    depends_on:
+     postgres:
+       condition: service_healthy
