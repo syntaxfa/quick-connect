@@ -15,6 +15,7 @@ FROM alpine:3.22.0 AS runtime
 
 COPY --from=builder /notification/notification ./
 COPY --from=builder /notification/deploy/notification/config.yml ./deploy/notification/config.yml
+COPY --from=builder /notification/app/notificationapp/repository/migrations/*.sql ./app/notificationapp/repository/migrations/
 COPY --from=builder /notification/pkg/translation ./pkg/translation
 
 CMD ["./notification", "start"]
