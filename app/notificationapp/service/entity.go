@@ -76,10 +76,11 @@ const (
 	ChannelTypeSMS     ChannelType = "sms"      // Short Message Service (text messages)
 	ChannelTypeEmail   ChannelType = "email"    // Electronic mail
 	ChannelTypeWebPush ChannelType = "web_push" // Browser-based push notifications (e.g., via FCM, Web Push API)
+	ChannelTypeInApp   ChannelType = "in_app"   // In-App notification
 )
 
-func IsValidChannelType(channelType string) bool {
-	if channelType == "sms" || channelType == "email" || channelType == "web_push" {
+func IsValidChannelType(channelType ChannelType) bool {
+	if channelType == ChannelTypeSMS || channelType == ChannelTypeEmail || channelType == ChannelTypeWebPush || channelType == ChannelTypeInApp {
 		return true
 	}
 
@@ -104,4 +105,22 @@ type ChannelDelivery struct {
 	LastAttemptAt *time.Time     `json:"last_attempt_at"` // Timestamp of the last delivery attempt
 	AttemptCount  int            `json:"attempt_count"`   // Number of times delivery has been attempted for this channel
 	Error         *string        `json:"error"`           // Optional: Error message if the last delivery attempt failed
+}
+
+// Template represents a notification template definition.
+// It groups different content variations (bodies) for various channels and languages
+// under a single logical template name.
+type Template struct {
+	ID        types.ID       `json:"id"`
+	Name      string         `json:"name"`
+	Bodies    []TemplateBody `json:"bodies"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+}
+
+// TemplateBody defines the content of a specific template for a given language and channel.
+type TemplateBody struct {
+	Lang    string      `json:"lang"`
+	Body    string      `json:"body"`
+	Channel ChannelType `json:"channel"`
 }
