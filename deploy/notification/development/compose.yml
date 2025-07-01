@@ -31,7 +31,7 @@ services:
       - app_net
 
   pgadmin:
-    image: dpage/pgadmin4:9.4
+    image: dpage/pgadmin4:9.5
     container_name: pgadmin4_container
     restart: always
     ports:
