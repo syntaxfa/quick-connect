@@ -16,6 +16,8 @@ type Notification struct {
 	Title             string            `json:"title"`
 	Body              string            `json:"body"`
 	Data              json.RawMessage   `json:"data,omitempty"`
+	TemplateName      *string           `json:"template_name"`
+	DynamicData       json.RawMessage   `json:"dynamic_data"`
 	IsRead            bool              `json:"is_read"`
 	CreatedAt         time.Time         `json:"created_at"`
 	ChannelDeliveries []ChannelDelivery `json:"channel_deliveries"`
