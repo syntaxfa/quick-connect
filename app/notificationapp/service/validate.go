@@ -85,7 +85,7 @@ func (v Validate) ValidateNotificationChannelDeliveries(value interface{}) error
 	}
 
 	for _, channel := range channelDeliveries {
-		if !IsValidChannelType(string(channel.Channel)) {
+		if !IsValidChannelType(channel.Channel) {
 			return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
 		}
 	}
