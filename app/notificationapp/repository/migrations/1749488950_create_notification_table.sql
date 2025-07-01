@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     "title" VARCHAR(255) NOT NULL,
     "body" TEXT NULL,
     "data" JSONB NULL,
-    "template_name" VARCHAR(26) NULL,
+    "template_name" VARCHAR(255) NULL,
     "dynamic_data" JSONB NULL,
     "is_read" BOOL DEFAULT false,
     "created_at" TIMESTAMP DEFAULT NOW(),
