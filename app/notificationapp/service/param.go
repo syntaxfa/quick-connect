@@ -88,3 +88,16 @@ type ListNotificationResponseSchema struct {
 	Results  []ListNotificationResultSchema `json:"results"`
 	Paginate paginate.ResponseBase          `json:"paginate"`
 }
+
+type AddTemplateRequest struct {
+	Name   string         `json:"name"` // maximum is 255 characters.
+	Bodies []TemplateBody `json:"bodies"`
+}
+
+type AddTemplateResponse struct {
+	ID        types.ID       `json:"id"`
+	Name      string         `json:"name"`
+	Bodies    []TemplateBody `json:"bodies"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+}

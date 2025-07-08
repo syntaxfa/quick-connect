@@ -15,4 +15,9 @@ const (
 	MsgInvalidNotificationChannelDelivery = "invalid notification channel delivery"
 	MsgPageSizeMin                        = "page size must be greater than 0"
 	MsgPageMin                            = "page must be greater than 0"
+	MsgInvalidLengthOfTemplateName        = "the name must be between 1 and 255"
+	MsgInvalidTemplateBody                = "invalid template bodies"
+	MsgConflictTemplateBody               = "body language and channel cannot be the same as another body"
+	MsgConflictTemplate                   = "template is already exists"
+	MsgTemplateNotFound                   = "this template does not exist"
 )

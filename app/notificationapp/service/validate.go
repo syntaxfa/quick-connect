@@ -118,3 +118,51 @@ func (v Validate) ValidateListNotificationRequest(req ListNotificationRequest) e
 
 	return nil
 }
+
+func (v Validate) ValidateAddTemplateRequest(req AddTemplateRequest) error {
+	const op = "validate.ValidateAddTemplateRequest"
+
+	if err := validation.ValidateStruct(&req,
+		validation.Field(&req.Name,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.Length(1, 255).Error(servermsg.MsgInvalidLengthOfTemplateName),
+		),
+		validation.Field(&req.Bodies,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.By(v.ValidateTemplateBodies),
+		),
+	); err != nil {
+		fieldErrors := make(map[string]string)
+
+		vErr := validation.Errors{}
+		if errors.As(err, &vErr) {
+			for key, value := range vErr {
+				if value != nil {
+					fieldErrors[key] = v.t.TranslateMessage(value.Error())
+				}
+			}
+		}
+
+		return richerror.New(op).WithMessage(servermsg.MsgInvalidInput).WithKind(richerror.KindInvalid).
+			WithErrorFields(fieldErrors).WithMeta(map[string]interface{}{"req": req})
+	}
+
+	return nil
+}
+
+func (v Validate) ValidateTemplateBodies(value interface{}) error {
+	bodies, ok := value.([]TemplateBody)
+	if !ok {
+		return errors.New(servermsg.MsgInvalidTemplateBody)
+	}
+
+	for index, body := range bodies {
+		for i := index; i < (len(bodies) - 1); i++ {
+			if body.Lang == bodies[i+1].Lang && body.Channel == bodies[i+1].Channel {
+				return errors.New(servermsg.MsgConflictTemplateBody)
+			}
+		}
+	}
+
+	return nil
+}
