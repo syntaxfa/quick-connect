@@ -28,3 +28,7 @@ func (d *DB) IsExistUserIDFromExternalUserID(ctx context.Context, externalUserID
 
 	return exists, nil
 }
+
+func (d *DB) IsExistTemplateName(_ context.Context, _ string) (bool, error) {
+	return false, nil
+}

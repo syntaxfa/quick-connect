@@ -26,6 +26,8 @@ func mapKindToHTTPStatusCode(kind richerror.Kind) int {
 		return http.StatusForbidden
 	case richerror.KindBadRequest:
 		return http.StatusBadRequest
+	case richerror.KindConflict:
+		return http.StatusConflict
 	default:
 		return http.StatusInternalServerError
 	}
