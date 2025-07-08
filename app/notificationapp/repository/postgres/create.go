@@ -40,3 +40,7 @@ func (d *DB) CreateUserIDFromExternalUserID(ctx context.Context, externalUserID 
 
 	return nil
 }
+
+func (d *DB) CreateTemplate(_ context.Context, _ service.AddTemplateRequest) (service.AddTemplateResponse, error) {
+	return service.AddTemplateResponse{}, nil
+}

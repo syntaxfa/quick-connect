@@ -13,6 +13,7 @@ const (
 	KindUnexpected                   // internal server error
 	KindUnAuthorized                 // authentication error
 	KindBadRequest                   // bad request
+	KindConflict                     // conflict
 )
 
 type RichError struct {

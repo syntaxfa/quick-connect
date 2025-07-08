@@ -18,6 +18,9 @@ type Repository interface {
 	IsExistUserIDFromExternalUserID(ctx context.Context, externalUserID string) (bool, error)
 	GetUserIDFromExternalUserID(ctx context.Context, externalUserID string) (types.ID, error)
 	CreateUserIDFromExternalUserID(ctx context.Context, externalUserID string, userID types.ID) error
+	IsExistTemplateName(ctx context.Context, name string) (bool, error)
+	CreateTemplate(ctx context.Context, req AddTemplateRequest) (AddTemplateResponse, error)
+	UpdateTemplate(ctx context.Context, req AddTemplateRequest) (AddTemplateResponse, error)
 }
 
 type Service struct {

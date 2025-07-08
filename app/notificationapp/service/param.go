@@ -90,7 +90,7 @@ type ListNotificationResponseSchema struct {
 }
 
 type AddTemplateRequest struct {
-	Name   string         `json:"name"`
+	Name   string         `json:"name"` // maximum is 255 characters.
 	Bodies []TemplateBody `json:"bodies"`
 }
 
