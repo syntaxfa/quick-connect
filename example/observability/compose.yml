@@ -6,7 +6,7 @@ networks:
 services:
   collector:
     container_name: collector
-    image: otel/opentelemetry-collector:0.128.0
+    image: otel/opentelemetry-collector:0.129.1
     volumes:
       - ./otelcol.yaml:/etc/otelcol/config.yaml
     depends_on:
