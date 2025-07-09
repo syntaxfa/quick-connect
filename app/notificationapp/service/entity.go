@@ -56,7 +56,7 @@ const (
 	NotificationTypeInfo      NotificationType = "info"      // General informational messages
 	NotificationTypePromotion NotificationType = "promotion" // Marketing or promotional messages
 	NotificationTypeCritical  NotificationType = "critical"  // High-priority messages that usually cannot be opted out of (e.g., security alerts, password resets)
-	NotificationTypeDirect    NotificationType = "direct"
+	NotificationTypeDirect    NotificationType = "direct"    // Notifications of "direct" type do not have a retry mechanism in case of delivery failure.
 )
 
 func IsValidNotificationType(notificationType string) bool {
@@ -123,4 +123,16 @@ type TemplateBody struct {
 	Lang    string      `json:"lang"`
 	Body    string      `json:"body"`
 	Channel ChannelType `json:"channel"`
+}
+
+type UserNotificationSetting struct {
+	ID             types.ID        `json:"id"`
+	UserID         types.ID        `json:"user_id"`
+	Lang           string          `json:"lang"`
+	IgnoreChannels []IgnoreChannel `json:"ignore_channels"`
+}
+
+type IgnoreChannel struct {
+	Channel           ChannelType        `json:"channel"`
+	NotificationTypes []NotificationType `json:"notification_type"`
 }
