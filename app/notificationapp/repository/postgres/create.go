@@ -66,3 +66,7 @@ func (d *DB) CreateTemplate(ctx context.Context, req service.AddTemplateRequest)
 
 	return template, nil
 }
+
+func (d *DB) CreateUserSetting(_ context.Context, _ types.ID, _ service.UpdateUserSettingRequest) (service.UserSetting, error) {
+	return service.UserSetting{}, nil
+}

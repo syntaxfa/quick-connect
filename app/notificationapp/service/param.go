@@ -93,3 +93,8 @@ type AddTemplateRequest struct {
 	Name   string         `json:"name"` // maximum is 255 characters.
 	Bodies []TemplateBody `json:"bodies"`
 }
+
+type UpdateUserSettingRequest struct {
+	Lang           string          `json:"lang"`
+	IgnoreChannels []IgnoreChannel `json:"ignore_channels"`
+}

@@ -129,3 +129,7 @@ func (d *DB) GetTemplateByID(ctx context.Context, id types.ID) (service.Template
 
 	return template, nil
 }
+
+func (d *DB) GetUserSetting(_ context.Context, _ types.ID) (service.UserSetting, error) {
+	return service.UserSetting{}, nil
+}

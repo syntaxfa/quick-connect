@@ -20,4 +20,5 @@ const (
 	MsgConflictTemplateBody               = "body language and channel cannot be the same as another body"
 	MsgConflictTemplate                   = "template is already exists"
 	MsgTemplateNotFound                   = "this template does not exist"
+	MsgInvalidIgnoreChannel               = "invalid ignore channel"
 )

@@ -71,3 +71,7 @@ func (d *DB) IsExistTemplateByID(ctx context.Context, id types.ID) (bool, error)
 
 	return exists, nil
 }
+
+func (d *DB) IsExistUserSetting(_ context.Context, _ types.ID) (bool, error) {
+	return false, nil
+}

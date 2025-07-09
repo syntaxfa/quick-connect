@@ -37,9 +37,10 @@ const (
 	OverallStatusMixed    OverallStatus = "mixed"
 )
 
-func IsValidOverallStatus(overallStatus string) bool {
-	if overallStatus == "pending" || overallStatus == "sent" || overallStatus == "failed" ||
-		overallStatus == "retrying" || overallStatus == "ignored" {
+func IsValidOverallStatus(overallStatus OverallStatus) bool {
+	if overallStatus == OverallStatusPending || overallStatus == OverallStatusSent ||
+		overallStatus == OverallStatusFailed || overallStatus == OverallStatusRetrying ||
+		overallStatus == OverallStatusIgnored || overallStatus == OverallStatusMixed {
 		return true
 	}
 
@@ -59,10 +60,10 @@ const (
 	NotificationTypeDirect    NotificationType = "direct"    // Notifications of "direct" type do not have a retry mechanism in case of delivery failure.
 )
 
-func IsValidNotificationType(notificationType string) bool {
-	if notificationType == "optional" || notificationType == "info" ||
-		notificationType == "promotion" || notificationType == "critical" ||
-		notificationType == "direct" {
+func IsValidNotificationType(notificationType NotificationType) bool {
+	if notificationType == NotificationTypeOptional || notificationType == NotificationTypeInfo ||
+		notificationType == NotificationTypePromotion || notificationType == NotificationTypeCritical ||
+		notificationType == NotificationTypeDirect {
 		return true
 	}
 
@@ -125,13 +126,18 @@ type TemplateBody struct {
 	Channel ChannelType `json:"channel"`
 }
 
-type UserNotificationSetting struct {
+// UserSetting A user can have their custom and personalized settings, such as language and channels
+// they do not want to receive notifications from.
+type UserSetting struct {
 	ID             types.ID        `json:"id"`
 	UserID         types.ID        `json:"user_id"`
 	Lang           string          `json:"lang"`
 	IgnoreChannels []IgnoreChannel `json:"ignore_channels"`
 }
 
+// IgnoreChannel A user can ignore channels with a high level of customization. A user can specify based on notification type,
+// for example, only promotion notifications should be ignored in SMS.
+// Note: A user cannot ignore notifications whose type is critical or direct.
 type IgnoreChannel struct {
 	Channel           ChannelType        `json:"channel"`
 	NotificationTypes []NotificationType `json:"notification_type"`

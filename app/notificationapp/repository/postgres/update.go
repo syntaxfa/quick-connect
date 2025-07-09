@@ -27,3 +27,7 @@ func (d *DB) UpdateTemplate(ctx context.Context, id types.ID, req service.AddTem
 
 	return nil
 }
+
+func (d *DB) UpdateUserSetting(_ context.Context, _ types.ID, _ service.UpdateUserSettingRequest) error {
+	return nil
+}
