@@ -82,3 +82,25 @@ func (s Service) UpdateTemplate(ctx context.Context, templateID types.ID, req Ad
 
 	return template, nil
 }
+
+func (s Service) GetTemplate(ctx context.Context, templateID types.ID) (Template, error) {
+	const op = "service.template.GetTemplate"
+
+	exists, eErr := s.repo.IsExistTemplateByID(ctx, templateID)
+	if eErr != nil {
+		return Template{}, errlog.ErrLog(richerror.New(op).WithWrapError(eErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	if !exists {
+		return Template{}, richerror.New(op).WithMessage(servermsg.MsgTemplateNotFound).WithKind(richerror.KindNotFound)
+	}
+
+	template, gErr := s.repo.GetTemplateByID(ctx, templateID)
+	if gErr != nil {
+		return Template{}, errlog.ErrLog(richerror.New(op).WithWrapError(gErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return template, nil
+}

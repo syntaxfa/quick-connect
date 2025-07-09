@@ -64,6 +64,16 @@ definitions:
       message:
         type: string
     type: object
+  service.AddTemplateRequest:
+    properties:
+      bodies:
+        items:
+          $ref: '#/definitions/service.TemplateBody'
+        type: array
+      name:
+        description: maximum is 255 characters.
+        type: string
+    type: object
   service.ChannelDelivery:
     properties:
       attempt_count:
@@ -94,9 +104,11 @@ definitions:
     - sms
     - email
     - web_push
+    - in_app
     type: string
     x-enum-comments:
       ChannelTypeEmail: Electronic mail
+      ChannelTypeInApp: In-App notification
       ChannelTypeSMS: Short Message Service (text messages)
       ChannelTypeWebPush: Browser-based push notifications (e.g., via FCM, Web Push
         API)
@@ -104,6 +116,7 @@ definitions:
     - ChannelTypeSMS
     - ChannelTypeEmail
     - ChannelTypeWebPush
+    - ChannelTypeInApp
   service.DeliveryStatus:
     enum:
     - pending
@@ -249,6 +262,30 @@ definitions:
       user_id:
         type: string
     type: object
+  service.Template:
+    properties:
+      bodies:
+        items:
+          $ref: '#/definitions/service.TemplateBody'
+        type: array
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  service.TemplateBody:
+    properties:
+      body:
+        type: string
+      channel:
+        $ref: '#/definitions/service.ChannelType'
+      lang:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -389,6 +426,119 @@ paths:
       summary: mark all notification as read
       tags:
       - NotificationClient
+  /v1/templates:
+    post:
+      consumes:
+      - application/json
+      description: This API endpoint creates a new template.
+      parameters:
+      - description: template
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/service.AddTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/service.Template'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "409":
+          description: Conflict
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: create new template
+      tags:
+      - NotificationAdmin
+  /v1/templates/{templateID}:
+    get:
+      consumes:
+      - application/json
+      description: This API endpoint retrieve template detail.
+      parameters:
+      - description: ID of the template to update
+        in: path
+        name: templateID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Template'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: retrieve detail template
+      tags:
+      - NotificationAdmin
+    put:
+      consumes:
+      - application/json
+      description: This API endpoint updates a specific template.
+      parameters:
+      - description: template
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/service.AddTemplateRequest'
+      - description: ID of the template to update
+        in: path
+        name: templateID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Template'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "409":
+          description: Conflict
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update template
+      tags:
+      - NotificationAdmin
 schemes:
 - http
 - https

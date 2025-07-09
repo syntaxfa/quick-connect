@@ -61,7 +61,7 @@ func (d *DB) IsExistTemplateByID(ctx context.Context, id types.ID) (bool, error)
 	const op = "repository.postgres.exist.IsExistTemplateByID"
 
 	var exists bool
-	if qErr := d.conn.Conn().QueryRow(ctx, queryIsExistTemplateByID, id).Scan(exists); qErr != nil {
+	if qErr := d.conn.Conn().QueryRow(ctx, queryIsExistTemplateByID, id).Scan(&exists); qErr != nil {
 		if errors.Is(qErr, pgx.ErrNoRows) {
 			return false, nil
 		}

@@ -164,5 +164,11 @@ func (v Validate) ValidateTemplateBodies(value interface{}) error {
 		}
 	}
 
+	for _, body := range bodies {
+		if !IsValidChannelType(body.Channel) {
+			return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
+		}
+	}
+
 	return nil
 }

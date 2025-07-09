@@ -41,8 +41,12 @@ func (s AdminServer) registerRoutes() {
 	v1 := s.httpServer.Router.Group("/v1")
 
 	notifications := v1.Group("/notifications")
-
 	notifications.POST("", s.handler.sendNotification)
+
+	templates := v1.Group("/templates")
+	templates.POST("", s.handler.createTemplate)
+	templates.PUT("/:templateID", s.handler.updateTemplate)
+	templates.GET("/:templateID", s.handler.getDetailTemplate)
 }
 
 func (s AdminServer) registerSwagger() {

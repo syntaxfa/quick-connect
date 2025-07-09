@@ -216,6 +216,177 @@
                     }
                 }
             }
+        },
+        "/v1/templates": {
+            "post": {
+                "description": "This API endpoint creates a new template.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NotificationAdmin"
+                ],
+                "summary": "create new template",
+                "parameters": [
+                    {
+                        "description": "template",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.AddTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/service.Template"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/templates/{templateID}": {
+            "get": {
+                "description": "This API endpoint retrieve template detail.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NotificationAdmin"
+                ],
+                "summary": "retrieve detail template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the template to update",
+                        "name": "templateID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.Template"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "This API endpoint updates a specific template.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NotificationAdmin"
+                ],
+                "summary": "update template",
+                "parameters": [
+                    {
+                        "description": "template",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.AddTemplateRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the template to update",
+                        "name": "templateID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.Template"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -310,6 +481,21 @@
                 }
             }
         },
+        "service.AddTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "bodies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.TemplateBody"
+                    }
+                },
+                "name": {
+                    "description": "maximum is 255 characters.",
+                    "type": "string"
+                }
+            }
+        },
         "service.ChannelDelivery": {
             "type": "object",
             "properties": {
@@ -356,17 +542,20 @@
             "enum": [
                 "sms",
                 "email",
-                "web_push"
+                "web_push",
+                "in_app"
             ],
             "x-enum-comments": {
                 "ChannelTypeEmail": "Electronic mail",
+                "ChannelTypeInApp": "In-App notification",
                 "ChannelTypeSMS": "Short Message Service (text messages)",
                 "ChannelTypeWebPush": "Browser-based push notifications (e.g., via FCM, Web Push API)"
             },
             "x-enum-varnames": [
                 "ChannelTypeSMS",
                 "ChannelTypeEmail",
-                "ChannelTypeWebPush"
+                "ChannelTypeWebPush",
+                "ChannelTypeInApp"
             ]
         },
         "service.DeliveryStatus": {
@@ -556,6 +745,43 @@
                     "$ref": "#/definitions/service.NotificationType"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.Template": {
+            "type": "object",
+            "properties": {
+                "bodies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.TemplateBody"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.TemplateBody": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "channel": {
+                    "$ref": "#/definitions/service.ChannelType"
+                },
+                "lang": {
                     "type": "string"
                 }
             }
