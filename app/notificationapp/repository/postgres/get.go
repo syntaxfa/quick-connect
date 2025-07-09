@@ -118,7 +118,7 @@ func (d *DB) GetTemplateByID(ctx context.Context, id types.ID) (service.Template
 	var jsonBodies json.RawMessage
 
 	if qErr := d.conn.Conn().QueryRow(ctx, queryTemplateByID, id).
-		Scan(&template.ID, &template.Name, &jsonBodies, &template.CreatedAt, template.UpdatedAt); qErr != nil {
+		Scan(&template.ID, &template.Name, &jsonBodies, &template.CreatedAt, &template.UpdatedAt); qErr != nil {
 		return service.Template{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
 	}
 
