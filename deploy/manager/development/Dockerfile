@@ -1,5 +1,5 @@
 # deploy/manager/development/Dockerfile
-FROM golang:1.24.4
+FROM golang:1.24.5
 
 WORKDIR /app
 
