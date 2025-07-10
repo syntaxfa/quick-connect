@@ -67,7 +67,7 @@ func (v Validate) ValidateNotificationType(value interface{}) error {
 		return errors.New(servermsg.MsgInvalidNotificationType)
 	}
 
-	if !IsValidNotificationType(string(notificationType)) {
+	if !IsValidNotificationType(notificationType) {
 		return errors.New(servermsg.MsgInvalidNotificationType)
 	}
 
@@ -167,6 +167,56 @@ func (v Validate) ValidateTemplateBodies(value interface{}) error {
 	for _, body := range bodies {
 		if !IsValidChannelType(body.Channel) {
 			return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
+		}
+	}
+
+	return nil
+}
+
+func (v Validate) ValidateUpdateUserSettingsRequest(req UpdateUserSettingRequest) error {
+	const op = "validate.ValidateUpdateUserNotificationSettingsRequest"
+
+	if err := validation.ValidateStruct(&req,
+		validation.Field(&req.Lang,
+			validation.Required.Error(servermsg.MsgFieldRequired)),
+		validation.Field(&req.IgnoreChannels,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.By(v.validateIgnoreChannel),
+		),
+	); err != nil {
+		fieldErrors := make(map[string]string)
+
+		vErr := validation.Errors{}
+		if errors.As(err, &vErr) {
+			for key, value := range vErr {
+				if value != nil {
+					fieldErrors[key] = v.t.TranslateMessage(value.Error())
+				}
+			}
+		}
+
+		return richerror.New(op).WithMessage(servermsg.MsgInvalidInput).WithKind(richerror.KindInvalid).
+			WithErrorFields(fieldErrors).WithMeta(map[string]interface{}{"req": req})
+	}
+
+	return nil
+}
+
+func (v Validate) validateIgnoreChannel(value interface{}) error {
+	ignoreChannels, ok := value.([]IgnoreChannel)
+	if !ok {
+		return errors.New(servermsg.MsgInvalidIgnoreChannel)
+	}
+
+	for _, ignore := range ignoreChannels {
+		if !IsValidChannelType(ignore.Channel) {
+			return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
+		}
+
+		for _, nt := range ignore.NotificationTypes {
+			if !IsValidNotificationType(nt) {
+				return errors.New(servermsg.MsgInvalidNotificationType)
+			}
 		}
 	}
 

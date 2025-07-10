@@ -26,6 +26,7 @@ func (s Service) getUserIDFromExternalUserID(ctx context.Context, externalUserID
 		if !errors.Is(gErr, cachemanager.ErrKeyNotFound) {
 			return "", gErr
 		}
+
 		exist, eErr := s.repo.IsExistUserIDFromExternalUserID(ctx, externalUserID)
 		if eErr != nil {
 			return "", eErr
@@ -36,6 +37,8 @@ func (s Service) getUserIDFromExternalUserID(ctx context.Context, externalUserID
 			if gErr != nil {
 				return "", gErr
 			}
+
+			fmt.Println(s.cfg.UserIDCacheExpiration)
 
 			if sErr := s.cache.Set(ctx, key, UserIDCacheValue{UserID: userID}, s.cfg.UserIDCacheExpiration); sErr != nil {
 				return "", sErr

@@ -50,8 +50,11 @@ func (s ClientServer) registerRoutes() {
 	notifications.POST("/list", s.handler.findNotifications, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 	notifications.GET("/:notificationID/mark-as-read", s.handler.markNotificationAsRead, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 	notifications.GET("/mark-all-as-read", s.handler.markAllNotificationAsRead, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
-
 	notifications.GET("/ws", s.handler.wsNotification, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
+
+	settings := v1.Group("/settings")
+	settings.GET("", s.handler.getUserSettingClient, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
+	settings.POST("", s.handler.updateUserSettingClient, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 }
 
 func (s ClientServer) registerSwagger() {

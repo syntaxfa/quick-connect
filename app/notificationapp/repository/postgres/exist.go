@@ -71,3 +71,24 @@ func (d *DB) IsExistTemplateByID(ctx context.Context, id types.ID) (bool, error)
 
 	return exists, nil
 }
+
+const queryIsExistUserSetting = `SELECT EXISTS (
+	SELECT 1
+	FROM user_notification_settings
+	WHERE user_id = $1
+);`
+
+func (d *DB) IsExistUserSetting(ctx context.Context, userID types.ID) (bool, error) {
+	const op = "repository.postgres.exist.IsExistUserSetting"
+
+	var exists bool
+	if qErr := d.conn.Conn().QueryRow(ctx, queryIsExistUserSetting, userID).Scan(&exists); qErr != nil {
+		if errors.Is(qErr, pgx.ErrNoRows) {
+			return false, nil
+		}
+
+		return false, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+
+	return exists, nil
+}
