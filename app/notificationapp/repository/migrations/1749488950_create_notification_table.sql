@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     "user_id" VARCHAR(26) NOT NULL,
     "type" notification_type NOT NULL,
     "data" JSONB NULL,
-    "template_name" VARCHAR(255) NULL,
+    "template_name" VARCHAR(255) NOT NULL,
     "dynamic_body_data" JSONB NULL,
     "dynamic_title_data" JSONB NULL,
     "is_read" BOOL DEFAULT false,
