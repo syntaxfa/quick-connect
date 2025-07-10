@@ -24,6 +24,10 @@ type Repository interface {
 	UpdateTemplate(ctx context.Context, id types.ID, req AddTemplateRequest) error
 	GetTemplateByName(ctx context.Context, name string) (Template, error)
 	GetTemplateByID(ctx context.Context, id types.ID) (Template, error)
+	IsExistUserSetting(ctx context.Context, userID types.ID) (bool, error)
+	GetUserSetting(ctx context.Context, userID types.ID) (UserSetting, error)
+	CreateUserSetting(ctx context.Context, userID types.ID, req UpdateUserSettingRequest) (UserSetting, error)
+	UpdateUserSetting(ctx context.Context, userID types.ID, req UpdateUserSettingRequest) error
 }
 
 type Service struct {

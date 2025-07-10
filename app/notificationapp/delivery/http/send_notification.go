@@ -14,7 +14,7 @@ import (
 // @Tags NotificationAdmin
 // @Accept json
 // @Produce json
-// @Param Request body service.SendNotificationRequestSchema true "generate pair(refresh & access) tokens"
+// @Param Request body service.SendNotificationRequestSchema true "notification body"
 // @Success 201 {object} service.SendNotificationResponseSchema
 // @Failure 400 {string} string Bad Request
 // @Failure 422 {object} servermsg.ErrorResponse

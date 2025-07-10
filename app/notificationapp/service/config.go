@@ -11,4 +11,5 @@ type Config struct {
 	MaxMessageSize        int           `koanf:"max_message_size"`
 	PublishTimeout        time.Duration `koanf:"publish_timeout"`
 	PingPeriod            time.Duration
+	DefaultUserLanguage   string `koanf:"default_user_language"`
 }

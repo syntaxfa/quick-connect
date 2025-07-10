@@ -23,7 +23,7 @@ postgres:
   ssl_mode: disable
   max_idle_conns: 10
   max_open_conns: 20
-  conn_max_lifetime: 600
+  conn_max_lifetime: 600s
   path_of_migration: "app/notificationapp/repository/migrations"
 redis:
   host: "localhost"
@@ -33,11 +33,12 @@ websocket:
   read_buffer_size: 1024
   write_buffer_size: 1024
 notification:
-  user_id_cache_expiration: 3600
+  user_id_cache_expiration: 3600s
   channel_name: notification
   write_wait: 10s
   pong_wait: 60s
   max_message_size: 512
   user_connection_limit: 5
   publish_timeout: 10s
+  default_user_language: fa
 get_user_id_url: "http://localhost:8000/api/v1/accounts/get-user-id/"

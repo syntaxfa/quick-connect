@@ -129,3 +129,24 @@ func (d *DB) GetTemplateByID(ctx context.Context, id types.ID) (service.Template
 
 	return template, nil
 }
+
+const queryGetUserSetting = `SELECT id, user_id, lang, ignore_channels
+FROM user_notification_settings
+WHERE user_id = $1`
+
+func (d *DB) GetUserSetting(ctx context.Context, userID types.ID) (service.UserSetting, error) {
+	const op = "repository.postgres.get.GetUserSetting"
+
+	var setting service.UserSetting
+	var jsonChannel json.RawMessage
+	if qErr := d.conn.Conn().QueryRow(ctx, queryGetUserSetting, userID).
+		Scan(&setting.ID, &setting.UserID, &setting.Lang, &jsonChannel); qErr != nil {
+		return service.UserSetting{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+
+	if uErr := json.Unmarshal(jsonChannel, &setting.IgnoreChannels); uErr != nil {
+		return service.UserSetting{}, richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected)
+	}
+
+	return setting, nil
+}
