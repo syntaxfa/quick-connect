@@ -140,6 +140,15 @@ definitions:
     - DeliveryStatusFailed
     - DeliveryStatusRetrying
     - DeliveryStatusIgnored
+  service.IgnoreChannel:
+    properties:
+      channel:
+        $ref: '#/definitions/service.ChannelType'
+      notification_type:
+        items:
+          $ref: '#/definitions/service.NotificationType'
+        type: array
+    type: object
   service.ListNotificationRequest:
     properties:
       is_read:
@@ -177,7 +186,7 @@ definitions:
     type: object
   service.NotificationType:
     enum:
-    - 'optional '
+    - optional
     - info
     - promotion
     - critical
@@ -186,6 +195,8 @@ definitions:
     x-enum-comments:
       NotificationTypeCritical: High-priority messages that usually cannot be opted
         out of (e.g., security alerts, password resets)
+      NotificationTypeDirect: Notifications of "direct" type do not have a retry mechanism
+        in case of delivery failure.
       NotificationTypeInfo: General informational messages
       NotificationTypeOptional: Can be opted out by user preferences
       NotificationTypePromotion: Marketing or promotional messages
@@ -286,6 +297,28 @@ definitions:
       lang:
         type: string
     type: object
+  service.UpdateUserSettingRequest:
+    properties:
+      ignore_channels:
+        items:
+          $ref: '#/definitions/service.IgnoreChannel'
+        type: array
+      lang:
+        type: string
+    type: object
+  service.UserSetting:
+    properties:
+      id:
+        type: string
+      ignore_channels:
+        items:
+          $ref: '#/definitions/service.IgnoreChannel'
+        type: array
+      lang:
+        type: string
+      user_id:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -314,7 +347,7 @@ paths:
       - application/json
       description: This API endpoint send a new notification.
       parameters:
-      - description: generate pair(refresh & access) tokens
+      - description: notification body
         in: body
         name: Request
         required: true
@@ -426,6 +459,129 @@ paths:
       summary: mark all notification as read
       tags:
       - NotificationClient
+  /v1/settings:
+    get:
+      consumes:
+      - application/json
+      description: retrieve user settings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: marked as read
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: retrieve user setting
+      tags:
+      - NotificationClient
+    post:
+      consumes:
+      - application/json
+      description: This API endpoint updates user notification settings
+      parameters:
+      - description: user settings
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateUserSettingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserSetting'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update user setting
+      tags:
+      - NotificationClient
+  /v1/settings/{externalUserID}:
+    get:
+      consumes:
+      - application/json
+      description: retrieve user settings
+      parameters:
+      - description: ID of the template to update
+        in: path
+        name: externalUserID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserSetting'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: retrieve user setting
+      tags:
+      - NotificationAdmin
+    post:
+      consumes:
+      - application/json
+      description: This API endpoint updates user notification settings
+      parameters:
+      - description: ID of the template to update
+        in: path
+        name: externalUserID
+        required: true
+        type: string
+      - description: user settings
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateUserSettingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserSetting'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update user setting
+      tags:
+      - NotificationAdmin
   /v1/templates:
     post:
       consumes:

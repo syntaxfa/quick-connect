@@ -52,3 +52,31 @@ func (s Service) UpdateUserSetting(ctx context.Context, externalUserID string, r
 
 	return userSetting, nil
 }
+
+func (s Service) GetUserSetting(ctx context.Context, externalUserID string) (UserSetting, error) {
+	const op = "service.user_setting.GetUserSetting"
+
+	userID, guErr := s.getUserIDFromExternalUserID(ctx, externalUserID)
+	if guErr != nil {
+		return UserSetting{}, errlog.ErrLog(richerror.New(op).WithWrapError(guErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	exists, eErr := s.repo.IsExistUserSetting(ctx, userID)
+	if eErr != nil {
+		return UserSetting{}, errlog.ErrLog(richerror.New(op).WithWrapError(eErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	if !exists {
+		return UserSetting{Lang: s.cfg.DefaultUserLanguage}, nil
+	}
+
+	setting, gsErr := s.repo.GetUserSetting(ctx, userID)
+	if gsErr != nil {
+		return UserSetting{}, errlog.ErrLog(richerror.New(op).WithWrapError(gsErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return setting, nil
+}

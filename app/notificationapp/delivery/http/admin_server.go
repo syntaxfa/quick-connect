@@ -47,6 +47,10 @@ func (s AdminServer) registerRoutes() {
 	templates.POST("", s.handler.createTemplate)
 	templates.PUT("/:templateID", s.handler.updateTemplate)
 	templates.GET("/:templateID", s.handler.getDetailTemplate)
+
+	settings := v1.Group("/settings")
+	settings.POST("/:externalUserID", s.handler.updateUserSettingAdmin)
+	settings.GET("/:externalUserID", s.handler.getUserSettingAdmin)
 }
 
 func (s AdminServer) registerSwagger() {

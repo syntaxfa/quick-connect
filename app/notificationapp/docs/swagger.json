@@ -52,7 +52,7 @@
                 "summary": "send notification",
                 "parameters": [
                     {
-                        "description": "generate pair(refresh \u0026 access) tokens",
+                        "description": "notification body",
                         "name": "Request",
                         "in": "body",
                         "required": true,
@@ -206,6 +206,192 @@
                         "description": "marked as read",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/settings": {
+            "get": {
+                "description": "retrieve user settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NotificationClient"
+                ],
+                "summary": "retrieve user setting",
+                "responses": {
+                    "200": {
+                        "description": "marked as read",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "This API endpoint updates user notification settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NotificationClient"
+                ],
+                "summary": "update user setting",
+                "parameters": [
+                    {
+                        "description": "user settings",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.UpdateUserSettingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.UserSetting"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/settings/{externalUserID}": {
+            "get": {
+                "description": "retrieve user settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NotificationAdmin"
+                ],
+                "summary": "retrieve user setting",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the template to update",
+                        "name": "externalUserID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.UserSetting"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "This API endpoint updates user notification settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NotificationAdmin"
+                ],
+                "summary": "update user setting",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the template to update",
+                        "name": "externalUserID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "user settings",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.UpdateUserSettingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.UserSetting"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
                         }
                     },
                     "500": {
@@ -582,6 +768,20 @@
                 "DeliveryStatusIgnored"
             ]
         },
+        "service.IgnoreChannel": {
+            "type": "object",
+            "properties": {
+                "channel": {
+                    "$ref": "#/definitions/service.ChannelType"
+                },
+                "notification_type": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.NotificationType"
+                    }
+                }
+            }
+        },
         "service.ListNotificationRequest": {
             "type": "object",
             "properties": {
@@ -639,7 +839,7 @@
         "service.NotificationType": {
             "type": "string",
             "enum": [
-                "optional ",
+                "optional",
                 "info",
                 "promotion",
                 "critical",
@@ -647,6 +847,7 @@
             ],
             "x-enum-comments": {
                 "NotificationTypeCritical": "High-priority messages that usually cannot be opted out of (e.g., security alerts, password resets)",
+                "NotificationTypeDirect": "Notifications of \"direct\" type do not have a retry mechanism in case of delivery failure.",
                 "NotificationTypeInfo": "General informational messages",
                 "NotificationTypeOptional": "Can be opted out by user preferences",
                 "NotificationTypePromotion": "Marketing or promotional messages"
@@ -782,6 +983,40 @@
                     "$ref": "#/definitions/service.ChannelType"
                 },
                 "lang": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.UpdateUserSettingRequest": {
+            "type": "object",
+            "properties": {
+                "ignore_channels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.IgnoreChannel"
+                    }
+                },
+                "lang": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.UserSetting": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ignore_channels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.IgnoreChannel"
+                    }
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }

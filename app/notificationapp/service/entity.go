@@ -53,7 +53,7 @@ func IsValidOverallStatus(overallStatus OverallStatus) bool {
 type NotificationType string
 
 const (
-	NotificationTypeOptional  NotificationType = "optional " // Can be opted out by user preferences
+	NotificationTypeOptional  NotificationType = "optional"  // Can be opted out by user preferences
 	NotificationTypeInfo      NotificationType = "info"      // General informational messages
 	NotificationTypePromotion NotificationType = "promotion" // Marketing or promotional messages
 	NotificationTypeCritical  NotificationType = "critical"  // High-priority messages that usually cannot be opted out of (e.g., security alerts, password resets)
