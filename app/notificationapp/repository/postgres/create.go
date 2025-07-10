@@ -67,6 +67,28 @@ func (d *DB) CreateTemplate(ctx context.Context, req service.AddTemplateRequest)
 	return template, nil
 }
 
-func (d *DB) CreateUserSetting(_ context.Context, _ types.ID, _ service.UpdateUserSettingRequest) (service.UserSetting, error) {
-	return service.UserSetting{}, nil
+const queryCreateUserSetting = `INSERT INTO user_notification_settings (id, user_id, lang, ignore_channels)
+VALUES ($1, $2, $3, $4);`
+
+func (d *DB) CreateUserSetting(ctx context.Context, userID types.ID, req service.UpdateUserSettingRequest) (service.UserSetting, error) {
+	const op = "repository.postgres.create.CreateUserSetting"
+
+	id := ulid.Make().String()
+
+	jsonChannel, mErr := json.Marshal(req.IgnoreChannels)
+	if mErr != nil {
+		return service.UserSetting{}, richerror.New(op).WithMessage("can't marshal ignore channels").
+			WithWrapError(mErr).WithKind(richerror.KindUnexpected)
+	}
+
+	if _, eErr := d.conn.Conn().Exec(ctx, queryCreateUserSetting, id, userID, req.Lang, jsonChannel); eErr != nil {
+		return service.UserSetting{}, richerror.New(op).WithWrapError(eErr).WithKind(richerror.KindUnexpected)
+	}
+
+	return service.UserSetting{
+		ID:             types.ID(id),
+		UserID:         userID,
+		Lang:           req.Lang,
+		IgnoreChannels: req.IgnoreChannels,
+	}, nil
 }
