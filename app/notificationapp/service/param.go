@@ -56,3 +56,20 @@ type UpdateUserSettingRequest struct {
 	Lang           string          `json:"lang"`
 	IgnoreChannels []IgnoreChannel `json:"ignore_channels"`
 }
+
+type ListTemplateRequest struct {
+	Name      string               `json:"template_name"`
+	Paginated paginate.RequestBase `json:"paginated"`
+}
+
+type ListTemplateResult struct {
+	ID        types.ID  `json:"id"`
+	Name      string    `json:"template_name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type ListTemplateResponse struct {
+	Results  []ListTemplateResult  `json:"results"`
+	Paginate paginate.ResponseBase `json:"paginate"`
+}

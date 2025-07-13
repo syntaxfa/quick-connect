@@ -195,6 +195,33 @@ definitions:
       user_id:
         type: string
     type: object
+  service.ListTemplateRequest:
+    properties:
+      paginated:
+        $ref: '#/definitions/paginate.RequestBase'
+      template_name:
+        type: string
+    type: object
+  service.ListTemplateResponse:
+    properties:
+      paginate:
+        $ref: '#/definitions/paginate.ResponseBase'
+      results:
+        items:
+          $ref: '#/definitions/service.ListTemplateResult'
+        type: array
+    type: object
+  service.ListTemplateResult:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      template_name:
+        type: string
+      updated_at:
+        type: string
+    type: object
   service.Notification:
     properties:
       channel_deliveries:
@@ -722,6 +749,32 @@ paths:
           schema:
             type: string
       summary: update template
+      tags:
+      - NotificationAdmin
+  /v1/templates/list:
+    post:
+      consumes:
+      - application/json
+      description: This API endpoint retrieve all templates.
+      parameters:
+      - description: template list
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ListTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ListTemplateResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: list of all templates
       tags:
       - NotificationAdmin
 schemes:

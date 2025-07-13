@@ -45,6 +45,7 @@ func (s AdminServer) registerRoutes() {
 
 	templates := v1.Group("/templates")
 	templates.POST("", s.handler.createTemplate)
+	templates.POST("/list", s.handler.ListTemplate)
 	templates.PUT("/:templateID", s.handler.updateTemplate)
 	templates.GET("/:templateID", s.handler.getDetailTemplate)
 
