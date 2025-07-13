@@ -461,6 +461,46 @@
                 }
             }
         },
+        "/v1/templates/list": {
+            "post": {
+                "description": "This API endpoint retrieve all templates.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NotificationAdmin"
+                ],
+                "summary": "list of all templates",
+                "parameters": [
+                    {
+                        "description": "template list",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.ListTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.ListTemplateResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/templates/{templateID}": {
             "get": {
                 "description": "This API endpoint retrieve template detail.",
@@ -849,6 +889,48 @@
                     "$ref": "#/definitions/service.NotificationType"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ListTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "paginated": {
+                    "$ref": "#/definitions/paginate.RequestBase"
+                },
+                "template_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ListTemplateResponse": {
+            "type": "object",
+            "properties": {
+                "paginate": {
+                    "$ref": "#/definitions/paginate.ResponseBase"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.ListTemplateResult"
+                    }
+                }
+            }
+        },
+        "service.ListTemplateResult": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "template_name": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

@@ -107,3 +107,19 @@ func (s Service) GetTemplate(ctx context.Context, templateID types.ID) (Template
 
 	return template, nil
 }
+
+func (s Service) TemplateList(ctx context.Context, req ListTemplateRequest) (ListTemplateResponse, error) {
+	const op = "service.template.TemplateList"
+
+	if bErr := req.Paginated.BasicValidation(); bErr != nil {
+		return ListTemplateResponse{}, richerror.New(op).WithKind(richerror.KindBadRequest)
+	}
+
+	templates, gErr := s.repo.GetTemplates(ctx, req)
+	if gErr != nil {
+		return ListTemplateResponse{}, errlog.ErrLog(richerror.New(op).WithWrapError(gErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return templates, nil
+}

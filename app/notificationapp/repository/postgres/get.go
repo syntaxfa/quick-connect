@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
@@ -128,6 +129,63 @@ func (d *DB) GetTemplateByID(ctx context.Context, id types.ID) (service.Template
 	}
 
 	return template, nil
+}
+
+func (d *DB) GetTemplates(ctx context.Context, req service.ListTemplateRequest) (service.ListTemplateResponse, error) {
+	const op = "repository.get.GetTemplates"
+
+	filters := make(map[paginate.FilterParameter]paginate.Filter)
+	if req.Name != "" {
+		filters["name"] = paginate.Filter{Operation: paginate.FilterOperationEqual, Values: []interface{}{req.Name}}
+	}
+
+	fields := []string{"id", "name", "created_at", "updated_at"}
+	sortColumn := "created_at"
+	offset := (req.Paginated.CurrentPage - 1) * req.Paginated.PageSize
+	limit := req.Paginated.PageSize
+
+	query, countQuery, args := pagesql.WriteQuery(pagesql.Parameters{
+		Table:      "templates",
+		Fields:     fields,
+		Filters:    filters,
+		SortColumn: sortColumn,
+		Descending: req.Paginated.Descending,
+		Limit:      limit,
+		Offset:     offset,
+	})
+
+	fmt.Println(query)
+	fmt.Println(countQuery)
+
+	// TODO: complete this
+	_ = countQuery
+
+	rows, qErr := d.conn.Conn().Query(ctx, query, args...)
+	if qErr != nil {
+		return service.ListTemplateResponse{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+	defer rows.Close()
+
+	var templates []service.ListTemplateResult
+	for rows.Next() {
+		var template service.ListTemplateResult
+		if sErr := rows.Scan(&template.ID, &template.Name, &template.CreatedAt, &template.UpdatedAt); sErr != nil {
+			return service.ListTemplateResponse{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
+		}
+		templates = append(templates, template)
+	}
+
+	if rErr := rows.Err(); rErr != nil {
+		return service.ListTemplateResponse{}, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
+	}
+
+	return service.ListTemplateResponse{
+		Results: templates,
+		Paginate: paginate.ResponseBase{
+			CurrentPage: req.Paginated.CurrentPage,
+			PageSize:    req.Paginated.PageSize,
+		},
+	}, nil
 }
 
 const queryGetUserSetting = `SELECT id, user_id, lang, ignore_channels
