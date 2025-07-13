@@ -156,28 +156,65 @@ definitions:
       paginated:
         $ref: '#/definitions/paginate.RequestBase'
     type: object
-  service.ListNotificationResponseSchema:
+  service.ListNotificationResponse:
     properties:
       paginate:
         $ref: '#/definitions/paginate.ResponseBase'
       results:
         items:
-          $ref: '#/definitions/service.ListNotificationResultSchema'
+          $ref: '#/definitions/service.ListNotificationResult'
         type: array
     type: object
-  service.ListNotificationResultSchema:
+  service.ListNotificationResult:
     properties:
       body:
         type: string
       created_at:
         type: string
       data:
-        type: string
+        additionalProperties:
+          type: string
+        type: object
       id:
         type: string
       is_read:
         type: boolean
       title:
+        type: string
+      type:
+        $ref: '#/definitions/service.NotificationType'
+      user_id:
+        type: string
+    type: object
+  service.Notification:
+    properties:
+      channel_deliveries:
+        items:
+          $ref: '#/definitions/service.ChannelDelivery'
+        type: array
+      created_at:
+        type: string
+      data:
+        additionalProperties:
+          type: string
+        type: object
+      dynamic_body_data:
+        additionalProperties:
+          type: string
+        type: object
+      dynamic_title_data:
+        additionalProperties:
+          type: string
+        type: object
+      id:
+        type: string
+      is_in_app:
+        type: boolean
+      is_read:
+        type: boolean
+      overall_status:
+        $ref: '#/definitions/service.OverallStatus'
+      template_name:
         type: string
       type:
         $ref: '#/definitions/service.NotificationType'
@@ -231,47 +268,30 @@ definitions:
     - OverallStatusRetrying
     - OverallStatusIgnored
     - OverallStatusMixed
-  service.SendNotificationRequestSchema:
+  service.SendNotificationRequest:
     properties:
-      body:
-        type: string
       channel_deliveries:
         items:
           $ref: '#/definitions/service.ChannelDeliveryRequest'
         type: array
       data:
-        type: string
+        additionalProperties:
+          type: string
+        type: object
+      dynamic_body_data:
+        additionalProperties:
+          type: string
+        type: object
+      dynamic_title_data:
+        additionalProperties:
+          type: string
+        type: object
       external_user_id:
         type: string
-      title:
+      template_name:
         type: string
       type:
         $ref: '#/definitions/service.NotificationType'
-    type: object
-  service.SendNotificationResponseSchema:
-    properties:
-      body:
-        type: string
-      channel_deliveries:
-        items:
-          $ref: '#/definitions/service.ChannelDelivery'
-        type: array
-      created_at:
-        type: string
-      data:
-        type: string
-      id:
-        type: string
-      is_read:
-        type: boolean
-      overall_status:
-        $ref: '#/definitions/service.OverallStatus'
-      title:
-        type: string
-      type:
-        $ref: '#/definitions/service.NotificationType'
-      user_id:
-        type: string
     type: object
   service.Template:
     properties:
@@ -352,14 +372,14 @@ paths:
         name: Request
         required: true
         schema:
-          $ref: '#/definitions/service.SendNotificationRequestSchema'
+          $ref: '#/definitions/service.SendNotificationRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/service.SendNotificationResponseSchema'
+            $ref: '#/definitions/service.Notification'
         "400":
           description: Bad Request
           schema:
@@ -418,7 +438,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.ListNotificationResponseSchema'
+            $ref: '#/definitions/service.ListNotificationResponse'
         "400":
           description: Bad Request
           schema:

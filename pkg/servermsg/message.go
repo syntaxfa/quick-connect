@@ -10,7 +10,6 @@ const (
 	MsgInvalidLengthOfPassword            = "the password must be between 8 and 191 characters"
 	MsgRecordNotFound                     = "record not found"
 	MsgInvalidLengthOfUserID              = "the user id must be less than 255 characters"
-	MsgInvalidLengthOfNotificationTitle   = "the title must be less than 255 characters"
 	MsgInvalidNotificationType            = "invalid notification type"
 	MsgInvalidNotificationChannelDelivery = "invalid notification channel delivery"
 	MsgPageSizeMin                        = "page size must be greater than 0"

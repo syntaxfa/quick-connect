@@ -15,7 +15,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param Request body service.ListNotificationRequest true "find user notifications"
-// @Success 200 {object} service.ListNotificationResponseSchema
+// @Success 200 {object} service.ListNotificationResponse
 // @Failure 400 {string} string Bad Request
 // @Failure 422 {object} servermsg.ErrorResponse
 // @Failure 500 {string} something went wrong

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"time"
 
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
@@ -17,38 +16,12 @@ type SendNotificationRequest struct {
 	UserID            types.ID                 `json:"-"`
 	ExternalUserID    string                   `json:"external_user_id"`
 	Type              NotificationType         `json:"type"`
-	Title             string                   `json:"title"`
-	Body              string                   `json:"body"`
-	Data              json.RawMessage          `json:"data"`
+	Data              map[string]string        `json:"data"`
+	TemplateName      string                   `json:"template_name"`
+	DynamicBodyData   map[string]string        `json:"dynamic_body_data,omitempty"`
+	DynamicTitleData  map[string]string        `json:"dynamic_title_data,omitempty"`
 	ChannelDeliveries []ChannelDeliveryRequest `json:"channel_deliveries"`
-}
-
-type SendNotificationRequestSchema struct {
-	ID                types.ID                 `json:"-"`
-	UserID            types.ID                 `json:"-"`
-	ExternalUserID    string                   `json:"external_user_id"`
-	Type              NotificationType         `json:"type"`
-	Title             string                   `json:"title"`
-	Body              string                   `json:"body"`
-	Data              string                   `json:"data"`
-	ChannelDeliveries []ChannelDeliveryRequest `json:"channel_deliveries"`
-}
-
-type SendNotificationResponse struct {
-	Notification
-}
-
-type SendNotificationResponseSchema struct {
-	ID                types.ID          `json:"id"`
-	UserID            types.ID          `json:"user_id"`
-	Type              NotificationType  `json:"type"`
-	Title             string            `json:"title"`
-	Body              string            `json:"body"`
-	Data              string            `json:"data,omitempty"`
-	IsRead            bool              `json:"is_read"`
-	CreatedAt         time.Time         `json:"created_at"`
-	ChannelDeliveries []ChannelDelivery `json:"channel_deliveries"`
-	OverallStatus     OverallStatus     `json:"overall_status"`
+	IsInApp           bool                     `json:"-"`
 }
 
 type ListNotificationRequest struct {
@@ -58,35 +31,19 @@ type ListNotificationRequest struct {
 }
 
 type ListNotificationResult struct {
-	ID        types.ID         `json:"id"`
-	UserID    types.ID         `json:"user_id"`
-	Type      NotificationType `json:"type"`
-	Title     string           `json:"title"`
-	Body      string           `json:"body"`
-	Data      json.RawMessage  `json:"data,omitempty"`
-	IsRead    bool             `json:"is_read"`
-	CreatedAt time.Time        `json:"created_at"`
-}
-
-type ListNotificationResultSchema struct {
-	ID        types.ID         `json:"id"`
-	UserID    types.ID         `json:"user_id"`
-	Type      NotificationType `json:"type"`
-	Title     string           `json:"title"`
-	Body      string           `json:"body"`
-	Data      string           `json:"data,omitempty"`
-	IsRead    bool             `json:"is_read"`
-	CreatedAt time.Time        `json:"created_at"`
+	ID        types.ID          `json:"id"`
+	UserID    types.ID          `json:"user_id"`
+	Type      NotificationType  `json:"type"`
+	Title     string            `json:"title"`
+	Body      string            `json:"body"`
+	Data      map[string]string `json:"data,omitempty"`
+	IsRead    bool              `json:"is_read"`
+	CreatedAt time.Time         `json:"created_at"`
 }
 
 type ListNotificationResponse struct {
 	Results  []ListNotificationResult `json:"results"`
 	Paginate paginate.ResponseBase    `json:"paginate"`
-}
-
-type ListNotificationResponseSchema struct {
-	Results  []ListNotificationResultSchema `json:"results"`
-	Paginate paginate.ResponseBase          `json:"paginate"`
 }
 
 type AddTemplateRequest struct {
