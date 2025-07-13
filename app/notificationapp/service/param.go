@@ -47,8 +47,9 @@ type ListNotificationResponse struct {
 }
 
 type AddTemplateRequest struct {
-	Name   string         `json:"name"` // maximum is 255 characters.
-	Bodies []TemplateBody `json:"bodies"`
+	ID       types.ID          `json:"-"`
+	Name     string            `json:"name"` // maximum is 255 characters.
+	Contents []TemplateContent `json:"contents"`
 }
 
 type UpdateUserSettingRequest struct {

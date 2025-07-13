@@ -525,6 +525,13 @@ const docTemplate = `{
                 "summary": "update template",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "ID of the template to update",
+                        "name": "templateID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "template",
                         "name": "Request",
                         "in": "body",
@@ -532,13 +539,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/service.AddTemplateRequest"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "ID of the template to update",
-                        "name": "templateID",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -677,10 +677,10 @@ const docTemplate = `{
         "service.AddTemplateRequest": {
             "type": "object",
             "properties": {
-                "bodies": {
+                "contents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/service.TemplateBody"
+                        "$ref": "#/definitions/service.TemplateContent"
                     }
                 },
                 "name": {
@@ -750,6 +750,20 @@ const docTemplate = `{
                 "ChannelTypeWebPush",
                 "ChannelTypeInApp"
             ]
+        },
+        "service.ContentBody": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
         },
         "service.DeliveryStatus": {
             "type": "string",
@@ -990,10 +1004,10 @@ const docTemplate = `{
         "service.Template": {
             "type": "object",
             "properties": {
-                "bodies": {
+                "contents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/service.TemplateBody"
+                        "$ref": "#/definitions/service.TemplateContent"
                     }
                 },
                 "created_at": {
@@ -1010,17 +1024,17 @@ const docTemplate = `{
                 }
             }
         },
-        "service.TemplateBody": {
+        "service.TemplateContent": {
             "type": "object",
             "properties": {
-                "body": {
-                    "type": "string"
+                "bodies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.ContentBody"
+                    }
                 },
                 "channel": {
                     "$ref": "#/definitions/service.ChannelType"
-                },
-                "lang": {
-                    "type": "string"
                 }
             }
         },

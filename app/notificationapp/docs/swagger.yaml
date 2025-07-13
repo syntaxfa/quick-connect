@@ -66,9 +66,9 @@ definitions:
     type: object
   service.AddTemplateRequest:
     properties:
-      bodies:
+      contents:
         items:
-          $ref: '#/definitions/service.TemplateBody'
+          $ref: '#/definitions/service.TemplateContent'
         type: array
       name:
         description: maximum is 255 characters.
@@ -117,6 +117,15 @@ definitions:
     - ChannelTypeEmail
     - ChannelTypeWebPush
     - ChannelTypeInApp
+  service.ContentBody:
+    properties:
+      body:
+        type: string
+      lang:
+        type: string
+      title:
+        type: string
+    type: object
   service.DeliveryStatus:
     enum:
     - pending
@@ -295,9 +304,9 @@ definitions:
     type: object
   service.Template:
     properties:
-      bodies:
+      contents:
         items:
-          $ref: '#/definitions/service.TemplateBody'
+          $ref: '#/definitions/service.TemplateContent'
         type: array
       created_at:
         type: string
@@ -308,14 +317,14 @@ definitions:
       updated_at:
         type: string
     type: object
-  service.TemplateBody:
+  service.TemplateContent:
     properties:
-      body:
-        type: string
+      bodies:
+        items:
+          $ref: '#/definitions/service.ContentBody'
+        type: array
       channel:
         $ref: '#/definitions/service.ChannelType'
-      lang:
-        type: string
     type: object
   service.UpdateUserSettingRequest:
     properties:
@@ -674,17 +683,17 @@ paths:
       - application/json
       description: This API endpoint updates a specific template.
       parameters:
+      - description: ID of the template to update
+        in: path
+        name: templateID
+        required: true
+        type: string
       - description: template
         in: body
         name: Request
         required: true
         schema:
           $ref: '#/definitions/service.AddTemplateRequest'
-      - description: ID of the template to update
-        in: path
-        name: templateID
-        required: true
-        type: string
       produces:
       - application/json
       responses:
