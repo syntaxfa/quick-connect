@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/syntaxfa/quick-connect/types"
@@ -13,12 +12,12 @@ type Notification struct {
 	ID                types.ID          `json:"id"`
 	UserID            types.ID          `json:"user_id"`
 	Type              NotificationType  `json:"type"`
-	Title             string            `json:"title"`
-	Body              string            `json:"body"`
-	Data              json.RawMessage   `json:"data,omitempty"`
-	TemplateName      *string           `json:"template_name"`
-	DynamicData       json.RawMessage   `json:"dynamic_data"`
+	Data              map[string]string `json:"data,omitempty"`
+	TemplateName      string            `json:"template_name"`
+	DynamicBodyData   map[string]string `json:"dynamic_body_data,omitempty"`
+	DynamicTitleData  map[string]string `json:"dynamic_title_data,omitempty"`
 	IsRead            bool              `json:"is_read"`
+	IsInApp           bool              `json:"is_in_app"`
 	CreatedAt         time.Time         `json:"created_at"`
 	ChannelDeliveries []ChannelDelivery `json:"channel_deliveries"`
 	OverallStatus     OverallStatus     `json:"overall_status"`

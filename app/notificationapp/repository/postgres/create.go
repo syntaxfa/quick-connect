@@ -10,20 +10,60 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-const queryCreateNotification = `INSERT INTO notifications (id, user_id, type, title, body, data, channel_deliveries)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, user_id, type, title, body, data, is_read, created_at, overall_status, channel_deliveries;`
+const queryCreateNotification = `INSERT INTO notifications (id, user_id, type, data, template_name, dynamic_body_data, dynamic_title_data, is_in_app, channel_deliveries)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, user_id, type, data, template_name, dynamic_body_data, dynamic_title_data, is_read, is_in_app, created_at, overall_status, channel_deliveries;`
 
 func (d *DB) Save(ctx context.Context, req service.SendNotificationRequest) (service.Notification, error) {
 	const op = "repository.postgres.create.Save"
 
+	jsonData, mdErr := json.Marshal(req.Data)
+	if mdErr != nil {
+		return service.Notification{}, richerror.New(op).WithMessage("can't marshal notification data").
+			WithWrapError(mdErr).WithKind(richerror.KindUnexpected)
+	}
+
+	jsonBodyData, mbErr := json.Marshal(req.DynamicBodyData)
+	if mbErr != nil {
+		return service.Notification{}, richerror.New(op).WithMessage("can't marshal notification dynamic body data").
+			WithWrapError(mbErr).WithKind(richerror.KindUnexpected)
+	}
+
+	jsonTitleData, mtErr := json.Marshal(req.DynamicTitleData)
+	if mtErr != nil {
+		return service.Notification{}, richerror.New(op).WithMessage("can't marshal notification dynamic title data").
+			WithWrapError(mtErr).WithKind(richerror.KindUnexpected)
+	}
+
 	var notification service.Notification
-	if qErr := d.conn.Conn().QueryRow(ctx, queryCreateNotification, req.ID, req.UserID, req.Type, req.Title, req.Body, req.Data, req.ChannelDeliveries).Scan(
-		&notification.ID, &notification.UserID, &notification.Type,
-		&notification.Title, &notification.Body, &notification.Data,
-		&notification.IsRead, &notification.CreatedAt, &notification.OverallStatus,
-		&notification.ChannelDeliveries); qErr != nil {
-		return service.Notification{}, richerror.New(op).WithMessage("can't insert into notifications table").WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	var jsonChannelDeliveries json.RawMessage
+	if qErr := d.conn.Conn().QueryRow(ctx, queryCreateNotification, req.ID, req.UserID, req.Type, jsonData, req.TemplateName,
+		jsonBodyData, jsonTitleData, req.IsInApp, req.ChannelDeliveries).Scan(
+		&notification.ID, &notification.UserID, &notification.Type, &jsonData, &notification.TemplateName, &jsonBodyData,
+		&jsonTitleData, &notification.IsRead, &notification.IsInApp, &notification.CreatedAt, &notification.OverallStatus,
+		&jsonChannelDeliveries); qErr != nil {
+		return service.Notification{}, richerror.New(op).WithMessage("can't insert into notifications table").
+			WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+
+	if udErr := json.Unmarshal(jsonData, &notification.Data); udErr != nil {
+		return service.Notification{}, richerror.New(op).WithMessage("can't unmarshall notification data").
+			WithWrapError(udErr).WithKind(richerror.KindUnexpected)
+	}
+
+	if ubErr := json.Unmarshal(jsonBodyData, &notification.DynamicBodyData); ubErr != nil {
+		return service.Notification{}, richerror.New(op).WithMessage("can't unmarshall notification dynamic body data").
+			WithWrapError(ubErr).WithKind(richerror.KindUnexpected)
+	}
+
+	if utErr := json.Unmarshal(jsonTitleData, &notification.DynamicTitleData); utErr != nil {
+		return service.Notification{}, richerror.New(op).WithMessage("can't unmarshal notification title body data").
+			WithWrapError(utErr).WithKind(richerror.KindUnexpected)
+	}
+
+	if ucErr := json.Unmarshal(jsonChannelDeliveries, &notification.ChannelDeliveries); ucErr != nil {
+		return service.Notification{}, richerror.New(op).WithMessage("can't unmarshal notification channel deliveries").
+			WithWrapError(ucErr).WithKind(richerror.KindUnexpected)
 	}
 
 	return notification, nil

@@ -64,7 +64,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.SendNotificationRequestSchema"
+                            "$ref": "#/definitions/service.SendNotificationRequest"
                         }
                     }
                 ],
@@ -72,7 +72,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/service.SendNotificationResponseSchema"
+                            "$ref": "#/definitions/service.Notification"
                         }
                     },
                     "400": {
@@ -124,7 +124,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/service.ListNotificationResponseSchema"
+                            "$ref": "#/definitions/service.ListNotificationResponse"
                         }
                     },
                     "400": {
@@ -800,7 +800,7 @@ const docTemplate = `{
                 }
             }
         },
-        "service.ListNotificationResponseSchema": {
+        "service.ListNotificationResponse": {
             "type": "object",
             "properties": {
                 "paginate": {
@@ -809,12 +809,12 @@ const docTemplate = `{
                 "results": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/service.ListNotificationResultSchema"
+                        "$ref": "#/definitions/service.ListNotificationResult"
                     }
                 }
             }
         },
-        "service.ListNotificationResultSchema": {
+        "service.ListNotificationResult": {
             "type": "object",
             "properties": {
                 "body": {
@@ -824,7 +824,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "data": {
-                    "type": "string"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "id": {
                     "type": "string"
@@ -833,6 +836,59 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/service.NotificationType"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.Notification": {
+            "type": "object",
+            "properties": {
+                "channel_deliveries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.ChannelDelivery"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "dynamic_body_data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "dynamic_title_data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_in_app": {
+                    "type": "boolean"
+                },
+                "is_read": {
+                    "type": "boolean"
+                },
+                "overall_status": {
+                    "$ref": "#/definitions/service.OverallStatus"
+                },
+                "template_name": {
                     "type": "string"
                 },
                 "type": {
@@ -893,12 +949,9 @@ const docTemplate = `{
                 "OverallStatusMixed"
             ]
         },
-        "service.SendNotificationRequestSchema": {
+        "service.SendNotificationRequest": {
             "type": "object",
             "properties": {
-                "body": {
-                    "type": "string"
-                },
                 "channel_deliveries": {
                     "type": "array",
                     "items": {
@@ -906,54 +959,31 @@ const docTemplate = `{
                     }
                 },
                 "data": {
-                    "type": "string"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "dynamic_body_data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "dynamic_title_data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "external_user_id": {
                     "type": "string"
                 },
-                "title": {
+                "template_name": {
                     "type": "string"
                 },
                 "type": {
                     "$ref": "#/definitions/service.NotificationType"
-                }
-            }
-        },
-        "service.SendNotificationResponseSchema": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "channel_deliveries": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/service.ChannelDelivery"
-                    }
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "data": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "is_read": {
-                    "type": "boolean"
-                },
-                "overall_status": {
-                    "$ref": "#/definitions/service.OverallStatus"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/service.NotificationType"
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },
