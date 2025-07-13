@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS templates (
     "id" VARCHAR(26) PRIMARY KEY,
     "name" VARCHAR(255) NOT NULL,
-    "bodies" JSONB NOT NULL,
+    "contents" JSONB NOT NULL,
     "created_at" TIMESTAMP DEFAULT NOW(),
     "updated_at" TIMESTAMP DEFAULT NOW()
 );

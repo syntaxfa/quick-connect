@@ -518,6 +518,13 @@
                 "summary": "update template",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "ID of the template to update",
+                        "name": "templateID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "template",
                         "name": "Request",
                         "in": "body",
@@ -525,13 +532,6 @@
                         "schema": {
                             "$ref": "#/definitions/service.AddTemplateRequest"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "ID of the template to update",
-                        "name": "templateID",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -670,10 +670,10 @@
         "service.AddTemplateRequest": {
             "type": "object",
             "properties": {
-                "bodies": {
+                "contents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/service.TemplateBody"
+                        "$ref": "#/definitions/service.TemplateContent"
                     }
                 },
                 "name": {
@@ -743,6 +743,20 @@
                 "ChannelTypeWebPush",
                 "ChannelTypeInApp"
             ]
+        },
+        "service.ContentBody": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
         },
         "service.DeliveryStatus": {
             "type": "string",
@@ -983,10 +997,10 @@
         "service.Template": {
             "type": "object",
             "properties": {
-                "bodies": {
+                "contents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/service.TemplateBody"
+                        "$ref": "#/definitions/service.TemplateContent"
                     }
                 },
                 "created_at": {
@@ -1003,17 +1017,17 @@
                 }
             }
         },
-        "service.TemplateBody": {
+        "service.TemplateContent": {
             "type": "object",
             "properties": {
-                "body": {
-                    "type": "string"
+                "bodies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.ContentBody"
+                    }
                 },
                 "channel": {
                     "$ref": "#/definitions/service.ChannelType"
-                },
-                "lang": {
-                    "type": "string"
                 }
             }
         },

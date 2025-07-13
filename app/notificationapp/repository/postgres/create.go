@@ -83,26 +83,26 @@ func (d *DB) CreateUserIDFromExternalUserID(ctx context.Context, externalUserID 
 	return nil
 }
 
-const queryCreateTemplate = `INSERT INTO templates (id, name, bodies)
+const queryCreateTemplate = `INSERT INTO templates (id, name, contents)
 VALUES ($1, $2, $3)
 RETURNING id, created_at, updated_at;`
 
 func (d *DB) CreateTemplate(ctx context.Context, req service.AddTemplateRequest) (service.Template, error) {
 	const op = "repository.postgres.create.CreateTemplate"
 
-	jsonBodies, mErr := json.Marshal(req.Bodies)
+	jsonContents, mErr := json.Marshal(req.Contents)
 	if mErr != nil {
 		return service.Template{}, richerror.New(op).WithWrapError(mErr).WithKind(richerror.KindUnexpected)
 	}
 
 	var template service.Template
-	if qErr := d.conn.Conn().QueryRow(ctx, queryCreateTemplate, ulid.Make().String(), req.Name, jsonBodies).
+	if qErr := d.conn.Conn().QueryRow(ctx, queryCreateTemplate, req.ID, req.Name, jsonContents).
 		Scan(&template.ID, &template.CreatedAt, &template.UpdatedAt); qErr != nil {
 		return service.Template{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
 	}
 
 	template.Name = req.Name
-	template.Bodies = req.Bodies
+	template.Contents = req.Contents
 
 	return template, nil
 }
