@@ -111,18 +111,24 @@ type ChannelDelivery struct {
 // It groups different content variations (bodies) for various channels and languages
 // under a single logical template name.
 type Template struct {
-	ID        types.ID       `json:"id"`
-	Name      string         `json:"name"`
-	Bodies    []TemplateBody `json:"bodies"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
+	ID        types.ID          `json:"id"`
+	Name      string            `json:"name"`
+	Contents  []TemplateContent `json:"contents"`
+	CreatedAt time.Time         `json:"created_at"`
+	UpdatedAt time.Time         `json:"updated_at"`
 }
 
-// TemplateBody defines the content of a specific template for a given language and channel.
-type TemplateBody struct {
-	Lang    string      `json:"lang"`
-	Body    string      `json:"body"`
-	Channel ChannelType `json:"channel"`
+// TemplateContent defines the content of a specific template for a given channel.
+type TemplateContent struct {
+	Channel ChannelType   `json:"channel"`
+	Bodies  []ContentBody `json:"bodies"`
+}
+
+// ContentBody defines the content body of a specific template content for a given language.
+type ContentBody struct {
+	Lang  string `json:"lang"`
+	Body  string `json:"body"`
+	Title string `json:"title"`
 }
 
 // UserSetting A user can have their custom and personalized settings, such as language and channels

@@ -16,8 +16,8 @@ import (
 // @Tags NotificationAdmin
 // @Accept json
 // @Produce json
-// @Param Request body service.AddTemplateRequest true "template"
 // @Param templateID path string true "ID of the template to update"
+// @Param Request body service.AddTemplateRequest true "template"
 // @Success 200 {object} service.Template
 // @Failure 400 {string} string Bad Request
 // @Failure 404 {string} the template with this templateID does not exist

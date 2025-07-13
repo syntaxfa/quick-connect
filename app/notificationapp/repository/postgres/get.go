@@ -92,14 +92,14 @@ func (d *DB) GetTemplateByName(ctx context.Context, name string) (service.Templa
 	const op = "repository.postgres.get.GetTemplateByName"
 
 	var template service.Template
-	var jsonBodies json.RawMessage
+	var jsonContents json.RawMessage
 
 	if qErr := d.conn.Conn().QueryRow(ctx, queryGetTemplateByName, name).
-		Scan(&template.ID, &template.Name, &jsonBodies, &template.CreatedAt, &template.UpdatedAt); qErr != nil {
+		Scan(&template.ID, &template.Name, &jsonContents, &template.CreatedAt, &template.UpdatedAt); qErr != nil {
 		return service.Template{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
 	}
 
-	if uErr := json.Unmarshal(jsonBodies, &template.Bodies); uErr != nil {
+	if uErr := json.Unmarshal(jsonContents, &template.Contents); uErr != nil {
 		return service.Template{}, richerror.New(op).WithMessage("failed to unmarshalling template bodies").
 			WithWrapError(uErr).WithKind(richerror.KindUnexpected)
 	}
@@ -107,7 +107,7 @@ func (d *DB) GetTemplateByName(ctx context.Context, name string) (service.Templa
 	return template, nil
 }
 
-const queryTemplateByID = `SELECT id, name, bodies, created_at, updated_at
+const queryTemplateByID = `SELECT id, name, contents, created_at, updated_at
 FROM templates WHERE id = $1
 LIMIT 1;`
 
@@ -115,14 +115,14 @@ func (d *DB) GetTemplateByID(ctx context.Context, id types.ID) (service.Template
 	const op = "repository.postgres.get.GetTemplateByID"
 
 	var template service.Template
-	var jsonBodies json.RawMessage
+	var jsonContents json.RawMessage
 
 	if qErr := d.conn.Conn().QueryRow(ctx, queryTemplateByID, id).
-		Scan(&template.ID, &template.Name, &jsonBodies, &template.CreatedAt, &template.UpdatedAt); qErr != nil {
+		Scan(&template.ID, &template.Name, &jsonContents, &template.CreatedAt, &template.UpdatedAt); qErr != nil {
 		return service.Template{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
 	}
 
-	if uErr := json.Unmarshal(jsonBodies, &template.Bodies); uErr != nil {
+	if uErr := json.Unmarshal(jsonContents, &template.Contents); uErr != nil {
 		return service.Template{}, richerror.New(op).WithMessage("failed to unmarshalling template bodies").
 			WithWrapError(uErr).WithKind(richerror.KindUnexpected)
 	}

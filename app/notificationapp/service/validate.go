@@ -124,9 +124,9 @@ func (v Validate) ValidateAddTemplateRequest(req AddTemplateRequest) error {
 			validation.Required.Error(servermsg.MsgFieldRequired),
 			validation.Length(1, 255).Error(servermsg.MsgInvalidLengthOfTemplateName),
 		),
-		validation.Field(&req.Bodies,
+		validation.Field(&req.Contents,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.By(v.ValidateTemplateBodies),
+			validation.By(v.ValidateTemplateContents),
 		),
 	); err != nil {
 		fieldErrors := make(map[string]string)
@@ -147,23 +147,28 @@ func (v Validate) ValidateAddTemplateRequest(req AddTemplateRequest) error {
 	return nil
 }
 
-func (v Validate) ValidateTemplateBodies(value interface{}) error {
-	bodies, ok := value.([]TemplateBody)
+func (v Validate) ValidateTemplateContents(value interface{}) error {
+	contents, ok := value.([]TemplateContent)
 	if !ok {
-		return errors.New(servermsg.MsgInvalidTemplateBody)
+		return errors.New(servermsg.MsgInvalidTemplateContent)
 	}
 
-	for index, body := range bodies {
-		for i := index; i < (len(bodies) - 1); i++ {
-			if body.Lang == bodies[i+1].Lang && body.Channel == bodies[i+1].Channel {
-				return errors.New(servermsg.MsgConflictTemplateBody)
+	for index, content := range contents {
+		if !IsValidChannelType(content.Channel) {
+			return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
+		}
+		for i := index; i < (len(contents) - 1); i++ {
+			if content.Channel == contents[i+1].Channel {
+				return errors.New(servermsg.MsgConflictTemplateChannel)
 			}
 		}
-	}
 
-	for _, body := range bodies {
-		if !IsValidChannelType(body.Channel) {
-			return errors.New(servermsg.MsgInvalidNotificationChannelDelivery)
+		for index, body := range content.Bodies {
+			for i := index; i < (len(content.Bodies) - 1); i++ {
+				if body.Lang == content.Bodies[i+1].Lang {
+					return errors.New(servermsg.MsgConflictTemplateChannelLang)
+				}
+			}
 		}
 	}
 

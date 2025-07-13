@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
@@ -26,6 +27,8 @@ func (s Service) AddTemplate(ctx context.Context, req AddTemplateRequest) (Templ
 		return Template{}, richerror.New(op).WithMessage(servermsg.MsgConflictTemplate).
 			WithKind(richerror.KindConflict)
 	}
+
+	req.ID = types.ID(ulid.Make().String())
 
 	template, cErr := s.repo.CreateTemplate(ctx, req)
 	if cErr != nil {
@@ -78,7 +81,7 @@ func (s Service) UpdateTemplate(ctx context.Context, templateID types.ID, req Ad
 	}
 
 	template.Name = req.Name
-	template.Bodies = req.Bodies
+	template.Contents = req.Contents
 
 	return template, nil
 }
