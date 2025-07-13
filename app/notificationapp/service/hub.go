@@ -39,13 +39,13 @@ type Client struct {
 }
 
 type NotificationMessage struct {
-	NotificationID types.ID         `json:"notification_id"`
-	UserID         types.ID         `json:"user_id"`
-	Type           NotificationType `json:"type"`
-	Title          string           `json:"title"`
-	Body           string           `json:"body"`
-	Data           json.RawMessage  `json:"data"`
-	Timestamp      int64            `json:"timestamp"`
+	NotificationID types.ID          `json:"notification_id"`
+	UserID         types.ID          `json:"user_id"`
+	Type           NotificationType  `json:"type"`
+	Title          string            `json:"title"`
+	Body           string            `json:"body"`
+	Data           map[string]string `json:"data"`
+	Timestamp      int64             `json:"timestamp"`
 }
 
 func NewHub(cfg Config, logger *slog.Logger, subscriber pubsub.Subscriber) *Hub {

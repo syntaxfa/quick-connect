@@ -14,8 +14,8 @@ import (
 // @Tags NotificationAdmin
 // @Accept json
 // @Produce json
-// @Param Request body service.SendNotificationRequestSchema true "notification body"
-// @Success 201 {object} service.SendNotificationResponseSchema
+// @Param Request body service.SendNotificationRequest true "notification body"
+// @Success 201 {object} service.Notification
 // @Failure 400 {string} string Bad Request
 // @Failure 422 {object} servermsg.ErrorResponse
 // @Failure 500 {string} something went wrong
