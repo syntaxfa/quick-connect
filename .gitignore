@@ -179,3 +179,5 @@ fabric.properties
 
 build-errors.log
 tmp
+
+logs*.json
