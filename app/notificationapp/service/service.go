@@ -39,6 +39,7 @@ type Service struct {
 	logger    *slog.Logger
 	hub       *Hub
 	publisher pubsub.Publisher
+	renderSvc *RenderService
 }
 
 func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Repository, logger *slog.Logger, hub *Hub, publisher pubsub.Publisher) Service {
@@ -52,6 +53,7 @@ func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Reposi
 		logger:    logger,
 		hub:       hub,
 		publisher: publisher,
+		renderSvc: NewRenderService(),
 	}
 }
 

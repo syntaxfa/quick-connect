@@ -38,16 +38,6 @@ type Client struct {
 	userID types.ID
 }
 
-type NotificationMessage struct {
-	NotificationID types.ID          `json:"notification_id"`
-	UserID         types.ID          `json:"user_id"`
-	Type           NotificationType  `json:"type"`
-	Title          string            `json:"title"`
-	Body           string            `json:"body"`
-	Data           map[string]string `json:"data"`
-	Timestamp      int64             `json:"timestamp"`
-}
-
 func NewHub(cfg Config, logger *slog.Logger, subscriber pubsub.Subscriber) *Hub {
 	return &Hub{
 		cfg:          cfg,
@@ -129,7 +119,7 @@ func (h *Hub) Run(ctx context.Context) {
 				select {
 				case client.send <- &notification:
 					h.logger.Debug("notification sent to client", slog.String("notification_id",
-						string(notification.NotificationID)))
+						string(notification.ID)))
 				default:
 					h.logger.Warn("failed to send notification to client, client send buffer full",
 						slog.String("user_id", string(notification.UserID)))
