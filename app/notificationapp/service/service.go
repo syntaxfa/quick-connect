@@ -25,6 +25,7 @@ type Repository interface {
 	GetTemplateByName(ctx context.Context, name string) (Template, error)
 	GetTemplateByID(ctx context.Context, id types.ID) (Template, error)
 	GetTemplates(ctx context.Context, req ListTemplateRequest) (ListTemplateResponse, error)
+	GetTemplatesByNames(ctx context.Context, names ...string) ([]Template, error)
 	IsExistUserSetting(ctx context.Context, userID types.ID) (bool, error)
 	GetUserSetting(ctx context.Context, userID types.ID) (UserSetting, error)
 	CreateUserSetting(ctx context.Context, userID types.ID, req UpdateUserSettingRequest) (UserSetting, error)
@@ -39,6 +40,7 @@ type Service struct {
 	logger    *slog.Logger
 	hub       *Hub
 	publisher pubsub.Publisher
+	renderSvc *RenderService
 }
 
 func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Repository, logger *slog.Logger, hub *Hub, publisher pubsub.Publisher) Service {
@@ -52,6 +54,7 @@ func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Reposi
 		logger:    logger,
 		hub:       hub,
 		publisher: publisher,
+		renderSvc: NewRenderService(cfg.DefaultLanguage),
 	}
 }
 

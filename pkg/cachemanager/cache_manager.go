@@ -23,6 +23,8 @@ type CacheClient interface {
 	// It returns the value as a byte slice, If the key is not found, it returns ErrKeyNotFound.
 	Get(ctx context.Context, key string) ([]byte, error)
 
+	MGet(ctx context.Context, keys ...string) ([]interface{}, error)
+
 	// Delete removes one or more keys from the cache.
 	Delete(ctx context.Context, keys ...string) error
 
@@ -78,6 +80,16 @@ func (c *CacheManager) Get(ctx context.Context, key string, dest any) error {
 	}
 
 	return nil
+}
+
+// MGet retrieves values from the cache.
+func (c *CacheManager) MGet(ctx context.Context, keys ...string) ([]interface{}, error) {
+	data, gErr := c.client.MGet(ctx, keys...)
+	if gErr != nil {
+		return nil, fmt.Errorf("cachemanager: failed to mget keys from cache: %s", gErr.Error())
+	}
+
+	return data, nil
 }
 
 // Delete removes one or more keys from cache.
