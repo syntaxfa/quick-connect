@@ -65,6 +65,11 @@ func (a *Adapter) Get(ctx context.Context, key string) ([]byte, error) {
 	return data, gErr
 }
 
+// MGet implement the MGet method of the cachemanager.CacheClient interfcae for redis.
+func (a *Adapter) MGet(ctx context.Context, keys ...string) ([]interface{}, error) {
+	return a.client.MGet(ctx, keys...).Result()
+}
+
 // Delete implement the Delete method of the cachemanager.CacheClient interface for Redis.
 func (a *Adapter) Delete(ctx context.Context, keys ...string) error {
 	return a.client.Del(ctx, keys...).Err()

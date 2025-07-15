@@ -53,13 +53,13 @@ func (s Service) publishNotification(ctxTimeout time.Duration, notification Noti
 
 	// TODO: render template
 	notificationMsg := &NotificationMessage{
-		NotificationID: notification.ID,
-		UserID:         notification.UserID,
-		Type:           notification.Type,
-		Title:          "test title",
-		Body:           "test body",
-		Data:           notification.Data,
-		Timestamp:      notification.CreatedAt.Unix(),
+		ID:        notification.ID,
+		UserID:    notification.UserID,
+		Type:      notification.Type,
+		Title:     "test title",
+		Body:      "test body",
+		Data:      notification.Data,
+		Timestamp: notification.CreatedAt.Unix(),
 	}
 
 	jsonData, mErr := json.Marshal(notificationMsg)

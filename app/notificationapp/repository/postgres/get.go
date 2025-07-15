@@ -131,6 +131,41 @@ func (d *DB) GetTemplateByID(ctx context.Context, id types.ID) (service.Template
 	return template, nil
 }
 
+const queryGetTemplatesByNames = `SELECT id, name, contents, created_at
+FROM templates WHERE name IN = ($1)`
+
+func (d *DB) GetTemplatesByNames(ctx context.Context, names ...string) ([]service.Template, error) {
+	const op = "repository,postgres.get.GetTemplatesByNames"
+
+	var templates []service.Template
+
+	rows, qErr := d.conn.Conn().Query(ctx, queryGetTemplatesByNames, names)
+	if qErr != nil {
+		return nil, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var template service.Template
+		var jsonContents json.RawMessage
+		if sErr := rows.Scan(&template.ID, &template.Name, &jsonContents, &template.CreatedAt); sErr != nil {
+			return nil, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
+		}
+
+		if uErr := json.Unmarshal(jsonContents, &template.Contents); uErr != nil {
+			return nil, richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected)
+		}
+
+		templates = append(templates, template)
+	}
+
+	if rErr := rows.Err(); rErr != nil {
+		return nil, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
+	}
+
+	return templates, nil
+}
+
 func (d *DB) GetTemplates(ctx context.Context, req service.ListTemplateRequest) (service.ListTemplateResponse, error) {
 	const op = "repository.get.GetTemplates"
 
