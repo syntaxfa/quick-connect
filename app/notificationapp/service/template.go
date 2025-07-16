@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
@@ -125,74 +126,79 @@ func (s Service) TemplateList(ctx context.Context, req ListTemplateRequest) (Lis
 	return templates, nil
 }
 
-func (s Service) RenderNotificationTemplates(ctx context.Context, channel ChannelType, lang string, notifications ...Notification) ([]NotificationMessage, error) {
-	const op = "service.template.RenderNotificationTemplates"
+func (s Service) getTemplates(ctx context.Context, names []string) (map[string]Template, error) {
+	const op = "service.template.getTemplates"
 
-	templateNames := make([]string, 0)
-	for _, notification := range notifications {
-		templateNames = append(templateNames, notification.TemplateName)
+	if len(names) == 0 {
+		return make(map[string]Template), nil
 	}
 
-	redisKeys := make([]string, 0)
-	for _, name := range templateNames {
-		redisKeys = append(redisKeys, "template:"+name)
+	templatesToProcess := make(map[string]*Template)
+	destMap := make(map[string]any, len(names))
+	cacheKeys := make([]string, len(names))
+
+	for i, name := range names {
+		key := "template:" + name
+		cacheKeys[i] = key
+		t := &Template{}
+		templatesToProcess[name] = t
+		destMap[key] = t
 	}
 
-	// Fetch all of them in one go using MGET
-	// The result will be a alice of interfaces
-	results, mErr := s.cache.MGet(ctx, redisKeys...)
-	if mErr != nil {
-		return nil, errlog.ErrLog(richerror.New(op).WithWrapError(mErr).WithKind(richerror.KindUnexpected), s.logger)
+	missedKeys, mgErr := s.cache.MGet(ctx, destMap, cacheKeys...)
+	if mgErr != nil {
+		return nil, richerror.New(op).WithWrapError(mgErr).WithKind(richerror.KindUnexpected)
 	}
 
-	cachedTemplates := make(map[string]Template)
-	var missedNames []string
+	if len(missedKeys) > 0 {
+		missedNames := make([]string, len(missedKeys))
+		for i, key := range missedKeys {
+			missedNames[i] = strings.TrimPrefix(key, "template:")
+		}
 
-	for i, result := range results {
-		originalName := templateNames[i]
+		dbTemplates, dbErr := s.repo.GetTemplatesByNames(ctx, missedNames...)
+		if dbErr != nil {
+			return nil, richerror.New(op).WithWrapError(dbErr).WithKind(richerror.KindUnexpected)
+		}
 
-		if result == nil {
-			missedNames = append(missedNames, originalName)
-		} else {
-			var ok bool
-			cachedTemplates[originalName], ok = result.(Template)
-			if !ok {
-				return nil, errlog.ErrLog(richerror.New(op).WithMessage("cache template type assertion is not ok").
-					WithMeta(map[string]interface{}{"value": result}).WithKind(richerror.KindUnexpected), s.logger)
+		for _, dbTemp := range dbTemplates {
+			if tempPtr, ok := templatesToProcess[dbTemp.Name]; ok {
+				*tempPtr = dbTemp
+			}
+
+			cacheKey := "template:" + dbTemp.Name
+			if sErr := s.cache.Set(ctx, cacheKey, dbTemp, s.cfg.TemplateCacheExpiration); sErr != nil {
+				errlog.WithoutErr(richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected), s.logger)
 			}
 		}
 	}
 
-	var dbTemplates []Template
-	if len(missedNames) > 0 {
-		var gtErr error
-		dbTemplates, gtErr = s.repo.GetTemplatesByNames(ctx, missedNames...)
-		if gtErr != nil {
-			return nil, errlog.ErrLog(richerror.New(op).WithWrapError(gtErr).WithKind(richerror.KindUnexpected), s.logger)
-		}
-	}
-
 	finalTemplates := make(map[string]Template)
-
-	// Add templates fetch from DB
-	for _, t := range dbTemplates {
-		finalTemplates[t.Name] = t
-
-		// Update cache for the next request
-		redisKey := "template:" + t.Name
-		if sErr := s.cache.Set(ctx, redisKey, t, s.cfg.TemplateCacheExpiration); sErr != nil {
-			return nil, errlog.ErrLog(richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected), s.logger)
+	for name, tempPtr := range templatesToProcess {
+		if tempPtr != nil && tempPtr.ID != "" {
+			finalTemplates[name] = *tempPtr
 		}
 	}
 
-	// Add templates fetch from cache
-	for name, t := range cachedTemplates {
-		finalTemplates[name] = t
+	return finalTemplates, nil
+}
+
+func (s Service) RenderNotificationTemplates(ctx context.Context, channel ChannelType, lang string, notifications ...Notification) ([]NotificationMessage, error) {
+	const op = "service.template.RenderNotificationTemplates"
+
+	templateNames := make([]string, len(notifications))
+	for i, notification := range notifications {
+		templateNames[i] = notification.TemplateName
+	}
+
+	templates, tErr := s.getTemplates(ctx, templateNames)
+	if tErr != nil {
+		return nil, errlog.ErrLog(richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
 	notificationMessages := make([]NotificationMessage, 0)
 	for _, n := range notifications {
-		res, rErr := s.renderSvc.RenderTemplate(finalTemplates[n.TemplateName], channel, lang, n.DynamicTitleData, n.DynamicBodyData)
+		res, rErr := s.renderSvc.RenderTemplate(templates[n.TemplateName], channel, lang, n.DynamicTitleData, n.DynamicBodyData)
 		if rErr != nil {
 			return nil, errlog.ErrLog(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected).
 				WithMessage(fmt.Sprintf("can't render notification %s", n.ID)), s.logger)

@@ -38,7 +38,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, re *redis.Ada
 
 	cfg.Notification.PingPeriod = (cfg.Notification.PongWait * 9) / 10
 
-	cache := cachemanager.New(re)
+	cache := cachemanager.New(re, logger)
 
 	notificationVld := service.NewValidate(t)
 	notificationRepo := postgres2.New(pg)
