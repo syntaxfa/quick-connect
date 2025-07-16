@@ -11,7 +11,7 @@ COPY . .
 RUN CGO_ENABLED=0 go build -o $APP_NAME cmd/manager/main.go
 
 # run stage
-FROM alpine:3.22.0 AS runtime
+FROM alpine:3.22.1 AS runtime
 
 COPY --from=builder /manager/manager ./
 COPY --from=builder /manager/deploy/manager/config.yml ./deploy/manager/config.yml
