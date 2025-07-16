@@ -41,4 +41,5 @@ notification:
   user_connection_limit: 5
   publish_timeout: 10s
   default_user_language: fa
+  template_cache_expiration: 3600s
 get_user_id_url: "http://localhost:8000/api/v1/accounts/get-user-id/"

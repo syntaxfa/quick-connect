@@ -54,7 +54,7 @@ func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Reposi
 		logger:    logger,
 		hub:       hub,
 		publisher: publisher,
-		renderSvc: NewRenderService(cfg.DefaultLanguage),
+		renderSvc: NewRenderService(cfg.DefaultUserLanguage),
 	}
 }
 

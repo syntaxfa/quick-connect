@@ -24,7 +24,7 @@ func main() {
 
 	redisAdapter := redis.New(redisCfg, slog.Default())
 
-	cache := cachemanager.New(redisAdapter)
+	cache := cachemanager.New(redisAdapter, slog.Default())
 
 	key := "notification:users:1"
 	ctx := context.Background()

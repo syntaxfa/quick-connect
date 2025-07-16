@@ -13,5 +13,4 @@ type Config struct {
 	PingPeriod              time.Duration
 	DefaultUserLanguage     string        `koanf:"default_user_language"`
 	TemplateCacheExpiration time.Duration `koanf:"template_cache_expiration"`
-	DefaultLanguage         string        `koanf:"default_language"`
 }

@@ -132,7 +132,7 @@ func (d *DB) GetTemplateByID(ctx context.Context, id types.ID) (service.Template
 }
 
 const queryGetTemplatesByNames = `SELECT id, name, contents, created_at
-FROM templates WHERE name IN = ($1)`
+FROM templates WHERE name = ANY($1)`
 
 func (d *DB) GetTemplatesByNames(ctx context.Context, names ...string) ([]service.Template, error) {
 	const op = "repository,postgres.get.GetTemplatesByNames"
