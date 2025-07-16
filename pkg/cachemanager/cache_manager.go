@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 )
 
@@ -37,13 +38,15 @@ type CacheClient interface {
 // CacheManager creates a new instance of CacheManager.
 type CacheManager struct {
 	client CacheClient
+	logger *slog.Logger
 }
 
 // New creates a new instance of CacheManager.
 // It accepts an implementation of CacheClient interface.
-func New(client CacheClient) *CacheManager {
+func New(client CacheClient, logger *slog.Logger) *CacheManager {
 	return &CacheManager{
 		client: client,
+		logger: logger,
 	}
 }
 
@@ -82,14 +85,61 @@ func (c *CacheManager) Get(ctx context.Context, key string, dest any) error {
 	return nil
 }
 
-// MGet retrieves values from the cache.
-func (c *CacheManager) MGet(ctx context.Context, keys ...string) ([]interface{}, error) {
-	data, gErr := c.client.MGet(ctx, keys...)
+// MGet retrieves multiple values from the cache for the given keys.
+// It populates the `destMap` for keys are found(cache hint).
+// The keys of destMap must be the cache keys, and values must be pointers
+// to the destination structs
+// It returns a slice of keys that were not found in the cache(cache misses),
+// which can then be fetched from the primary data source.
+func (c *CacheManager) MGet(ctx context.Context, destMap map[string]any, keys ...string) (missedKeys []string, err error) {
+	if len(keys) == 0 {
+		return nil, nil
+	}
+
+	results, gErr := c.client.MGet(ctx, keys...)
 	if gErr != nil {
 		return nil, fmt.Errorf("cachemanager: failed to mget keys from cache: %s", gErr.Error())
 	}
 
-	return data, nil
+	if len(results) != len(keys) {
+		return nil, fmt.Errorf("mismatched number of keys and results")
+	}
+
+	for i, result := range results {
+		key := keys[i]
+
+		if result == nil {
+			missedKeys = append(missedKeys, key)
+
+			continue
+		}
+
+		dest, ok := destMap[key]
+		if !ok {
+			// the caller must provider a destination for each key.
+			return nil, fmt.Errorf("destination for key `%s` not provided in destMap", key)
+		}
+
+		var data []byte
+		switch v := result.(type) {
+		case []byte:
+			data = v
+		case string:
+			data = []byte(v)
+		default:
+			return nil, fmt.Errorf("unsupported cache value type for key `%s`: %T", key, v)
+		}
+
+		// Unmarshal the JSON bytes into the destination pointer.
+		if uErr := json.Unmarshal(data, dest); uErr != nil {
+			missedKeys = append(missedKeys, key)
+			c.logger.Warn(fmt.Sprintf("failed to unmarshal cache for key `%s`, treating as miss", key), slog.String("error", uErr.Error()))
+
+			continue
+		}
+	}
+
+	return missedKeys, nil
 }
 
 // Delete removes one or more keys from cache.

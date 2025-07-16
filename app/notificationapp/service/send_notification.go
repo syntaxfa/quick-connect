@@ -8,6 +8,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
@@ -16,6 +17,15 @@ func (s Service) SendNotification(ctx context.Context, req SendNotificationReque
 
 	if vErr := s.vld.ValidateSendNotificationRequest(req); vErr != nil {
 		return Notification{}, vErr
+	}
+
+	exists, eErr := s.repo.IsExistTemplateByName(ctx, req.TemplateName)
+	if eErr != nil {
+		return Notification{}, errlog.ErrLog(richerror.New(op).WithWrapError(eErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	if !exists {
+		return Notification{}, richerror.New(op).WithMessage(servermsg.MsgTemplateNotFound).WithKind(richerror.KindNotFound)
 	}
 
 	userID, gErr := s.getUserIDFromExternalUserID(ctx, req.ExternalUserID)
@@ -40,7 +50,11 @@ func (s Service) SendNotification(ctx context.Context, req SendNotificationReque
 			WithKind(richerror.KindUnexpected), s.logger)
 	}
 
-	go s.publishNotification(s.cfg.PublishTimeout, notification) //nolint:contextcheck // This function run asynchronously
+	for _, ch := range notification.ChannelDeliveries {
+		if ch.Channel == ChannelTypeInApp {
+			go s.publishNotification(s.cfg.PublishTimeout, notification) //nolint:contextcheck // This function run asynchronously
+		}
+	}
 
 	return notification, nil
 }
@@ -51,18 +65,14 @@ func (s Service) publishNotification(ctxTimeout time.Duration, notification Noti
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	// TODO: render template
-	notificationMsg := &NotificationMessage{
-		ID:        notification.ID,
-		UserID:    notification.UserID,
-		Type:      notification.Type,
-		Title:     "test title",
-		Body:      "test body",
-		Data:      notification.Data,
-		Timestamp: notification.CreatedAt.Unix(),
+	// TODO: get user setting and set language from user choice
+	notificationMsgs, rErr := s.RenderNotificationTemplates(ctx, ChannelTypeInApp, "fa", notification)
+	if rErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected).
+			WithMessage("can't render notification"), s.logger)
 	}
 
-	jsonData, mErr := json.Marshal(notificationMsg)
+	jsonData, mErr := json.Marshal(notificationMsgs[0])
 	if mErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithMessage("can't marshalling notification message").WithWrapError(mErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
