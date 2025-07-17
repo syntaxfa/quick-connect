@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/oklog/ulid/v2"
@@ -65,19 +66,52 @@ func (s Service) publishNotification(ctxTimeout time.Duration, notification Noti
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	// TODO: get user setting and set language from user choice
-	notificationMsgs, rErr := s.RenderNotificationTemplates(ctx, ChannelTypeInApp, "fa", notification)
+	userSetting, usErr := s.GetUserSetting(ctx, string(notification.UserID))
+	if usErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(usErr).WithMessage(fmt.Sprintf("can't get user setting for user id: %s", notification.UserID)), s.logger)
+	}
+	fmt.Println(userSetting)
+
+	if !CheckNotificationAccessToSend(notification, userSetting, ChannelTypeInApp) {
+		return
+	}
+	notificationMsgs, rErr := s.RenderNotificationTemplates(ctx, ChannelTypeInApp, userSetting.Lang, notification)
 	if rErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected).
 			WithMessage("can't render notification"), s.logger)
+
+		return
 	}
 
 	jsonData, mErr := json.Marshal(notificationMsgs[0])
 	if mErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithMessage("can't marshalling notification message").WithWrapError(mErr).WithKind(richerror.KindUnexpected), s.logger)
+
+		return
 	}
 
 	if pErr := s.publisher.Publish(ctx, s.cfg.ChannelName, jsonData); pErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithMessage("can't publish notification message").WithWrapError(mErr).WithKind(richerror.KindUnexpected), s.logger)
+
+		return
 	}
+}
+
+// CheckNotificationAccessToSend if notification type is critical, notification send and doesn't check user ignore channels.
+func CheckNotificationAccessToSend(notification Notification, userSetting UserSetting, channel ChannelType) bool {
+	if notification.Type == NotificationTypeCritical {
+		return true
+	}
+
+	for _, ignore := range userSetting.IgnoreChannels {
+		if ignore.Channel == channel {
+			for _, notificationType := range ignore.NotificationTypes {
+				if notificationType == notification.Type {
+					return false
+				}
+			}
+		}
+	}
+
+	return true
 }
