@@ -72,7 +72,7 @@ func (s Service) publishNotification(ctxTimeout time.Duration, notification Noti
 	}
 	fmt.Println(userSetting)
 
-	if !CheckNotificationAccessToSend(notification, userSetting, ChannelTypeInApp) {
+	if !s.CheckNotificationAccessToSend(notification, userSetting, ChannelTypeInApp) {
 		return
 	}
 	notificationMsgs, rErr := s.RenderNotificationTemplates(ctx, ChannelTypeInApp, userSetting.Lang, notification)
@@ -98,7 +98,7 @@ func (s Service) publishNotification(ctxTimeout time.Duration, notification Noti
 }
 
 // CheckNotificationAccessToSend if notification type is critical, notification send and doesn't check user ignore channels.
-func CheckNotificationAccessToSend(notification Notification, userSetting UserSetting, channel ChannelType) bool {
+func (s Service) CheckNotificationAccessToSend(notification Notification, userSetting UserSetting, channel ChannelType) bool {
 	if notification.Type == NotificationTypeCritical {
 		return true
 	}
