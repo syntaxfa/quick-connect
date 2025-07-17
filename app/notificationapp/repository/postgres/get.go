@@ -12,7 +12,7 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-func (d *DB) FindNotificationByUserID(ctx context.Context, userID types.ID, paginated paginate.RequestBase, isRead *bool) (service.ListNotificationResponse, error) {
+func (d *DB) FindNotificationByUserID(ctx context.Context, userID types.ID, paginated paginate.RequestBase, isRead, isInApp *bool) ([]service.Notification, paginate.ResponseBase, error) {
 	const op = "repository.get.FindNotificationByUserID"
 
 	filters := map[paginate.FilterParameter]paginate.Filter{
@@ -23,7 +23,14 @@ func (d *DB) FindNotificationByUserID(ctx context.Context, userID types.ID, pagi
 		filters["is_read"] = paginate.Filter{Operation: paginate.FilterOperationEqual, Values: []interface{}{*isRead}}
 	}
 
-	fields := []string{"id", "user_id", "type", "title", "body", "data", "is_read", "created_at"}
+	if isInApp != nil {
+		filters["is_in_app"] = paginate.Filter{Operation: paginate.FilterOperationEqual, Values: []interface{}{*isInApp}}
+	}
+
+	fields := []string{
+		"id", "user_id", "type", "data", "template_name", "dynamic_body_data", "dynamic_title_data",
+		"is_read", "created_at", "overall_status", "channel_deliveries",
+	}
 	sortColumn := "created_at"
 	offset := (paginated.CurrentPage - 1) * paginated.PageSize
 	limit := paginated.PageSize
@@ -43,30 +50,52 @@ func (d *DB) FindNotificationByUserID(ctx context.Context, userID types.ID, pagi
 
 	rows, qErr := d.conn.Conn().Query(ctx, query, args...)
 	if qErr != nil {
-		return service.ListNotificationResponse{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
 	}
 	defer rows.Close()
 
-	var notifications []service.ListNotificationResult
+	var notifications []service.Notification
+	var jsonData json.RawMessage
+	var jsonBodyData json.RawMessage
+	var jsonTitleData json.RawMessage
+	var jsonChannelDelivery json.RawMessage
 	for rows.Next() {
-		var notification service.ListNotificationResult
-		if sErr := rows.Scan(&notification.ID, &notification.UserID, &notification.Type, &notification.Title,
-			&notification.Body, &notification.Data, &notification.IsRead, &notification.CreatedAt); sErr != nil {
-			return service.ListNotificationResponse{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
+		var notification service.Notification
+		if sErr := rows.Scan(&notification.ID, &notification.UserID, &notification.Type, &jsonData, &notification.TemplateName,
+			&jsonBodyData, &jsonTitleData, &notification.IsRead, &notification.CreatedAt, &notification.OverallStatus, &jsonChannelDelivery); sErr != nil {
+			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
 		}
+
+		if uErr := json.Unmarshal(jsonData, &notification.Data); uErr != nil {
+			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected).
+				WithMessage("can't unmarshal notification data")
+		}
+
+		if uErr := json.Unmarshal(jsonBodyData, &notification.DynamicBodyData); uErr != nil {
+			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected).
+				WithMessage("can't unmarshal notification dynamic body data")
+		}
+
+		if uErr := json.Unmarshal(jsonTitleData, &notification.DynamicTitleData); uErr != nil {
+			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected).
+				WithMessage("can't unmarshal notification dynamic title data")
+		}
+
+		if uErr := json.Unmarshal(jsonChannelDelivery, &notification.ChannelDeliveries); uErr != nil {
+			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected).
+				WithMessage("can't unmarshal notification channel deliveries")
+		}
+
 		notifications = append(notifications, notification)
 	}
 
 	if rErr := rows.Err(); rErr != nil {
-		return service.ListNotificationResponse{}, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
+		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
 	}
 
-	return service.ListNotificationResponse{
-		Results: notifications,
-		Paginate: paginate.ResponseBase{
-			CurrentPage: paginated.CurrentPage,
-			PageSize:    paginated.PageSize,
-		},
+	return notifications, paginate.ResponseBase{
+		CurrentPage: paginated.CurrentPage,
+		PageSize:    paginated.PageSize,
 	}, nil
 }
 
