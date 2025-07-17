@@ -23,18 +23,6 @@ type Notification struct {
 	OverallStatus     OverallStatus     `json:"overall_status"`
 }
 
-// NotificationMessage rendered notification.
-type NotificationMessage struct {
-	ID        types.ID          `json:"id"`
-	UserID    types.ID          `json:"user_id"`
-	Type      NotificationType  `json:"type"`
-	Data      map[string]string `json:"data"`
-	Title     string            `json:"title"`
-	Body      string            `json:"body"`
-	IsRead    bool              `json:"is_read"`
-	Timestamp int64             `json:"timestamp"`
-}
-
 // OverallStatus defines the aggregate delivery status of a notification across all channels.
 // This status reflects whether delivery to all intended channels was successful, failed, or is pending.
 type OverallStatus string
