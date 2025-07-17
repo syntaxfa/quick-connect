@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
@@ -217,9 +216,6 @@ func (d *DB) GetTemplates(ctx context.Context, req service.ListTemplateRequest) 
 		Limit:      limit,
 		Offset:     offset,
 	})
-
-	fmt.Println(query)
-	fmt.Println(countQuery)
 
 	// TODO: complete this
 	_ = countQuery
