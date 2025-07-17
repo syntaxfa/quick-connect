@@ -87,6 +87,14 @@ func (v Validate) ValidateNotificationChannelDeliveries(value interface{}) error
 		}
 	}
 
+	for index, channel := range channelDeliveries {
+		for i := index; i < (len(channelDeliveries) - 1); i++ {
+			if channel.Channel == channelDeliveries[i+1].Channel {
+				return errors.New(servermsg.MsgConflictNotificationChannelDelivery)
+			}
+		}
+	}
+
 	return nil
 }
 
