@@ -22,6 +22,7 @@ type SendNotificationRequest struct {
 	DynamicTitleData  map[string]string        `json:"dynamic_title_data,omitempty"`
 	ChannelDeliveries []ChannelDeliveryRequest `json:"channel_deliveries"`
 	IsInApp           bool                     `json:"-"`
+	Status            DeliveryStatus           `json:"-"`
 }
 
 // NotificationMessage rendered notification.

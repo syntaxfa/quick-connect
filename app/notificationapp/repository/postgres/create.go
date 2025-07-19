@@ -10,8 +10,8 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-const queryCreateNotification = `INSERT INTO notifications (id, user_id, type, data, template_name, dynamic_body_data, dynamic_title_data, is_in_app, channel_deliveries)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+const queryCreateNotification = `INSERT INTO notifications (id, user_id, type, data, template_name, dynamic_body_data, dynamic_title_data, is_in_app, overall_status, channel_deliveries)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING id, user_id, type, data, template_name, dynamic_body_data, dynamic_title_data, is_read, is_in_app, created_at, overall_status, channel_deliveries;`
 
 func (d *DB) Save(ctx context.Context, req service.SendNotificationRequest) (service.Notification, error) {
@@ -38,7 +38,7 @@ func (d *DB) Save(ctx context.Context, req service.SendNotificationRequest) (ser
 	var notification service.Notification
 	var jsonChannelDeliveries json.RawMessage
 	if qErr := d.conn.Conn().QueryRow(ctx, queryCreateNotification, req.ID, req.UserID, req.Type, jsonData, req.TemplateName,
-		jsonBodyData, jsonTitleData, req.IsInApp, req.ChannelDeliveries).Scan(
+		jsonBodyData, jsonTitleData, req.IsInApp, req.Status, req.ChannelDeliveries).Scan(
 		&notification.ID, &notification.UserID, &notification.Type, &jsonData, &notification.TemplateName, &jsonBodyData,
 		&jsonTitleData, &notification.IsRead, &notification.IsInApp, &notification.CreatedAt, &notification.OverallStatus,
 		&jsonChannelDeliveries); qErr != nil {
