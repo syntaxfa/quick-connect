@@ -44,6 +44,13 @@ func (s Service) SendNotification(ctx context.Context, req SendNotificationReque
 		}
 	}
 
+	req.Status = DeliveryStatusPending
+	if len(req.ChannelDeliveries) == 1 {
+		if req.ChannelDeliveries[0].Channel == ChannelTypeInApp {
+			req.Status = DeliveryStatusSent
+		}
+	}
+
 	notification, sErr := s.repo.Save(ctx, req)
 	if sErr != nil {
 		return Notification{}, errlog.ErrLog(richerror.New(op).
