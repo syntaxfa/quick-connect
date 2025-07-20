@@ -147,3 +147,14 @@ type IgnoreChannel struct {
 	Channel           ChannelType        `json:"channel"`
 	NotificationTypes []NotificationType `json:"notification_type"`
 }
+
+// SubscriberProfile holds the contact information for a user.
+type SubscriberProfile struct {
+	ID          types.ID  `json:"id"`
+	UserID      types.ID  `json:"user_id"`
+	Email       string    `json:"email"`
+	PhoneNumber string    `json:"phone_number"`
+	PushTokens  []string  `json:"push_tokens"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
