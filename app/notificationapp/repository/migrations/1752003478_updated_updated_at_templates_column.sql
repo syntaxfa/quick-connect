@@ -1,8 +1,9 @@
+-- +migrate Up
 -- +migrate StatementBegin
 CREATE TRIGGER set_updated_at
     BEFORE UPDATE ON templates
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+    EXECUTE PROCEDURE update_updated_at_column();
 -- +migrate StatementEnd
 
 -- +migrate Down
