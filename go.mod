@@ -23,7 +23,7 @@ require (
 	github.com/rubenv/sql-migrate v1.8.0
 	github.com/spf13/cobra v1.9.1
 	github.com/swaggo/echo-swagger v1.4.1
-	github.com/swaggo/swag v1.16.5
+	github.com/swaggo/swag v1.16.6
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.62.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.62.0
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.62.0
