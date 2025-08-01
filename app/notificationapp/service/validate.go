@@ -190,7 +190,6 @@ func (v Validate) ValidateUpdateUserSettingsRequest(req UpdateUserSettingRequest
 		validation.Field(&req.Lang,
 			validation.Required.Error(servermsg.MsgFieldRequired)),
 		validation.Field(&req.IgnoreChannels,
-			validation.Required.Error(servermsg.MsgFieldRequired),
 			validation.By(v.validateIgnoreChannel),
 		),
 	); err != nil {

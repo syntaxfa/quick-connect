@@ -38,8 +38,6 @@ func (s Service) getUserIDFromExternalUserID(ctx context.Context, externalUserID
 				return "", gErr
 			}
 
-			fmt.Println(s.cfg.UserIDCacheExpiration)
-
 			if sErr := s.cache.Set(ctx, key, UserIDCacheValue{UserID: userID}, s.cfg.UserIDCacheExpiration); sErr != nil {
 				return "", sErr
 			}
