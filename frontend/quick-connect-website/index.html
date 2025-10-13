@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Connect - The Complete Customer Engagement Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .gradient-bg {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+        }
+        .section-fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s cubic-bezier(0.33, 1, 0.68, 1), transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+        }
+        .section-fade-in.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
+        }
+        /* Style for the code block */
+        pre[class*="language-"] {
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-markup.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-900 text-white">
+
+<header class="bg-gray-900/80 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Quick Connect</h1>
+        <nav class="space-x-8 hidden md:flex">
+            <a href="#suite" class="hover:text-blue-400 transition-colors">Services</a>
+            <a href="#integration" class="hover:text-blue-400 transition-colors">Integration</a>
+            <a href="#use-cases" class="hover:text-blue-400 transition-colors">Use Cases</a>
+        </nav>
+        <a href="https://github.com/syntaxfa/quick-connect" target="_blank" class="gradient-bg text-white font-semibold px-5 py-2 rounded-full hover:shadow-lg hover:shadow-blue-500/50 transition-shadow">
+            View on GitHub
+        </a>
+    </div>
+</header>
+
+<main>
+    <section class="pt-32 pb-20 text-center">
+        <div class="container mx-auto px-6">
+            <h2 class="text-5xl md:text-7xl font-extrabold leading-tight mb-4">
+                The Modern Platform for
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-600">Customer Engagement.</span>
+            </h2>
+            <p class="text-gray-300 text-lg md:text-xl max-w-3xl mx-auto mb-8">
+                Quick Connect is a suite of open-source, self-hostable services designed to create meaningful, real-time interactions with your users through chat, notifications, and more.
+            </p>
+            <div class="flex justify-center gap-4">
+                <a href="https://github.com/syntaxfa/quick-connect#development" target="_blank" class="bg-white text-gray-900 font-bold px-8 py-3 rounded-full text-lg hover:bg-gray-200 transition-colors">Get Started</a>
+                <a href="https://github.com/syntaxfa/quick-connect" target="_blank" class="border border-gray-600 text-white font-bold px-8 py-3 rounded-full text-lg hover:bg-gray-800 transition-colors">View Source</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="suite" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12 section-fade-in">
+                <h3 class="text-4xl font-bold">An Entire Communication Suite</h3>
+                <p class="text-gray-400 mt-2">Everything you need to build a modern communication experience.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="feature-card bg-gray-800 p-8 rounded-lg section-fade-in">
+                    <div class="gradient-bg w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-2">Live Chat</h4>
+                    <p class="text-gray-400">Engage with your customers instantly using our low-latency chat widget, powered by WebSockets for a seamless, real-time experience.</p>
+                </div>
+                <div class="feature-card bg-gray-800 p-8 rounded-lg section-fade-in" style="transition-delay: 0.2s;">
+                    <div class="gradient-bg w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-2">Notification Engine</h4>
+                    <p class="text-gray-400">Keep users informed with our powerful, multi-channel notification service. Deliver messages via In-App, Push, Email, and SMS.</p>
+                </div>
+                <div class="feature-card bg-gray-800 p-8 rounded-lg section-fade-in" style="transition-delay: 0.4s;">
+                    <div class="relative gradient-bg w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span class="absolute -top-2 -right-3 bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">SOON</span>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-2">Story Platform</h4>
+                    <p class="text-gray-400">Engage users with ephemeral, full-screen content. Share updates, promotions, or news in a familiar and immersive format.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="integration" class="py-20">
+        <div class="container mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
+            <div class="lg:w-1/2 section-fade-in">
+                <h3 class="text-4xl font-bold">Stupidly Simple to Integrate</h3>
+                <p class="text-gray-400 mt-4 mb-6">No complex configurations or lengthy tutorials. Deploy our services with Docker, then add the Quick Connect chat widget to your site by including a single script tag. It's that easy.</p>
+                <a href="https://github.com/syntaxfa/quick-connect/tree/main/sdk/chat/web/simple" target="_blank" class="text-blue-400 font-semibold text-lg hover:underline">Explore the SDK &rarr;</a>
+            </div>
+            <div class="lg:w-1/2 w-full section-fade-in" style="transition-delay: 0.2s;">
+<pre><code class="language-markup">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;My Awesome Website&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Welcome to my site!&lt;/h1&gt;
+
+  &lt;!-- Add this script right before your closing &lt;/body&gt; tag --&gt;
+  &lt;script src="http://your-domain.com/quickconnect-chat-sdk.js"&gt;&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section id="use-cases" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12 section-fade-in">
+                <h3 class="text-4xl font-bold">Built for Modern Use Cases</h3>
+                <p class="text-gray-400 mt-2">Flexible and powerful enough for any business.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="section-fade-in">
+                    <h4 class="text-2xl font-semibold text-blue-400">E-commerce</h4>
+                    <p class="text-gray-400 mt-2">Provide instant support, announce sales with notifications, and showcase products with stories to boost conversions.</p>
+                </div>
+                <div class="section-fade-in" style="transition-delay: 0.2s;">
+                    <h4 class="text-2xl font-semibold text-blue-400">SaaS Platforms</h4>
+                    <p class="text-gray-400 mt-2">Onboard new users with guided chat, announce features, and reduce churn with proactive communication.</p>
+                </div>
+                <div class="section-fade-in" style="transition-delay: 0.4s;">
+                    <h4 class="text-2xl font-semibold text-blue-400">Support Teams</h4>
+                    <p class="text-gray-400 mt-2">Centralize customer conversations, manage support requests efficiently, and deliver exceptional service.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="gradient-bg py-20">
+        <div class="container mx-auto px-6 text-center section-fade-in">
+            <h3 class="text-4xl font-bold text-white">Ready to Connect?</h3>
+            <p class="text-blue-100 mt-2 mb-8 max-w-2xl mx-auto">
+                Explore the source code, deploy your own instance, and start building better customer relationships today. It's open-source and free, forever.
+            </p>
+            <a href="https://github.com/syntaxfa/quick-connect" target="_blank" class="bg-white text-gray-900 font-bold px-10 py-4 rounded-full text-lg hover:bg-gray-200 transition-colors">
+                Get the Source Code on GitHub
+            </a>
+        </div>
+    </section>
+</main>
+
+<footer class="bg-gray-900 py-8">
+    <div class="container mx-auto px-6 text-center text-gray-500">
+        <p>&copy; 2025 Quick Connect. All Rights Reserved. Licensed under the AGPL-3.0 License.</p>
+        <p class="mt-2">An Open-Source Project by <a href="https://github.com/syntaxfa" target="_blank" class="text-blue-400 hover:underline">SyntaxFA</a></p>
+    </div>
+</footer>
+
+<script>
+    // Simple Intersection Observer for fade-in animations
+    const sections = document.querySelectorAll('.section-fade-in');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+</script>
+</body>
+</html>
