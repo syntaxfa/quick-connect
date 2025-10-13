@@ -31,7 +31,7 @@ services:
       - web_app
 
   postgres:
-    image: postgres:17
+    image: postgres:18
     container_name: manager_postgres
     hostname: manager_postgres
     command: -p ${MANAGER_POSTGRES__PORT}

@@ -13,7 +13,7 @@ volumes:
 
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18
     container_name: quick_connect_postgres
     hostname: manager_postgres
     command: -p ${MANAGER_POSTGRES__PORT}

@@ -10,7 +10,7 @@ networks:
 
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18
     container_name: roomix_postgres
     hostname: roomix_postgres
     command: -p 5432
