@@ -19,7 +19,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/prometheus/client_golang v1.23.2
-	github.com/redis/go-redis/v9 v9.11.0
+	github.com/redis/go-redis/v9 v9.14.0
 	github.com/rubenv/sql-migrate v1.8.0
 	github.com/spf13/cobra v1.9.1
 	github.com/swaggo/echo-swagger v1.4.1
