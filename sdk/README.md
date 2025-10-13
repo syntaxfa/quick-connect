@@ -1,7 +1,3 @@
-You got it. Here's the revised `README.md` in English, with the "Available SDKs" section removed.
-
------
-
 # Quick Connect SDKs
 
 This directory contains the Software Development Kits (SDKs) for the various services within the **Quick Connect** project. The purpose of these SDKs is to simplify and standardize the integration process with our services across different platforms.
