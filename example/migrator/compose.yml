@@ -30,7 +30,7 @@ services:
       retries: 10
 
   pgadmin:
-    image: dpage/pgadmin4:9.5
+    image: dpage/pgadmin4:9.8
     container_name: pgadmin4_container
     restart: always
     ports:
