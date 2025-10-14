@@ -10,7 +10,7 @@ volumes:
 
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18
     container_name: notification_postgres
     hostname: notification_postgres
     command: -p ${NOTIFICATION_POSTGRES__PORT}
