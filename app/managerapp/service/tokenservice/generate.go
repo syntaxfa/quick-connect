@@ -11,15 +11,15 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-func (s Service) GenerateTokenPair(userID types.ID, role types.Role) (*TokenGenerateResponse, error) {
+func (s Service) GenerateTokenPair(userID types.ID, roles []types.Role) (*TokenGenerateResponse, error) {
 	op := "auth.service.GenerateTokenPair"
 
-	accessToken, gaErr := s.generateToken(userID, role, types.TokenTypeAccess, s.cfg.AccessExpiry, s.cfg.AccessAudience)
+	accessToken, gaErr := s.generateToken(userID, roles, types.TokenTypeAccess, s.cfg.AccessExpiry, s.cfg.AccessAudience)
 	if gaErr != nil {
 		return nil, errlog.ErrLog(richerror.New(op).WithWrapError(gaErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
-	refreshToken, grErr := s.generateToken(userID, role, types.TokenTypeRefresh, s.cfg.RefreshExpiry, s.cfg.RefreshAudience)
+	refreshToken, grErr := s.generateToken(userID, roles, types.TokenTypeRefresh, s.cfg.RefreshExpiry, s.cfg.RefreshAudience)
 	if grErr != nil {
 		return nil, errlog.ErrLog(richerror.New(op).WithWrapError(grErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
@@ -31,7 +31,7 @@ func (s Service) GenerateTokenPair(userID types.ID, role types.Role) (*TokenGene
 	}, nil
 }
 
-func (s Service) generateToken(userID types.ID, role types.Role, tokenType types.TokenType, expiry time.Duration, audience string) (string, error) {
+func (s Service) generateToken(userID types.ID, roles []types.Role, tokenType types.TokenType, expiry time.Duration, audience string) (string, error) {
 	op := "auth.service.generateToken"
 
 	now := time.Now().UTC()
@@ -44,7 +44,7 @@ func (s Service) generateToken(userID types.ID, role types.Role, tokenType types
 
 	claims := types.UserClaims{
 		UserID:    userID,
-		Role:      role,
+		Roles:     roles,
 		TokenType: tokenType,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    s.cfg.Issuer,

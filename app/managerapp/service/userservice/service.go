@@ -9,12 +9,13 @@ import (
 )
 
 type TokenSvc interface {
-	GenerateTokenPair(userID types.ID, role types.Role) (*tokenservice.TokenGenerateResponse, error)
+	GenerateTokenPair(userID types.ID, roles []types.Role) (*tokenservice.TokenGenerateResponse, error)
 }
 
 type Repository interface {
 	IsExistUserByUsername(ctx context.Context, username string) (bool, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
+	CreateUser(ctx context.Context, req UserCreateRequest) (User, error)
 }
 
 type Service struct {
