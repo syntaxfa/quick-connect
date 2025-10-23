@@ -30,7 +30,7 @@ func (s Service) Login(ctx context.Context, req UserLoginRequest) (UserLoginResp
 		return UserLoginResponse{}, errlog.ErrLog(richerror.New(op).WithKind(richerror.KindNotFound).WithMessage(servermsg.MsgRecordNotFound), s.logger)
 	}
 
-	token, gtErr := s.tokenSvc.GenerateTokenPair(user.ID, user.Role)
+	token, gtErr := s.tokenSvc.GenerateTokenPair(user.ID, user.Roles)
 	if gtErr != nil {
 		return UserLoginResponse{}, errlog.ErrLog(richerror.New(op).WithWrapError(gtErr).WithKind(richerror.KindUnexpected), s.logger)
 	}

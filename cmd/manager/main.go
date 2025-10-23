@@ -55,6 +55,7 @@ func main() {
 	root.AddCommand(
 		command.Server{}.Command(cfg, log, trap),
 		command.Migrate{}.Command(cfg.Postgres, log),
+		command.CreateUser{}.Command(cfg, log, trap),
 	)
 
 	if eErr := root.Execute(); eErr != nil {

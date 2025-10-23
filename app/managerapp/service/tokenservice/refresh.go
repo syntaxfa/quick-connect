@@ -20,5 +20,5 @@ func (s Service) RefreshTokens(refreshToken string) (*TokenGenerateResponse, err
 		return nil, errlog.ErrLog(richerror.New(op).WithMessage(servermsg.MsgInvalidToken).WithKind(richerror.KindUnAuthorized), s.logger)
 	}
 
-	return s.GenerateTokenPair(claims.UserID, claims.Role)
+	return s.GenerateTokenPair(claims.UserID, claims.Roles)
 }
