@@ -4,7 +4,7 @@ import "github.com/golang-jwt/jwt/v5"
 
 type UserClaims struct {
 	UserID    ID        `json:"user_id"`
-	Role      Role      `json:"role"`
+	Roles     []Role    `json:"roles"`
 	TokenType TokenType `json:"token_type"`
 	jwt.RegisteredClaims
 }
@@ -16,9 +16,20 @@ const (
 	TokenTypeRefresh TokenType = "refresh"
 )
 
-type Role uint8
+type Role string
 
 const (
-	RoleSuperUser = iota + 1
-	RoleAdmin
+	RoleSuperUser    Role = "superuser"
+	RoleSupport      Role = "support"
+	RoleStory        Role = "story"
+	RoleFile         Role = "file"
+	RoleNotification Role = "notification"
 )
+
+func IsValidRole(role Role) bool {
+	if role == RoleSuperUser || role == RoleSupport || role == RoleStory || role == RoleFile || role == RoleNotification {
+		return true
+	}
+
+	return false
+}

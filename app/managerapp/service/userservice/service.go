@@ -9,7 +9,7 @@ import (
 )
 
 type TokenSvc interface {
-	GenerateTokenPair(userID types.ID, role types.Role) (*tokenservice.TokenGenerateResponse, error)
+	GenerateTokenPair(userID types.ID, roles []types.Role) (*tokenservice.TokenGenerateResponse, error)
 }
 
 type Repository interface {
