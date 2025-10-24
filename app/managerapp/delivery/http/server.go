@@ -7,6 +7,7 @@ import (
 	"github.com/syntaxfa/quick-connect/app/managerapp/docs"
 	"github.com/syntaxfa/quick-connect/pkg/auth"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
+	"github.com/syntaxfa/quick-connect/types"
 )
 
 type Server struct {
@@ -43,6 +44,7 @@ func (s Server) registerRoutes() {
 	token.POST("/validate", s.handler.ValidateToken)
 
 	user := s.httpserver.Router.Group("/users")
+	user.POST("", s.handler.CreateUser, s.authMid.RequireAuth, s.authMid.RequireRole([]types.Role{types.RoleSuperUser}))
 	user.POST("/login", s.handler.UserLogin)
 	user.GET("/profile", s.handler.UserProfile, s.authMid.RequireAuth)
 }
