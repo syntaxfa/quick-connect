@@ -13,8 +13,10 @@ import (
 	postgres2 "github.com/syntaxfa/quick-connect/app/managerapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
+	"github.com/syntaxfa/quick-connect/pkg/auth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
+	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
 
@@ -38,7 +40,10 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	userRepo := postgres2.New(psqAdapter)
 	userSvc := userservice.New(tokenSvc, vldUser, userRepo, logger)
 	handler := http.NewHandler(t, tokenSvc, userSvc)
-	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
+
+	jwtValidator := jwtvalidator.New(cfg.Token.PublicKeyString, logger)
+	authMid := auth.New(jwtValidator)
+	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler, authMid)
 
 	grpcHandler := grpc.NewHandler(logger, tokenSvc)
 	grpcServer := grpc.New(grpcserver.New(cfg.GRPCServer, logger), grpcHandler, logger)
