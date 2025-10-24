@@ -40,7 +40,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	handler := http.NewHandler(t, tokenSvc, userSvc)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
 
-	grpcHandler := grpc.NewHandler(logger)
+	grpcHandler := grpc.NewHandler(logger, tokenSvc)
 	grpcServer := grpc.New(grpcserver.New(cfg.GRPCServer, logger), grpcHandler, logger)
 
 	return Application{

@@ -48,3 +48,7 @@ func LoadKeyPair(keyPair KeyPair) (ed25519.PrivateKey, ed25519.PublicKey, error)
 
 	return ed25519.PrivateKey(privateKeyBytes), ed25519.PublicKey(publicKeyBytes), nil
 }
+
+func (s Service) GetPublicKey() string {
+	return s.cfg.PublicKeyString
+}
