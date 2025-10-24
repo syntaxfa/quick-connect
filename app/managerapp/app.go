@@ -8,10 +8,12 @@ import (
 	"sync"
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/app/managerapp/delivery/grpc"
 	"github.com/syntaxfa/quick-connect/app/managerapp/delivery/http"
 	postgres2 "github.com/syntaxfa/quick-connect/app/managerapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
+	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
@@ -21,6 +23,7 @@ type Application struct {
 	trap       <-chan os.Signal
 	logger     *slog.Logger
 	httpServer http.Server
+	grpcServer grpc.Server
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database) Application {
@@ -37,16 +40,21 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	handler := http.NewHandler(t, tokenSvc, userSvc)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)
 
+	grpcHandler := grpc.NewHandler(logger, tokenSvc)
+	grpcServer := grpc.New(grpcserver.New(cfg.GRPCServer, logger), grpcHandler, logger)
+
 	return Application{
 		cfg:        cfg,
 		trap:       trap,
 		logger:     logger,
 		httpServer: httpServer,
+		grpcServer: grpcServer,
 	}
 }
 
 func (a Application) Start() {
 	httpServerChan := make(chan error, 1)
+	grpcServerChan := make(chan error, 1)
 
 	go func() {
 		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.HTTPServer.Port))
@@ -56,9 +64,17 @@ func (a Application) Start() {
 		}
 	}()
 
+	go func() {
+		if sErr := a.grpcServer.Start(); sErr != nil {
+			grpcServerChan <- sErr
+		}
+	}()
+
 	select {
 	case err := <-httpServerChan:
 		a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.HTTPServer.Port), slog.String("error", err.Error()))
+	case err := <-grpcServerChan:
+		a.logger.Error(fmt.Sprintf("error in grpc server on %d", a.cfg.GRPCServer.Port), slog.String("error", err.Error()))
 	case <-a.trap:
 		a.logger.Info("received http server shutdown signal!!!")
 	}
@@ -85,6 +101,11 @@ func (a Application) Stop(ctx context.Context) bool {
 
 		shutdownWg.Wait()
 		close(shutdownDone)
+	}()
+
+	go func() {
+		a.grpcServer.Stop()
+		a.logger.Info("grpc server gracefully stop")
 	}()
 
 	select {
