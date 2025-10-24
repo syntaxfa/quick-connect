@@ -39,7 +39,7 @@ func New(cfg Config, logger *slog.Logger) Service {
 		os.Exit(1)
 	}
 
-	validator := jwtvalidator.New(cfg.publicKey, logger)
+	validator := jwtvalidator.New(cfg.PublicKeyString, logger)
 
 	return Service{
 		cfg:       cfg,

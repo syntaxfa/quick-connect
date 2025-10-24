@@ -5,18 +5,21 @@ import (
 
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/syntaxfa/quick-connect/app/managerapp/docs"
+	"github.com/syntaxfa/quick-connect/pkg/auth"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 )
 
 type Server struct {
 	httpserver httpserver.Server
 	handler    Handler
+	authMid    *auth.Middleware
 }
 
-func New(httpServer httpserver.Server, handler Handler) Server {
+func New(httpServer httpserver.Server, handler Handler, authMid *auth.Middleware) Server {
 	return Server{
 		httpserver: httpServer,
 		handler:    handler,
+		authMid:    authMid,
 	}
 }
 
@@ -41,6 +44,7 @@ func (s Server) registerRoutes() {
 
 	user := s.httpserver.Router.Group("/users")
 	user.POST("/login", s.handler.UserLogin)
+	user.GET("/profile", s.handler.UserProfile, s.authMid.RequireAuth)
 }
 
 func (s Server) registerSwagger() {

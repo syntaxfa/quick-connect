@@ -2,6 +2,8 @@ package jwtvalidator
 
 import (
 	"crypto"
+	"crypto/ed25519"
+	"encoding/hex"
 	"log/slog"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -12,19 +14,27 @@ import (
 )
 
 type Validator struct {
-	publicKey crypto.PublicKey
-	logger    *slog.Logger
+	publicKeyString string
+	publicKey       crypto.PublicKey
+	logger          *slog.Logger
 }
 
-func New(publicKey crypto.PublicKey, logger *slog.Logger) *Validator {
+func New(publicKeyString string, logger *slog.Logger) *Validator {
 	return &Validator{
-		publicKey: publicKey,
-		logger:    logger,
+		publicKeyString: publicKeyString,
+		logger:          logger,
 	}
 }
 
 func (v *Validator) ValidateToken(tokenString string) (*types.UserClaims, error) {
 	op := "token.service.ValidateToken"
+
+	publicKeyBytes, dErr := hex.DecodeString(v.publicKeyString)
+	if dErr != nil {
+		return nil, errlog.ErrLog(richerror.New(op).WithWrapError(dErr).WithMessage("invalid public key").WithKind(richerror.KindUnAuthorized), v.logger)
+	}
+
+	v.publicKey = ed25519.PublicKey(publicKeyBytes)
 
 	token, err := jwt.ParseWithClaims(tokenString, &types.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// validate algorithm signature.
