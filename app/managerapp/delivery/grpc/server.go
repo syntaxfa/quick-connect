@@ -1,0 +1,32 @@
+package grpc
+
+import (
+	"log/slog"
+
+	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/tokenpb"
+)
+
+type Server struct {
+	server  grpcserver.Server
+	handler Handler
+	logger  *slog.Logger
+}
+
+func New(server grpcserver.Server, handler Handler, logger *slog.Logger) Server {
+	return Server{
+		server:  server,
+		handler: handler,
+		logger:  logger,
+	}
+}
+
+func (s Server) Start() error {
+	tokenpb.RegisterTokenServiceServer(s.server.GrpcServer, s.handler)
+
+	return s.server.Start()
+}
+
+func (s Server) Stop() {
+	s.server.Stop()
+}
