@@ -2,16 +2,19 @@ package userservice
 
 import (
 	"context"
-	"github.com/oklog/ulid/v2"
-	"github.com/syntaxfa/quick-connect/types"
+	"fmt"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
+	"github.com/syntaxfa/quick-connect/types"
 )
 
 func (s Service) CreateUser(ctx context.Context, req UserCreateRequest) (UserCreateResponse, error) {
 	op := "service.CreateUser"
+
+	fmt.Printf("%+v\n\n\n", req)
 
 	if vErr := s.vld.ValidateUserCreateRequest(req); vErr != nil {
 		return UserCreateResponse{}, vErr
