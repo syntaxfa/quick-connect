@@ -14,7 +14,9 @@ type TokenSvc interface {
 
 type Repository interface {
 	IsExistUserByUsername(ctx context.Context, username string) (bool, error)
+	IsExistUserByID(ctx context.Context, userID types.ID) (bool, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
+	GetUserByID(ctx context.Context, userID types.ID) (User, error)
 	CreateUser(ctx context.Context, req UserCreateRequest) (User, error)
 }
 

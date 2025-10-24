@@ -2,6 +2,7 @@ package tokenservice
 
 import (
 	"crypto/ed25519"
+	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 	"log/slog"
 	"os"
 	"time"
@@ -20,8 +21,9 @@ type Config struct {
 }
 
 type Service struct {
-	cfg    Config
-	logger *slog.Logger
+	cfg       Config
+	logger    *slog.Logger
+	validator *jwtvalidator.Validator
 }
 
 func New(cfg Config, logger *slog.Logger) Service {
@@ -37,8 +39,11 @@ func New(cfg Config, logger *slog.Logger) Service {
 		os.Exit(1)
 	}
 
+	validator := jwtvalidator.New(cfg.PublicKeyString, logger)
+
 	return Service{
-		cfg:    cfg,
-		logger: logger,
+		cfg:       cfg,
+		logger:    logger,
+		validator: validator,
 	}
 }

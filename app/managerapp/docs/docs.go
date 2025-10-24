@@ -208,6 +208,40 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/profile": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "get user profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "UserProfile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userservice.UserProfileResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -256,6 +290,49 @@ const docTemplate = `{
                 }
             }
         },
+        "types.Role": {
+            "type": "string",
+            "enum": [
+                "superuser",
+                "support",
+                "story",
+                "file",
+                "notification"
+            ],
+            "x-enum-varnames": [
+                "RoleSuperUser",
+                "RoleSupport",
+                "RoleStory",
+                "RoleFile",
+                "RoleNotification"
+            ]
+        },
+        "userservice.User": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_online_at": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Role"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "userservice.UserLoginRequest": {
             "type": "object",
             "properties": {
@@ -268,7 +345,41 @@ const docTemplate = `{
             }
         },
         "userservice.UserLoginResponse": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "token": {
+                    "$ref": "#/definitions/tokenservice.TokenGenerateResponse"
+                },
+                "user": {
+                    "$ref": "#/definitions/userservice.User"
+                }
+            }
+        },
+        "userservice.UserProfileResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_online_at": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Role"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {

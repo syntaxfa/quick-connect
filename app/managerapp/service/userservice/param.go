@@ -26,3 +26,7 @@ type UserCreateRequest struct {
 type UserCreateResponse struct {
 	User
 }
+
+type UserProfileResponse struct {
+	User
+}
