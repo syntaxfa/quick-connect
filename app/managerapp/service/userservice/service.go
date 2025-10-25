@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
+	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
@@ -18,6 +19,7 @@ type Repository interface {
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserByID(ctx context.Context, userID types.ID) (User, error)
 	CreateUser(ctx context.Context, req UserCreateRequest) (User, error)
+	GetUserList(ctx context.Context, paginated paginate.RequestBase, username string) ([]User, paginate.ResponseBase, error)
 }
 
 type Service struct {

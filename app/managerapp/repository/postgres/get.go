@@ -5,6 +5,8 @@ import (
 	"database/sql"
 
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
+	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
+	pagesql "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset/sql"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/types"
 )
@@ -109,4 +111,69 @@ func (d *DB) GetUserRolesByUserID(ctx context.Context, userID types.ID) ([]types
 	}
 
 	return roles, nil
+}
+
+func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase, username string) ([]userservice.User, paginate.ResponseBase, error) {
+	const op = "repository.postgres.get.GetUserList"
+
+	filters := map[paginate.FilterParameter]paginate.Filter{}
+
+	if username != "" {
+		filters["username"] = paginate.Filter{Operation: paginate.FilterOperationEqual, Values: []interface{}{username}}
+	}
+
+	fields := []string{
+		"id", "username", "fullname", "avatar", "last_online_at",
+	}
+	sortColumn := "id"
+	offset := (paginated.CurrentPage - 1) * paginated.PageSize
+	limit := paginated.PageSize
+
+	query, countQuery, args := pagesql.WriteQuery(pagesql.Parameters{
+		Table:      "users",
+		Fields:     fields,
+		Filters:    filters,
+		SortColumn: sortColumn,
+		Descending: paginated.Descending,
+		Limit:      limit,
+		Offset:     offset,
+	})
+
+	// TODO: complete this
+	_ = countQuery
+
+	rows, qErr := d.conn.Conn().Query(ctx, query, args...)
+	if qErr != nil {
+		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+	defer rows.Close()
+
+	var users []userservice.User
+
+	for rows.Next() {
+		var user userservice.User
+		var nullable nullableFields
+
+		if sErr := rows.Scan(&user.ID, &user.Username, &nullable.Fullname, &nullable.Avatar, &user.LastOnlineAt); sErr != nil {
+			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
+		}
+
+		if nullable.Fullname.Valid {
+			user.Fullname = nullable.Fullname.String
+		}
+		if nullable.Avatar.Valid {
+			user.Avatar = nullable.Avatar.String
+		}
+
+		users = append(users, user)
+	}
+
+	if rErr := rows.Err(); rErr != nil {
+		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
+	}
+
+	return users, paginate.ResponseBase{
+		CurrentPage: paginated.CurrentPage,
+		PageSize:    paginated.PageSize,
+	}, nil
 }

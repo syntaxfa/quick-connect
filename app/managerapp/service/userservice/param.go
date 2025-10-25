@@ -2,6 +2,7 @@ package userservice
 
 import (
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
+	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
@@ -29,4 +30,14 @@ type UserCreateResponse struct {
 
 type UserProfileResponse struct {
 	User
+}
+
+type ListUserRequest struct {
+	Username  string               `json:"username"`
+	Paginated paginate.RequestBase `json:"paginated"`
+}
+
+type ListUserResponse struct {
+	Results  []User                `json:"results"`
+	Paginate paginate.ResponseBase `json:"paginate"`
 }

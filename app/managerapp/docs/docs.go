@@ -214,6 +214,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/list": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "This API endpoint get user list.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "get user list",
+                "parameters": [
+                    {
+                        "description": "list of users",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userservice.ListUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userservice.ListUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/users/login": {
             "post": {
                 "description": "user log in and generate pair token(access and refresh)",
@@ -302,6 +359,83 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "paginate.Filter": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "$ref": "#/definitions/paginate.FilterOperation"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "paginate.FilterOperation": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ],
+            "x-enum-varnames": [
+                "FilterOperationEqual",
+                "FilterOperationNotEqual",
+                "FilterOperationGreater",
+                "FilterOperationGreaterEqual",
+                "FilterOperationLess",
+                "FilterOperationLessEqual",
+                "FilterOperationIn",
+                "FilterOperationNotIn",
+                "FilterOperationBetween"
+            ]
+        },
+        "paginate.RequestBase": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "descending": {
+                    "type": "boolean"
+                },
+                "filters": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/paginate.Filter"
+                    }
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "sort_column": {
+                    "type": "string"
+                }
+            }
+        },
+        "paginate.ResponseBase": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "total_numbers": {
+                    "type": "integer"
+                },
+                "total_page": {
+                    "type": "integer"
+                }
+            }
+        },
         "servermsg.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -363,6 +497,31 @@ const docTemplate = `{
                 "RoleFile",
                 "RoleNotification"
             ]
+        },
+        "userservice.ListUserRequest": {
+            "type": "object",
+            "properties": {
+                "paginated": {
+                    "$ref": "#/definitions/paginate.RequestBase"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "userservice.ListUserResponse": {
+            "type": "object",
+            "properties": {
+                "paginate": {
+                    "$ref": "#/definitions/paginate.ResponseBase"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/userservice.User"
+                    }
+                }
+            }
         },
         "userservice.User": {
             "type": "object",
