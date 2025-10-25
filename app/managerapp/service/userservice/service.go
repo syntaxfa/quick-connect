@@ -20,6 +20,7 @@ type Repository interface {
 	GetUserByID(ctx context.Context, userID types.ID) (User, error)
 	CreateUser(ctx context.Context, req UserCreateRequest) (User, error)
 	GetUserList(ctx context.Context, paginated paginate.RequestBase, username string) ([]User, paginate.ResponseBase, error)
+	DeleteUser(ctx context.Context, userID types.ID) error
 }
 
 type Service struct {
