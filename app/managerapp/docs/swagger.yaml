@@ -326,6 +326,37 @@ paths:
       summary: CreateUser
       tags:
       - User
+  /users/{userID}:
+    delete:
+      consumes:
+      - application/json
+      description: This API delete user
+      parameters:
+      - description: ID of the user to delete
+        in: path
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: delete user
+      tags:
+      - User
   /users/list:
     post:
       consumes:
