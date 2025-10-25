@@ -45,6 +45,7 @@ func (s Server) registerRoutes() {
 
 	user := s.httpserver.Router.Group("/users")
 	user.POST("", s.handler.CreateUser, s.authMid.RequireAuth, s.authMid.RequireRole([]types.Role{types.RoleSuperUser}))
+	user.DELETE("/:userID", s.handler.UserDelete, s.authMid.RequireAuth, s.authMid.RequireRole([]types.Role{types.RoleSuperUser}))
 	user.POST("/list", s.handler.UserList, s.authMid.RequireAuth, s.authMid.RequireRole([]types.Role{types.RoleSuperUser}))
 	user.POST("/login", s.handler.UserLogin)
 	user.GET("/profile", s.handler.UserProfile, s.authMid.RequireAuth)
