@@ -1,4 +1,60 @@
 definitions:
+  paginate.Filter:
+    properties:
+      operation:
+        $ref: '#/definitions/paginate.FilterOperation'
+      values:
+        items: {}
+        type: array
+    type: object
+  paginate.FilterOperation:
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    type: integer
+    x-enum-varnames:
+    - FilterOperationEqual
+    - FilterOperationNotEqual
+    - FilterOperationGreater
+    - FilterOperationGreaterEqual
+    - FilterOperationLess
+    - FilterOperationLessEqual
+    - FilterOperationIn
+    - FilterOperationNotIn
+    - FilterOperationBetween
+  paginate.RequestBase:
+    properties:
+      current_page:
+        type: integer
+      descending:
+        type: boolean
+      filters:
+        additionalProperties:
+          $ref: '#/definitions/paginate.Filter'
+        type: object
+      page_size:
+        type: integer
+      sort_column:
+        type: string
+    type: object
+  paginate.ResponseBase:
+    properties:
+      current_page:
+        type: integer
+      page_size:
+        type: integer
+      total_numbers:
+        type: integer
+      total_page:
+        type: integer
+    type: object
   servermsg.ErrorResponse:
     properties:
       errors:
@@ -42,6 +98,22 @@ definitions:
     - RoleStory
     - RoleFile
     - RoleNotification
+  userservice.ListUserRequest:
+    properties:
+      paginated:
+        $ref: '#/definitions/paginate.RequestBase'
+      username:
+        type: string
+    type: object
+  userservice.ListUserResponse:
+    properties:
+      paginate:
+        $ref: '#/definitions/paginate.ResponseBase'
+      results:
+        items:
+          $ref: '#/definitions/userservice.User'
+        type: array
+    type: object
   userservice.User:
     properties:
       avatar:
@@ -252,6 +324,42 @@ paths:
       security:
       - JWT: []
       summary: CreateUser
+      tags:
+      - User
+  /users/list:
+    post:
+      consumes:
+      - application/json
+      description: This API endpoint get user list.
+      parameters:
+      - description: list of users
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/userservice.ListUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userservice.ListUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: get user list
       tags:
       - User
   /users/login:
