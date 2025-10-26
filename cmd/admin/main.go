@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/syntaxfa/quick-connect/cmd/admin/command"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/syntaxfa/quick-connect/app/adminapp"
+	"github.com/syntaxfa/quick-connect/cmd/admin/command"
 	"github.com/syntaxfa/quick-connect/config"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 )
