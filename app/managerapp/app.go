@@ -104,13 +104,11 @@ func (a Application) Stop(ctx context.Context) bool {
 		shutdownWg.Add(1)
 		go a.StopHTTPServer(ctx, &shutdownWg)
 
+		shutdownWg.Add(1)
+		go a.StopGRPCServer(&shutdownWg)
+
 		shutdownWg.Wait()
 		close(shutdownDone)
-	}()
-
-	go func() {
-		a.grpcServer.Stop()
-		a.logger.Info("grpc server gracefully stop")
 	}()
 
 	select {
@@ -126,4 +124,9 @@ func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	if sErr := a.httpServer.Stop(ctx); sErr != nil {
 		a.logger.Error("http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
+}
+
+func (a Application) StopGRPCServer(wg *sync.WaitGroup) {
+	defer wg.Done()
+	a.grpcServer.Stop()
 }
