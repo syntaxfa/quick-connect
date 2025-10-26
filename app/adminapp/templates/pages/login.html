@@ -1,16 +1,46 @@
 {{define "page"}}
-<h2>Admin Panel Login</h2>
-<form id="login-form" hx-post="/login" hx-swap="outerHTML">
-    <div class="form-group">
-        <label for="username">Username (phone number)</label>
-        <input type="text" id="username" name="username" required>
+<div class="login-card">
+    <div class="login-header">
+        <h3>Quick Connect</h3>
+        <p>Admin Panel Login</p>
     </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
-    </div>
-    <button type="submit">Login</button>
 
-    <div id="error-message" class="error"></div>
-</form>
+    <!--
+      - hx-post: Sends the form to /login
+      - hx-target="#error-message": Puts the error response into the error div
+      - hx-swap="innerHTML": Swaps the content of the error div
+    -->
+    <form id="login-form"
+          hx-post="/login"
+          hx-target="#error-message"
+          hx-swap="innerHTML">
+
+        <div class="input-group">
+            <!-- User Icon SVG -->
+            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A1.5 1.5 0 0118 21.75H6A1.5 1.5 0 014.501 20.118z" />
+            </svg>
+            <input type="text" id="username" name="username" placeholder="Username (phone number)" required>
+        </div>
+
+        <div class="input-group">
+            <!-- Lock Icon SVG -->
+            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+        </div>
+
+        <button type="submit" class="submit-button">
+            <!-- This text hides when loading -->
+            <span class="button-text">Login</span>
+
+            <!-- This loader shows when loading -->
+            <div class="htmx-indicator"></div>
+        </button>
+
+        <!-- This div will receive error messages from the server -->
+        <div id="error-message" class="error"></div>
+    </form>
+</div>
 {{end}}
