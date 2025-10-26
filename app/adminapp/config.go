@@ -11,4 +11,5 @@ type Config struct {
 	ShutdownTimeout time.Duration     `koanf:"shutdown_timeout"`
 	HTTPServer      httpserver.Config `koanf:"http_server"`
 	Logger          logger.Config     `koanf:"logger"`
+	TemplatePath    string            `koanf:"template_path"`
 }

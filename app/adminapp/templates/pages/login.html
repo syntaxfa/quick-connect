@@ -1,0 +1,16 @@
+{{define "page"}}
+<h2>Admin Panel Login</h2>
+<form id="login-form" hx-post="/login" hx-swap="outerHTML">
+    <div class="form-group">
+        <label for="username">Username (phone number)</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit">Login</button>
+
+    <div id="error-message" class="error"></div>
+</form>
+{{end}}

@@ -10,3 +10,4 @@ logger:
   file_max_age_in_days: 30
   max_backup: 0
   compress: false
+template_path: "app/adminapp/templates/**/*.html"
