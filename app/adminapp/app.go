@@ -31,7 +31,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 		cfg:        cfg,
 		trap:       trap,
 		logger:     logger,
-		httpServer: http.New(httpserver.New(cfg.HTTPServer, logger), handler),
+		httpServer: http.New(httpserver.New(cfg.HTTPServer, logger), handler, cfg.TemplatePath),
 	}
 }
 
