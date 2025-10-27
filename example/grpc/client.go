@@ -36,8 +36,8 @@ func main() {
 	fmt.Println("--------------------")
 
 	resp, lErr := authAdapter.Login(context.Background(), &authpb.LoginRequest{
-		Username: "al",
-		Password: "Pad",
+		Username: "alireza",
+		Password: "Password",
 	})
 	if lErr != nil {
 		handleGRPCError(lErr, slog.Default())
