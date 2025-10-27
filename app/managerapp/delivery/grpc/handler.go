@@ -1,27 +1,27 @@
 package grpc
 
 import (
-	"context"
-	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
+	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
+	"github.com/syntaxfa/quick-connect/pkg/translation"
 	"log/slog"
 
-	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/tokenpb"
+	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
 )
 
 type Handler struct {
-	tokenpb.UnimplementedTokenServiceServer
+	authpb.UnimplementedAuthServiceServer
 	logger   *slog.Logger
 	tokenSvc tokenservice.Service
+	userSvc  userservice.Service
+	t        *translation.Translate
 }
 
-func NewHandler(logger *slog.Logger, tokenSvc tokenservice.Service) Handler {
+func NewHandler(logger *slog.Logger, tokenSvc tokenservice.Service, userSvc userservice.Service, t *translation.Translate) Handler {
 	return Handler{
 		logger:   logger,
 		tokenSvc: tokenSvc,
+		userSvc:  userSvc,
+		t:        t,
 	}
-}
-
-func (h Handler) GetPublicKey(_ context.Context, _ *empty.Empty) (*tokenpb.GetPublicKeyResponse, error) {
-	return &tokenpb.GetPublicKeyResponse{PublicKey: h.tokenSvc.GetPublicKey()}, nil
 }

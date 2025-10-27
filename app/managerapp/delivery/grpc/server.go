@@ -4,7 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
-	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/tokenpb"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
 )
 
 type Server struct {
@@ -22,7 +22,7 @@ func New(server grpcserver.Server, handler Handler, logger *slog.Logger) Server 
 }
 
 func (s Server) Start() error {
-	tokenpb.RegisterTokenServiceServer(s.server.GrpcServer, s.handler)
+	authpb.RegisterAuthServiceServer(s.server.GrpcServer, s.handler)
 
 	return s.server.Start()
 }

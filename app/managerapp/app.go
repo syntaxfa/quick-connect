@@ -45,7 +45,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	authMid := auth.New(jwtValidator)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler, authMid)
 
-	grpcHandler := grpc.NewHandler(logger, tokenSvc)
+	grpcHandler := grpc.NewHandler(logger, tokenSvc, userSvc, t)
 	grpcServer := grpc.New(grpcserver.New(cfg.GRPCServer, logger), grpcHandler, logger)
 
 	return Application{

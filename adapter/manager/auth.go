@@ -8,16 +8,20 @@ import (
 	"google.golang.org/grpc"
 )
 
-type TokenAdapter struct {
-	tokenClient authpb.TokenServiceClient
+type AuthAdapter struct {
+	client authpb.AuthServiceClient
 }
 
-func NewTokenAdapter(conn *grpc.ClientConn) *TokenAdapter {
-	return &TokenAdapter{
-		tokenClient: authpb.NewTokenServiceClient(conn),
+func NewAuthAdapter(conn *grpc.ClientConn) *AuthAdapter {
+	return &AuthAdapter{
+		client: authpb.NewAuthServiceClient(conn),
 	}
 }
 
-func (tc TokenAdapter) GetPublicKey(ctx context.Context) (*authpb.GetPublicKeyResponse, error) {
-	return tc.tokenClient.GetPublicKey(ctx, &empty.Empty{})
+func (tc AuthAdapter) GetPublicKey(ctx context.Context) (*authpb.GetPublicKeyResponse, error) {
+	return tc.client.GetPublicKey(ctx, &empty.Empty{})
+}
+
+func (tc AuthAdapter) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error) {
+	return tc.client.Login(ctx, req)
 }

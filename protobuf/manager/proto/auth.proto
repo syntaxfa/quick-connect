@@ -9,10 +9,6 @@ message GetPublicKeyResponse {
   string public_key = 1;
 }
 
-service TokenService {
-  rpc GetPublicKey (google.protobuf.Empty) returns (GetPublicKeyResponse);
-}
-
 message LoginRequest {
   string username = 1;
   string password = 2;
@@ -23,6 +19,8 @@ message LoginResponse {
   string refresh_token = 2;
 }
 
-service LoginService {
+service AuthService {
+  rpc GetPublicKey (google.protobuf.Empty) returns (GetPublicKeyResponse);
+
   rpc Login (LoginRequest) returns (LoginResponse);
 }

@@ -20,203 +20,139 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TokenService_GetPublicKey_FullMethodName = "/manager.TokenService/GetPublicKey"
+	AuthService_GetPublicKey_FullMethodName = "/manager.AuthService/GetPublicKey"
+	AuthService_Login_FullMethodName        = "/manager.AuthService/Login"
 )
 
-// TokenServiceClient is the client API for TokenService service.
+// AuthServiceClient is the client API for AuthService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TokenServiceClient interface {
+type AuthServiceClient interface {
 	GetPublicKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 }
 
-type tokenServiceClient struct {
+type authServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTokenServiceClient(cc grpc.ClientConnInterface) TokenServiceClient {
-	return &tokenServiceClient{cc}
+func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
+	return &authServiceClient{cc}
 }
 
-func (c *tokenServiceClient) GetPublicKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error) {
+func (c *authServiceClient) GetPublicKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetPublicKeyResponse)
-	err := c.cc.Invoke(ctx, TokenService_GetPublicKey_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AuthService_GetPublicKey_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// TokenServiceServer is the server API for TokenService service.
-// All implementations must embed UnimplementedTokenServiceServer
-// for forward compatibility.
-type TokenServiceServer interface {
-	GetPublicKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error)
-	mustEmbedUnimplementedTokenServiceServer()
+func (c *authServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, AuthService_Login_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
-// UnimplementedTokenServiceServer must be embedded to have
+// AuthServiceServer is the server API for AuthService service.
+// All implementations must embed UnimplementedAuthServiceServer
+// for forward compatibility.
+type AuthServiceServer interface {
+	GetPublicKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error)
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	mustEmbedUnimplementedAuthServiceServer()
+}
+
+// UnimplementedAuthServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedTokenServiceServer struct{}
+type UnimplementedAuthServiceServer struct{}
 
-func (UnimplementedTokenServiceServer) GetPublicKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error) {
+func (UnimplementedAuthServiceServer) GetPublicKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPublicKey not implemented")
 }
-func (UnimplementedTokenServiceServer) mustEmbedUnimplementedTokenServiceServer() {}
-func (UnimplementedTokenServiceServer) testEmbeddedByValue()                      {}
+func (UnimplementedAuthServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
+func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
 
-// UnsafeTokenServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TokenServiceServer will
+// UnsafeAuthServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to AuthServiceServer will
 // result in compilation errors.
-type UnsafeTokenServiceServer interface {
-	mustEmbedUnimplementedTokenServiceServer()
+type UnsafeAuthServiceServer interface {
+	mustEmbedUnimplementedAuthServiceServer()
 }
 
-func RegisterTokenServiceServer(s grpc.ServiceRegistrar, srv TokenServiceServer) {
-	// If the following call pancis, it indicates UnimplementedTokenServiceServer was
+func RegisterAuthServiceServer(s grpc.ServiceRegistrar, srv AuthServiceServer) {
+	// If the following call pancis, it indicates UnimplementedAuthServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&TokenService_ServiceDesc, srv)
+	s.RegisterService(&AuthService_ServiceDesc, srv)
 }
 
-func _TokenService_GetPublicKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthService_GetPublicKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TokenServiceServer).GetPublicKey(ctx, in)
+		return srv.(AuthServiceServer).GetPublicKey(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TokenService_GetPublicKey_FullMethodName,
+		FullMethod: AuthService_GetPublicKey_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TokenServiceServer).GetPublicKey(ctx, req.(*empty.Empty))
+		return srv.(AuthServiceServer).GetPublicKey(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// TokenService_ServiceDesc is the grpc.ServiceDesc for TokenService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var TokenService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "manager.TokenService",
-	HandlerType: (*TokenServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetPublicKey",
-			Handler:    _TokenService_GetPublicKey_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "manager/proto/auth.proto",
-}
-
-const (
-	LoginService_Login_FullMethodName = "/manager.LoginService/Login"
-)
-
-// LoginServiceClient is the client API for LoginService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type LoginServiceClient interface {
-	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-}
-
-type loginServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewLoginServiceClient(cc grpc.ClientConnInterface) LoginServiceClient {
-	return &loginServiceClient{cc}
-}
-
-func (c *loginServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, LoginService_Login_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// LoginServiceServer is the server API for LoginService service.
-// All implementations must embed UnimplementedLoginServiceServer
-// for forward compatibility.
-type LoginServiceServer interface {
-	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	mustEmbedUnimplementedLoginServiceServer()
-}
-
-// UnimplementedLoginServiceServer must be embedded to have
-// forward compatible implementations.
-//
-// NOTE: this should be embedded by value instead of pointer to avoid a nil
-// pointer dereference when methods are called.
-type UnimplementedLoginServiceServer struct{}
-
-func (UnimplementedLoginServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
-func (UnimplementedLoginServiceServer) mustEmbedUnimplementedLoginServiceServer() {}
-func (UnimplementedLoginServiceServer) testEmbeddedByValue()                      {}
-
-// UnsafeLoginServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LoginServiceServer will
-// result in compilation errors.
-type UnsafeLoginServiceServer interface {
-	mustEmbedUnimplementedLoginServiceServer()
-}
-
-func RegisterLoginServiceServer(s grpc.ServiceRegistrar, srv LoginServiceServer) {
-	// If the following call pancis, it indicates UnimplementedLoginServiceServer was
-	// embedded by pointer and is nil.  This will cause panics if an
-	// unimplemented method is ever invoked, so we test this at initialization
-	// time to prevent it from happening at runtime later due to I/O.
-	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
-		t.testEmbeddedByValue()
-	}
-	s.RegisterService(&LoginService_ServiceDesc, srv)
-}
-
-func _LoginService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LoginServiceServer).Login(ctx, in)
+		return srv.(AuthServiceServer).Login(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: LoginService_Login_FullMethodName,
+		FullMethod: AuthService_Login_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LoginServiceServer).Login(ctx, req.(*LoginRequest))
+		return srv.(AuthServiceServer).Login(ctx, req.(*LoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// LoginService_ServiceDesc is the grpc.ServiceDesc for LoginService service.
+// AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var LoginService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "manager.LoginService",
-	HandlerType: (*LoginServiceServer)(nil),
+var AuthService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "manager.AuthService",
+	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetPublicKey",
+			Handler:    _AuthService_GetPublicKey_Handler,
+		},
+		{
 			MethodName: "Login",
-			Handler:    _LoginService_Login_Handler,
+			Handler:    _AuthService_Login_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
