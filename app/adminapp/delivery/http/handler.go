@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -26,6 +27,8 @@ func NewHandler(logger *slog.Logger, t *translation.Translate, authAd *manager.A
 func (h Handler) renderErrorPartial(c echo.Context, httpStatus int, errorMessage string) error {
 	html := `<div id="error-message" class="error">` + h.t.TranslateMessage(errorMessage) + `</div>`
 
+	// TODO: HTMX can't handle errors when status code is not 200
+	c.Response().Header().Set("X-HTTP-Status", fmt.Sprintf("%d", httpStatus))
 	//return c.HTML(httpStatus, html)
 	return c.HTML(http.StatusOK, html)
 }
