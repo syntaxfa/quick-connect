@@ -1,9 +1,10 @@
 package tokenservice
 
 type TokenGenerateResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresIn    int64  `json:"expires_in"` // in seconds
+	AccessToken     string `json:"access_token"`
+	RefreshToken    string `json:"refresh_token"`
+	AccessExpiresIn int32  `json:"access_expires_in"` // in seconds
+	RefreshExpireIn int32  `json:"refresh_expire_in"` // in seconds
 }
 
 type KeyPair struct {
