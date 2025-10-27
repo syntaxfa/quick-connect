@@ -11,3 +11,8 @@ logger:
   max_backup: 0
   compress: false
 template_path: "app/adminapp/templates/**/*.html"
+manager_app_grpc:
+  host: "localhost"
+  port: 2541
+  ssl_mode: false
+  use_otel: false

@@ -13,7 +13,7 @@ type Client struct {
 	conn *grpc.ClientConn
 }
 
-func New(cfg Config) (Client, error) {
+func New(cfg Config) (*Client, error) {
 	var opts []grpc.DialOption
 
 	if !cfg.SSLMode {
@@ -28,10 +28,10 @@ func New(cfg Config) (Client, error) {
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), opts...)
 	if err != nil {
-		return Client{}, err
+		return &Client{}, err
 	}
 
-	return Client{
+	return &Client{
 		conn: conn,
 	}, nil
 }

@@ -8,12 +8,15 @@
     <!--
       - hx-post: Sends the form to /login
       - hx-target="#error-message": Puts the error response into the error div
-      - hx-swap="innerHTML": Swaps the content of the error div
+      - hx-swap="innerHTML swap:4xx:innerHTML swap:5xx:innerHTML":
+          - For 2xx/3xx responses: swap innerHTML
+          - For 4xx responses: ALSO swap innerHTML
+          - For 5xx responses: ALSO swap innerHTML (handles server errors)
     -->
     <form id="login-form"
           hx-post="/login"
           hx-target="#error-message"
-          hx-swap="innerHTML">
+          hx-swap="innerHTML swap:4xx:innerHTML swap:5xx:innerHTML">
 
         <div class="input-group">
             <!-- User Icon SVG -->
