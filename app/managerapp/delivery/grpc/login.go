@@ -19,7 +19,9 @@ func (h Handler) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.L
 	}
 
 	return &authpb.LoginResponse{
-		AccessToken:  resp.Token.AccessToken,
-		RefreshToken: resp.Token.RefreshToken,
+		AccessToken:      resp.Token.AccessToken,
+		RefreshToken:     resp.Token.RefreshToken,
+		AccessExpiresIn:  resp.Token.AccessExpiresIn,
+		RefreshExpiresIn: resp.Token.RefreshExpireIn,
 	}, nil
 }

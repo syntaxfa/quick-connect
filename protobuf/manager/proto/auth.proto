@@ -17,6 +17,8 @@ message LoginRequest {
 message LoginResponse {
   string access_token = 1;
   string refresh_token = 2;
+  int32 access_expires_in = 3;
+  int32 refresh_expires_in = 4;
 }
 
 service AuthService {
