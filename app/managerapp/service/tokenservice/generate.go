@@ -25,9 +25,10 @@ func (s Service) GenerateTokenPair(userID types.ID, roles []types.Role) (*TokenG
 	}
 
 	return &TokenGenerateResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		ExpiresIn:    int64(s.cfg.AccessExpiry.Seconds()),
+		AccessToken:     accessToken,
+		RefreshToken:    refreshToken,
+		AccessExpiresIn: int32(s.cfg.AccessExpiry.Seconds()),
+		RefreshExpireIn: int32(s.cfg.RefreshExpiry.Seconds()),
 	}, nil
 }
 

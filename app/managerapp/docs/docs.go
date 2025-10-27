@@ -502,10 +502,14 @@ const docTemplate = `{
         "tokenservice.TokenGenerateResponse": {
             "type": "object",
             "properties": {
+                "access_expires_in": {
+                    "description": "in seconds",
+                    "type": "integer"
+                },
                 "access_token": {
                     "type": "string"
                 },
-                "expires_in": {
+                "refresh_expire_in": {
                     "description": "in seconds",
                     "type": "integer"
                 },

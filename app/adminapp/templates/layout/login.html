@@ -5,11 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quick Connect - Admin Login</title>
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Local CSS -->
     <link rel="stylesheet" href="/static/css/style.css">
+
+    <!-- Local HTMX -->
     <script src="/static/js/htmx.min.js" defer></script>
 </head>
 <body class="login-body">
+
+<!--
+  Inline SVG filter for the delicate noise effect.
+  This is hidden and applied to the body via CSS.
+-->
+<svg style="position:absolute; width:0; height:0; overflow:hidden;">
+    <filter id="noiseFilter">
+        <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.8"
+                numOctaves="1"
+                stitchTiles="stitch"/>
+        <feComposite operator="in" in2="SourceGraphic" result="noisy"/>
+    </filter>
+</svg>
+
 <div class="login-container">
+    <!-- Page content (from pages/login.html) will be rendered here -->
     {{template "page" .}}
 </div>
 </body>

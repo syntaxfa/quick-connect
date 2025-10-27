@@ -7,31 +7,46 @@ import (
 	"os"
 	"sync"
 
+	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/app/adminapp/delivery/http"
+	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
 
 type Application struct {
-	cfg        Config
-	trap       <-chan os.Signal
-	logger     *slog.Logger
-	httpServer http.Server
+	cfg               Config
+	trap              <-chan os.Signal
+	logger            *slog.Logger
+	httpServer        http.Server
+	managerGRPCClient *grpcclient.Client
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	t, tErr := translation.New(translation.DefaultLanguages...)
 	if tErr != nil {
+		logger.Error("failed create new instance of translation", slog.String("error", tErr.Error()))
+
 		panic(tErr)
 	}
 
-	handler := http.NewHandler(t)
+	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC)
+	if grpcErr != nil {
+		logger.Error("failed to create manager gRPC client", slog.String("error", grpcErr.Error()))
+
+		panic(grpcErr)
+	}
+
+	authAdapter := manager.NewAuthAdapter(managerGRPCClient.Conn())
+
+	handler := http.NewHandler(logger, t, authAdapter)
 
 	return Application{
-		cfg:        cfg,
-		trap:       trap,
-		logger:     logger,
-		httpServer: http.New(httpserver.New(cfg.HTTPServer, logger), handler, cfg.TemplatePath),
+		cfg:               cfg,
+		trap:              trap,
+		logger:            logger,
+		httpServer:        http.New(httpserver.New(cfg.HTTPServer, logger), handler, cfg.TemplatePath),
+		managerGRPCClient: managerGRPCClient,
 	}
 }
 
@@ -69,7 +84,10 @@ func (a Application) Stop(ctx context.Context) bool {
 	go func() {
 		var shutdownWg sync.WaitGroup
 		shutdownWg.Add(1)
-		go a.StopHTTPServer(ctx, &shutdownWg)
+		go a.stopHTTPServer(ctx, &shutdownWg)
+
+		shutdownWg.Add(1)
+		go a.closeManagerGRPCClient(&shutdownWg)
 
 		shutdownWg.Wait()
 		close(shutdownDone)
@@ -83,9 +101,16 @@ func (a Application) Stop(ctx context.Context) bool {
 	}
 }
 
-func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
+func (a Application) stopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	if sErr := a.httpServer.Stop(ctx); sErr != nil {
 		a.logger.Error("http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+	}
+}
+
+func (a Application) closeManagerGRPCClient(wg *sync.WaitGroup) {
+	defer wg.Done()
+	if cErr := a.managerGRPCClient.Close(); cErr != nil {
+		a.logger.Error("failed to close manager gRPC client", slog.String("error", cErr.Error()))
 	}
 }

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package shared;
+
+option go_package = "protobuf/shared/golang/errdetailspb";
+
+// FieldViolation describes a single validation error on a field.
+message FieldViolation {
+  string field = 1; // The field that was invalid, e.g., "password"
+  string description = 2; // The error description, e.g., "must be at least 8 characters"
+}
+
+// BadRequest contains violation for multiple fields.
+// Usually used with code InvalidArgument.
+message BadRequest {
+  repeated FieldViolation field_violations = 1;
+}
+
+// PreconditionFailure describe errors where the system is not in a state
+// require for the operation's execution.
+// Usually used with code FailedPrecondition.
+message PreconditionFailure {
+  message Violation {
+    string type = 1;
+    string subject = 2;
+    string description = 3;
+  }
+  repeated Violation violations = 1;
+}
