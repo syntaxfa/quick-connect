@@ -2,22 +2,22 @@ package manager
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes/empty"
 
-	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/tokenpb"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
 	"google.golang.org/grpc"
 )
 
 type TokenAdapter struct {
-	client tokenpb.TokenServiceClient
+	tokenClient authpb.TokenServiceClient
 }
 
 func NewTokenAdapter(conn *grpc.ClientConn) *TokenAdapter {
 	return &TokenAdapter{
-		client: tokenpb.NewTokenServiceClient(conn),
+		tokenClient: authpb.NewTokenServiceClient(conn),
 	}
 }
 
-func (tc TokenAdapter) GetPublicKey(ctx context.Context) (*tokenpb.GetPublicKeyResponse, error) {
-	return tc.client.GetPublicKey(ctx, &empty.Empty{})
+func (tc TokenAdapter) GetPublicKey(ctx context.Context) (*authpb.GetPublicKeyResponse, error) {
+	return tc.tokenClient.GetPublicKey(ctx, &empty.Empty{})
 }
