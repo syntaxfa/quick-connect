@@ -27,7 +27,7 @@ func (h Handler) renderErrorPartial(c echo.Context, httpStatus int, errorMessage
 	html := `<div id="error-message" class="error">` + h.t.TranslateMessage(errorMessage) + `</div>`
 
 	//return c.HTML(httpStatus, html)
-	return c.HTML(http.StatusOK, html) // <-- تست با 200 OK
+	return c.HTML(http.StatusOK, html)
 }
 
 func (h Handler) logError(c echo.Context, err error, message string) {
