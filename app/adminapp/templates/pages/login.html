@@ -1,18 +1,35 @@
 {{define "page"}}
 <div class="login-card">
     <div class="login-header">
+        <!-- Logo Icon -->
+        <div class="logo-wrapper">
+            <div class="logo-icon">
+                <!-- Connection Icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                    <circle cx="8" cy="8" r="2"/>
+                    <circle cx="16" cy="8" r="2"/>
+                    <circle cx="8" cy="16" r="2"/>
+                    <circle cx="16" cy="16" r="2"/>
+                    <line x1="8" y1="10" x2="8" y2="14"/>
+                    <line x1="16" y1="10" x2="16" y2="14"/>
+                    <line x1="10" y1="8" x2="14" y2="8"/>
+                    <line x1="10" y1="16" x2="14" y2="16"/>
+                </svg>
+            </div>
+        </div>
+
         <h3>Quick Connect</h3>
         <p>Admin Panel Login</p>
+
+        <!-- Feature Badges -->
+        <div class="feature-badges">
+            <span class="badge">Chat</span>
+            <span class="badge">Notify</span>
+            <span class="badge">Stories</span>
+        </div>
     </div>
 
-    <!--
-      - hx-post: Sends the form to /login
-      - hx-target="#error-message": Puts the error response into the error div
-      - hx-swap="innerHTML swap:4xx:innerHTML swap:5xx:innerHTML":
-          - For 2xx/3xx responses: swap innerHTML
-          - For 4xx responses: ALSO swap innerHTML
-          - For 5xx responses: ALSO swap innerHTML (handles server errors)
-    -->
     <form id="login-form"
           hx-post="/login"
           hx-target="#error-message"
@@ -35,14 +52,11 @@
         </div>
 
         <button type="submit" class="submit-button">
-            <!-- This text hides when loading -->
             <span class="button-text">Login</span>
-
-            <!-- This loader shows when loading -->
             <div class="htmx-indicator"></div>
         </button>
 
-        <!-- This div will receive error messages from the server -->
+        <!-- Error message container -->
         <div id="error-message" class="error"></div>
     </form>
 </div>

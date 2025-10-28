@@ -25,4 +25,8 @@ const (
 	MsgConflictTemplate                    = "template is already exists"
 	MsgTemplateNotFound                    = "this template does not exist"
 	MsgInvalidIgnoreChannel                = "invalid ignore channel"
+
+	// Admin app
+
+	MsgUsernameAndPasswordAreRequired = "username and password are required"
 )
