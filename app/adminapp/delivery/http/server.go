@@ -53,6 +53,12 @@ func (s Server) registerRoutes() {
 	protectedGroup.GET("/support", s.handler.ShowSupportService)
 	protectedGroup.GET("/notification", s.handler.ShowNotificationService)
 	protectedGroup.GET("/story", s.handler.ShowStoryService)
+
+	// Users management routes
+	protectedGroup.GET("/users", s.handler.ShowUsers)
+	protectedGroup.GET("/users/search", s.handler.SearchUsers)
+	protectedGroup.GET("/users/export", s.handler.ExportUsers)
+	protectedGroup.GET("/users/create", s.handler.ShowCreateUserForm)
 }
 
 func (s Server) registerSwagger() {
