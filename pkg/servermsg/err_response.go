@@ -136,3 +136,20 @@ func GRPCMsg(err error, t *translation.Translate, logger *slog.Logger) error {
 		return status.Error(internalCode, MsgSomethingWentWrong)
 	}
 }
+
+func GRPCCodeToHTTPStatusCode(code codes.Code) int {
+	switch code {
+	case codes.InvalidArgument:
+		return http.StatusBadRequest
+	case codes.Unauthenticated:
+		return http.StatusUnauthorized
+	case codes.NotFound:
+		return http.StatusNotFound
+	case codes.PermissionDenied:
+		return http.StatusForbidden
+	case codes.AlreadyExists:
+		return http.StatusConflict
+	default:
+		return http.StatusInternalServerError
+	}
+}
