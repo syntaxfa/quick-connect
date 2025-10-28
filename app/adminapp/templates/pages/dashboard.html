@@ -1,0 +1,138 @@
+{{define "dashboard_page"}}
+<div class="dashboard-content">
+
+    <!-- Header Section -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">Welcome to Quick Connect</h1>
+            <p class="dashboard-subtitle">Select a service to manage</p>
+        </div>
+
+        <!-- Quick Stats (Optional) -->
+        <div class="quick-stats">
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-value">1,234</span>
+                    <span class="stat-label">Active Users</span>
+                </div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z" />
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-value">89</span>
+                    <span class="stat-label">Support Tickets</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Cards Grid -->
+    <div class="services-grid">
+
+        <!-- Support Service Card -->
+        <div class="service-card support-card"
+             hx-get="/support"
+             hx-target="#main-content"
+             hx-swap="innerHTML"
+             hx-push-url="true">
+            <div class="service-card-inner">
+                <div class="service-icon support-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                    </svg>
+                </div>
+
+                <div class="service-content">
+                    <h3 class="service-title">Support</h3>
+                    <p class="service-description">Manage support tickets and customer inquiries</p>
+
+                    <div class="service-stats">
+                        <span class="stat-badge">89 Active</span>
+                        <span class="stat-badge">12 Pending</span>
+                    </div>
+                </div>
+
+                <div class="service-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Service Card -->
+        <div class="service-card notification-card"
+             hx-get="/notification"
+             hx-target="#main-content"
+             hx-swap="innerHTML"
+             hx-push-url="true">
+            <div class="service-card-inner">
+                <div class="service-icon notification-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0M3.124 7.5A8.969 8.969 0 015.292 3m13.416 0a8.969 8.969 0 012.168 4.5" />
+                    </svg>
+                </div>
+
+                <div class="service-content">
+                    <h3 class="service-title">Notification</h3>
+                    <p class="service-description">Send push notifications to users</p>
+
+                    <div class="service-stats">
+                        <span class="stat-badge">1.2K Sent</span>
+                        <span class="stat-badge">98% Delivered</span>
+                    </div>
+                </div>
+
+                <div class="service-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Story Service Card -->
+        <div class="service-card story-card"
+             hx-get="/story"
+             hx-target="#main-content"
+             hx-swap="innerHTML"
+             hx-push-url="true">
+            <div class="service-card-inner">
+                <div class="service-icon story-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                    </svg>
+                </div>
+
+                <div class="service-content">
+                    <h3 class="service-title">Story</h3>
+                    <p class="service-description">Manage user stories and highlights</p>
+
+                    <div class="service-stats">
+                        <span class="stat-badge">456 Active</span>
+                        <span class="stat-badge">2.3M Views</span>
+                    </div>
+                </div>
+
+                <div class="service-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{{end}}
