@@ -41,6 +41,18 @@ func (s Server) registerRoutes() {
 
 	authGroup := s.httpserver.Router.Group("")
 	authGroup.POST("/login", s.handler.Login)
+
+	// TODO: Add authentication middleware here
+	// protectedGroup := s.httpserver.Router.Group("", AuthMiddleware)
+	protectedGroup := s.httpserver.Router.Group("")
+
+	// Dashboard - Main hub
+	protectedGroup.GET("/dashboard", s.handler.ShowDashboard)
+
+	// Service routes - these load content via HTMX
+	protectedGroup.GET("/support", s.handler.ShowSupportService)
+	protectedGroup.GET("/notification", s.handler.ShowNotificationService)
+	protectedGroup.GET("/story", s.handler.ShowStoryService)
 }
 
 func (s Server) registerSwagger() {
