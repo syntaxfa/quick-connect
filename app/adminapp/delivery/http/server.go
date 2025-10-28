@@ -2,9 +2,7 @@ package http
 
 import (
 	"context"
-	"net/http"
 
-	"github.com/labstack/echo/v4"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 )
 
@@ -43,10 +41,6 @@ func (s Server) registerRoutes() {
 
 	authGroup := s.httpserver.Router.Group("")
 	authGroup.POST("/login", s.handler.Login)
-
-	s.httpserver.Router.GET("/ping", func(c echo.Context) error {
-		return c.String(http.StatusOK, "<div id='ping-result'>Pong! HTMX works.</div>")
-	})
 }
 
 func (s Server) registerSwagger() {

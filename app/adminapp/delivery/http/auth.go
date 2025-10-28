@@ -4,9 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func (h Handler) ShowLoginPage(c echo.Context) error {
@@ -22,32 +21,13 @@ func (h Handler) Login(c echo.Context) error {
 	}
 
 	if loginReq.Username == "" || loginReq.Password == "" {
-		return h.renderErrorPartial(c, http.StatusBadRequest, "Username and password are required")
+		return h.renderErrorPartial(c, http.StatusBadRequest, h.t.TranslateMessage(servermsg.MsgUsernameAndPasswordAreRequired))
 	}
 
 	loginResp, err := h.authAd.Login(ctx, loginReq)
 
 	if err != nil {
-		h.logError(c, err, "gRPC login call failed")
-
-		st, ok := status.FromError(err)
-		if !ok {
-			return h.renderErrorPartial(c, http.StatusInternalServerError, "An unexpected error occurred")
-		}
-
-		errorMessage := st.Message()
-		httpStatus := http.StatusInternalServerError // پیش‌فرض
-
-		switch st.Code() {
-		case codes.InvalidArgument:
-			httpStatus = http.StatusBadRequest
-		case codes.Unauthenticated:
-			httpStatus = http.StatusUnauthorized
-		case codes.NotFound:
-			httpStatus = http.StatusUnauthorized // for security is better return 401 for 404
-		}
-
-		return h.renderErrorPartial(c, httpStatus, errorMessage)
+		return h.renderGRPCError(c, "gRPC login call failed", err)
 	}
 
 	accessMaxAge := int(loginResp.GetAccessExpiresIn())
@@ -73,6 +53,6 @@ func (h Handler) Login(c echo.Context) error {
 	refreshCookie.MaxAge = refreshMaxAge
 	c.SetCookie(refreshCookie)
 
-	c.Response().Header().Set("HX-Redirect", "/dashboard") // ریدایرکت به داشبورد
+	c.Response().Header().Set("HX-Redirect", "/dashboard")
 	return c.NoContent(http.StatusOK)
 }
