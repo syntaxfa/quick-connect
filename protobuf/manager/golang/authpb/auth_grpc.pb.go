@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	AuthService_GetPublicKey_FullMethodName = "/manager.AuthService/GetPublicKey"
 	AuthService_Login_FullMethodName        = "/manager.AuthService/Login"
+	AuthService_TokenVerify_FullMethodName  = "/manager.AuthService/TokenVerify"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -30,6 +31,7 @@ const (
 type AuthServiceClient interface {
 	GetPublicKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	TokenVerify(ctx context.Context, in *TokenVerifyRequest, opts ...grpc.CallOption) (*TokenVerifyResponse, error)
 }
 
 type authServiceClient struct {
@@ -60,12 +62,23 @@ func (c *authServiceClient) Login(ctx context.Context, in *LoginRequest, opts ..
 	return out, nil
 }
 
+func (c *authServiceClient) TokenVerify(ctx context.Context, in *TokenVerifyRequest, opts ...grpc.CallOption) (*TokenVerifyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TokenVerifyResponse)
+	err := c.cc.Invoke(ctx, AuthService_TokenVerify_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
 type AuthServiceServer interface {
 	GetPublicKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	TokenVerify(context.Context, *TokenVerifyRequest) (*TokenVerifyResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -81,6 +94,9 @@ func (UnimplementedAuthServiceServer) GetPublicKey(context.Context, *empty.Empty
 }
 func (UnimplementedAuthServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedAuthServiceServer) TokenVerify(context.Context, *TokenVerifyRequest) (*TokenVerifyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TokenVerify not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -139,6 +155,24 @@ func _AuthService_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_TokenVerify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenVerifyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).TokenVerify(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_TokenVerify_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).TokenVerify(ctx, req.(*TokenVerifyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -153,6 +187,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _AuthService_Login_Handler,
+		},
+		{
+			MethodName: "TokenVerify",
+			Handler:    _AuthService_TokenVerify_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

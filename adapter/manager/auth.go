@@ -31,3 +31,8 @@ func (tc AuthAdapter) GetPublicKey(ctx context.Context, opts ...grpc.CallOption)
 func (tc AuthAdapter) Login(ctx context.Context, req *authpb.LoginRequest, opts ...grpc.CallOption) (*authpb.LoginResponse, error) {
 	return tc.client.Login(ctx, req, opts...)
 }
+
+// TokenVerify calls the TokenVerify PRC on the AuthService.
+func (tc AuthAdapter) TokenVerify(ctx context.Context, req *authpb.TokenVerifyRequest, opts ...grpc.CallOption) (*authpb.TokenVerifyResponse, error) {
+	return tc.client.TokenVerify(ctx, req, opts...)
+}

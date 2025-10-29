@@ -21,8 +21,20 @@ message LoginResponse {
   int32 refresh_expires_in = 4;
 }
 
+message TokenVerifyRequest {
+  string token = 1;
+}
+
+message TokenVerifyResponse {
+  string user_id = 1;
+  repeated string roles = 2;
+  string token_type = 3;
+}
+
 service AuthService {
   rpc GetPublicKey (google.protobuf.Empty) returns (GetPublicKeyResponse);
 
   rpc Login (LoginRequest) returns (LoginResponse);
+
+  rpc TokenVerify (TokenVerifyRequest) returns (TokenVerifyResponse);
 }

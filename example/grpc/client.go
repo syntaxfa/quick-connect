@@ -46,6 +46,13 @@ func main() {
 	}
 
 	fmt.Printf("%+v\n", resp)
+
+	tokenVerifyResp, tvErr := authAdapter.TokenVerify(context.Background(), &authpb.TokenVerifyRequest{Token: resp.RefreshToken})
+	if tvErr != nil {
+		handleGRPCError(tvErr, slog.Default())
+	}
+
+	fmt.Printf("%+v\n", tokenVerifyResp)
 }
 
 func handleGRPCError(err error, logger *slog.Logger) {
