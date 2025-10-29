@@ -31,10 +31,23 @@ message TokenVerifyResponse {
   string token_type = 3;
 }
 
+message TokenRefreshRequest {
+  string refresh_token = 1;
+}
+
+message TokenRefreshResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int32 access_expires_in = 3;
+  int32 refresh_expires_in = 4;
+}
+
 service AuthService {
   rpc GetPublicKey (google.protobuf.Empty) returns (GetPublicKeyResponse);
 
   rpc Login (LoginRequest) returns (LoginResponse);
 
   rpc TokenVerify (TokenVerifyRequest) returns (TokenVerifyResponse);
+
+  rpc TokenRefresh (TokenRefreshRequest) returns (TokenRefreshResponse);
 }

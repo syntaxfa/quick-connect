@@ -23,6 +23,7 @@ const (
 	AuthService_GetPublicKey_FullMethodName = "/manager.AuthService/GetPublicKey"
 	AuthService_Login_FullMethodName        = "/manager.AuthService/Login"
 	AuthService_TokenVerify_FullMethodName  = "/manager.AuthService/TokenVerify"
+	AuthService_TokenRefresh_FullMethodName = "/manager.AuthService/TokenRefresh"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -32,6 +33,7 @@ type AuthServiceClient interface {
 	GetPublicKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	TokenVerify(ctx context.Context, in *TokenVerifyRequest, opts ...grpc.CallOption) (*TokenVerifyResponse, error)
+	TokenRefresh(ctx context.Context, in *TokenRefreshRequest, opts ...grpc.CallOption) (*TokenRefreshResponse, error)
 }
 
 type authServiceClient struct {
@@ -72,6 +74,16 @@ func (c *authServiceClient) TokenVerify(ctx context.Context, in *TokenVerifyRequ
 	return out, nil
 }
 
+func (c *authServiceClient) TokenRefresh(ctx context.Context, in *TokenRefreshRequest, opts ...grpc.CallOption) (*TokenRefreshResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TokenRefreshResponse)
+	err := c.cc.Invoke(ctx, AuthService_TokenRefresh_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -79,6 +91,7 @@ type AuthServiceServer interface {
 	GetPublicKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	TokenVerify(context.Context, *TokenVerifyRequest) (*TokenVerifyResponse, error)
+	TokenRefresh(context.Context, *TokenRefreshRequest) (*TokenRefreshResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -97,6 +110,9 @@ func (UnimplementedAuthServiceServer) Login(context.Context, *LoginRequest) (*Lo
 }
 func (UnimplementedAuthServiceServer) TokenVerify(context.Context, *TokenVerifyRequest) (*TokenVerifyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TokenVerify not implemented")
+}
+func (UnimplementedAuthServiceServer) TokenRefresh(context.Context, *TokenRefreshRequest) (*TokenRefreshResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TokenRefresh not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -173,6 +189,24 @@ func _AuthService_TokenVerify_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_TokenRefresh_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenRefreshRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).TokenRefresh(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_TokenRefresh_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).TokenRefresh(ctx, req.(*TokenRefreshRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -191,6 +225,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TokenVerify",
 			Handler:    _AuthService_TokenVerify_Handler,
+		},
+		{
+			MethodName: "TokenRefresh",
+			Handler:    _AuthService_TokenRefresh_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
