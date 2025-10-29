@@ -7,9 +7,9 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 )
 
-const queryCreateUser = `INSERT INTO users (id, username, hashed_password, fullname)
-VALUES ($1, $2, $3, $4)
-RETURNING id, username, fullname, last_online_at;`
+const queryCreateUser = `INSERT INTO users (id, username, hashed_password, fullname, email, phone_number)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, username, fullname, email, phone_number, last_online_at;`
 
 const queryCreateUserRole = `INSERT INTO user_roles (user_id, role)
 VALUES ($1, $2);`
@@ -25,8 +25,8 @@ func (d *DB) CreateUser(ctx context.Context, req userservice.UserCreateRequest) 
 
 	var user userservice.User
 
-	if sErr := tx.QueryRow(ctx, queryCreateUser, req.ID, req.Username, req.Password, req.Fullname).
-		Scan(&user.ID, &user.Username, &user.Fullname, &user.LastOnlineAt); sErr != nil {
+	if sErr := tx.QueryRow(ctx, queryCreateUser, req.ID, req.Username, req.Password, req.Fullname, req.Email, req.PhoneNumber).
+		Scan(&user.ID, &user.Username, &user.Fullname, &user.Email, &user.PhoneNumber, &user.LastOnlineAt); sErr != nil {
 		return userservice.User{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
 	}
 

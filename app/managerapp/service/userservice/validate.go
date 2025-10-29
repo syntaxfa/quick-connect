@@ -2,6 +2,7 @@ package userservice
 
 import (
 	"errors"
+	"regexp"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
@@ -9,6 +10,9 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 	"github.com/syntaxfa/quick-connect/types"
 )
+
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+var usernameRegex = regexp.MustCompile(`^[\x21-\x7E]+$`)
 
 type Validate struct {
 	t *translation.Translate
@@ -55,13 +59,20 @@ func (v Validate) ValidateUserCreateRequest(req UserCreateRequest) error {
 	if err := validation.ValidateStruct(&req,
 		validation.Field(&req.Username,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(4, 191).Error(servermsg.MsgInvalidLengthOfUsername)),
+			validation.Length(4, 191).Error(servermsg.MsgInvalidLengthOfUsername),
+			validation.Match(usernameRegex).Error(servermsg.MsgInvalidUsernameFormat)),
 		validation.Field(&req.Password,
 			validation.Required.Error(servermsg.MsgFieldRequired),
 			validation.Length(7, 64).Error(servermsg.MsgInvalidLengthOfPassword)),
 		validation.Field(&req.Fullname,
 			validation.Required.Error(servermsg.MsgFieldRequired),
 			validation.Length(3, 191).Error(servermsg.MsgInvalidLengthOfFullname)),
+		validation.Field(&req.Email,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.Length(10, 255).Error(servermsg.MsgInvalidLengthOfEmail),
+			validation.Match(emailRegex).Error(servermsg.MsgInvalidEmailFormat)),
+		validation.Field(&req.PhoneNumber,
+			validation.Required.Error(servermsg.MsgFieldRequired)),
 		validation.Field(&req.Roles,
 			validation.Required.Error(servermsg.MsgFieldRequired),
 			validation.By(v.validateUserRole)),
