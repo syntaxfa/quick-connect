@@ -13,7 +13,7 @@ type Client struct {
 	conn *grpc.ClientConn
 }
 
-func New(cfg Config) (*Client, error) {
+func New(cfg Config, externalOpts ...grpc.DialOption) (*Client, error) {
 	var opts []grpc.DialOption
 
 	if !cfg.SSLMode {
@@ -25,6 +25,8 @@ func New(cfg Config) (*Client, error) {
 			otelgrpc.WithMeterProvider(otel.GetMeterProvider()),
 		)))
 	}
+
+	opts = append(opts, externalOpts...)
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), opts...)
 	if err != nil {

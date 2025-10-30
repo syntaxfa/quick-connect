@@ -3,6 +3,8 @@ package adminapp
 import (
 	"context"
 	"fmt"
+	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
+	"google.golang.org/grpc"
 	"log/slog"
 	"os"
 	"sync"
@@ -30,7 +32,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 		panic(tErr)
 	}
 
-	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC)
+	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
 	if grpcErr != nil {
 		logger.Error("failed to create manager gRPC client", slog.String("error", grpcErr.Error()))
 
