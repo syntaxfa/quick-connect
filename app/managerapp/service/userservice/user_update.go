@@ -53,3 +53,20 @@ func (s Service) UserUpdateFromSuperuser(ctx context.Context, userID types.ID, r
 		User: updatedUser,
 	}, nil
 }
+
+func (s Service) UserUpdateFromOwn(ctx context.Context, userID types.ID, req UserUpdateFromOwnRequest) (UserUpdateResponse, error) {
+	const op = "service.user_update.UpdateUserFromOwn"
+
+	user, guErr := s.repo.GetUserByID(ctx, userID)
+	if guErr != nil {
+		return UserUpdateResponse{}, errlog.ErrLog(richerror.New(op).WithWrapError(guErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return s.UserUpdateFromSuperuser(ctx, userID, UserUpdateFromSuperuserRequest{
+		Username:    req.Username,
+		Fullname:    req.Fullname,
+		Email:       req.Email,
+		PhoneNumber: req.PhoneNumber,
+		Roles:       user.Roles,
+	})
+}

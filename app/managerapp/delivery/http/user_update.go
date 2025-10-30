@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
+	"github.com/syntaxfa/quick-connect/pkg/auth"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/types"
 )
@@ -31,6 +32,39 @@ func (h Handler) UserUpdateFormSuperuser(c echo.Context) error {
 	}
 
 	resp, sErr := h.userSvc.UserUpdateFromSuperuser(c.Request().Context(), types.ID(c.Param("userID")), req)
+	if sErr != nil {
+		return servermsg.HTTPMsg(c, sErr, h.t)
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
+// UserUpdate docs
+// @Router /users [PUT]
+// @Security JWT
+// @Summary update user
+// @Description update user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param Request body userservice.UserUpdateFromOwnRequest true "check token validation"
+// @Success 200 {object} userservice.UserUpdateResponse
+// @Failure 404 {string} user not found
+// @Failure 409 {string} This username already exists
+// @Failure 422 {object} servermsg.ErrorResponse
+// @Failure 500 {string} something went wrong.
+func (h Handler) UserUpdate(c echo.Context) error {
+	userClaims, gErr := auth.GetUserClaimFormContext(c)
+	if gErr != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, gErr.Error())
+	}
+
+	var req userservice.UserUpdateFromOwnRequest
+	if bErr := c.Bind(&req); bErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	resp, sErr := h.userSvc.UserUpdateFromOwn(c.Request().Context(), userClaims.UserID, req)
 	if sErr != nil {
 		return servermsg.HTTPMsg(c, sErr, h.t)
 	}
