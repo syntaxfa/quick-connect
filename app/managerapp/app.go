@@ -3,10 +3,6 @@ package managerapp
 import (
 	"context"
 	"fmt"
-	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
-	"github.com/syntaxfa/quick-connect/pkg/rolemanager"
-	"github.com/syntaxfa/quick-connect/types"
-	"google.golang.org/grpc"
 	"log/slog"
 	"os"
 	"sync"
@@ -18,10 +14,14 @@ import (
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
 	"github.com/syntaxfa/quick-connect/pkg/auth"
+	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
+	"github.com/syntaxfa/quick-connect/pkg/rolemanager"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
+	"github.com/syntaxfa/quick-connect/types"
+	"google.golang.org/grpc"
 )
 
 type Application struct {
