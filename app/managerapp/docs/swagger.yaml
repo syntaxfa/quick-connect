@@ -462,6 +462,36 @@ paths:
       summary: delete user
       tags:
       - User
+    get:
+      consumes:
+      - application/json
+      description: get user detail by superuser
+      parameters:
+      - description: ID of the user to update
+        in: path
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userservice.UserProfileResponse'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: get user detail by superuser
+      tags:
+      - User
     put:
       consumes:
       - application/json
