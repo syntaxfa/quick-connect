@@ -8,16 +8,20 @@ import (
 	"sync"
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
-	"github.com/syntaxfa/quick-connect/app/managerapp/delivery/grpc"
+	grpcdelivery "github.com/syntaxfa/quick-connect/app/managerapp/delivery/grpc"
 	"github.com/syntaxfa/quick-connect/app/managerapp/delivery/http"
 	postgres2 "github.com/syntaxfa/quick-connect/app/managerapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
 	"github.com/syntaxfa/quick-connect/pkg/auth"
+	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
+	"github.com/syntaxfa/quick-connect/pkg/rolemanager"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
+	"github.com/syntaxfa/quick-connect/types"
+	"google.golang.org/grpc"
 )
 
 type Application struct {
@@ -25,7 +29,7 @@ type Application struct {
 	trap       <-chan os.Signal
 	logger     *slog.Logger
 	httpServer http.Server
-	grpcServer grpc.Server
+	grpcServer grpcdelivery.Server
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database) Application {
@@ -45,8 +49,10 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	authMid := auth.New(jwtValidator)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler, authMid)
 
-	grpcHandler := grpc.NewHandler(logger, tokenSvc, userSvc, t)
-	grpcServer := grpc.New(grpcserver.New(cfg.GRPCServer, logger), grpcHandler, logger)
+	roleManager := setupRoleManager()
+	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, roleManager)
+	grpcHandler := grpcdelivery.NewHandler(logger, tokenSvc, userSvc, t)
+	grpcServer := grpcdelivery.New(grpcserver.New(cfg.GRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)), grpcHandler, logger)
 
 	return Application{
 		cfg:        cfg,
@@ -129,4 +135,14 @@ func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 func (a Application) StopGRPCServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 	a.grpcServer.Stop()
+}
+
+func setupRoleManager() *rolemanager.RoleManager {
+	methodRoles := map[string][]types.Role{
+		"/manager.AuthService/Login":        {},
+		"/manager.AuthService/TokenRefresh": {},
+		"/manager.AuthService/TokenVerify":  {},
+	}
+
+	return rolemanager.NewRoleManager(methodRoles)
 }

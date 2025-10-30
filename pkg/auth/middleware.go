@@ -10,8 +10,6 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-const UserContextKey = "user_claims"
-
 type Middleware struct {
 	validator *jwtvalidator.Validator
 }
@@ -37,7 +35,7 @@ func (m *Middleware) RequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusUnauthorized, jErr.Error())
 		}
 
-		c.Set(UserContextKey, claims)
+		c.Set(types.UserContextKey, claims)
 
 		return next(c)
 	}
@@ -74,7 +72,7 @@ func extractToken(authHeader string) (string, error) {
 }
 
 func GetUserClaimFormContext(c echo.Context) (types.UserClaims, error) {
-	claimsStr := c.Get(UserContextKey)
+	claimsStr := c.Get(types.UserContextKey)
 	if claimsStr == "" {
 		return types.UserClaims{}, errors.New("user claims not found in context")
 	}
