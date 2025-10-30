@@ -358,6 +358,74 @@ const docTemplate = `{
             }
         },
         "/users/{userID}": {
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "update user by superuser",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "update user by superuser",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the user to update",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "check token validation",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userservice.UserUpdateFromSuperuserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userservice.UserUpdateResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -582,6 +650,9 @@ const docTemplate = `{
                 "avatar": {
                     "type": "string"
                 },
+                "email": {
+                    "type": "string"
+                },
                 "fullname": {
                     "type": "string"
                 },
@@ -589,6 +660,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "last_online_at": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "roles": {
@@ -605,10 +679,16 @@ const docTemplate = `{
         "userservice.UserCreateRequest": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "fullname": {
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "roles": {
@@ -628,6 +708,9 @@ const docTemplate = `{
                 "avatar": {
                     "type": "string"
                 },
+                "email": {
+                    "type": "string"
+                },
                 "fullname": {
                     "type": "string"
                 },
@@ -635,6 +718,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "last_online_at": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "roles": {
@@ -676,6 +762,9 @@ const docTemplate = `{
                 "avatar": {
                     "type": "string"
                 },
+                "email": {
+                    "type": "string"
+                },
                 "fullname": {
                     "type": "string"
                 },
@@ -683,6 +772,64 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "last_online_at": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Role"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "userservice.UserUpdateFromSuperuserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Role"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "userservice.UserUpdateResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_online_at": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "roles": {

@@ -134,3 +134,42 @@ func (v Validate) ValidateListUserRequest(req ListUserRequest) error {
 
 	return nil
 }
+
+func (v Validate) UserUpdateFromSuperuserRequest(req UserUpdateFromSuperuserRequest) error {
+	const op = "service.validate.UserUpdateFromSuperuserRequest"
+
+	if err := validation.ValidateStruct(&req,
+		validation.Field(&req.Username,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.Length(4, 191).Error(servermsg.MsgInvalidLengthOfUsername),
+			validation.Match(usernameRegex).Error(servermsg.MsgInvalidUsernameFormat)),
+		validation.Field(&req.Fullname,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.Length(3, 191).Error(servermsg.MsgInvalidLengthOfFullname)),
+		validation.Field(&req.Email,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.Length(10, 255).Error(servermsg.MsgInvalidLengthOfEmail),
+			validation.Match(emailRegex).Error(servermsg.MsgInvalidEmailFormat)),
+		validation.Field(&req.PhoneNumber,
+			validation.Required.Error(servermsg.MsgFieldRequired)),
+		validation.Field(&req.Roles,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.By(v.validateUserRole)),
+	); err != nil {
+		fieldErrors := make(map[string]string)
+
+		vErr := validation.Errors{}
+		if errors.As(err, &vErr) {
+			for key, value := range vErr {
+				if value != nil {
+					fieldErrors[key] = v.t.TranslateMessage(value.Error())
+				}
+			}
+		}
+
+		return richerror.New(op).WithMessage(servermsg.MsgInvalidInput).WithKind(richerror.KindInvalid).
+			WithErrorFields(fieldErrors).WithMeta(map[string]interface{}{"req": req})
+	}
+
+	return nil
+}

@@ -27,11 +27,17 @@ func (d *DB) CreateUser(ctx context.Context, req userservice.UserCreateRequest) 
 
 	if sErr := tx.QueryRow(ctx, queryCreateUser, req.ID, req.Username, req.Password, req.Fullname, req.Email, req.PhoneNumber).
 		Scan(&user.ID, &user.Username, &user.Fullname, &user.Email, &user.PhoneNumber, &user.LastOnlineAt); sErr != nil {
+		if rErr := tx.Rollback(ctx); rErr != nil {
+			return userservice.User{}, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
+		}
 		return userservice.User{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
 	}
 
 	for _, role := range req.Roles {
 		if _, srErr := tx.Exec(ctx, queryCreateUserRole, user.ID, role); srErr != nil {
+			if rErr := tx.Rollback(ctx); rErr != nil {
+				return userservice.User{}, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
+			}
 			return userservice.User{}, richerror.New(op).WithWrapError(srErr).WithKind(richerror.KindUnexpected)
 		}
 
