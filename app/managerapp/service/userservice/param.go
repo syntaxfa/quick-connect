@@ -17,14 +17,35 @@ type UserLoginResponse struct {
 }
 
 type UserCreateRequest struct {
-	ID       types.ID     `json:"-"`
-	Username string       `json:"username"`
-	Password string       `json:"password"`
-	Fullname string       `json:"fullname"`
-	Roles    []types.Role `json:"roles"`
+	ID          types.ID     `json:"-"`
+	Username    string       `json:"username"`
+	Password    string       `json:"password"`
+	Fullname    string       `json:"fullname"`
+	Email       string       `json:"email"`
+	PhoneNumber string       `json:"phone_number"`
+	Roles       []types.Role `json:"roles"`
 }
 
 type UserCreateResponse struct {
+	User
+}
+
+type UserUpdateFromSuperuserRequest struct {
+	Username    string       `json:"username"`
+	Fullname    string       `json:"fullname"`
+	Email       string       `json:"email"`
+	PhoneNumber string       `json:"phone_number"`
+	Roles       []types.Role `json:"roles"`
+}
+
+type UserUpdateFromOwnRequest struct {
+	Username    string `json:"username"`
+	Fullname    string `json:"fullname"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
+}
+
+type UserUpdateResponse struct {
 	User
 }
 

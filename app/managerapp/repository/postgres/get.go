@@ -11,7 +11,7 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-const queryGetUserByUsername = `SELECT id, username, hashed_password, fullname, avatar, last_online_at
+const queryGetUserByUsername = `SELECT id, username, hashed_password, fullname, email, phone_number, avatar, last_online_at
 FROM users
 WHERE username=$1
 limit 1;`
@@ -21,8 +21,7 @@ FROM user_roles
 WHERE user_id = $1;`
 
 type nullableFields struct {
-	Fullname sql.NullString
-	Avatar   sql.NullString
+	Avatar sql.NullString
 }
 
 func (d *DB) GetUserByUsername(ctx context.Context, username string) (userservice.User, error) {
@@ -32,14 +31,11 @@ func (d *DB) GetUserByUsername(ctx context.Context, username string) (userservic
 	var nullable nullableFields
 
 	if qErr := d.conn.Conn().QueryRow(ctx, queryGetUserByUsername, username).Scan(
-		&user.ID, &user.Username, &user.HashedPassword, &nullable.Fullname, &nullable.Avatar,
+		&user.ID, &user.Username, &user.HashedPassword, &user.Fullname, &user.Email, &user.PhoneNumber, &nullable.Avatar,
 		&user.LastOnlineAt); qErr != nil {
 		return userservice.User{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected).WithMessage("get user")
 	}
 
-	if nullable.Fullname.Valid {
-		user.Fullname = nullable.Fullname.String
-	}
 	if nullable.Avatar.Valid {
 		user.Avatar = nullable.Avatar.String
 	}
@@ -54,7 +50,7 @@ func (d *DB) GetUserByUsername(ctx context.Context, username string) (userservic
 	return user, nil
 }
 
-const queryGetUserByID = `SELECT id, username, hashed_password, fullname, avatar, last_online_at
+const queryGetUserByID = `SELECT id, username, hashed_password, fullname, email, phone_number, avatar, last_online_at
 FROM users
 WHERE id=$1
 limit 1;`
@@ -66,14 +62,11 @@ func (d *DB) GetUserByID(ctx context.Context, userID types.ID) (userservice.User
 	var nullable nullableFields
 
 	if qErr := d.conn.Conn().QueryRow(ctx, queryGetUserByID, userID).Scan(
-		&user.ID, &user.Username, &user.HashedPassword, &nullable.Fullname, &nullable.Avatar,
+		&user.ID, &user.Username, &user.HashedPassword, &user.Fullname, &user.Email, &user.PhoneNumber, &nullable.Avatar,
 		&user.LastOnlineAt); qErr != nil {
 		return userservice.User{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected).WithMessage("get user")
 	}
 
-	if nullable.Fullname.Valid {
-		user.Fullname = nullable.Fullname.String
-	}
 	if nullable.Avatar.Valid {
 		user.Avatar = nullable.Avatar.String
 	}
@@ -123,7 +116,7 @@ func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase, us
 	}
 
 	fields := []string{
-		"id", "username", "fullname", "avatar", "last_online_at",
+		"id", "username", "fullname", "email", "phone_number", "avatar", "last_online_at",
 	}
 	sortColumn := "id"
 	offset := (paginated.CurrentPage - 1) * paginated.PageSize
@@ -154,13 +147,11 @@ func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase, us
 		var user userservice.User
 		var nullable nullableFields
 
-		if sErr := rows.Scan(&user.ID, &user.Username, &nullable.Fullname, &nullable.Avatar, &user.LastOnlineAt); sErr != nil {
+		if sErr := rows.Scan(&user.ID, &user.Username, &user.Fullname, &user.Email, &user.PhoneNumber,
+			&nullable.Avatar, &user.LastOnlineAt); sErr != nil {
 			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
 		}
-
-		if nullable.Fullname.Valid {
-			user.Fullname = nullable.Fullname.String
-		}
+		
 		if nullable.Avatar.Valid {
 			user.Avatar = nullable.Avatar.String
 		}

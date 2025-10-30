@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -22,8 +21,6 @@ import (
 // @Failure 404 {string} string user not found
 // @Failure 500 {string} something went wrong
 func (h Handler) UserDelete(c echo.Context) error {
-	fmt.Println(c.Param("userID"))
-
 	if sErr := h.userSvc.UserDelete(c.Request().Context(), types.ID(c.Param("userID"))); sErr != nil {
 		return servermsg.HTTPMsg(c, sErr, h.t)
 	}
