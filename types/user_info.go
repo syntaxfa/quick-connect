@@ -26,6 +26,8 @@ const (
 	RoleNotification Role = "notification"
 )
 
+var AllUserRole = []Role{RoleSuperUser, RoleSupport, RoleStory, RoleFile, RoleNotification}
+
 func IsValidRole(role Role) bool {
 	if role == RoleSuperUser || role == RoleSupport || role == RoleStory || role == RoleFile || role == RoleNotification {
 		return true
@@ -33,3 +35,5 @@ func IsValidRole(role Role) bool {
 
 	return false
 }
+
+const UserContextKey = "user_claims"
