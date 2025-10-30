@@ -19,7 +19,7 @@ type TokenValidator interface {
 
 // RoleManager manager method access.
 type RoleManager interface {
-	GetRequireRoles(method string) []string
+	GetRequireRoles(method string) []types.Role
 }
 
 func NewAuthInterceptor(validator TokenValidator, manager RoleManager) grpc.UnaryServerInterceptor {
@@ -50,7 +50,7 @@ func NewAuthInterceptor(validator TokenValidator, manager RoleManager) grpc.Unar
 		hasPermission := false
 		for _, role := range claims.Roles {
 			for _, requireRole := range requiredRoles {
-				if role == types.Role(requireRole) {
+				if role == requireRole {
 					hasPermission = true
 
 					break
