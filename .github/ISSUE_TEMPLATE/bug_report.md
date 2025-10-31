@@ -7,7 +7,13 @@ assignees: alireza-fa
 
 ---
 
-- type: markdown
+---
+name: "Bug Report"
+about: "Create a report to help us improve Quick Connect"
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report!
@@ -79,3 +85,4 @@ assignees: alireza-fa
       value: |
         **IMPORTANT:** If you checked the box above, **DO NOT POST DETAILS HERE.**
         Please report security vulnerabilities privately according to our [Security Policy](https://github.com/syntaxfa/quick-connect/security/policy), for example by contacting **Alireza Feizi** on Telegram at **[https://t.me/Ayeef](https://t.me/Ayeef)**.
+---
