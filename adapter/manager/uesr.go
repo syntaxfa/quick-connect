@@ -41,3 +41,8 @@ func (ud *UserAdapter) UserDelete(ctx context.Context, req *userpb.UserDeleteReq
 func (ud *UserAdapter) UserUpdateFromSuperuser(ctx context.Context, req *userpb.UserUpdateFromSuperUserRequest, opts ...grpc.CallOption) (*userpb.User, error) {
 	return ud.client.UserUpdateFromSuperuser(ctx, req, opts...)
 }
+
+// UserList calls the UserList PRC on the UserService.
+func (ud *UserAdapter) UserList(ctx context.Context, req *userpb.UserListRequest, opts ...grpc.CallOption) (*userpb.UserListResponse, error) {
+	return ud.client.UserList(ctx, req, opts...)
+}

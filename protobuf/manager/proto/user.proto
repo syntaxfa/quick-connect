@@ -60,10 +60,32 @@ message UserUpdateFromOwnRequest {
   string phone_number = 4;
 }
 
+enum SortDirection {
+  SORT_DIRECTION_UNSPECIFIED = 0;
+  SORT_DIRECTION_ASC = 1;
+  SORT_DIRECTION_DESC = 2;
+}
+
+message UserListRequest {
+  uint64 current_page = 1;
+  uint64 page_size = 2;
+  SortDirection sort_direction = 3;
+  string username = 4;
+}
+
+message UserListResponse {
+  uint64 current_page = 1;
+  uint64 page_size = 2;
+  uint64 total_number = 3;
+  uint64 total_page = 4;
+  repeated User users = 5;
+}
+
 service UserService {
   rpc CreateUser (CreateUserRequest) returns (User);
   rpc UserDetail (UserDetailRequest) returns (User);
   rpc UserDelete (UserDeleteRequest) returns (google.protobuf.Empty);
   rpc UserUpdateFromSuperuser (UserUpdateFromSuperUserRequest) returns (User);
   rpc UserUpdateFromOwn (UserUpdateFromOwnRequest) returns (User);
+  rpc UserList (UserListRequest) returns (UserListResponse);
 }

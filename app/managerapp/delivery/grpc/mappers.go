@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
+	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 	"github.com/syntaxfa/quick-connect/types"
 )
@@ -87,5 +88,39 @@ func convertUserUpdateFromOwnToEntity(req *userpb.UserUpdateFromOwnRequest) user
 		Fullname:    req.Fullname,
 		Email:       req.Email,
 		PhoneNumber: req.PhoneNumber,
+	}
+}
+
+func convertUserListRequestToEntity(req *userpb.UserListRequest) userservice.ListUserRequest {
+	request := userservice.ListUserRequest{
+		Username: req.Username,
+		Paginated: paginate.RequestBase{
+			CurrentPage: req.CurrentPage,
+			PageSize:    req.PageSize,
+		},
+	}
+
+	switch req.SortDirection {
+	case userpb.SortDirection_SORT_DIRECTION_ASC:
+		request.Paginated.Descending = false
+	default:
+		request.Paginated.Descending = true
+	}
+
+	return request
+}
+
+func convertUserListResponseToPB(req userservice.ListUserResponse) *userpb.UserListResponse {
+	var users []*userpb.User
+	for _, user := range req.Results {
+		users = append(users, convertUserToPB(user))
+	}
+
+	return &userpb.UserListResponse{
+		CurrentPage: req.Paginate.CurrentPage,
+		PageSize:    req.Paginate.PageSize,
+		TotalNumber: req.Paginate.TotalNumbers,
+		TotalPage:   req.Paginate.TotalPage,
+		Users:       users,
 	}
 }

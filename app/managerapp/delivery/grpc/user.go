@@ -61,3 +61,12 @@ func (h Handler) UserUpdateFromOwn(ctx context.Context, req *userpb.UserUpdateFr
 
 	return convertUserToPB(resp.User), nil
 }
+
+func (h Handler) UserList(ctx context.Context, req *userpb.UserListRequest) (*userpb.UserListResponse, error) {
+	resp, sErr := h.userSvc.UserList(ctx, convertUserListRequestToEntity(req))
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
+	}
+
+	return convertUserListResponseToPB(resp), nil
+}

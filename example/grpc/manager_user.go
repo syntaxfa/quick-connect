@@ -103,4 +103,21 @@ func main() {
 	fmt.Printf("%+v\n", userUpResp)
 
 	fmt.Println("-----------------")
+	fmt.Println("User List:")
+
+	userListResp, userListErr := userAdapter.UserList(ctxWithValue, &userpb.UserListRequest{
+		CurrentPage:   1,
+		PageSize:      10,
+		SortDirection: 1,
+		Username:      "",
+	})
+	if userListErr != nil {
+		errorhandler.HandleGRPCError(userListErr, slog.Default())
+
+		return
+	}
+
+	fmt.Printf("%+v\n", userListResp)
+
+	fmt.Println("-----------------")
 }
