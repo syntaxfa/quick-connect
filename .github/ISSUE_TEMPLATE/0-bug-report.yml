@@ -1,0 +1,91 @@
+name: "Bug Report"
+description: "Create a report to help us improve Quick Connect"
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: "What happened? (Describe the bug)"
+      description: "A clear and concise description of what the bug is."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: "Steps to Reproduce"
+      description: "Provide the exact steps to reproduce the behavior."
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "Expected Behavior"
+      description: "A clear and concise description of what you expected to happen."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: service
+    attributes:
+      label: "Affected Service (if known)"
+      description: "Which microservice has the bug? Understanding this helps us fix it faster."
+      options:
+        - "manager"
+        - "chat"
+        - "notification"
+        - "admin"
+        - "filehandler"
+        - "Other / I don't know"
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots (optional)"
+      description: "If applicable, add screenshots to help explain your problem. You can drag & drop images here."
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment (please complete the following information)"
+      description: "Provide details about the environment where you saw this bug."
+      placeholder: |
+        - OS: [e.g. Ubuntu 22.04, Windows 11]
+        - Browser: [e.g. Chrome, Safari]
+        - Go Version: [e.g. 1.25.2]
+        - Docker Version: [e.g. 20.10.7]
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Additional Context (optional)"
+      description: "Add any other context, logs, or information about the problem here."
+
+  - type: checkboxes
+    id: security
+    attributes:
+      label: "Security Vulnerability"
+      description: "Is this a security vulnerability?"
+      options:
+        - label: "Yes, this is a security vulnerability."
+          required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        **IMPORTANT:** If you checked the box above, **DO NOT POST DETAILS HERE.**
+        Please report security vulnerabilities privately according to our [Security Policy](https://github.com/syntaxfa/quick-connect/security/policy), for example by contacting **Alireza Feizi** on Telegram at **[https://t.me/Ayeef]**.
