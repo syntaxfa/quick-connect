@@ -23,7 +23,7 @@ body:
       description: "Provide the exact steps to reproduce the behavior."
       placeholder: |
         1. Go to '...'
-        2. Click on '....'
+        2. Click on '....
         3. Scroll down to '....'
         4. See error
     validations:
