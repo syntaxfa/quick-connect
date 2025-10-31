@@ -8,6 +8,7 @@ package userpb
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -21,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	UserService_CreateUser_FullMethodName = "/manager.UserService/CreateUser"
 	UserService_UserDetail_FullMethodName = "/manager.UserService/UserDetail"
+	UserService_UserDelete_FullMethodName = "/manager.UserService/UserDelete"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -29,6 +31,7 @@ const (
 type UserServiceClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	UserDetail(ctx context.Context, in *UserDetailRequest, opts ...grpc.CallOption) (*User, error)
+	UserDelete(ctx context.Context, in *UserDeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type userServiceClient struct {
@@ -59,12 +62,23 @@ func (c *userServiceClient) UserDetail(ctx context.Context, in *UserDetailReques
 	return out, nil
 }
 
+func (c *userServiceClient) UserDelete(ctx context.Context, in *UserDeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, UserService_UserDelete_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 type UserServiceServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	UserDetail(context.Context, *UserDetailRequest) (*User, error)
+	UserDelete(context.Context, *UserDeleteRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -80,6 +94,9 @@ func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserReq
 }
 func (UnimplementedUserServiceServer) UserDetail(context.Context, *UserDetailRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserDetail not implemented")
+}
+func (UnimplementedUserServiceServer) UserDelete(context.Context, *UserDeleteRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserDelete not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -138,6 +155,24 @@ func _UserService_UserDetail_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_UserDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserDeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UserDelete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UserDelete_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UserDelete(ctx, req.(*UserDeleteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +187,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserDetail",
 			Handler:    _UserService_UserDetail_Handler,
+		},
+		{
+			MethodName: "UserDelete",
+			Handler:    _UserService_UserDelete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

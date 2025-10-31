@@ -46,31 +46,43 @@ func main() {
 
 	ctxWithValue := context.WithValue(context.Background(), types.AuthorizationKey, "Bearer "+resp.AccessToken)
 
-	createUserResp, createErr := userAdapter.CreateUser(ctxWithValue, &userpb.CreateUserRequest{
-		Username:    "ayda",
-		Password:    "Password",
-		Fullname:    "ayda jon",
-		Email:       "ayda@gmail.com",
-		PhoneNumber: "09307225656",
-		Roles:       []userpb.Role{userpb.Role_ROLE_SUPPORT, userpb.Role_ROLE_STORY},
-	})
-	if createErr != nil {
-		errorhandler.HandleGRPCError(createErr, slog.Default())
-	}
-
-	fmt.Printf("%+v\n", createUserResp)
+	//createUserResp, createErr := userAdapter.CreateUser(ctxWithValue, &userpb.CreateUserRequest{
+	//	Username:    "ayda",
+	//	Password:    "Password",
+	//	Fullname:    "ayda jon",
+	//	Email:       "ayda@gmail.com",
+	//	PhoneNumber: "09307225656",
+	//	Roles:       []userpb.Role{userpb.Role_ROLE_SUPPORT, userpb.Role_ROLE_STORY},
+	//})
+	//if createErr != nil {
+	//	errorhandler.HandleGRPCError(createErr, slog.Default())
+	//
+	//	return
+	//}
+	//
+	//fmt.Printf("%+v\n", createUserResp)
 
 	fmt.Println("-----------------")
 	fmt.Println("User Detail:")
 
-	ctxWithValue = context.WithValue(context.Background(), types.AuthorizationKey, "Bearer "+resp.AccessToken)
-
-	userDetailResp, userDetailErr := userAdapter.UserDetail(ctxWithValue, &userpb.UserDetailRequest{UserId: "01K8QVTKGM9XRKV29T7BAPAK9J"})
+	userDetailResp, userDetailErr := userAdapter.UserDetail(ctxWithValue, &userpb.UserDetailRequest{UserId: "01K8XSS8B8XYGM1Y5DYWRXG0S3"})
 	if userDetailErr != nil {
-		errorhandler.HandleGRPCError(createErr, slog.Default())
+		errorhandler.HandleGRPCError(userDetailErr, slog.Default())
+
+		return
 	}
 
 	fmt.Printf("%+v\n", userDetailResp)
 
-	fmt.Println("-----------------")
+	//fmt.Println("-----------------")
+	//fmt.Println("User Delete:")
+	//
+	//if _, userDeleteErr := userAdapter.UserDelete(ctxWithValue, &userpb.UserDeleteRequest{UserId: "01K8QVTKGM9XRKV29T7BAPAK9J"}); userDeleteErr != nil {
+	//	errorhandler.HandleGRPCError(userDeleteErr, slog.Default())
+	//
+	//	return
+	//}
+	//
+	//fmt.Println("user deleted")
+	//fmt.Println("-----------------")
 }

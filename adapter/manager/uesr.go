@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 	"google.golang.org/grpc"
 )
@@ -29,4 +30,9 @@ func (ud *UserAdapter) CreateUser(ctx context.Context, req *userpb.CreateUserReq
 // UserDetail calls the UserDetail PRC on the UserService.
 func (ud *UserAdapter) UserDetail(ctx context.Context, req *userpb.UserDetailRequest, opts ...grpc.CallOption) (*userpb.User, error) {
 	return ud.client.UserDetail(ctx, req, opts...)
+}
+
+// UserDelete calls the UserDelete PRC on the UserService.
+func (ud *UserAdapter) UserDelete(ctx context.Context, req *userpb.UserDeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return ud.client.UserDelete(ctx, req, opts...)
 }
