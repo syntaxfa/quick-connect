@@ -25,3 +25,8 @@ func NewUserAdapter(conn grpc.ClientConnInterface) *UserAdapter {
 func (ud *UserAdapter) CreateUser(ctx context.Context, req *userpb.CreateUserRequest, opts ...grpc.CallOption) (*userpb.User, error) {
 	return ud.client.CreateUser(ctx, req, opts...)
 }
+
+// UserDetail calls the UserDetail PRC on the UserService.
+func (ud *UserAdapter) UserDetail(ctx context.Context, req *userpb.UserDetailRequest, opts ...grpc.CallOption) (*userpb.User, error) {
+	return ud.client.UserDetail(ctx, req, opts...)
+}

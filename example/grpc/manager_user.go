@@ -45,6 +45,7 @@ func main() {
 	userAdapter := manager.NewUserAdapter(grpcClient.Conn())
 
 	ctxWithValue := context.WithValue(context.Background(), types.AuthorizationKey, "Bearer "+resp.AccessToken)
+
 	createUserResp, createErr := userAdapter.CreateUser(ctxWithValue, &userpb.CreateUserRequest{
 		Username:    "ayda",
 		Password:    "Password",
@@ -58,4 +59,18 @@ func main() {
 	}
 
 	fmt.Printf("%+v\n", createUserResp)
+
+	fmt.Println("-----------------")
+	fmt.Println("User Detail:")
+
+	ctxWithValue = context.WithValue(context.Background(), types.AuthorizationKey, "Bearer "+resp.AccessToken)
+
+	userDetailResp, userDetailErr := userAdapter.UserDetail(ctxWithValue, &userpb.UserDetailRequest{UserId: "01K8QVTKGM9XRKV29T7BAPAK9J"})
+	if userDetailErr != nil {
+		errorhandler.HandleGRPCError(createErr, slog.Default())
+	}
+
+	fmt.Printf("%+v\n", userDetailResp)
+
+	fmt.Println("-----------------")
 }

@@ -35,6 +35,11 @@ message User {
   google.protobuf.Timestamp last_online_at = 8;
 }
 
+message UserDetailRequest {
+  string user_id = 1;
+}
+
 service UserService {
   rpc CreateUser (CreateUserRequest) returns (User);
+  rpc UserDetail (UserDetailRequest) returns (User);
 }
