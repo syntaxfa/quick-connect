@@ -5,6 +5,7 @@ import (
 
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 )
 
 type Server struct {
@@ -23,6 +24,7 @@ func New(server grpcserver.Server, handler Handler, logger *slog.Logger) Server 
 
 func (s Server) Start() error {
 	authpb.RegisterAuthServiceServer(s.server.GrpcServer, s.handler)
+	userpb.RegisterUserServiceServer(s.server.GrpcServer, s.handler)
 
 	return s.server.Start()
 }
