@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package manager;
+
+option go_package = "protobuf/manager/golang/userpb";
+
+import "google/protobuf/timestamp.proto";
+
+enum Role {
+    ROLE_UNSPECIFIED = 0;
+    ROLE_SUPERUSER = 1;
+    ROLE_SUPPORT = 2;
+    ROLE_STORY = 3;
+    ROLE_FILE = 4;
+    ROLE_NOTIFICATION = 5;
+}
+
+message CreateUserRequest {
+  string username = 1;
+  string password = 2;
+  string fullname = 3;
+  string email = 4;
+  string phone_number = 5;
+  repeated Role roles = 6;
+}
+
+message User {
+  string id = 1;
+  string username = 2;
+  string fullname = 3;
+  string email = 4;
+  string phone_number = 5;
+  string avatar = 6;
+  repeated Role roles = 7;
+  google.protobuf.Timestamp last_online_at = 8;
+}
+
+service UserService {
+  rpc CreateUser (CreateUserRequest) returns (User);
+}
