@@ -139,9 +139,15 @@ func (a Application) StopGRPCServer(wg *sync.WaitGroup) {
 
 func setupRoleManager() *rolemanager.RoleManager {
 	methodRoles := map[string][]types.Role{
+		// AuthService
 		"/manager.AuthService/Login":        {},
 		"/manager.AuthService/TokenRefresh": {},
 		"/manager.AuthService/TokenVerify":  {},
+		// UserService
+		"/manager.UserService/CreateUser":              {types.RoleSuperUser},
+		"/manager.UserService/UserDelete":              {types.RoleSuperUser},
+		"/manager.UserService/UserUpdateFromSuperuser": {types.RoleSuperUser},
+		"/manager.UserService/UserUpdateFromOwn":       types.AllUserRole,
 	}
 
 	return rolemanager.NewRoleManager(methodRoles)
