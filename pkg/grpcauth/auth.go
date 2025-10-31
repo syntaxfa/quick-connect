@@ -2,6 +2,7 @@ package grpcauth
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/syntaxfa/quick-connect/types"
@@ -63,4 +64,13 @@ func NewAuthInterceptor(validator TokenValidator, manager RoleManager) grpc.Unar
 
 		return handler(newCtx, req)
 	}
+}
+
+func ExtractUserClaimsFromContext(ctx context.Context) (*types.UserClaims, error) {
+	userClaims, ok := ctx.Value(types.UserContextKey).(*types.UserClaims)
+	if !ok {
+		return nil, errors.New("user claims not provided")
+	}
+
+	return userClaims, nil
 }

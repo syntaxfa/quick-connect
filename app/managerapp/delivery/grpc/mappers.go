@@ -70,3 +70,22 @@ func convertUserToPB(req userservice.User) *userpb.User {
 		LastOnlineAt: nil,
 	}
 }
+
+func convertUserUpdateFromSuperuserToEntity(req *userpb.UserUpdateFromSuperUserRequest) userservice.UserUpdateFromSuperuserRequest {
+	return userservice.UserUpdateFromSuperuserRequest{
+		Username:    req.Username,
+		Fullname:    req.Fullname,
+		Email:       req.Email,
+		PhoneNumber: req.PhoneNumber,
+		Roles:       convertUserRoleToEntity(req.Roles),
+	}
+}
+
+func convertUserUpdateFromOwnToEntity(req *userpb.UserUpdateFromOwnRequest) userservice.UserUpdateFromOwnRequest {
+	return userservice.UserUpdateFromOwnRequest{
+		Username:    req.Username,
+		Fullname:    req.Fullname,
+		Email:       req.Email,
+		PhoneNumber: req.PhoneNumber,
+	}
+}

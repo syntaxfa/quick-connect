@@ -44,8 +44,26 @@ message UserDeleteRequest {
   string user_id = 1;
 }
 
+message UserUpdateFromSuperUserRequest {
+  string user_id = 1;
+  string username = 2;
+  string fullname = 3;
+  string email = 4;
+  string phone_number = 5;
+  repeated Role roles = 6;
+}
+
+message UserUpdateFromOwnRequest {
+  string username = 1;
+  string fullname = 2;
+  string email = 3;
+  string phone_number = 4;
+}
+
 service UserService {
   rpc CreateUser (CreateUserRequest) returns (User);
   rpc UserDetail (UserDetailRequest) returns (User);
   rpc UserDelete (UserDeleteRequest) returns (google.protobuf.Empty);
+  rpc UserUpdateFromSuperuser (UserUpdateFromSuperUserRequest) returns (User);
+  rpc UserUpdateFromOwn (UserUpdateFromOwnRequest) returns (User);
 }

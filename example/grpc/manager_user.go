@@ -83,6 +83,24 @@ func main() {
 	//	return
 	//}
 	//
-	//fmt.Println("user deleted")
-	//fmt.Println("-----------------")
+	fmt.Println("-----------------")
+	fmt.Println("User Update:")
+
+	userUpResp, UserUpErr := userAdapter.UserUpdateFromSuperuser(ctxWithValue, &userpb.UserUpdateFromSuperUserRequest{
+		UserId:      "01K8XSS8B8XYGM1Y5DYWRXG0S3",
+		Username:    userDetailResp.Username,
+		Fullname:    "ayda family",
+		Email:       "aydafamily@gmail.com",
+		PhoneNumber: "09119111111",
+		Roles:       []userpb.Role{userpb.Role_ROLE_SUPPORT, userpb.Role_ROLE_NOTIFICATION},
+	})
+	if UserUpErr != nil {
+		errorhandler.HandleGRPCError(UserUpErr, slog.Default())
+
+		return
+	}
+
+	fmt.Printf("%+v\n", userUpResp)
+
+	fmt.Println("-----------------")
 }

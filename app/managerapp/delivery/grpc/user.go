@@ -4,9 +4,12 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 	"github.com/syntaxfa/quick-connect/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (h Handler) CreateUser(ctx context.Context, req *userpb.CreateUserRequest) (*userpb.User, error) {
@@ -34,4 +37,27 @@ func (h Handler) UserDelete(ctx context.Context, req *userpb.UserDeleteRequest) 
 	}
 
 	return &empty.Empty{}, nil
+}
+
+func (h Handler) UserUpdateFromSuperuser(ctx context.Context, req *userpb.UserUpdateFromSuperUserRequest) (*userpb.User, error) {
+	resp, sErr := h.userSvc.UserUpdateFromSuperuser(ctx, types.ID(req.UserId), convertUserUpdateFromSuperuserToEntity(req))
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
+	}
+
+	return convertUserToPB(resp.User), nil
+}
+
+func (h Handler) UserUpdateFromOwn(ctx context.Context, req *userpb.UserUpdateFromOwnRequest) (*userpb.User, error) {
+	userClaims, ucErr := grpcauth.ExtractUserClaimsFromContext(ctx)
+	if ucErr != nil {
+		return nil, status.Error(codes.Unauthenticated, ucErr.Error())
+	}
+
+	resp, sErr := h.userSvc.UserUpdateFromOwn(ctx, userClaims.UserID, convertUserUpdateFromOwnToEntity(req))
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
+	}
+
+	return convertUserToPB(resp.User), nil
 }

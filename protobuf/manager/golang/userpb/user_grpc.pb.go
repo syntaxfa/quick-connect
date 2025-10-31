@@ -20,9 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_CreateUser_FullMethodName = "/manager.UserService/CreateUser"
-	UserService_UserDetail_FullMethodName = "/manager.UserService/UserDetail"
-	UserService_UserDelete_FullMethodName = "/manager.UserService/UserDelete"
+	UserService_CreateUser_FullMethodName              = "/manager.UserService/CreateUser"
+	UserService_UserDetail_FullMethodName              = "/manager.UserService/UserDetail"
+	UserService_UserDelete_FullMethodName              = "/manager.UserService/UserDelete"
+	UserService_UserUpdateFromSuperuser_FullMethodName = "/manager.UserService/UserUpdateFromSuperuser"
+	UserService_UserUpdateFromOwn_FullMethodName       = "/manager.UserService/UserUpdateFromOwn"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -32,6 +34,8 @@ type UserServiceClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	UserDetail(ctx context.Context, in *UserDetailRequest, opts ...grpc.CallOption) (*User, error)
 	UserDelete(ctx context.Context, in *UserDeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	UserUpdateFromSuperuser(ctx context.Context, in *UserUpdateFromSuperUserRequest, opts ...grpc.CallOption) (*User, error)
+	UserUpdateFromOwn(ctx context.Context, in *UserUpdateFromOwnRequest, opts ...grpc.CallOption) (*User, error)
 }
 
 type userServiceClient struct {
@@ -72,6 +76,26 @@ func (c *userServiceClient) UserDelete(ctx context.Context, in *UserDeleteReques
 	return out, nil
 }
 
+func (c *userServiceClient) UserUpdateFromSuperuser(ctx context.Context, in *UserUpdateFromSuperUserRequest, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, UserService_UserUpdateFromSuperuser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UserUpdateFromOwn(ctx context.Context, in *UserUpdateFromOwnRequest, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, UserService_UserUpdateFromOwn_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -79,6 +103,8 @@ type UserServiceServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	UserDetail(context.Context, *UserDetailRequest) (*User, error)
 	UserDelete(context.Context, *UserDeleteRequest) (*empty.Empty, error)
+	UserUpdateFromSuperuser(context.Context, *UserUpdateFromSuperUserRequest) (*User, error)
+	UserUpdateFromOwn(context.Context, *UserUpdateFromOwnRequest) (*User, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -97,6 +123,12 @@ func (UnimplementedUserServiceServer) UserDetail(context.Context, *UserDetailReq
 }
 func (UnimplementedUserServiceServer) UserDelete(context.Context, *UserDeleteRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserDelete not implemented")
+}
+func (UnimplementedUserServiceServer) UserUpdateFromSuperuser(context.Context, *UserUpdateFromSuperUserRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserUpdateFromSuperuser not implemented")
+}
+func (UnimplementedUserServiceServer) UserUpdateFromOwn(context.Context, *UserUpdateFromOwnRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserUpdateFromOwn not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -173,6 +205,42 @@ func _UserService_UserDelete_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_UserUpdateFromSuperuser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserUpdateFromSuperUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UserUpdateFromSuperuser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UserUpdateFromSuperuser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UserUpdateFromSuperuser(ctx, req.(*UserUpdateFromSuperUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UserUpdateFromOwn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserUpdateFromOwnRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UserUpdateFromOwn(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UserUpdateFromOwn_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UserUpdateFromOwn(ctx, req.(*UserUpdateFromOwnRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -191,6 +259,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserDelete",
 			Handler:    _UserService_UserDelete_Handler,
+		},
+		{
+			MethodName: "UserUpdateFromSuperuser",
+			Handler:    _UserService_UserUpdateFromSuperuser_Handler,
+		},
+		{
+			MethodName: "UserUpdateFromOwn",
+			Handler:    _UserService_UserUpdateFromOwn_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
