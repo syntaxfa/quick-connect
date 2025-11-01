@@ -26,6 +26,7 @@ const (
 	UserService_UserUpdateFromSuperuser_FullMethodName = "/manager.UserService/UserUpdateFromSuperuser"
 	UserService_UserUpdateFromOwn_FullMethodName       = "/manager.UserService/UserUpdateFromOwn"
 	UserService_UserList_FullMethodName                = "/manager.UserService/UserList"
+	UserService_UserProfile_FullMethodName             = "/manager.UserService/UserProfile"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -38,6 +39,7 @@ type UserServiceClient interface {
 	UserUpdateFromSuperuser(ctx context.Context, in *UserUpdateFromSuperUserRequest, opts ...grpc.CallOption) (*User, error)
 	UserUpdateFromOwn(ctx context.Context, in *UserUpdateFromOwnRequest, opts ...grpc.CallOption) (*User, error)
 	UserList(ctx context.Context, in *UserListRequest, opts ...grpc.CallOption) (*UserListResponse, error)
+	UserProfile(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*User, error)
 }
 
 type userServiceClient struct {
@@ -108,6 +110,16 @@ func (c *userServiceClient) UserList(ctx context.Context, in *UserListRequest, o
 	return out, nil
 }
 
+func (c *userServiceClient) UserProfile(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, UserService_UserProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -118,6 +130,7 @@ type UserServiceServer interface {
 	UserUpdateFromSuperuser(context.Context, *UserUpdateFromSuperUserRequest) (*User, error)
 	UserUpdateFromOwn(context.Context, *UserUpdateFromOwnRequest) (*User, error)
 	UserList(context.Context, *UserListRequest) (*UserListResponse, error)
+	UserProfile(context.Context, *empty.Empty) (*User, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -145,6 +158,9 @@ func (UnimplementedUserServiceServer) UserUpdateFromOwn(context.Context, *UserUp
 }
 func (UnimplementedUserServiceServer) UserList(context.Context, *UserListRequest) (*UserListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserList not implemented")
+}
+func (UnimplementedUserServiceServer) UserProfile(context.Context, *empty.Empty) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserProfile not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -275,6 +291,24 @@ func _UserService_UserList_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_UserProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UserProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UserProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UserProfile(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -305,6 +339,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserList",
 			Handler:    _UserService_UserList_Handler,
+		},
+		{
+			MethodName: "UserProfile",
+			Handler:    _UserService_UserProfile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

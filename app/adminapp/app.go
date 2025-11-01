@@ -45,8 +45,9 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	}
 
 	authAdapter := manager.NewAuthAdapter(managerGRPCClient.Conn())
+	userAdapter := manager.NewUserAdapter(managerGRPCClient.Conn())
 
-	handler := http.NewHandler(logger, t, authAdapter)
+	handler := http.NewHandler(logger, t, authAdapter, userAdapter)
 
 	getPuResp, gpuErr := authAdapter.GetPublicKey(context.Background())
 	if gpuErr != nil {
