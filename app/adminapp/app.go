@@ -3,17 +3,20 @@ package adminapp
 import (
 	"context"
 	"fmt"
-	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
-	"google.golang.org/grpc"
 	"log/slog"
 	"os"
 	"sync"
 
 	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/app/adminapp/delivery/http"
+	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
+	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
+	"google.golang.org/grpc"
 )
 
 type Application struct {
@@ -25,6 +28,8 @@ type Application struct {
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
+	const op = "Setup"
+
 	t, tErr := translation.New(translation.DefaultLanguages...)
 	if tErr != nil {
 		logger.Error("failed create new instance of translation", slog.String("error", tErr.Error()))
@@ -43,11 +48,20 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 
 	handler := http.NewHandler(logger, t, authAdapter)
 
+	getPuResp, gpuErr := authAdapter.GetPublicKey(context.Background())
+	if gpuErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(gpuErr).WithKind(richerror.KindUnexpected), logger)
+
+		panic(gpuErr)
+	}
+
+	jwtValidator := jwtvalidator.New(getPuResp.PublicKey, logger)
+
 	return Application{
 		cfg:               cfg,
 		trap:              trap,
 		logger:            logger,
-		httpServer:        http.New(httpserver.New(cfg.HTTPServer, logger), handler, cfg.TemplatePath),
+		httpServer:        http.New(httpserver.New(cfg.HTTPServer, logger), handler, cfg.TemplatePath, jwtValidator),
 		managerGRPCClient: managerGRPCClient,
 	}
 }

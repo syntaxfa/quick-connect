@@ -1,1 +1,56 @@
 package http
+
+import (
+	"log/slog"
+
+	"github.com/labstack/echo/v4"
+	"github.com/syntaxfa/quick-connect/adapter/manager"
+	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
+	"github.com/syntaxfa/quick-connect/types"
+)
+
+func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, authAd *manager.AuthAdapter, loginPath string, logger *slog.Logger) func(nex echo.HandlerFunc) echo.HandlerFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			const op = "delivery.middleware.setTokenToRequestContext"
+
+			if c.Path() == loginPath {
+				return next(c)
+			}
+
+			accessToken, acExist := getAccessTokenFromCookie(c, logger)
+			if acExist {
+				if _, err := jwtValidator.ValidateToken(accessToken); err == nil {
+					c.Set(types.AuthorizationKey, accessToken)
+
+					return next(c)
+				}
+			}
+
+			refreshToken, rtExist := getRefreshTokenFromCookie(c, logger)
+			if !rtExist {
+				clearAuthCookie(c)
+
+				return redirectToLogin(c)
+			}
+
+			token, tErr := authAd.TokenRefresh(c.Request().Context(), &authpb.TokenRefreshRequest{RefreshToken: refreshToken})
+			if tErr != nil {
+				errlog.WithoutErr(richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected).WithMessage("refresh token is not valid"), logger)
+
+				clearAuthCookie(c)
+
+				return redirectToLogin(c)
+			}
+
+			setAuthCookie(c, token.AccessToken, token.RefreshToken, int(token.AccessExpiresIn), int(token.RefreshExpiresIn))
+
+			c.Set(types.AuthorizationKey, token.AccessToken)
+
+			return next(c)
+		}
+	}
+}

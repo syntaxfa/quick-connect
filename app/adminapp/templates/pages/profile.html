@@ -1,0 +1,12 @@
+{{define "profile_page"}}
+<div class="users-header" style="animation-delay: 0s;">
+    <div class="header-left">
+        <h1 class="page-title">My Profile</h1>
+        <p class="page-subtitle">Manage your personal information and settings.</p>
+    </div>
+</div>
+
+<div id="profile-content-wrapper" class="profile-content" hx-target="this" hx-swap="outerHTML">
+    {{template "profile_view" .}}
+</div>
+{{end}}
