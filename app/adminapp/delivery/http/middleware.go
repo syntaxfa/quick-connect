@@ -24,7 +24,7 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 			accessToken, acExist := getAccessTokenFromCookie(c, logger)
 			if acExist {
 				if _, err := jwtValidator.ValidateToken(accessToken); err == nil {
-					c.Set(types.AuthorizationKey, accessToken)
+					setTokenToContext(c, accessToken)
 
 					return next(c)
 				}
@@ -48,9 +48,13 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 
 			setAuthCookie(c, token.AccessToken, token.RefreshToken, int(token.AccessExpiresIn), int(token.RefreshExpiresIn))
 
-			c.Set(types.AuthorizationKey, token.AccessToken)
+			setTokenToContext(c, token.AccessToken)
 
 			return next(c)
 		}
 	}
+}
+
+func setTokenToContext(c echo.Context, accessToken string) {
+	c.Set(types.AuthorizationKey, "Bearer "+accessToken)
 }

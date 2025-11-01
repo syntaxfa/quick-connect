@@ -42,7 +42,17 @@ func (ud *UserAdapter) UserUpdateFromSuperuser(ctx context.Context, req *userpb.
 	return ud.client.UserUpdateFromSuperuser(ctx, req, opts...)
 }
 
+// UserUpdateFromOwn calls new UserUpdateFromOwn RPC on the UserService.
+func (ud *UserAdapter) UserUpdateFromOwn(ctx context.Context, req *userpb.UserUpdateFromOwnRequest, opts ...grpc.CallOption) (*userpb.User, error) {
+	return ud.client.UserUpdateFromOwn(ctx, req, opts...)
+}
+
 // UserList calls the UserList PRC on the UserService.
 func (ud *UserAdapter) UserList(ctx context.Context, req *userpb.UserListRequest, opts ...grpc.CallOption) (*userpb.UserListResponse, error) {
 	return ud.client.UserList(ctx, req, opts...)
+}
+
+// UserProfile calls the UserProfile RPC on the UserService.
+func (ud *UserAdapter) UserProfile(ctx context.Context, req *empty.Empty, opts ...grpc.CallOption) (*userpb.User, error) {
+	return ud.client.UserProfile(ctx, req, opts...)
 }

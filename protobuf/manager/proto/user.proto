@@ -88,4 +88,5 @@ service UserService {
   rpc UserUpdateFromSuperuser (UserUpdateFromSuperUserRequest) returns (User);
   rpc UserUpdateFromOwn (UserUpdateFromOwnRequest) returns (User);
   rpc UserList (UserListRequest) returns (UserListResponse);
+  rpc UserProfile (google.protobuf.Empty) returns (User);
 }

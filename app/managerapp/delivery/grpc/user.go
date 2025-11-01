@@ -70,3 +70,17 @@ func (h Handler) UserList(ctx context.Context, req *userpb.UserListRequest) (*us
 
 	return convertUserListResponseToPB(resp), nil
 }
+
+func (h Handler) UserProfile(ctx context.Context, _ *empty.Empty) (*userpb.User, error) {
+	userClaims, ucErr := grpcauth.ExtractUserClaimsFromContext(ctx)
+	if ucErr != nil {
+		return nil, status.Error(codes.Unauthenticated, ucErr.Error())
+	}
+
+	resp, sErr := h.userSvc.UserProfile(ctx, userClaims.UserID)
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
+	}
+
+	return convertUserToPB(resp.User), nil
+}
