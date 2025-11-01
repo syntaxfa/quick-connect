@@ -9,10 +9,34 @@ import (
 )
 
 func (h Handler) ShowLoginPage(c echo.Context) error {
+	if exist := isUserHaveAuthCookie(c, h.logger); exist {
+		isHTMX := c.Request().Header.Get("HX-Request") == "true"
+
+		if isHTMX {
+			c.Response().Header().Set("HX-Redirect", "/dashboard")
+
+			return c.NoContent(http.StatusOK)
+		} else {
+			return c.Redirect(http.StatusSeeOther, "/dashboard")
+		}
+	}
+
 	return c.Render(http.StatusOK, "login_layout", nil)
 }
 
 func (h Handler) Login(c echo.Context) error {
+	if exist := isUserHaveAuthCookie(c, h.logger); exist {
+		isHTMX := c.Request().Header.Get("HX-Request") == "true"
+
+		if isHTMX {
+			c.Response().Header().Set("HX-Redirect", "/dashboard")
+
+			return c.NoContent(http.StatusOK)
+		} else {
+			return c.Redirect(http.StatusSeeOther, "/dashboard")
+		}
+	}
+
 	ctx := c.Request().Context()
 
 	loginReq := &authpb.LoginRequest{
@@ -30,28 +54,7 @@ func (h Handler) Login(c echo.Context) error {
 		return h.renderGRPCError(c, "gRPC login call failed", err)
 	}
 
-	accessMaxAge := int(loginResp.GetAccessExpiresIn())
-	refreshMaxAge := int(loginResp.GetRefreshExpiresIn())
-
-	accessCookie := new(http.Cookie)
-	accessCookie.Name = "access_token"
-	accessCookie.Value = loginResp.GetAccessToken()
-	accessCookie.Path = "/"
-	accessCookie.HttpOnly = true
-	accessCookie.Secure = c.Scheme() == "https"
-	accessCookie.SameSite = http.SameSiteLaxMode
-	accessCookie.MaxAge = accessMaxAge
-	c.SetCookie(accessCookie)
-
-	refreshCookie := new(http.Cookie)
-	refreshCookie.Name = "refresh_token"
-	refreshCookie.Value = loginResp.GetRefreshToken()
-	refreshCookie.Path = "/"
-	refreshCookie.HttpOnly = true
-	refreshCookie.Secure = c.Scheme() == "https"
-	refreshCookie.SameSite = http.SameSiteLaxMode
-	refreshCookie.MaxAge = refreshMaxAge
-	c.SetCookie(refreshCookie)
+	setAuthCookie(c, loginResp.AccessToken, loginResp.RefreshToken, int(loginResp.GetAccessExpiresIn()), int(loginResp.GetRefreshExpiresIn()))
 
 	c.Response().Header().Set("HX-Redirect", "/dashboard")
 	return c.NoContent(http.StatusOK)
