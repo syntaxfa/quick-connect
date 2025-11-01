@@ -10,15 +10,7 @@ import (
 
 func (h Handler) ShowLoginPage(c echo.Context) error {
 	if exist := isUserHaveAuthCookie(c, h.logger); exist {
-		isHTMX := c.Request().Header.Get("HX-Request") == "true"
-
-		if isHTMX {
-			c.Response().Header().Set("HX-Redirect", "/dashboard")
-
-			return c.NoContent(http.StatusOK)
-		} else {
-			return c.Redirect(http.StatusSeeOther, "/dashboard")
-		}
+		return redirectToDashboard(c)
 	}
 
 	return c.Render(http.StatusOK, "login_layout", nil)
@@ -26,15 +18,7 @@ func (h Handler) ShowLoginPage(c echo.Context) error {
 
 func (h Handler) Login(c echo.Context) error {
 	if exist := isUserHaveAuthCookie(c, h.logger); exist {
-		isHTMX := c.Request().Header.Get("HX-Request") == "true"
-
-		if isHTMX {
-			c.Response().Header().Set("HX-Redirect", "/dashboard")
-
-			return c.NoContent(http.StatusOK)
-		} else {
-			return c.Redirect(http.StatusSeeOther, "/dashboard")
-		}
+		return redirectToDashboard(c)
 	}
 
 	ctx := c.Request().Context()
@@ -56,8 +40,7 @@ func (h Handler) Login(c echo.Context) error {
 
 	setAuthCookie(c, loginResp.AccessToken, loginResp.RefreshToken, int(loginResp.GetAccessExpiresIn()), int(loginResp.GetRefreshExpiresIn()))
 
-	c.Response().Header().Set("HX-Redirect", "/dashboard")
-	return c.NoContent(http.StatusOK)
+	return redirectToDashboard(c)
 }
 
 func (h Handler) Logout(c echo.Context) error {

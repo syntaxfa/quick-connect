@@ -2,7 +2,6 @@ package http
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -26,8 +25,6 @@ func isUserHaveAuthCookie(c echo.Context, logger *slog.Logger) bool {
 	}
 
 	if cookie.Value == "" {
-		fmt.Println("refresh token is empty")
-
 		clearAuthCookie(c)
 
 		return false
@@ -78,4 +75,40 @@ func clearAuthCookie(c echo.Context) {
 	refreshCookie.SameSite = http.SameSiteLaxMode
 	refreshCookie.MaxAge = -1
 	c.SetCookie(refreshCookie)
+}
+
+func getAccessTokenFromCookie(c echo.Context, logger *slog.Logger) (string, bool) {
+	cookie, err := c.Cookie(string(types.TokenTypeAccess))
+
+	if err != nil {
+		if !errors.Is(err, http.ErrNoCookie) {
+			errlog.WithoutErr(richerror.New("isUserHaveAuthCookie").WithKind(richerror.KindUnexpected).WithWrapError(err), logger)
+		}
+
+		return "", false
+	}
+
+	if cookie.Value == "" {
+		return "", false
+	}
+
+	return cookie.Value, true
+}
+
+func getRefreshTokenFromCookie(c echo.Context, logger *slog.Logger) (string, bool) {
+	cookie, err := c.Cookie(string(types.TokenTypeRefresh))
+
+	if err != nil {
+		if !errors.Is(err, http.ErrNoCookie) {
+			errlog.WithoutErr(richerror.New("isUserHaveAuthCookie").WithKind(richerror.KindUnexpected).WithWrapError(err), logger)
+		}
+
+		return "", false
+	}
+
+	if cookie.Value == "" {
+		return "", false
+	}
+
+	return cookie.Value, true
 }

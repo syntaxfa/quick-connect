@@ -2,22 +2,25 @@ package http
 
 import (
 	"context"
+	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 )
 
 type Server struct {
-	httpserver httpserver.Server
-	handler    Handler
+	httpserver   httpserver.Server
+	handler      Handler
+	jwtValidator *jwtvalidator.Validator
 }
 
-func New(httpServer httpserver.Server, handler Handler, templatePath string) Server {
+func New(httpServer httpserver.Server, handler Handler, templatePath string, jwtValidator *jwtvalidator.Validator) Server {
 	renderer := NewTemplateRenderer(templatePath)
 	httpServer.Router.Renderer = renderer
 
 	return Server{
-		httpserver: httpServer,
-		handler:    handler,
+		httpserver:   httpServer,
+		handler:      handler,
+		jwtValidator: jwtValidator,
 	}
 }
 
@@ -36,30 +39,34 @@ func (s Server) registerRoutes() {
 
 	s.httpserver.Router.Static("/static", "app/adminapp/static")
 
-	templateRout := s.httpserver.Router.Group("")
-	templateRout.GET("/login", s.handler.ShowLoginPage)
+	rootGr := s.httpserver.Router.Group("", setTokenToRequestContextMiddleware(s.jwtValidator, s.handler.authAd, "/login", s.handler.logger))
 
-	authGroup := s.httpserver.Router.Group("")
+	// authGroup
+	authGroup := rootGr.Group("")
+	authGroup.GET("/login", s.handler.ShowLoginPage)
 	authGroup.POST("/login", s.handler.Login)
 	authGroup.GET("/logout", s.handler.Logout)
 
-	// TODO: Add authentication middleware here
-	// protectedGroup := s.httpserver.Router.Group("", AuthMiddleware)
-	protectedGroup := s.httpserver.Router.Group("")
-
 	// Dashboard - Main hub
-	protectedGroup.GET("/dashboard", s.handler.ShowDashboard)
-
-	// Service routes - these load content via HTMX
-	protectedGroup.GET("/support", s.handler.ShowSupportService)
-	protectedGroup.GET("/notification", s.handler.ShowNotificationService)
-	protectedGroup.GET("/story", s.handler.ShowStoryService)
+	dashGr := rootGr.Group("")
+	dashGr.GET("/dashboard", s.handler.ShowDashboard)
+	dashGr.GET("/support", s.handler.ShowSupportService)
+	dashGr.GET("/notification", s.handler.ShowNotificationService)
+	dashGr.GET("/story", s.handler.ShowStoryService)
 
 	// Users management routes
-	protectedGroup.GET("/users", s.handler.ShowUsers)
-	protectedGroup.GET("/users/search", s.handler.SearchUsers)
-	protectedGroup.GET("/users/export", s.handler.ExportUsers)
-	protectedGroup.GET("/users/create", s.handler.ShowCreateUserForm)
+	userGr := rootGr.Group("/users")
+	userGr.GET("", s.handler.ShowUsers)
+	userGr.GET("/search", s.handler.SearchUsers)
+	userGr.GET("/export", s.handler.ExportUsers)
+	userGr.GET("/create", s.handler.ShowCreateUserForm)
+
+	// Profile
+	profileGroup := rootGr.Group("/profile")
+	profileGroup.GET("", s.handler.ShowProfilePage)
+	profileGroup.PUT("", s.handler.UpdateProfile)
+	profileGroup.GET("/view", s.handler.ShowProfileView)
+	profileGroup.GET("/edit", s.handler.ShowProfileEditForm)
 }
 
 func (s Server) registerSwagger() {
