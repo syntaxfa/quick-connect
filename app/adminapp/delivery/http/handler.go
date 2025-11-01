@@ -18,13 +18,15 @@ type Handler struct {
 	logger *slog.Logger
 	t      *translation.Translate
 	authAd *manager.AuthAdapter
+	userAd *manager.UserAdapter
 }
 
-func NewHandler(logger *slog.Logger, t *translation.Translate, authAd *manager.AuthAdapter) Handler {
+func NewHandler(logger *slog.Logger, t *translation.Translate, authAd *manager.AuthAdapter, userAd *manager.UserAdapter) Handler {
 	return Handler{
 		t:      t,
 		logger: logger,
 		authAd: authAd,
+		userAd: userAd,
 	}
 }
 

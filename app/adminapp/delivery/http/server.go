@@ -2,9 +2,11 @@ package http
 
 import (
 	"context"
-	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 
+	"github.com/labstack/echo/v4"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
+	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
+	"github.com/syntaxfa/quick-connect/types"
 )
 
 type Server struct {
@@ -70,4 +72,10 @@ func (s Server) registerRoutes() {
 }
 
 func (s Server) registerSwagger() {
+}
+
+func grpcContext(c echo.Context) context.Context {
+	token := c.Get(types.AuthorizationKey)
+
+	return context.WithValue(c.Request().Context(), types.AuthorizationKey, token)
 }
