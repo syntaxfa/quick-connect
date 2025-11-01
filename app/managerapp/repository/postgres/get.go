@@ -132,9 +132,6 @@ func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase, us
 		Offset:     offset,
 	})
 
-	// TODO: complete this
-	_ = countQuery
-
 	rows, qErr := d.conn.Conn().Query(ctx, query, args...)
 	if qErr != nil {
 		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
@@ -151,7 +148,7 @@ func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase, us
 			&nullable.Avatar, &user.LastOnlineAt); sErr != nil {
 			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
 		}
-		
+
 		if nullable.Avatar.Valid {
 			user.Avatar = nullable.Avatar.String
 		}
@@ -163,8 +160,15 @@ func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase, us
 		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
 	}
 
+	var totalCount uint64
+	if sErr := d.conn.Conn().QueryRow(ctx, countQuery).Scan(&totalCount); sErr != nil {
+		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
+	}
+
 	return users, paginate.ResponseBase{
-		CurrentPage: paginated.CurrentPage,
-		PageSize:    paginated.PageSize,
+		CurrentPage:  paginated.CurrentPage,
+		PageSize:     paginated.PageSize,
+		TotalNumbers: totalCount,
+		TotalPage:    (totalCount + paginated.PageSize - 1) / paginated.PageSize,
 	}, nil
 }
