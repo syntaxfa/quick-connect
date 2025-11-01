@@ -41,6 +41,7 @@ func (s Server) registerRoutes() {
 
 	authGroup := s.httpserver.Router.Group("")
 	authGroup.POST("/login", s.handler.Login)
+	authGroup.GET("/logout", s.handler.Logout)
 
 	// TODO: Add authentication middleware here
 	// protectedGroup := s.httpserver.Router.Group("", AuthMiddleware)

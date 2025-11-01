@@ -59,3 +59,11 @@ func (h Handler) Login(c echo.Context) error {
 	c.Response().Header().Set("HX-Redirect", "/dashboard")
 	return c.NoContent(http.StatusOK)
 }
+
+func (h Handler) Logout(c echo.Context) error {
+	clearAuthCookie(c)
+
+	c.Response().Header().Set("HX-Redirect", "/login")
+
+	return c.NoContent(http.StatusOK)
+}
