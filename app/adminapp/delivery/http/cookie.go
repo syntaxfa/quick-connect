@@ -1,6 +1,8 @@
 package http
 
 import (
+	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -11,15 +13,27 @@ import (
 )
 
 func isUserHaveAuthCookie(c echo.Context, logger *slog.Logger) bool {
-	if cookie, cErr := c.Cookie(string(types.TokenTypeRefresh)); cErr != nil {
-		errlog.WithoutErr(richerror.New("Login").WithKind(richerror.KindUnexpected).WithWrapError(cErr), logger)
-	} else if vErr := cookie.Valid(); vErr == nil {
-		return true
+	cookie, err := c.Cookie(string(types.TokenTypeRefresh))
+
+	if err != nil {
+		if !errors.Is(err, http.ErrNoCookie) {
+			errlog.WithoutErr(richerror.New("isUserHaveAuthCookie").WithKind(richerror.KindUnexpected).WithWrapError(err), logger)
+		}
+
+		clearAuthCookie(c)
+
+		return false
 	}
 
-	clearAuthCookie(c)
+	if cookie.Value == "" {
+		fmt.Println("refresh token is empty")
 
-	return false
+		clearAuthCookie(c)
+
+		return false
+	}
+
+	return true
 }
 
 func setAuthCookie(c echo.Context, accessToken, refreshToken string, accessExpiry, refreshExpiry int) {
