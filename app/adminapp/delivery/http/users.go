@@ -1,102 +1,174 @@
 package http
 
 import (
+	"fmt"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 )
 
-// ShowUsers renders the users list page
-func (h Handler) ShowUsers(c echo.Context) error {
-	// TODO: Fetch users from database
-	// users, err := h.userService.GetUsers(ctx, filters)
+// PaginationPage struct for template page loops
+type PaginationPage struct {
+	PageNumber int
+	URL        string
+	IsCurrent  bool
+}
+
+// PaginationData struct for template
+type PaginationData struct {
+	TotalNumber   uint64
+	CurrentPage   uint64
+	TotalPage     uint64
+	HasPrev       bool
+	PrevPage      uint64
+	HasNext       bool
+	NextPage      uint64
+	Pages         []PaginationPage
+	BaseURL       string
+	Query         string
+	SortDirection int
+}
+
+// ShowUsersPage renders the main user page shell
+// It fetches the total user count for the stat card
+func (h Handler) ShowUsersPage(c echo.Context) error {
+	ctx := grpcContext(c)
+
+	// Make a light request just to get the total count for the stat card
+	listReq := &userpb.UserListRequest{
+		CurrentPage: 1,
+		PageSize:    1, // We only need the total count
+	}
+
+	listResp, err := h.userAd.UserList(ctx, listReq)
+	totalUsers := uint64(0)
+	if err != nil {
+		// Don't fail the whole page, just log it and render with 0
+		h.logger.Error("Failed to get user count for stats", "error", err)
+	} else {
+		totalUsers = listResp.TotalNumber
+	}
 
 	data := map[string]interface{}{
-		"Title": "User Management",
-		"Stats": map[string]interface{}{
-			"Total":    1234,
-			"Active":   1089,
-			"Inactive": 145,
-			"NewToday": 23,
-		},
-		// Add actual users data here when you have the service
+		"TotalUsers": totalUsers,
 	}
 
 	return c.Render(http.StatusOK, "users_page", data)
 }
 
-// SearchUsers handles user search via HTMX
-func (h Handler) SearchUsers(c echo.Context) error {
-	query := c.QueryParam("q")
+// ListUsersPartial renders the table and pagination (called by HTMX)
+func (h Handler) ListUsersPartial(c echo.Context) error {
+	ctx := grpcContext(c)
 
-	// TODO: Search users in database
-	// users, err := h.userService.SearchUsers(ctx, query)
+	// 1. Parse Query Parameters
+	page, _ := strconv.ParseUint(c.QueryParam("page"), 10, 64)
+	if page == 0 {
+		page = 1
+	}
 
-	h.logger.Info("Searching users", "query", query)
+	sortDirInt, _ := strconv.ParseInt(c.QueryParam("sort_direction"), 10, 32)
+	if sortDirInt == 0 {
+		sortDirInt = 2 // Default to DESC (Newest First)
+	}
 
-	// Return only the table body rows
-	return c.HTML(http.StatusOK, `
-		<tr class="user-row">
-			<td><input type="checkbox" class="checkbox-input"></td>
-			<td>
-				<div class="user-cell">
-					<div class="user-avatar" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6);">
-						<span>SR</span>
-					</div>
-					<div class="user-info">
-						<span class="user-name">Search Result</span>
-						<span class="user-id">#USR-999</span>
-					</div>
-				</div>
-			</td>
-			<td><span class="user-email">search@example.com</span></td>
-			<td><span class="role-badge user">User</span></td>
-			<td><span class="status-badge active">Active</span></td>
-			<td><span class="user-date">Jan 25, 2024</span></td>
-			<td>
-				<div class="action-buttons">
-					<button class="action-btn view" title="View Details">
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-							<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-						</svg>
-					</button>
-					<button class="action-btn edit" title="Edit User">
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-						</svg>
-					</button>
-					<button class="action-btn delete" title="Delete User">
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-						</svg>
-					</button>
-				</div>
-			</td>
-		</tr>
-	`)
+	usernameQuery := c.QueryParam("username")
+
+	listReq := &userpb.UserListRequest{
+		CurrentPage:   page,
+		PageSize:      10, // Define page size (e.g., 10)
+		SortDirection: userpb.SortDirection(sortDirInt),
+		Username:      usernameQuery,
+	}
+
+	// 2. Call gRPC Service
+	listResp, err := h.userAd.UserList(ctx, listReq)
+	if err != nil {
+		return h.renderGRPCError(c, "ListUsersPartial", err)
+	}
+
+	// 3. Convert Users for template
+	users := make([]User, len(listResp.Users))
+	for i, pbUser := range listResp.Users {
+		users[i] = convertUserPbToUser(pbUser)
+	}
+
+	// 4. Build Pagination Data
+	pagination := h.buildPaginationData(listResp, usernameQuery, int(sortDirInt))
+
+	data := map[string]interface{}{
+		"Users":      users,
+		"Pagination": pagination,
+	}
+
+	// 5. Render Partial
+	err = c.Render(http.StatusOK, "users_list_partial", data)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	return nil
 }
 
-// ExportUsers handles user export
-func (h Handler) ExportUsers(c echo.Context) error {
-	// TODO: Generate CSV/Excel export
-	h.logger.Info("Exporting users")
+// DeleteUser handles deleting a user (called by HTMX)
+func (h Handler) DeleteUser(c echo.Context) error {
+	ctx := grpcContext(c)
+	userID := c.Param("id")
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Export functionality will be implemented",
-	})
+	if userID == "" {
+		return c.String(http.StatusBadRequest, "User ID is required")
+	}
+
+	_, err := h.userAd.UserDelete(ctx, &userpb.UserDeleteRequest{UserId: userID})
+	if err != nil {
+		// TODO: Return an error partial or message
+		return h.renderGRPCError(c, "DeleteUser", err)
+	}
+
+	// On success, return empty 200 OK.
+	// HTMX will remove the <tr> because of hx-target="closest tr"
+	return c.NoContent(http.StatusOK)
 }
 
-// ShowCreateUserForm shows the create user modal
-func (h Handler) ShowCreateUserForm(c echo.Context) error {
-	// TODO: Return modal HTML for creating user
-	return c.HTML(http.StatusOK, `
-		<div class="modal-backdrop" id="user-modal">
-			<div class="modal-content">
-				<h2>Add New User</h2>
-				<p>Create user form will be here</p>
-				<button onclick="document.getElementById('user-modal').remove()">Close</button>
-			</div>
-		</div>
-	`)
+// buildPaginationData is a helper to create the pagination struct
+func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string, sortDir int) PaginationData {
+	p := PaginationData{
+		TotalNumber:   resp.TotalNumber,
+		CurrentPage:   resp.CurrentPage,
+		TotalPage:     resp.TotalPage,
+		HasPrev:       resp.CurrentPage > 1,
+		HasNext:       resp.CurrentPage < resp.TotalPage,
+		BaseURL:       "/users/list", // Base URL for pagination links
+		Query:         query,
+		SortDirection: sortDir,
+	}
+
+	if p.HasPrev {
+		p.PrevPage = p.CurrentPage - 1
+	}
+	if p.HasNext {
+		p.NextPage = p.CurrentPage + 1
+	}
+
+	// Build page number links (e.g., show max 5 pages)
+	maxPagesToShow := 5
+	start := int(math.Max(1, float64(int(p.CurrentPage)-maxPagesToShow/2)))
+	end := int(math.Min(float64(p.TotalPage), float64(start+maxPagesToShow-1)))
+
+	if end-start+1 < maxPagesToShow && start > 1 {
+		start = int(math.Max(1, float64(end-maxPagesToShow+1)))
+	}
+
+	p.Pages = []PaginationPage{}
+	for i := start; i <= end; i++ {
+		p.Pages = append(p.Pages, PaginationPage{
+			PageNumber: i,
+			URL:        fmt.Sprintf("%s?page=%d&username=%s&sort_direction=%d", p.BaseURL, i, p.Query, p.SortDirection),
+			IsCurrent:  i == int(p.CurrentPage),
+		})
+	}
+
+	return p
 }

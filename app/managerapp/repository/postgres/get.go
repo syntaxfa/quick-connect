@@ -161,8 +161,14 @@ func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase, us
 	}
 
 	var totalCount uint64
-	if sErr := d.conn.Conn().QueryRow(ctx, countQuery).Scan(&totalCount); sErr != nil {
-		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
+	if username != "" {
+		if sErr := d.conn.Conn().QueryRow(ctx, countQuery, username).Scan(&totalCount); sErr != nil {
+			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
+		}
+	} else {
+		if sErr := d.conn.Conn().QueryRow(ctx, countQuery).Scan(&totalCount); sErr != nil {
+			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
+		}
 	}
 
 	return users, paginate.ResponseBase{
