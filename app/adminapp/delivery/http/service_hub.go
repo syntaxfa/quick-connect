@@ -8,10 +8,15 @@ import (
 
 // ShowDashboard renders the main dashboard page with service hub
 func (h Handler) ShowDashboard(c echo.Context) error {
-	// TODO: Get user info from context/session
-	// user := getUserFromContext(c)
+	data := map[string]interface{}{
+		"TemplateName": "dashboard_page",
+	}
 
-	return c.Render(http.StatusOK, "main_layout", nil)
+	if isHTMX(c) {
+		return c.Render(http.StatusOK, "dashboard_page", data)
+	}
+
+	return c.Render(http.StatusOK, "main_layout", data)
 }
 
 // ShowSupportService renders the support service page
@@ -24,9 +29,14 @@ func (h Handler) ShowSupportService(c echo.Context) error {
 			"Pending": 12,
 			"Closed":  456,
 		},
+		"TemplateName": "support_page",
 	}
 
-	return c.Render(http.StatusOK, "support_page", data)
+	if isHTMX(c) {
+		return c.Render(http.StatusOK, "support_page", data)
+	}
+
+	return c.Render(http.StatusOK, "main_layout", data)
 }
 
 // ShowNotificationService renders the notification service page
@@ -39,9 +49,13 @@ func (h Handler) ShowNotificationService(c echo.Context) error {
 			"Delivered": 98,
 			"Failed":    2,
 		},
+		"TemplateName": "notification_page",
 	}
 
-	return c.Render(http.StatusOK, "notification_page", data)
+	if isHTMX(c) {
+		return c.Render(http.StatusOK, "notification_page", data)
+	}
+	return c.Render(http.StatusOK, "main_layout", data)
 }
 
 // ShowStoryService renders the story service page
@@ -53,7 +67,11 @@ func (h Handler) ShowStoryService(c echo.Context) error {
 			"Active": 456,
 			"Views":  2300000,
 		},
+		"TemplateName": "story_page",
 	}
 
-	return c.Render(http.StatusOK, "story_page", data)
+	if isHTMX(c) {
+		return c.Render(http.StatusOK, "story_page", data)
+	}
+	return c.Render(http.StatusOK, "main_layout", data)
 }

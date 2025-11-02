@@ -29,10 +29,15 @@ func (h Handler) ShowProfilePage(c echo.Context) error {
 	}
 
 	data := map[string]interface{}{
-		"User": convertUserPbToUser(userPb),
+		"User":         convertUserPbToUser(userPb),
+		"TemplateName": "profile_page",
 	}
 
-	return c.Render(http.StatusOK, "profile_page", data)
+	if isHTMX(c) {
+		return c.Render(http.StatusOK, "profile_page", data)
+	}
+
+	return c.Render(http.StatusOK, "main_layout", data)
 }
 
 func (h Handler) ShowProfileView(c echo.Context) error {
