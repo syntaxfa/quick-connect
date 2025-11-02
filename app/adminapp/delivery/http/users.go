@@ -53,10 +53,15 @@ func (h Handler) ShowUsersPage(c echo.Context) error {
 	}
 
 	data := map[string]interface{}{
-		"TotalUsers": totalUsers,
+		"TotalUsers":   totalUsers,
+		"TemplateName": "users_page",
 	}
 
-	return c.Render(http.StatusOK, "users_page", data)
+	if isHTMX(c) {
+		return c.Render(http.StatusOK, "users_page", data)
+	}
+
+	return c.Render(http.StatusOK, "main_layout", data)
 }
 
 // ListUsersPartial renders the table and pagination (called by HTMX)

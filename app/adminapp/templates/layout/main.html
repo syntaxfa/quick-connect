@@ -135,8 +135,21 @@
 
         <!-- Main Content Area (This is now the *only* swap target) -->
         <main class="main-content" id="main-content">
-            <!-- Dynamic content will be loaded here via HTMX -->
+
+            {{if eq .TemplateName "users_page"}}
+            {{template "users_page" .}}
+            {{else if eq .TemplateName "profile_page"}}
+            {{template "profile_page" .}}
+            {{else if eq .TemplateName "support_page"}}
+            {{template "support_page" .}}
+            {{else if eq .TemplateName "notification_page"}}
+            {{template "notification_page" .}}
+            {{else if eq .TemplateName "story_page"}}
+            {{template "story_page" .}}
+            {{else}}
             {{template "dashboard_page" .}}
+            {{end}}
+
         </main>
 
     </div> <!-- End main-wrapper -->

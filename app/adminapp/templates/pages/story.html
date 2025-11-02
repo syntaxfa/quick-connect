@@ -1,0 +1,14 @@
+{{define "story_page"}}
+<div class="dashboard-content" style="animation: fadeInUp 0.5s ease;">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">{{.Title}}</h1>
+        <p class="dashboard-subtitle">Manage user stories and highlights.</p>
+    </div>
+
+    <pre style="color: white; background: #1e293b; padding: 1rem; border-radius: 8px;">
+Data:
+Active: {{.Stats.Active}}
+Views:  {{.Stats.Views}}
+    </pre>
+</div>
+{{end}}

@@ -1,0 +1,15 @@
+{{define "notification_page"}}
+<div class="dashboard-content" style="animation: fadeInUp 0.5s ease;">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">{{.Title}}</h1>
+        <p class="dashboard-subtitle">Send push notifications to users.</p>
+    </div>
+
+    <pre style="color: white; background: #1e293b; padding: 1rem; border-radius: 8px;">
+Data:
+Sent:      {{.Stats.Sent}}
+Delivered: {{.Stats.Delivered}}
+Failed:    {{.Stats.Failed}}
+    </pre>
+</div>
+{{end}}
