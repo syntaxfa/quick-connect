@@ -40,6 +40,7 @@
     <div class="services-grid">
 
         <!-- Support Service Card -->
+        {{if or (hasRole .User.Roles "superuser") (hasRole .User.Roles "support")}}
         <div class="service-card support-card"
              hx-get="/support"
              hx-target="#main-content"
@@ -69,8 +70,10 @@
                 </div>
             </div>
         </div>
+        {{end}}
 
         <!-- Notification Service Card -->
+        {{if or (hasRole .User.Roles "superuser") (hasRole .User.Roles "notification")}}
         <div class="service-card notification-card"
              hx-get="/notification"
              hx-target="#main-content"
@@ -100,8 +103,10 @@
                 </div>
             </div>
         </div>
+        {{end}}
 
         <!-- Story Service Card -->
+        {{if or (hasRole .User.Roles "superuser") (hasRole .User.Roles "story")}}
         <div class="service-card story-card"
              hx-get="/story"
              hx-target="#main-content"
@@ -131,6 +136,7 @@
                 </div>
             </div>
         </div>
+        {{end}}
 
     </div>
 

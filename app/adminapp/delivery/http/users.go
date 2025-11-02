@@ -36,6 +36,7 @@ type PaginationData struct {
 // It fetches the total user count for the stat card
 func (h Handler) ShowUsersPage(c echo.Context) error {
 	ctx := grpcContext(c)
+	user, _ := getUserFromContext(c)
 
 	// Make a light request just to get the total count for the stat card
 	listReq := &userpb.UserListRequest{
@@ -55,6 +56,7 @@ func (h Handler) ShowUsersPage(c echo.Context) error {
 	data := map[string]interface{}{
 		"TotalUsers":   totalUsers,
 		"TemplateName": "users_page",
+		"User":         user,
 	}
 
 	if isHTMX(c) {
