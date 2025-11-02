@@ -86,7 +86,7 @@
     -->
     <div id="user-list-content"
          hx-get="/users/list"
-         hx-trigger="load"
+         hx-trigger="load, userListChanged from:body"
          hx-swap="innerHTML">
 
         <!-- Display a simple loader until content is loaded -->

@@ -31,7 +31,10 @@ func NewHandler(logger *slog.Logger, t *translation.Translate, authAd *manager.A
 }
 
 func (h Handler) renderErrorPartial(c echo.Context, httpStatus int, errorContent string) error {
-	html := `<div id="error-message" class="error">` + h.t.TranslateMessage(errorContent) + `</div>`
+	msg := h.t.TranslateMessage(errorContent)
+
+	html := `<div id="modal-error-message" class="error" hx-swap-oob="true">` + msg + `</div>`
+	html += `<div id="error-message" class="error" hx-swap-oob="true">` + msg + `</div>`
 
 	// TODO: HTMX can't handle errors when status code is not 200
 	c.Response().Header().Set("X-HTTP-Status", fmt.Sprintf("%d", httpStatus))

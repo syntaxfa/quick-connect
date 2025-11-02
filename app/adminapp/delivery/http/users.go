@@ -200,15 +200,55 @@ func (h Handler) DetailUser(c echo.Context) error {
 	return c.Render(http.StatusOK, "user_detail_modal", data)
 }
 
-//func (h Handler) UpdateUser(c echo.Context) error {
-//	ctx := grpcContext(c)
-//
-//	h.userAd.UserUpdateFromSuperuser(ctx, &userpb.UserUpdateFromSuperUserRequest{
-//		UserId:      c.Param("id"),
-//		Username:    c.FormValue("username"),
-//		Fullname:    c.FormValue("fullname"),
-//		Email:       c.FormValue("email"),
-//		PhoneNumber: c.FormValue("phone_number"),
-//		Roles:       c.,
-//	})
-//}
+// ShowEditUserModal fetches user details and renders the edit form modal
+func (h Handler) ShowEditUserModal(c echo.Context) error {
+	ctx := grpcContext(c)
+
+	userPb, aErr := h.userAd.UserDetail(ctx, &userpb.UserDetailRequest{UserId: c.Param("id")})
+	if aErr != nil {
+		return h.renderGRPCError(c, "ShowEditUserModal", aErr)
+	}
+
+	data := map[string]interface{}{
+		"User":     convertUserPbToUser(userPb),
+		"AllRoles": GetAllRoles(),
+	}
+
+	return c.Render(http.StatusOK, "user_edit_modal", data)
+}
+
+// UpdateUser handles the submission of the edit user form
+func (h Handler) UpdateUser(c echo.Context) error {
+	ctx := grpcContext(c)
+	userID := c.Param("id")
+
+	username := c.FormValue("username")
+	fullname := c.FormValue("fullname")
+	email := c.FormValue("email")
+	phoneNumber := c.FormValue("phone_number")
+	roleStrings := c.Request().Form["roles"]
+
+	roles := ParseRolesFromForm(roleStrings)
+
+	req := &userpb.UserUpdateFromSuperUserRequest{
+		UserId:      userID,
+		Username:    username,
+		Fullname:    fullname,
+		Email:       email,
+		PhoneNumber: phoneNumber,
+		Roles:       roles,
+	}
+
+	userPb, aErr := h.userAd.UserUpdateFromSuperuser(ctx, req)
+	if aErr != nil {
+		return h.renderGRPCError(c, "UpdateUser", aErr)
+	}
+
+	c.Response().Header().Set("HX-Trigger", "userListChanged")
+
+	data := map[string]interface{}{
+		"User": convertUserPbToUser(userPb),
+	}
+
+	return c.Render(http.StatusOK, "user_detail_modal", data)
+}

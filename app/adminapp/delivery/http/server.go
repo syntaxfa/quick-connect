@@ -63,6 +63,8 @@ func (s Server) registerRoutes() {
 	userGr.GET("/delete/confirm", s.handler.ShowDeleteUserConfirm)
 	userGr.POST("/:id/delete", s.handler.DeleteUser)
 	userGr.GET("/:id/detail", s.handler.DetailUser)
+	userGr.GET("/:id/edit", s.handler.ShowEditUserModal)
+	userGr.POST("/:id/update", s.handler.UpdateUser)
 
 	// GET /users/create
 	// Shows the "Add User" modal

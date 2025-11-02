@@ -149,3 +149,14 @@
     color: var(--text-secondary);
     cursor: pointer;
 }
+
+label.role-checkbox {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.role-checkbox label {
+    cursor: default;
+}

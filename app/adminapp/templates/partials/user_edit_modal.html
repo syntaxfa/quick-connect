@@ -1,0 +1,79 @@
+{{define "user_edit_modal"}}
+<div class="modal-backdrop" onclick="this.remove()">
+
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
+
+        <form
+                hx-post="/users/{{.User.ID}}/update"
+                hx-target="closest .modal-backdrop"
+                hx-swap="outerHTML"
+        >
+            <div class="modal-header">
+                <h3 class="modal-title">Edit User @{{.User.Username}}</h3>
+                <button type="button" class="modal-close-btn" onclick="this.closest('.modal-backdrop').remove()">&times;</button>
+            </div>
+
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+
+                <div id="modal-error-message"></div>
+
+                <div class="profile-form" style="gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" name="username" class="form-input" value="{{.User.Username}}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="fullname">Full Name</label>
+                        <input type="text" id="fullname" name="fullname" class="form-input" value="{{.User.Fullname}}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" value="{{.User.Email}}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="phone_number">Phone Number</label>
+                        <input type="tel" id="phone_number" name="phone_number" class="form-input" value="{{.User.PhoneNumber}}">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">Roles</label>
+                        <div class="role-grid">
+                            {{$userRoles := .User.Roles}}
+                            {{range .AllRoles}}
+                            <label class="role-checkbox" for="role-{{.Value}}">
+                                <input
+                                        type="checkbox"
+                                        name="roles"
+                                        id="role-{{.Value}}"
+                                        value="{{.Name}}"
+                                        {{if hasRole $userRoles .Name}}checked{{end}}
+                                >
+                                {{.Name}}
+                            </label>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="this.closest('.modal-backdrop').remove()">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary" hx-indicator="#save-spinner-{{.User.ID}}">
+                    <span>Save Changes</span>
+                    <span class="htmx-indicator" id="save-spinner-{{.User.ID}}">
+                        <svg class="nav-icon" style="width: 20px; height: 20px; animation: spin 1s linear infinite;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity: 0.2;"></circle>
+                            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" style="opacity: 1;"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}
