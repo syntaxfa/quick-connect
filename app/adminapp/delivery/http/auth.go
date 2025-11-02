@@ -43,6 +43,11 @@ func (h Handler) Login(c echo.Context) error {
 	return redirectToDashboard(c)
 }
 
+// ShowLogoutConfirm renders the logout confirmation modal
+func (h Handler) ShowLogoutConfirm(c echo.Context) error {
+	return c.Render(http.StatusOK, "logout_confirm_modal", nil)
+}
+
 func (h Handler) Logout(c echo.Context) error {
 	clearAuthCookie(c)
 
