@@ -8,17 +8,6 @@ import (
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 )
 
-type User struct {
-	ID           string
-	Username     string
-	Fullname     string
-	Email        string
-	PhoneNumber  string
-	Avatar       string
-	Roles        []string
-	LastOnlineAt string
-}
-
 // ShowProfilePage renders the user's profile page
 func (h Handler) ShowProfilePage(c echo.Context) error {
 	ctx := grpcContext(c)

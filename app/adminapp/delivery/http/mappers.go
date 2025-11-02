@@ -7,6 +7,17 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
+type User struct {
+	ID           string
+	Username     string
+	Fullname     string
+	Email        string
+	PhoneNumber  string
+	Avatar       string
+	Roles        []string
+	LastOnlineAt string
+}
+
 // RoleInfo struct helper for templates
 type RoleInfo struct {
 	Name  string // "SUPERUSER", "SUPPORT"
@@ -79,5 +90,17 @@ func convertUserPbToUser(userPb *userpb.User) User {
 		Avatar:       userPb.Avatar,
 		Roles:        roles,
 		LastOnlineAt: time.Now().Add(-15 * time.Minute).Format("Jan 02, 2006 at 3:04 PM"),
+	}
+}
+
+func convertClaimsToUser(claims *types.UserClaims) User {
+	var roles []string
+	for _, role := range claims.Roles {
+		roles = append(roles, string(role))
+	}
+
+	return User{
+		ID:    claims.ID,
+		Roles: roles,
 	}
 }

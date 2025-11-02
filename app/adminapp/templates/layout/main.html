@@ -88,6 +88,7 @@
             <span>Profile</span>
             </a>
 
+            {{if hasRole .User.Roles "superuser"}}
             <a href="/users"
                class="nav-item {{if eq $activePage "users"}}active{{end}}"
             hx-get="/users"
@@ -99,7 +100,9 @@
             </svg>
             <span>Users</span>
             </a>
+            {{end}}
 
+            {{if hasRole .User.Roles "superuser"}}
             <a href="/settings"
                class="nav-item {{if eq $activePage "settings"}}active{{end}}"
             hx-get="/settings"
@@ -112,6 +115,8 @@
             </svg>
             <span>Settings</span>
             </a>
+            {{end}}
+
         </nav>
 
         <div class="sidebar-footer">
