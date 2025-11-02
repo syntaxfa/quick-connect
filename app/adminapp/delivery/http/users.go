@@ -254,3 +254,35 @@ func (h Handler) UpdateUser(c echo.Context) error {
 
 	return c.Render(http.StatusOK, "user_detail_modal", data)
 }
+
+// ShowCreateUserModal renders the create user form modal
+func (h Handler) ShowCreateUserModal(c echo.Context) error {
+	data := map[string]interface{}{
+		"AllRoles": GetAllRoles(),
+	}
+
+	return c.Render(http.StatusOK, "user_create_modal", data)
+}
+
+// CreateUser handles the submission of the new user form
+func (h Handler) CreateUser(c echo.Context) error {
+	ctx := grpcContext(c)
+
+	req := &userpb.CreateUserRequest{
+		Username:    c.FormValue("username"),
+		Password:    c.FormValue("password"),
+		Fullname:    c.FormValue("fullname"),
+		Email:       c.FormValue("email"),
+		PhoneNumber: c.FormValue("phone_number"),
+		Roles:       ParseRolesFromForm(c.Request().Form["roles"]),
+	}
+
+	_, aErr := h.userAd.CreateUser(ctx, req)
+	if aErr != nil {
+		return h.renderGRPCError(c, "CreateUser", aErr)
+	}
+
+	c.Response().Header().Set("HX-Trigger", "userListChanged")
+
+	return c.NoContent(http.StatusCreated)
+}
