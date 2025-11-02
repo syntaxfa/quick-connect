@@ -43,11 +43,11 @@ func (s Server) registerRoutes() {
 
 	rootGr := s.httpserver.Router.Group("", setTokenToRequestContextMiddleware(s.jwtValidator, s.handler.authAd, "/login", s.handler.logger))
 
-	// authGroup
-	authGroup := rootGr.Group("")
-	authGroup.GET("/login", s.handler.ShowLoginPage)
-	authGroup.POST("/login", s.handler.Login)
-	authGroup.GET("/logout", s.handler.Logout)
+	// auth Group
+	authGr := rootGr.Group("")
+	authGr.GET("/login", s.handler.ShowLoginPage)
+	authGr.POST("/login", s.handler.Login)
+	authGr.GET("/logout", s.handler.Logout)
 
 	// Dashboard - Main hub
 	dashGr := rootGr.Group("")
@@ -95,12 +95,16 @@ func (s Server) registerRoutes() {
 		// userGr.GET("/export", h.ExportUsers) // TODO: Create h.ExportUsers handler
 	}
 
-	// Profile
-	profileGroup := rootGr.Group("/profile")
-	profileGroup.GET("", s.handler.ShowProfilePage)
-	profileGroup.PUT("", s.handler.UpdateProfile)
-	profileGroup.GET("/view", s.handler.ShowProfileView)
-	profileGroup.GET("/edit", s.handler.ShowProfileEditForm)
+	// Profile Group
+	profileGr := rootGr.Group("/profile")
+	profileGr.GET("", s.handler.ShowProfilePage)
+	profileGr.PUT("", s.handler.UpdateProfile)
+	profileGr.GET("/view", s.handler.ShowProfileView)
+	profileGr.GET("/edit", s.handler.ShowProfileEditForm)
+
+	// Settings
+	settingGr := rootGr.Group("/settings")
+	settingGr.GET("", s.handler.ShowSettingsPage)
 }
 
 func (s Server) registerSwagger() {
