@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -17,6 +18,11 @@ type TemplateRenderer struct {
 
 // NewTemplateRenderer creates a new TemplateRenderer
 func NewTemplateRenderer(basePath string) *TemplateRenderer {
+	// Define custom functions
+	funcMap := template.FuncMap{
+		"initials": getInitials,
+	}
+
 	// Check if base path exists
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
 		panic(fmt.Sprintf("template base path does not exist: %s", basePath))
@@ -58,7 +64,8 @@ func NewTemplateRenderer(basePath string) *TemplateRenderer {
 		panic("no template files found")
 	}
 
-	tmpl, err := template.ParseFiles(allFiles...)
+	tmpl := template.New("").Funcs(funcMap)
+	tmpl, err = tmpl.ParseFiles(allFiles...)
 	if err != nil {
 		panic(fmt.Sprintf("failed to parse templates: %v", err))
 	}
@@ -79,4 +86,25 @@ func NewTemplateRenderer(basePath string) *TemplateRenderer {
 // Render returns a template document
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+// getInitials is a helper function to get initials from a full name
+func getInitials(fullname string) string {
+	fullname = strings.TrimSpace(fullname)
+	if fullname == "" {
+		return "?"
+	}
+
+	parts := strings.Fields(fullname)
+	if len(parts) == 1 {
+		return strings.ToUpper(string([]rune(parts[0])[0]))
+	}
+
+	if len(parts) > 1 {
+		first := []rune(parts[0])[0]
+		last := []rune(parts[len(parts)-1])[0]
+		return strings.ToUpper(string(first) + string(last))
+	}
+
+	return "?"
 }

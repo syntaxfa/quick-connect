@@ -56,12 +56,44 @@ func (s Server) registerRoutes() {
 	dashGr.GET("/notification", s.handler.ShowNotificationService)
 	dashGr.GET("/story", s.handler.ShowStoryService)
 
-	// Users management routes
+	// --- Users Management Routes ---
+	// This replaces your old route structure
 	userGr := rootGr.Group("/users")
-	userGr.GET("", s.handler.ShowUsers)
-	userGr.GET("/search", s.handler.SearchUsers)
-	userGr.GET("/export", s.handler.ExportUsers)
-	userGr.GET("/create", s.handler.ShowCreateUserForm)
+	{
+		// GET /users
+		// Renders the main page shell (users_page.html)
+		userGr.GET("", s.handler.ShowUsersPage)
+
+		// GET /users/list
+		// This is the new HTMX partial route for searching, pagination, and initial load.
+		// It replaces the old /search route.
+		userGr.GET("/list", s.handler.ListUsersPartial)
+
+		// POST /users/:id/delete
+		// Handles user deletion via HTMX (from users_list_partial.html)
+		userGr.POST("/:id/delete", s.handler.DeleteUser)
+
+		// --- Routes for Modals (from templates) ---
+		// TODO: Implement these handlers
+
+		// GET /users/create
+		// Shows the "Add User" modal
+		//userGr.GET("/create", s.handler.ShowCreateUserModal) // TODO: Create h.ShowCreateUserModal
+
+		// GET /users/:id/edit
+		// Shows the "Edit User" modal
+		//userGr.GET("/:id/edit", h.ShowEditUserModal) // TODO: Create h.ShowEditUserModal
+
+		// GET /users/:id/details
+		// Shows the "View Details" modal
+		//userGr.GET("/:id/details", h.ShowUserDetailsModal) // TODO: Create h.ShowUserDetailsModal
+
+		// --- Other Actions ---
+
+		// GET /users/export
+		// (Handler not yet implemented, but route is defined in template)
+		// userGr.GET("/export", h.ExportUsers) // TODO: Create h.ExportUsers handler
+	}
 
 	// Profile
 	profileGroup := rootGr.Group("/profile")

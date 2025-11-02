@@ -9,12 +9,13 @@
         </div>
 
         <div class="header-actions">
+            <!--
+                TODO: Export button needs a separate handler
             <button class="btn-secondary" hx-get="/users/export" hx-swap="none">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
+                <svg ...>...</svg>
                 Export
             </button>
+            -->
             <button class="btn-primary" hx-get="/users/create" hx-target="#modal-container" hx-swap="innerHTML">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -24,7 +25,7 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Stats Cards - Only Total Users is supported by the API -->
     <div class="users-stats">
         <div class="stat-card">
             <div class="stat-card-icon total">
@@ -33,270 +34,64 @@
                 </svg>
             </div>
             <div class="stat-card-content">
-                <span class="stat-value">1,234</span>
+                <!-- This value should be passed by the ShowUsersPage handler -->
+                <!--
+                  FIX: Use 'if' for conditional rendering.
+                  This checks if .TotalUsers exists and is not a zero value (0, false, nil, "").
+                -->
+                <span class="stat-value">{{if .TotalUsers}}{{.TotalUsers}}{{else}}N/A{{end}}</span>
                 <span class="stat-label">Total Users</span>
             </div>
         </div>
-
-        <div class="stat-card">
-            <div class="stat-card-icon active">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div class="stat-card-content">
-                <span class="stat-value">1,089</span>
-                <span class="stat-label">Active</span>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-card-icon inactive">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                </svg>
-            </div>
-            <div class="stat-card-content">
-                <span class="stat-value">145</span>
-                <span class="stat-label">Inactive</span>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-card-icon new">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-            </div>
-            <div class="stat-card-content">
-                <span class="stat-value">23</span>
-                <span class="stat-label">New Today</span>
-            </div>
-        </div>
+        <!-- Other stat cards were removed as the API doesn't support them -->
     </div>
 
-    <!-- Filters and Search -->
-    <div class="users-filters">
+    <!-- Filters and Search Form -->
+    <!--
+      This form builds the UserListRequest parameters
+      and loads the result into #user-list-content
+    -->
+    <form class="users-filters"
+          hx-get="/users/list"
+          hx-target="#user-list-content"
+          hx-swap="innerHTML"
+          hx-trigger="submit, keyup changed delay:500ms from:#user-search-input, change from:#user-sort-select">
+
         <div class="search-box">
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
             <input type="text"
+                   id="user-search-input"
                    class="search-input"
-                   placeholder="Search users by name, email or ID..."
-                   hx-get="/users/search"
-                   hx-trigger="keyup changed delay:500ms"
-                   hx-target="#users-table-body"
-                   hx-swap="innerHTML"
-                   name="q">
+                   placeholder="Search by username..."
+                   name="username">
         </div>
 
-        <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="active">Active</button>
-            <button class="filter-btn" data-filter="inactive">Inactive</button>
-            <button class="filter-btn" data-filter="admin">Admin</button>
-        </div>
+        <!-- Filter buttons removed -->
 
-        <select class="sort-select">
-            <option value="created_desc">Newest First</option>
-            <option value="created_asc">Oldest First</option>
-            <option value="name_asc">Name A-Z</option>
-            <option value="name_desc">Name Z-A</option>
+        <select class="sort-select" name="sort_direction" id="user-sort-select">
+            <!-- Value maps directly to Proto Enum -->
+            <option value="2">Newest First (DESC)</option> <!-- 2 = SORT_DIRECTION_DESC -->
+            <option value="1">Oldest First (ASC)</option> <!-- 1 = SORT_DIRECTION_ASC -->
         </select>
-    </div>
 
-    <!-- Users Table -->
-    <div class="users-table-container">
-        <table class="users-table">
-            <thead>
-            <tr>
-                <th>
-                    <input type="checkbox" class="checkbox-input" id="select-all">
-                </th>
-                <th>User</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Joined</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody id="users-table-body">
-            <!-- User Row 1 -->
-            <tr class="user-row">
-                <td>
-                    <input type="checkbox" class="checkbox-input">
-                </td>
-                <td>
-                    <div class="user-cell">
-                        <div class="user-avatar" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6);">
-                            <span>AS</span>
-                        </div>
-                        <div class="user-info">
-                            <span class="user-name">Ali Sadeghi</span>
-                            <span class="user-id">#USR-001</span>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="user-email">ali.sadeghi@example.com</span>
-                </td>
-                <td>
-                    <span class="role-badge admin">Admin</span>
-                </td>
-                <td>
-                    <span class="status-badge active">Active</span>
-                </td>
-                <td>
-                    <span class="user-date">Jan 15, 2024</span>
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn view" title="View Details">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </button>
-                        <button class="action-btn edit" title="Edit User">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                        </button>
-                        <button class="action-btn delete" title="Delete User">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
-                        </button>
-                    </div>
-                </td>
-            </tr>
+        <!-- This button is hidden and only used for submitting the form with Enter -->
+        <button type="submit" style="display: none;">Search</button>
+    </form>
 
-            <!-- User Row 2 -->
-            <tr class="user-row">
-                <td>
-                    <input type="checkbox" class="checkbox-input">
-                </td>
-                <td>
-                    <div class="user-cell">
-                        <div class="user-avatar" style="background: linear-gradient(135deg, #ec4899, #f59e0b);">
-                            <span>SM</span>
-                        </div>
-                        <div class="user-info">
-                            <span class="user-name">Sara Mohammadi</span>
-                            <span class="user-id">#USR-002</span>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="user-email">sara.m@example.com</span>
-                </td>
-                <td>
-                    <span class="role-badge user">User</span>
-                </td>
-                <td>
-                    <span class="status-badge active">Active</span>
-                </td>
-                <td>
-                    <span class="user-date">Jan 20, 2024</span>
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn view" title="View Details">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </button>
-                        <button class="action-btn edit" title="Edit User">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                        </button>
-                        <button class="action-btn delete" title="Delete User">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
-                        </button>
-                    </div>
-                </td>
-            </tr>
+    <!--
+      Dynamic content (table and pagination)
+      This section automatically fetches content from /users/list on page load
+    -->
+    <div id="user-list-content"
+         hx-get="/users/list"
+         hx-trigger="load"
+         hx-swap="innerHTML">
 
-            <!-- User Row 3 -->
-            <tr class="user-row">
-                <td>
-                    <input type="checkbox" class="checkbox-input">
-                </td>
-                <td>
-                    <div class="user-cell">
-                        <div class="user-avatar" style="background: linear-gradient(135deg, #10b981, #3b82f6);">
-                            <span>MR</span>
-                        </div>
-                        <div class="user-info">
-                            <span class="user-name">Mohammad Rezaei</span>
-                            <span class="user-id">#USR-003</span>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="user-email">m.rezaei@example.com</span>
-                </td>
-                <td>
-                    <span class="role-badge moderator">Moderator</span>
-                </td>
-                <td>
-                    <span class="status-badge inactive">Inactive</span>
-                </td>
-                <td>
-                    <span class="user-date">Dec 28, 2023</span>
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn view" title="View Details">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </button>
-                        <button class="action-btn edit" title="Edit User">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                        </button>
-                        <button class="action-btn delete" title="Delete User">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination">
-        <div class="pagination-info">
-            Showing <span class="font-semibold">1-10</span> of <span class="font-semibold">1,234</span> users
-        </div>
-        <div class="pagination-controls">
-            <button class="pagination-btn" disabled>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-            </button>
-            <button class="pagination-btn active">1</button>
-            <button class="pagination-btn">2</button>
-            <button class="pagination-btn">3</button>
-            <span class="pagination-dots">...</span>
-            <button class="pagination-btn">10</button>
-            <button class="pagination-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-            </button>
+        <!-- Display a simple loader until content is loaded -->
+        <div style="display: flex; justify-content: center; padding: 4rem;">
+            <span style="color: #94a3b8; font-size: 1rem; font-family: 'JetBrains Mono', monospace;">Loading users...</span>
         </div>
     </div>
 
