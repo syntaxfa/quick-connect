@@ -1,0 +1,30 @@
+{{define "logout_confirm_modal"}}
+<div class="modal-backdrop" onclick="this.remove()">
+
+    <div class="modal-content" onclick="event.stopPropagation()">
+
+        <div class="modal-header">
+            <h3 class="modal-title">Confirm Logout</h3>
+            <button class="modal-close-btn" onclick="this.closest('.modal-backdrop').remove()">
+                &times;
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <p>Are you sure you want to log out?</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="this.closest('.modal-backdrop').remove()">
+                Cancel
+            </button>
+
+            <button class="btn-danger" hx-get="/logout" hx-indicator="this">
+                <span>Logout</span>
+                <div class="htmx-indicator">...</div>
+            </button>
+        </div>
+
+    </div>
+</div>
+{{end}}

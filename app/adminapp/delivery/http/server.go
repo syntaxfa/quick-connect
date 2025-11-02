@@ -48,6 +48,7 @@ func (s Server) registerRoutes() {
 	authGr.GET("/login", s.handler.ShowLoginPage)
 	authGr.POST("/login", s.handler.Login)
 	authGr.GET("/logout", s.handler.Logout)
+	authGr.GET("/logout/confirm", s.handler.ShowLogoutConfirm)
 
 	// Dashboard - Main hub
 	dashGr := rootGr.Group("")
