@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-
 	"github.com/labstack/echo/v4"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
@@ -57,44 +56,33 @@ func (s Server) registerRoutes() {
 	dashGr.GET("/notification", s.handler.ShowNotificationService)
 	dashGr.GET("/story", s.handler.ShowStoryService)
 
-	// --- Users Management Routes ---
-	// This replaces your old route structure
+	// Users Management Group
 	userGr := rootGr.Group("/users")
-	{
-		// GET /users
-		// Renders the main page shell (users_page.html)
-		userGr.GET("", s.handler.ShowUsersPage)
+	userGr.GET("", s.handler.ShowUsersPage)         // Renders the main page shell (users_page.html)
+	userGr.GET("/list", s.handler.ListUsersPartial) // This is the new HTMX partial route for searching, pagination, and initial load.
+	userGr.GET("/delete/confirm", s.handler.ShowDeleteUserConfirm)
+	userGr.POST("/:id/delete", s.handler.DeleteUser)
+	userGr.GET("/:id/detail", s.handler.DetailUser)
+	userGr.GET("/:id/edit", s.handler.ShowEditUserModal)
+	userGr.POST("/:id/update", s.handler.UpdateUser)
 
-		// GET /users/list
-		// This is the new HTMX partial route for searching, pagination, and initial load.
-		// It replaces the old /search route.
-		userGr.GET("/list", s.handler.ListUsersPartial)
+	// GET /users/create
+	// Shows the "Add User" modal
+	//userGr.GET("/create", s.handler.ShowCreateUserModal) // TODO: Create h.ShowCreateUserModal
 
-		// POST /users/:id/delete
-		// Handles user deletion via HTMX (from users_list_partial.html)
-		userGr.POST("/:id/delete", s.handler.DeleteUser)
+	// GET /users/:id/edit
+	// Shows the "Edit User" modal
+	//userGr.GET("/:id/edit", h.ShowEditUserModal) // TODO: Create h.ShowEditUserModal
 
-		// --- Routes for Modals (from templates) ---
-		// TODO: Implement these handlers
+	// GET /users/:id/details
+	// Shows the "View Details" modal
+	//userGr.GET("/:id/details", h.ShowUserDetailsModal) // TODO: Create h.ShowUserDetailsModal
 
-		// GET /users/create
-		// Shows the "Add User" modal
-		//userGr.GET("/create", s.handler.ShowCreateUserModal) // TODO: Create h.ShowCreateUserModal
+	// --- Other Actions ---
 
-		// GET /users/:id/edit
-		// Shows the "Edit User" modal
-		//userGr.GET("/:id/edit", h.ShowEditUserModal) // TODO: Create h.ShowEditUserModal
-
-		// GET /users/:id/details
-		// Shows the "View Details" modal
-		//userGr.GET("/:id/details", h.ShowUserDetailsModal) // TODO: Create h.ShowUserDetailsModal
-
-		// --- Other Actions ---
-
-		// GET /users/export
-		// (Handler not yet implemented, but route is defined in template)
-		// userGr.GET("/export", h.ExportUsers) // TODO: Create h.ExportUsers handler
-	}
+	// GET /users/export
+	// (Handler not yet implemented, but route is defined in template)
+	// userGr.GET("/export", h.ExportUsers) // TODO: Create h.ExportUsers handler
 
 	// Profile Group
 	profileGr := rootGr.Group("/profile")
@@ -103,7 +91,7 @@ func (s Server) registerRoutes() {
 	profileGr.GET("/view", s.handler.ShowProfileView)
 	profileGr.GET("/edit", s.handler.ShowProfileEditForm)
 
-	// Settings
+	// Settings Group
 	settingGr := rootGr.Group("/settings")
 	settingGr.GET("", s.handler.ShowSettingsPage)
 }

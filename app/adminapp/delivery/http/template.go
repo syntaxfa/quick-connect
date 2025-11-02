@@ -21,6 +21,7 @@ func NewTemplateRenderer(basePath string) *TemplateRenderer {
 	// Define custom functions
 	funcMap := template.FuncMap{
 		"initials": getInitials,
+		"hasRole":  HasRole,
 	}
 
 	// Check if base path exists
