@@ -1,0 +1,32 @@
+{{define "delete_user_confirm_modal"}}
+<div class="modal-backdrop" onclick="this.remove()">
+    <div class="modal-content" onclick="stopPropagation(event)">
+
+        <div class="modal-header">
+            <h3 class="modal-title">Confirm Deletion</h3>
+            <button class="modal-close-btn" onclick="this.closest('.modal-backdrop').remove()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <p>Are you sure you want to delete user <strong>@{{.Username}}</strong>?</p>
+            <p style="font-size: 0.9rem; color: #ef4444; margin-top: 1rem;">This action is permanent and cannot be undone.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="this.closest('.modal-backdrop').remove()">
+                Cancel
+            </button>
+
+            <button class="btn-danger"
+                    hx-post="/users/{{.ID}}/delete"
+                    hx-target="#user-row-{{.ID}}"
+                    hx-swap="outerHTML"
+                    hx-indicator="this">
+                <span>Delete User</span>
+                <div class="htmx-indicator">...</div>
+            </button>
+        </div>
+
+    </div>
+</div>
+{{end}}

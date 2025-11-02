@@ -117,6 +117,19 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 	return nil
 }
 
+// ShowDeleteUserConfirm renders the delete confirmation modal
+func (h Handler) ShowDeleteUserConfirm(c echo.Context) error {
+	userID := c.QueryParam("id")
+	username := c.QueryParam("username")
+
+	data := map[string]interface{}{
+		"ID":       userID,
+		"Username": username,
+	}
+
+	return c.Render(http.StatusOK, "delete_user_confirm_modal", data)
+}
+
 // DeleteUser handles deleting a user (called by HTMX)
 func (h Handler) DeleteUser(c echo.Context) error {
 	ctx := grpcContext(c)
