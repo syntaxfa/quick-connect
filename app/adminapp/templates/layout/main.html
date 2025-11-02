@@ -6,23 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quick Connect - Admin Dashboard</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Local CSS -->
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <link rel="stylesheet" href="/static/css/users.css">
     <link rel="stylesheet" href="/static/css/profile.css">
 
-    <!-- Local HTMX -->
     <script src="/static/js/htmx.min.js" defer></script>
 </head>
 <body class="dashboard-body">
 
-<!-- Animated Background Elements -->
 <div class="dashboard-bg">
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
@@ -33,14 +29,11 @@
     <div class="noise-overlay"></div>
 </div>
 
-<!-- Main Dashboard Container -->
 <div class="dashboard-container">
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-        <!-- Logo Section -->
         <div class="sidebar-logo">
             <div class="logo-icon-small">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -57,59 +50,68 @@
             <span class="logo-text">Quick Connect</span>
         </div>
 
-        <!-- Navigation Menu -->
+        {{$activePage := "dashboard"}}
+        {{if .TemplateName}}
+        {{if eq .TemplateName "profile_page"}}
+        {{$activePage = "profile"}}
+        {{else if eq .TemplateName "users_page"}}
+        {{$activePage = "users"}}
+        {{else if eq .TemplateName "settings_page"}}
+        {{$activePage = "settings"}}
+        {{end}}
+        {{end}}
+
         <nav class="sidebar-nav">
             <a href="/dashboard"
-               class="nav-item active"
-               hx-get="/dashboard"
-               hx-target="#main-content"
-               hx-swap="innerHTML"
-               hx-push-url="true">
-                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-                </svg>
-                <span>Dashboard</span>
+               class="nav-item {{if eq $activePage "dashboard"}}active{{end}}"
+            hx-get="/dashboard"
+            hx-target="#main-content"
+            hx-swap="innerHTML"
+            hx-push-url="true">
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+            <span>Dashboard</span>
             </a>
 
             <a href="/profile"
-               class="nav-item"
-               hx-get="/profile"
-               hx-target="#main-content"
-               hx-swap="innerHTML"
-               hx-push-url="true">
-                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Profile</span>
+               class="nav-item {{if eq $activePage "profile"}}active{{end}}"
+            hx-get="/profile"
+            hx-target="#main-content"
+            hx-swap="innerHTML"
+            hx-push-url="true">
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Profile</span>
             </a>
 
             <a href="/users"
-               class="nav-item"
-               hx-get="/users"
-               hx-target="#main-content"
-               hx-swap="innerHTML"
-               hx-push-url="true">
-                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
-                <span>Users</span>
+               class="nav-item {{if eq $activePage "users"}}active{{end}}"
+            hx-get="/users"
+            hx-target="#main-content"
+            hx-swap="innerHTML"
+            hx-push-url="true">
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+            </svg>
+            <span>Users</span>
             </a>
 
             <a href="/settings"
-               class="nav-item"
-               hx-get="/settings"
-               hx-target="#main-content"
-               hx-swap="innerHTML"
-               hx-push-url="true">
-                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Settings</span>
+               class="nav-item {{if eq $activePage "settings"}}active{{end}}"
+            hx-get="/settings"
+            hx-target="#main-content"
+            hx-swap="innerHTML"
+            hx-push-url="true">
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Settings</span>
             </a>
         </nav>
 
-        <!-- Logout Button -->
         <div class="sidebar-footer">
             <button class="logout-btn" hx-post="/logout" hx-confirm="Are you sure you want to logout?">
                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,10 +122,8 @@
         </div>
     </aside>
 
-    <!-- Wrapper for main content + mobile header -->
     <div class="main-wrapper">
 
-        <!-- Mobile header is now *here*, outside the swap target -->
         <header class="mobile-header">
             <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="Open Menu">
                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,39 +133,58 @@
             <span class="mobile-header-logo">Quick Connect</span>
         </header>
 
-        <!-- Main Content Area (This is now the *only* swap target) -->
         <main class="main-content" id="main-content">
-            <!-- Dynamic content will be loaded here via HTMX -->
+
+            {{if eq .TemplateName "users_page"}}
+            {{template "users_page" .}}
+            {{else if eq .TemplateName "profile_page"}}
+            {{template "profile_page" .}}
+            {{else if eq .TemplateName "support_page"}}
+            {{template "support_page" .}}
+            {{else if eq .TemplateName "notification_page"}}
+            {{template "notification_page" .}}
+            {{else if eq .TemplateName "story_page"}}
+            {{template "story_page" .}}
+            {{else}}
             {{template "dashboard_page" .}}
+            {{end}}
+
         </main>
 
-    </div> <!-- End main-wrapper -->
-
-</div>
+    </div> </div>
 
 <script>
-    // Handle active nav item
     document.body.addEventListener('htmx:afterSwap', function(evt) {
-        // Remove active class from all nav items
         document.querySelectorAll('.nav-item').forEach(item => {
             item.classList.remove('active');
         });
 
-        // Add active class to clicked nav item
         if (evt.detail.target.id === 'main-content') {
             const url = evt.detail.pathInfo.requestPath;
-            // Handle root URL case
             const activeUrl = url === '/' ? '/dashboard' : url;
-            const navItem = document.querySelector(`a[href="${activeUrl}"]`);
-            if (navItem) {
-                navItem.classList.add('active');
+
+            let bestMatch = null;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const itemUrl = item.getAttribute('href');
+
+                if (activeUrl.startsWith(itemUrl)) {
+                    if (bestMatch == null || itemUrl.length > bestMatch.getAttribute('href').length) {
+                        bestMatch = item;
+                    }
+                }
+            });
+
+            if (bestMatch) {
+                bestMatch.classList.add('active');
+            } else {
+                const dashboardItem = document.querySelector('a[href="/dashboard"]');
+                if (dashboardItem) dashboardItem.classList.add('active');
             }
         }
     });
 </script>
 
 <script>
-    // JavaScript for Mobile Sidebar Toggle
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('menu-toggle-btn');
@@ -185,7 +204,6 @@
             });
         }
 
-        // Close sidebar after a nav item is clicked
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
                 if (window.innerWidth <= 640) {
