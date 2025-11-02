@@ -148,6 +148,8 @@
             {{template "notification_page" .}}
             {{else if eq .TemplateName "story_page"}}
             {{template "story_page" .}}
+            {{else if eq .TemplateName "settings_page"}}
+            {{template "settings_page" .}}
             {{else}}
             {{template "dashboard_page" .}}
             {{end}}
