@@ -23,8 +23,9 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 
 			accessToken, acExist := getAccessTokenFromCookie(c, logger)
 			if acExist {
-				if _, err := jwtValidator.ValidateToken(accessToken); err == nil {
+				if claims, err := jwtValidator.ValidateToken(accessToken); err == nil {
 					setTokenToContext(c, accessToken)
+					setUserToContext(c, claims)
 
 					return next(c)
 				}
@@ -46,6 +47,10 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 				return redirectToLogin(c)
 			}
 
+			if claims, err := jwtValidator.ValidateToken(token.AccessToken); err == nil {
+				setUserToContext(c, claims)
+			}
+
 			setAuthCookie(c, token.AccessToken, token.RefreshToken, int(token.AccessExpiresIn), int(token.RefreshExpiresIn))
 
 			setTokenToContext(c, token.AccessToken)
@@ -57,4 +62,16 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 
 func setTokenToContext(c echo.Context, accessToken string) {
 	c.Set(types.AuthorizationKey, "Bearer "+accessToken)
+}
+
+func setUserToContext(c echo.Context, claims *types.UserClaims) {
+	user := convertClaimsToUser(claims)
+
+	c.Set("User", user)
+}
+
+func getUserFromContext(c echo.Context) (User, bool) {
+	user, ok := c.Get("User").(User)
+
+	return user, ok
 }

@@ -8,9 +8,12 @@ import (
 
 // ShowSettingsPage renders the settings page
 func (h Handler) ShowSettingsPage(c echo.Context) error {
+	user, _ := getUserFromContext(c)
+
 	data := map[string]interface{}{
 		"Title":        "Settings Management",
 		"TemplateName": "settings_page",
+		"User":         user,
 	}
 
 	if isHTMX(c) {

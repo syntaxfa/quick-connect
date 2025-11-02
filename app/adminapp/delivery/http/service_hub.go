@@ -8,8 +8,11 @@ import (
 
 // ShowDashboard renders the main dashboard page with service hub
 func (h Handler) ShowDashboard(c echo.Context) error {
+	user, _ := getUserFromContext(c)
+
 	data := map[string]interface{}{
 		"TemplateName": "dashboard_page",
+		"User":         user,
 	}
 
 	if isHTMX(c) {
@@ -21,6 +24,8 @@ func (h Handler) ShowDashboard(c echo.Context) error {
 
 // ShowSupportService renders the support service page
 func (h Handler) ShowSupportService(c echo.Context) error {
+	user, _ := getUserFromContext(c)
+
 	// TODO: Fetch support tickets data
 	data := map[string]interface{}{
 		"Title": "Support Management",
@@ -30,6 +35,7 @@ func (h Handler) ShowSupportService(c echo.Context) error {
 			"Closed":  456,
 		},
 		"TemplateName": "support_page",
+		"User":         user,
 	}
 
 	if isHTMX(c) {
@@ -41,6 +47,8 @@ func (h Handler) ShowSupportService(c echo.Context) error {
 
 // ShowNotificationService renders the notification service page
 func (h Handler) ShowNotificationService(c echo.Context) error {
+	user, _ := getUserFromContext(c)
+
 	// TODO: Fetch notification data
 	data := map[string]interface{}{
 		"Title": "Notification Management",
@@ -50,16 +58,20 @@ func (h Handler) ShowNotificationService(c echo.Context) error {
 			"Failed":    2,
 		},
 		"TemplateName": "notification_page",
+		"User":         user,
 	}
 
 	if isHTMX(c) {
 		return c.Render(http.StatusOK, "notification_page", data)
 	}
+
 	return c.Render(http.StatusOK, "main_layout", data)
 }
 
 // ShowStoryService renders the story service page
 func (h Handler) ShowStoryService(c echo.Context) error {
+	user, _ := getUserFromContext(c)
+
 	// TODO: Fetch story data
 	data := map[string]interface{}{
 		"Title": "Story Management",
@@ -68,10 +80,12 @@ func (h Handler) ShowStoryService(c echo.Context) error {
 			"Views":  2300000,
 		},
 		"TemplateName": "story_page",
+		"User":         user,
 	}
 
 	if isHTMX(c) {
 		return c.Render(http.StatusOK, "story_page", data)
 	}
+
 	return c.Render(http.StatusOK, "main_layout", data)
 }
