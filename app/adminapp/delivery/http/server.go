@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+
 	"github.com/labstack/echo/v4"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
@@ -65,24 +66,8 @@ func (s Server) registerRoutes() {
 	userGr.GET("/:id/detail", s.handler.DetailUser)
 	userGr.GET("/:id/edit", s.handler.ShowEditUserModal)
 	userGr.POST("/:id/update", s.handler.UpdateUser)
-
-	// GET /users/create
-	// Shows the "Add User" modal
-	//userGr.GET("/create", s.handler.ShowCreateUserModal) // TODO: Create h.ShowCreateUserModal
-
-	// GET /users/:id/edit
-	// Shows the "Edit User" modal
-	//userGr.GET("/:id/edit", h.ShowEditUserModal) // TODO: Create h.ShowEditUserModal
-
-	// GET /users/:id/details
-	// Shows the "View Details" modal
-	//userGr.GET("/:id/details", h.ShowUserDetailsModal) // TODO: Create h.ShowUserDetailsModal
-
-	// --- Other Actions ---
-
-	// GET /users/export
-	// (Handler not yet implemented, but route is defined in template)
-	// userGr.GET("/export", h.ExportUsers) // TODO: Create h.ExportUsers handler
+	userGr.GET("/create", s.handler.ShowCreateUserModal)
+	userGr.POST("/create", s.handler.CreateUser)
 
 	// Profile Group
 	profileGr := rootGr.Group("/profile")
