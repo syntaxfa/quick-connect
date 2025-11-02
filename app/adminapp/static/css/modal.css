@@ -111,3 +111,41 @@
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ========== STYLES FOR ROLE CHECKBOXES ========== */
+.role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.role-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.role-checkbox:hover {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: var(--primary-accent);
+}
+
+.role-checkbox input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-accent);
+}
+
+.role-checkbox label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+}

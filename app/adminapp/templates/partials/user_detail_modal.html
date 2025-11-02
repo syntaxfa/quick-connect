@@ -1,0 +1,62 @@
+{{define "user_detail_modal"}}
+<div class="modal-backdrop" onclick="this.remove()">
+
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+
+        <div class="modal-header">
+            <div class="profile-avatar-wrapper" style="padding-bottom: 0; border: none;">
+                <div class="profile-avatar" style="width: 50px; height: 50px; font-size: 1.5rem; background: linear-gradient(135deg, #06b6d4, #8b5cf6);">
+                    {{if .User.Avatar}}
+                    <img src="{{.User.Avatar}}" alt="Avatar">
+                    {{else}}
+                    <span>{{.User.Fullname | initials}}</span>
+                    {{end}}
+                </div>
+                <div class="profile-header-info">
+                    <h2 class="profile-fullname" style="font-size: 1.5rem;">{{.User.Fullname}}</h2>
+                    <span class="profile-username">@{{.User.Username}}</span>
+                </div>
+            </div>
+            <button class="modal-close-btn" onclick="this.closest('.modal-backdrop').remove()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="info-grid" style="gap: 1.5rem;">
+                <div class="info-item">
+                    <span class="info-label">Email Address</span>
+                    <span class="info-value">{{.User.Email}}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone Number</span>
+                    <span class="info-value">{{if .User.PhoneNumber}}{{.User.PhoneNumber}}{{else}}Not Set{{end}}</span>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <span class="info-label">Roles</span>
+                    <span class="info-value">
+                        {{range .User.Roles}}
+                            <span class="role-badge admin">{{.}}</span>
+                        {{else}}
+                            <span class="role-badge user">No Roles</span>
+                        {{end}}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Last Online</span>
+                    <span class="info-value">{{.User.LastOnlineAt}}</span>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <span class="info-label">User ID</span>
+                    <span class="info-value mono">{{.User.ID}}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="this.closest('.modal-backdrop').remove()">
+                Close
+            </button>
+        </div>
+
+    </div>
+</div>
+{{end}}

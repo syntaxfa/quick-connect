@@ -88,19 +88,16 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 		Username:      usernameQuery,
 	}
 
-	// 2. Call gRPC Service
 	listResp, err := h.userAd.UserList(ctx, listReq)
 	if err != nil {
 		return h.renderGRPCError(c, "ListUsersPartial", err)
 	}
 
-	// 3. Convert Users for template
 	users := make([]User, len(listResp.Users))
 	for i, pbUser := range listResp.Users {
 		users[i] = convertUserPbToUser(pbUser)
 	}
 
-	// 4. Build Pagination Data
 	pagination := h.buildPaginationData(listResp, usernameQuery, int(sortDirInt))
 
 	data := map[string]interface{}{
@@ -108,7 +105,6 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 		"Pagination": pagination,
 	}
 
-	// 5. Render Partial
 	err = c.Render(http.StatusOK, "users_list_partial", data)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -145,8 +141,6 @@ func (h Handler) DeleteUser(c echo.Context) error {
 		return h.renderGRPCError(c, "DeleteUser", err)
 	}
 
-	// On success, return empty 200 OK.
-	// HTMX will remove the <tr> because of hx-target="closest tr"
 	return c.NoContent(http.StatusOK)
 }
 
@@ -190,3 +184,31 @@ func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string
 
 	return p
 }
+
+func (h Handler) DetailUser(c echo.Context) error {
+	ctx := grpcContext(c)
+
+	userPb, aErr := h.userAd.UserDetail(ctx, &userpb.UserDetailRequest{UserId: c.Param("id")})
+	if aErr != nil {
+		return h.renderGRPCError(c, "DetailUser", aErr)
+	}
+
+	data := map[string]interface{}{
+		"User": convertUserPbToUser(userPb),
+	}
+
+	return c.Render(http.StatusOK, "user_detail_modal", data)
+}
+
+//func (h Handler) UpdateUser(c echo.Context) error {
+//	ctx := grpcContext(c)
+//
+//	h.userAd.UserUpdateFromSuperuser(ctx, &userpb.UserUpdateFromSuperUserRequest{
+//		UserId:      c.Param("id"),
+//		Username:    c.FormValue("username"),
+//		Fullname:    c.FormValue("fullname"),
+//		Email:       c.FormValue("email"),
+//		PhoneNumber: c.FormValue("phone_number"),
+//		Roles:       c.,
+//	})
+//}

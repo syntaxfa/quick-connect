@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-
 	"github.com/labstack/echo/v4"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
@@ -63,6 +62,7 @@ func (s Server) registerRoutes() {
 	userGr.GET("/list", s.handler.ListUsersPartial) // This is the new HTMX partial route for searching, pagination, and initial load.
 	userGr.GET("/delete/confirm", s.handler.ShowDeleteUserConfirm)
 	userGr.POST("/:id/delete", s.handler.DeleteUser)
+	userGr.GET("/:id/detail", s.handler.DetailUser)
 
 	// GET /users/create
 	// Shows the "Add User" modal
