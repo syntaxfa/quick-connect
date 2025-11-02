@@ -16,5 +16,6 @@ func (h Handler) ShowSettingsPage(c echo.Context) error {
 	if isHTMX(c) {
 		return c.Render(http.StatusOK, "settings_page", data)
 	}
+
 	return c.Render(http.StatusOK, "main_layout", data)
 }
