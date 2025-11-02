@@ -36,8 +36,10 @@
 <!-- Main Dashboard Container -->
 <div class="dashboard-container">
 
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <!-- Logo Section -->
         <div class="sidebar-logo">
             <div class="logo-icon-small">
@@ -109,7 +111,7 @@
 
         <!-- Logout Button -->
         <div class="sidebar-footer">
-            <button class="logout-btn" hx-get="/logout" hx-confirm="Are you sure you want to logout?">
+            <button class="logout-btn" hx-post="/logout" hx-confirm="Are you sure you want to logout?">
                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                 </svg>
@@ -118,11 +120,26 @@
         </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="main-content" id="main-content">
-        <!-- Dynamic content will be loaded here via HTMX -->
-        {{template "dashboard_page" .}}
-    </main>
+    <!-- Wrapper for main content + mobile header -->
+    <div class="main-wrapper">
+
+        <!-- Mobile header is now *here*, outside the swap target -->
+        <header class="mobile-header">
+            <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="Open Menu">
+                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <span class="mobile-header-logo">Quick Connect</span>
+        </header>
+
+        <!-- Main Content Area (This is now the *only* swap target) -->
+        <main class="main-content" id="main-content">
+            <!-- Dynamic content will be loaded here via HTMX -->
+            {{template "dashboard_page" .}}
+        </main>
+
+    </div> <!-- End main-wrapper -->
 
 </div>
 
@@ -137,11 +154,46 @@
         // Add active class to clicked nav item
         if (evt.detail.target.id === 'main-content') {
             const url = evt.detail.pathInfo.requestPath;
-            const navItem = document.querySelector(`a[href="${url}"]`);
+            // Handle root URL case
+            const activeUrl = url === '/' ? '/dashboard' : url;
+            const navItem = document.querySelector(`a[href="${activeUrl}"]`);
             if (navItem) {
                 navItem.classList.add('active');
             }
         }
+    });
+</script>
+
+<script>
+    // JavaScript for Mobile Sidebar Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('menu-toggle-btn');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+        }
+
+        // Close sidebar after a nav item is clicked
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (window.innerWidth <= 640) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                }
+            });
+        });
     });
 </script>
 
