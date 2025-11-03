@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func main() {
+func managerUser() {
 	cfg := grpcclient.Config{
 		Host:    "localhost",
 		Port:    2541,

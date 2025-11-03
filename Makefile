@@ -1,9 +1,13 @@
 ROOT=$(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 
-lint:
-	which golangci-lint || (go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8)
-	golangci-lint run --config=$(ROOT)/.golangci.yml $(ROOT)/...
+GOLANGCI_LINT_VERSION ?= v2.5.0
 
+lint:
+	@which golangci-lint > /dev/null 2>&1 || \
+		(echo "Installing golangci-lint $(GOLANGCI_LINT_VERSION)..." && \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
+		sh -s -- -b $(shell go env GOPATH)/bin $(GOLANGCI_LINT_VERSION))
+	golangci-lint run --config=$(ROOT)/.golangci.yml $(ROOT)/...
 
 PROTO_DIR ?= protobuf
 OUT_DIR ?= .

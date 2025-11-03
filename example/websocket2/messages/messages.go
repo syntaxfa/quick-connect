@@ -97,7 +97,6 @@ func messagesHandler(c echo.Context) error {
 						c.Logger().Error(err)
 					}
 					fmt.Println("connection closed from server")
-
 				}
 
 				fmt.Println("message receive error")

@@ -141,7 +141,6 @@ func (r *RenderService) renderTemplate(templateName, template string, templateTy
 			r.mu.Unlock()
 		}
 		executor = temp
-
 	} else {
 		r.mu.RLock()
 		temp, exists := r.htmlTemps[templateName]

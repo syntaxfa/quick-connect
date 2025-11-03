@@ -152,7 +152,7 @@ func TestLoadingConfigFromEnvironment(t *testing.T) {
 		},
 	}
 
-	os.Setenv(fmt.Sprintf("%s%s__%s__%s", options.Prefix, "db", "options", "max_thread_count"), "65")
+	t.Setenv(fmt.Sprintf("%s%s__%s__%s", options.Prefix, "db", "options", "max_thread_count"), "65")
 	defer os.Unsetenv(fmt.Sprintf("%s%s__%s__%s", options.Prefix, "db", "options", "max_thread_count"))
 
 	config.Load(options, &cfg, defaultConfig())
