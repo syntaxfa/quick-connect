@@ -1,8 +1,11 @@
 package migrator
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"net"
+	"strconv"
 
 	_ "github.com/lib/pq" // Postgres driver
 	migrate "github.com/rubenv/sql-migrate"
@@ -14,15 +17,17 @@ type Migrate struct {
 }
 
 func New(cfg Config, path string) Migrate {
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
-		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.DBName, cfg.SSLMode)
+	hostPort := net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port))
+
+	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+		cfg.Username, cfg.Password, hostPort, cfg.DBName, cfg.SSLMode)
 
 	db, oErr := sql.Open("postgres", connStr)
 	if oErr != nil {
 		panic(oErr)
 	}
 
-	if pErr := db.Ping(); pErr != nil {
+	if pErr := db.PingContext(context.Background()); pErr != nil {
 		panic(pErr)
 	}
 
@@ -34,8 +39,8 @@ func New(cfg Config, path string) Migrate {
 
 // Up migrate
 // Will apply at most `max` migrations. Pass 0 for no limit (or use Exec).
-func (m Migrate) Up(maxM int) (n int, err error) {
-	n, err = migrate.ExecMax(m.db, "postgres", m.migrations, migrate.Up, maxM)
+func (m Migrate) Up(maxM int) (int, error) {
+	n, err := migrate.ExecMax(m.db, "postgres", m.migrations, migrate.Up, maxM)
 	if err != nil {
 		return 0, err
 	}
@@ -45,8 +50,8 @@ func (m Migrate) Up(maxM int) (n int, err error) {
 
 // Down migrate
 // Will apply at most `max` migrations. Pass 0 for no limit (or use Exec).
-func (m Migrate) Down(maxM int) (n int, err error) {
-	n, err = migrate.ExecMax(m.db, "postgres", m.migrations, migrate.Down, maxM)
+func (m Migrate) Down(maxM int) (int, error) {
+	n, err := migrate.ExecMax(m.db, "postgres", m.migrations, migrate.Down, maxM)
 	if err != nil {
 		return 0, err
 	}

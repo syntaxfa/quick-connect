@@ -6,7 +6,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ShowDashboard renders the main dashboard page with service hub
+const (
+	storyActive           = 456
+	storyViews            = 2300000
+	notificationSent      = 1234
+	notificationDelivered = 98
+	notificationFailed    = 2
+	supportActive         = 89
+	supportPending        = 12
+	supportClosed         = 456
+)
+
+// ShowDashboard renders the main dashboard page with service hub.
 func (h Handler) ShowDashboard(c echo.Context) error {
 	user, _ := getUserFromContext(c)
 
@@ -22,7 +33,7 @@ func (h Handler) ShowDashboard(c echo.Context) error {
 	return c.Render(http.StatusOK, "main_layout", data)
 }
 
-// ShowSupportService renders the support service page
+// ShowSupportService renders the support service page.
 func (h Handler) ShowSupportService(c echo.Context) error {
 	user, _ := getUserFromContext(c)
 
@@ -30,9 +41,9 @@ func (h Handler) ShowSupportService(c echo.Context) error {
 	data := map[string]interface{}{
 		"Title": "Support Management",
 		"Stats": map[string]interface{}{
-			"Active":  89,
-			"Pending": 12,
-			"Closed":  456,
+			"Active":  supportActive,
+			"Pending": supportPending,
+			"Closed":  supportClosed,
 		},
 		"TemplateName": "support_page",
 		"User":         user,
@@ -45,7 +56,7 @@ func (h Handler) ShowSupportService(c echo.Context) error {
 	return c.Render(http.StatusOK, "main_layout", data)
 }
 
-// ShowNotificationService renders the notification service page
+// ShowNotificationService renders the notification service page.
 func (h Handler) ShowNotificationService(c echo.Context) error {
 	user, _ := getUserFromContext(c)
 
@@ -53,9 +64,9 @@ func (h Handler) ShowNotificationService(c echo.Context) error {
 	data := map[string]interface{}{
 		"Title": "Notification Management",
 		"Stats": map[string]interface{}{
-			"Sent":      1234,
-			"Delivered": 98,
-			"Failed":    2,
+			"Sent":      notificationSent,
+			"Delivered": notificationDelivered,
+			"Failed":    notificationFailed,
 		},
 		"TemplateName": "notification_page",
 		"User":         user,
@@ -68,7 +79,7 @@ func (h Handler) ShowNotificationService(c echo.Context) error {
 	return c.Render(http.StatusOK, "main_layout", data)
 }
 
-// ShowStoryService renders the story service page
+// ShowStoryService renders the story service page.
 func (h Handler) ShowStoryService(c echo.Context) error {
 	user, _ := getUserFromContext(c)
 
@@ -76,8 +87,8 @@ func (h Handler) ShowStoryService(c echo.Context) error {
 	data := map[string]interface{}{
 		"Title": "Story Management",
 		"Stats": map[string]interface{}{
-			"Active": 456,
-			"Views":  2300000,
+			"Active": storyActive,
+			"Views":  storyViews,
 		},
 		"TemplateName": "story_page",
 		"User":         user,

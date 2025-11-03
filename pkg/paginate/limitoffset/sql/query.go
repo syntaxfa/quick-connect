@@ -33,81 +33,19 @@ func WriteQuery(parameters Parameters) (query, countQuery string, args []interfa
 	// Base query for total count
 	countQuery = fmt.Sprintf("SELECT COUNT(*) FROM %s", parameters.Table)
 
-	// Add filters to the query
-	if len(parameters.Filters) == 0 {
-		// User DefaultSortColumn if sortColumn is empty
-		if parameters.SortColumn == "" {
-			sortColumn := DefaultSortColumn
+	// --- Refactored Part ---
+	// Build WHERE clause using a helper function
+	paramIndex := 1
+	whereClause, whereArgs, nextParamIndex := buildConditions(parameters.Filters, paramIndex)
 
-			orderClause := fmt.Sprintf(" ORDER BY %s %s", sortColumn, orderDirection(parameters.Descending))
+	args = append(args, whereArgs...)
+	paramIndex = nextParamIndex
 
-			// Set the pagination arguments
-			args = []interface{}{parameters.Limit, parameters.Offset}
-
-			return query + orderClause, countQuery, args
-		}
+	if whereClause != "" {
+		query += " WHERE " + whereClause
+		countQuery += " WHERE " + whereClause + ";" // Add semicolon for count query
 	}
-
-	paramIndex := len(args) + 1 // Start parameter numbering after pagination arguments
-
-	if len(parameters.Filters) > 0 {
-		query += " WHERE "
-		conditions := make([]string, 0)
-
-		for p, f := range parameters.Filters {
-			switch f.Operation {
-			case paginate.FilterOperationEqual:
-				conditions = append(conditions, fmt.Sprintf("%s = $%d", p, paramIndex))
-				args = append(args, f.Values[0])
-				paramIndex++
-			case paginate.FilterOperationNotEqual:
-				conditions = append(conditions, fmt.Sprintf("%s != $%d", p, paramIndex))
-				args = append(args, f.Values[0])
-				paramIndex++
-			case paginate.FilterOperationGreater:
-				conditions = append(conditions, fmt.Sprintf("%s > $%d", p, paramIndex))
-				args = append(args, f.Values[0])
-				paramIndex++
-			case paginate.FilterOperationGreaterEqual:
-				conditions = append(conditions, fmt.Sprintf("%s >= $%d", p, paramIndex))
-				args = append(args, f.Values[0])
-				paramIndex++
-			case paginate.FilterOperationLess:
-				conditions = append(conditions, fmt.Sprintf("%s < $%d", p, paramIndex))
-				args = append(args, f.Values[0])
-				paramIndex++
-			case paginate.FilterOperationLessEqual:
-				conditions = append(conditions, fmt.Sprintf("%s <= $%d", p, paramIndex))
-				args = append(args, f.Values[0])
-				paramIndex++
-			case paginate.FilterOperationIn:
-				placeholders := make([]string, 0)
-				for _, value := range f.Values {
-					placeholders = append(placeholders, fmt.Sprintf("$%d", paramIndex))
-					args = append(args, value)
-					paramIndex++
-				}
-				conditions = append(conditions, fmt.Sprintf("%s IN (%s)", p, strings.Join(placeholders, ", ")))
-			case paginate.FilterOperationNotIn:
-				placeholders := make([]string, 0)
-				for _, value := range f.Values {
-					placeholders = append(placeholders, fmt.Sprintf("$%d", paramIndex))
-					args = append(args, value)
-					paramIndex++
-				}
-				conditions = append(conditions, fmt.Sprintf("%s NOT IN (%s)", p, strings.Join(placeholders, ", ")))
-			case paginate.FilterOperationBetween:
-				conditions = append(conditions, fmt.Sprintf("%s BETWEEN $%d AND $%d", p, paramIndex, paramIndex+1))
-				args = append(args, f.Values[0], f.Values[1])
-				paramIndex += 2
-			}
-		}
-
-		// Add the condition to both the query and countQuery
-		query += strings.Join(conditions, " AND ")
-
-		countQuery += fmt.Sprintf(" WHERE %s;", strings.Join(conditions, " AND "))
-	}
+	// --- End Refactored Part ---
 
 	// User "ID" as the default column if sortColumn is empty
 	if parameters.SortColumn == "" {
@@ -122,6 +60,68 @@ func WriteQuery(parameters Parameters) (query, countQuery string, args []interfa
 	args = append(args, parameters.Limit, parameters.Offset)
 
 	return query, countQuery, args
+}
+
+// buildConditions builds the WHERE clause, arguments, and returns the next parameter index.
+func buildConditions(filters map[paginate.FilterParameter]paginate.Filter, startIndex int) (string, []interface{}, int) {
+	if len(filters) == 0 {
+		return "", nil, startIndex
+	}
+
+	conditions := make([]string, 0, len(filters))
+	var args []interface{}
+	paramIndex := startIndex
+
+	for p, f := range filters {
+		switch f.Operation {
+		case paginate.FilterOperationEqual:
+			conditions = append(conditions, fmt.Sprintf("%s = $%d", p, paramIndex))
+			args = append(args, f.Values[0])
+			paramIndex++
+		case paginate.FilterOperationNotEqual:
+			conditions = append(conditions, fmt.Sprintf("%s != $%d", p, paramIndex))
+			args = append(args, f.Values[0])
+			paramIndex++
+		case paginate.FilterOperationGreater:
+			conditions = append(conditions, fmt.Sprintf("%s > $%d", p, paramIndex))
+			args = append(args, f.Values[0])
+			paramIndex++
+		case paginate.FilterOperationGreaterEqual:
+			conditions = append(conditions, fmt.Sprintf("%s >= $%d", p, paramIndex))
+			args = append(args, f.Values[0])
+			paramIndex++
+		case paginate.FilterOperationLess:
+			conditions = append(conditions, fmt.Sprintf("%s < $%d", p, paramIndex))
+			args = append(args, f.Values[0])
+			paramIndex++
+		case paginate.FilterOperationLessEqual:
+			conditions = append(conditions, fmt.Sprintf("%s <= $%d", p, paramIndex))
+			args = append(args, f.Values[0])
+			paramIndex++
+		case paginate.FilterOperationIn:
+			placeholders := make([]string, 0, len(f.Values))
+			for _, value := range f.Values {
+				placeholders = append(placeholders, fmt.Sprintf("$%d", paramIndex))
+				args = append(args, value)
+				paramIndex++
+			}
+			conditions = append(conditions, fmt.Sprintf("%s IN (%s)", p, strings.Join(placeholders, ", ")))
+		case paginate.FilterOperationNotIn:
+			placeholders := make([]string, 0, len(f.Values))
+			for _, value := range f.Values {
+				placeholders = append(placeholders, fmt.Sprintf("$%d", paramIndex))
+				args = append(args, value)
+				paramIndex++
+			}
+			conditions = append(conditions, fmt.Sprintf("%s NOT IN (%s)", p, strings.Join(placeholders, ", ")))
+		case paginate.FilterOperationBetween:
+			conditions = append(conditions, fmt.Sprintf("%s BETWEEN $%d AND $%d", p, paramIndex, paramIndex+1))
+			args = append(args, f.Values[0], f.Values[1])
+			paramIndex += 2
+		}
+	}
+
+	return strings.Join(conditions, " AND "), args, paramIndex
 }
 
 func orderDirection(descending bool) string {

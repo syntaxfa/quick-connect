@@ -32,7 +32,8 @@ func (s Service) GenerateTokenPair(userID types.ID, roles []types.Role) (*TokenG
 	}, nil
 }
 
-func (s Service) generateToken(userID types.ID, roles []types.Role, tokenType types.TokenType, expiry time.Duration, audience string) (string, error) {
+func (s Service) generateToken(userID types.ID, roles []types.Role, tokenType types.TokenType, expiry time.Duration,
+	audience string) (string, error) {
 	op := "auth.service.generateToken"
 
 	now := time.Now().UTC()
@@ -61,7 +62,8 @@ func (s Service) generateToken(userID types.ID, roles []types.Role, tokenType ty
 	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims)
 	signedToken, err := token.SignedString(s.cfg.privateKey)
 	if err != nil {
-		return "", errlog.ErrLog(richerror.New(op).WithMessage(err.Error()).WithWrapError(err).WithKind(richerror.KindUnAuthorized), s.logger)
+		return "", errlog.ErrLog(richerror.New(op).WithMessage(err.Error()).WithWrapError(err).
+			WithKind(richerror.KindUnAuthorized), s.logger)
 	}
 
 	return signedToken, nil

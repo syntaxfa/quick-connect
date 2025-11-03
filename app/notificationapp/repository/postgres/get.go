@@ -11,7 +11,8 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-func (d *DB) FindNotificationByUserID(ctx context.Context, userID types.ID, paginated paginate.RequestBase, isRead, isInApp *bool) ([]service.Notification, paginate.ResponseBase, error) {
+func (d *DB) FindNotificationByUserID(ctx context.Context, userID types.ID, paginated paginate.RequestBase, isRead,
+	isInApp *bool) ([]service.Notification, paginate.ResponseBase, error) {
 	const op = "repository.get.FindNotificationByUserID"
 
 	filters := map[paginate.FilterParameter]paginate.Filter{

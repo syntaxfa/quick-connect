@@ -11,6 +11,10 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
+const (
+	SecureSchema = "https"
+)
+
 func isUserHaveAuthCookie(c echo.Context, logger *slog.Logger) bool {
 	cookie, err := c.Cookie(string(types.TokenTypeRefresh))
 
@@ -39,7 +43,7 @@ func setAuthCookie(c echo.Context, accessToken, refreshToken string, accessExpir
 	accessCookie.Value = accessToken
 	accessCookie.Path = "/"
 	accessCookie.HttpOnly = true
-	accessCookie.Secure = c.Scheme() == "https"
+	accessCookie.Secure = c.Scheme() == SecureSchema
 	accessCookie.SameSite = http.SameSiteLaxMode
 	accessCookie.MaxAge = accessExpiry
 	c.SetCookie(accessCookie)
@@ -49,7 +53,7 @@ func setAuthCookie(c echo.Context, accessToken, refreshToken string, accessExpir
 	refreshCookie.Value = refreshToken
 	refreshCookie.Path = "/"
 	refreshCookie.HttpOnly = true
-	refreshCookie.Secure = c.Scheme() == "https"
+	refreshCookie.Secure = c.Scheme() == SecureSchema
 	refreshCookie.SameSite = http.SameSiteLaxMode
 	refreshCookie.MaxAge = refreshExpiry
 	c.SetCookie(refreshCookie)
@@ -61,7 +65,7 @@ func clearAuthCookie(c echo.Context) {
 	accessCookie.Value = ""
 	accessCookie.Path = "/"
 	accessCookie.HttpOnly = true
-	accessCookie.Secure = c.Scheme() == "https"
+	accessCookie.Secure = c.Scheme() == SecureSchema
 	accessCookie.SameSite = http.SameSiteLaxMode
 	accessCookie.MaxAge = -1
 	c.SetCookie(accessCookie)
@@ -71,7 +75,7 @@ func clearAuthCookie(c echo.Context) {
 	refreshCookie.Value = ""
 	refreshCookie.Path = "/"
 	refreshCookie.HttpOnly = true
-	refreshCookie.Secure = c.Scheme() == "https"
+	refreshCookie.Secure = c.Scheme() == SecureSchema
 	refreshCookie.SameSite = http.SameSiteLaxMode
 	refreshCookie.MaxAge = -1
 	c.SetCookie(refreshCookie)

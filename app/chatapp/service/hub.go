@@ -5,25 +5,19 @@ import (
 	"sync"
 )
 
-type Client interface {
-	GetID() string
-	Send(message Message)
-	Close()
-}
-
-type Support interface {
+type Participant interface {
 	GetID() string
 	Send(message Message)
 	Close()
 }
 
 type Hub struct {
-	clients            map[string]Client
-	supports           map[string]Support
-	registerClient     chan Client
-	registerSupport    chan Support
-	unregisterClient   chan Client
-	unregisterSupport  chan Support
+	clients            map[string]Participant
+	supports           map[string]Participant
+	registerClient     chan Participant
+	registerSupport    chan Participant
+	unregisterClient   chan Participant
+	unregisterSupport  chan Participant
 	broadcastToSupport chan Message
 	broadcastToClient  chan Message
 	mu                 sync.RWMutex
@@ -32,12 +26,12 @@ type Hub struct {
 
 func NewHub(logger *slog.Logger) *Hub {
 	return &Hub{
-		clients:            make(map[string]Client),
-		supports:           make(map[string]Support),
-		registerClient:     make(chan Client),
-		registerSupport:    make(chan Support),
-		unregisterClient:   make(chan Client),
-		unregisterSupport:  make(chan Support),
+		clients:            make(map[string]Participant),
+		supports:           make(map[string]Participant),
+		registerClient:     make(chan Participant),
+		registerSupport:    make(chan Participant),
+		unregisterClient:   make(chan Participant),
+		unregisterSupport:  make(chan Participant),
 		broadcastToSupport: make(chan Message),
 		broadcastToClient:  make(chan Message),
 		mu:                 sync.RWMutex{},
@@ -62,18 +56,18 @@ func (h *Hub) Run() {
 
 		case client := <-h.unregisterClient:
 			h.mu.Lock()
-			if client, ok := h.clients[client.GetID()]; ok {
+			if conn, ok := h.clients[client.GetID()]; ok {
 				delete(h.clients, client.GetID())
-				client.Close()
+				conn.Close()
 				h.logger.Info("client unregistered", slog.String("id", client.GetID()))
 			}
 			h.mu.Unlock()
 
 		case support := <-h.unregisterSupport:
 			h.mu.Lock()
-			if support, ok := h.supports[support.GetID()]; ok {
+			if conn, ok := h.supports[support.GetID()]; ok {
 				delete(h.supports, support.GetID())
-				support.Close()
+				conn.Close()
 				h.logger.Info("support unregistered", slog.String("id", support.GetID()))
 			}
 			h.mu.Unlock()
@@ -91,19 +85,19 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) RegisterClient(client Client) {
+func (h *Hub) RegisterClient(client Participant) {
 	h.registerClient <- client
 }
 
-func (h *Hub) RegisterSupport(support Support) {
+func (h *Hub) RegisterSupport(support Participant) {
 	h.registerSupport <- support
 }
 
-func (h *Hub) UnregisterClient(client Client) {
+func (h *Hub) UnregisterClient(client Participant) {
 	h.unregisterClient <- client
 }
 
-func (h *Hub) UnregisterSupport(support Support) {
+func (h *Hub) UnregisterSupport(support Participant) {
 	h.unregisterSupport <- support
 }
 
@@ -147,10 +141,10 @@ func (h *Hub) SendPrivateMessageToClient(message Message) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
-	if client, ok := h.clients[message.Recipient]; ok {
+	if client, clientOk := h.clients[message.Recipient]; clientOk {
 		client.Send(message)
 
-		if sender, ok := h.supports[message.Sender]; ok {
+		if sender, supportOk := h.supports[message.Sender]; supportOk {
 			message.Type = MessageTypeEcho
 			sender.Send(message)
 		}

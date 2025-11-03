@@ -60,9 +60,9 @@ func TestRichError(t *testing.T) {
 		},
 	}
 
-	for i := 0; i < len(tests); i++ {
-		expect := tests[i].expected
-		input := tests[i].input
+	for _, test := range tests {
+		expect := test.expected
+		input := test.input
 
 		if expect.kind != input.Kind() {
 			t.Fatalf("expected kind: %d, but got: %d", expect.kind, input.Kind())

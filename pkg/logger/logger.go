@@ -1,8 +1,8 @@
 package logger
 
 import (
+	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -26,7 +26,7 @@ func New(cfg Config, opt *slog.HandlerOptions, writeInConsole bool, serviceName 
 
 	workingDir, wErr := os.Getwd()
 	if wErr != nil {
-		log.Fatalf("error getting current working directory, %s", wErr.Error())
+		panic(fmt.Errorf("error getting current working directory: %w", wErr))
 	}
 
 	fileWriter := &lumberjack.Logger{

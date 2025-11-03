@@ -20,7 +20,7 @@ func New(validator *jwtvalidator.Validator) *Middleware {
 	}
 }
 
-// RequireAuth (Authentication)
+// RequireAuth (Authentication).
 func (m *Middleware) RequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")
@@ -35,7 +35,7 @@ func (m *Middleware) RequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusUnauthorized, jErr.Error())
 		}
 
-		c.Set(types.UserContextKey, claims)
+		c.Set(string(types.UserContextKey), claims)
 
 		return next(c)
 	}
@@ -72,7 +72,7 @@ func extractToken(authHeader string) (string, error) {
 }
 
 func GetUserClaimFormContext(c echo.Context) (types.UserClaims, error) {
-	claimsStr := c.Get(types.UserContextKey)
+	claimsStr := c.Get(string(types.UserContextKey))
 	if claimsStr == "" {
 		return types.UserClaims{}, errors.New("user claims not found in context")
 	}

@@ -10,7 +10,7 @@ type GorillaConnection struct {
 	conn *websocket.Conn
 }
 
-func (c *GorillaConnection) ReadMessage() (messageType int, p []byte, err error) {
+func (c *GorillaConnection) ReadMessage() (int, []byte, error) {
 	return c.conn.ReadMessage()
 }
 

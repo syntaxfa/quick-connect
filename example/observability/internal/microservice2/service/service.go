@@ -23,5 +23,5 @@ func (s Service) GetCommentByID(ctx context.Context, commentID uint64) (GetComme
 	cCtx, span := traceotela.Tracer().Start(ctx, "Get comment By ID Service")
 	defer span.End()
 
-	return s.repo.GetCommentByID(cCtx, 2)
+	return s.repo.GetCommentByID(cCtx, commentID)
 }

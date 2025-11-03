@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -37,7 +38,7 @@ func (h Handler) renderErrorPartial(c echo.Context, httpStatus int, errorContent
 	html += `<div id="error-message" class="error" hx-swap-oob="true">` + msg + `</div>`
 
 	// TODO: HTMX can't handle errors when status code is not 200
-	c.Response().Header().Set("X-HTTP-Status", fmt.Sprintf("%d", httpStatus))
+	c.Response().Header().Set("X-Http-Status", strconv.Itoa(httpStatus))
 	return c.HTML(http.StatusOK, html)
 }
 
@@ -64,8 +65,7 @@ func (h Handler) renderGRPCError(c echo.Context, operationName string, err error
 	finalErrorMessage := h.t.TranslateMessage(st.Message())
 
 	for _, detail := range st.Details() {
-		switch d := detail.(type) {
-		case *errdetailspb.BadRequest:
+		if d, assertOk := detail.(*errdetailspb.BadRequest); assertOk {
 			var htmlBuilder strings.Builder
 			htmlBuilder.WriteString("<ul class='error-list'>")
 
@@ -76,7 +76,6 @@ func (h Handler) renderGRPCError(c echo.Context, operationName string, err error
 
 			htmlBuilder.WriteString("</ul>")
 			finalErrorMessage = htmlBuilder.String()
-			break
 		}
 	}
 

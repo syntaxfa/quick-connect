@@ -5,6 +5,7 @@ import (
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 	"github.com/syntaxfa/quick-connect/types"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func convertUserRoleToPB(roles []types.Role) []userpb.Role {
@@ -41,6 +42,8 @@ func convertUserRoleToEntity(pbRoles []userpb.Role) []types.Role {
 			roles = append(roles, types.RoleFile)
 		case userpb.Role_ROLE_NOTIFICATION:
 			roles = append(roles, types.RoleNotification)
+		case userpb.Role_ROLE_UNSPECIFIED:
+			continue
 		}
 	}
 
@@ -50,12 +53,12 @@ func convertUserRoleToEntity(pbRoles []userpb.Role) []types.Role {
 func convertCreateUserRequestToEntity(req *userpb.CreateUserRequest) userservice.UserCreateRequest {
 	return userservice.UserCreateRequest{
 		ID:          "",
-		Username:    req.Username,
-		Password:    req.Password,
-		Fullname:    req.Fullname,
-		Email:       req.Email,
-		PhoneNumber: req.PhoneNumber,
-		Roles:       convertUserRoleToEntity(req.Roles),
+		Username:    req.GetUsername(),
+		Password:    req.GetPassword(),
+		Fullname:    req.GetFullname(),
+		Email:       req.GetEmail(),
+		PhoneNumber: req.GetPhoneNumber(),
+		Roles:       convertUserRoleToEntity(req.GetRoles()),
 	}
 }
 
@@ -68,41 +71,45 @@ func convertUserToPB(req userservice.User) *userpb.User {
 		PhoneNumber:  req.PhoneNumber,
 		Avatar:       req.Avatar,
 		Roles:        convertUserRoleToPB(req.Roles),
-		LastOnlineAt: nil,
+		LastOnlineAt: timestamppb.New(req.LastOnlineAt),
 	}
 }
 
 func convertUserUpdateFromSuperuserToEntity(req *userpb.UserUpdateFromSuperUserRequest) userservice.UserUpdateFromSuperuserRequest {
 	return userservice.UserUpdateFromSuperuserRequest{
-		Username:    req.Username,
-		Fullname:    req.Fullname,
-		Email:       req.Email,
-		PhoneNumber: req.PhoneNumber,
-		Roles:       convertUserRoleToEntity(req.Roles),
+		Username:    req.GetUsername(),
+		Fullname:    req.GetFullname(),
+		Email:       req.GetEmail(),
+		PhoneNumber: req.GetPhoneNumber(),
+		Roles:       convertUserRoleToEntity(req.GetRoles()),
 	}
 }
 
 func convertUserUpdateFromOwnToEntity(req *userpb.UserUpdateFromOwnRequest) userservice.UserUpdateFromOwnRequest {
 	return userservice.UserUpdateFromOwnRequest{
-		Username:    req.Username,
-		Fullname:    req.Fullname,
-		Email:       req.Email,
-		PhoneNumber: req.PhoneNumber,
+		Username:    req.GetUsername(),
+		Fullname:    req.GetFullname(),
+		Email:       req.GetEmail(),
+		PhoneNumber: req.GetPhoneNumber(),
 	}
 }
 
 func convertUserListRequestToEntity(req *userpb.UserListRequest) userservice.ListUserRequest {
 	request := userservice.ListUserRequest{
-		Username: req.Username,
+		Username: req.GetUsername(),
 		Paginated: paginate.RequestBase{
-			CurrentPage: req.CurrentPage,
-			PageSize:    req.PageSize,
+			CurrentPage: req.GetCurrentPage(),
+			PageSize:    req.GetPageSize(),
 		},
 	}
 
-	switch req.SortDirection {
+	switch req.GetSortDirection() {
 	case userpb.SortDirection_SORT_DIRECTION_ASC:
 		request.Paginated.Descending = false
+	case userpb.SortDirection_SORT_DIRECTION_DESC:
+		request.Paginated.Descending = true
+	case userpb.SortDirection_SORT_DIRECTION_UNSPECIFIED:
+		request.Paginated.Descending = true
 	default:
 		request.Paginated.Descending = true
 	}

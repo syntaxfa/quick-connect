@@ -2,6 +2,7 @@ package userservice
 
 import (
 	"context"
+
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 )

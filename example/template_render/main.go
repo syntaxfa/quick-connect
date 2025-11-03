@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
 	"time"
+
+	"github.com/syntaxfa/quick-connect/app/notificationapp/service"
 )
 
 var TextOtpCodeEn = `login code is: {{.otp_code}}
@@ -14,7 +15,7 @@ var TextOtpCodeFa = `کد ورود شما است: {{.otp_code}}
 
 کوئیک کانکت`
 
-var EmailOtpCodeEn string = `
+var EmailOtpCodeEn = `
 <!DOCTYPE html>
 <html>
 <body>
@@ -25,7 +26,7 @@ var EmailOtpCodeEn string = `
 </body>
 </html>`
 
-var EmailOtpCodeFa string = `
+var EmailOtpCodeFa = `
 <!DOCTYPE html>
 <html>
 <body>
@@ -69,9 +70,9 @@ var otpCodeTemplate = service.Template{
 	UpdatedAt: time.Now(),
 }
 
-var textTemplate2 string = `hello dear {{.username}}`
+var textTemplate2 = `hello dear {{.username}}`
 
-var htmlTemplate2 string = `
+var htmlTemplate2 = `
 <!DOCTYPE html>
 <html>
 <body>
@@ -82,6 +83,9 @@ var htmlTemplate2 string = `
 </html>`
 
 func main() {
+	_ = textTemplate2
+	_ = htmlTemplate2
+
 	render := service.NewRenderService("fa")
 
 	notification := service.Notification{

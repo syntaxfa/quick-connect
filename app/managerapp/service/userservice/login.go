@@ -27,7 +27,8 @@ func (s Service) Login(ctx context.Context, req UserLoginRequest) (UserLoginResp
 	}
 
 	if !VerifyPassword(user.HashedPassword, req.Password) {
-		return UserLoginResponse{}, errlog.ErrLog(richerror.New(op).WithKind(richerror.KindNotFound).WithMessage(servermsg.MsgRecordNotFound), s.logger)
+		return UserLoginResponse{}, errlog.ErrLog(richerror.New(op).WithKind(richerror.KindNotFound).
+			WithMessage(servermsg.MsgRecordNotFound), s.logger)
 	}
 
 	token, gtErr := s.tokenSvc.GenerateTokenPair(user.ID, user.Roles)

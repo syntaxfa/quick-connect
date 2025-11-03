@@ -10,8 +10,8 @@ import (
 
 func (h Handler) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error) {
 	resp, sErr := h.userSvc.Login(ctx, userservice.UserLoginRequest{
-		Username: req.Username,
-		Password: req.Password,
+		Username: req.GetUsername(),
+		Password: req.GetPassword(),
 	})
 
 	if sErr != nil {

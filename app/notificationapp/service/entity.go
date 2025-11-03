@@ -79,9 +79,13 @@ const (
 	ChannelTypeInApp   ChannelType = "in_app"   // In-App notification
 )
 
+var AllChannelType = []ChannelType{ChannelTypeSMS, ChannelTypeEmail, ChannelTypeWebPush, ChannelTypeInApp}
+
 func IsValidChannelType(channelType ChannelType) bool {
-	if channelType == ChannelTypeSMS || channelType == ChannelTypeEmail || channelType == ChannelTypeWebPush || channelType == ChannelTypeInApp {
-		return true
+	for _, ch := range AllChannelType {
+		if ch == channelType {
+			return true
+		}
 	}
 
 	return false

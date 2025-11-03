@@ -75,9 +75,9 @@ func (s Service) publishNotification(ctxTimeout time.Duration, notification Noti
 
 	userSetting, usErr := s.GetUserSetting(ctx, string(notification.UserID))
 	if usErr != nil {
-		errlog.WithoutErr(richerror.New(op).WithWrapError(usErr).WithMessage(fmt.Sprintf("can't get user setting for user id: %s", notification.UserID)), s.logger)
+		errlog.WithoutErr(richerror.New(op).WithWrapError(usErr).WithMessage(fmt.Sprintf("can't get user setting for user id: %s",
+			notification.UserID)), s.logger)
 	}
-	fmt.Println(userSetting)
 
 	if !s.CheckNotificationAccessToSend(notification, userSetting, ChannelTypeInApp) {
 		return
@@ -92,13 +92,15 @@ func (s Service) publishNotification(ctxTimeout time.Duration, notification Noti
 
 	jsonData, mErr := json.Marshal(notificationMsgs[0])
 	if mErr != nil {
-		errlog.WithoutErr(richerror.New(op).WithMessage("can't marshalling notification message").WithWrapError(mErr).WithKind(richerror.KindUnexpected), s.logger)
+		errlog.WithoutErr(richerror.New(op).WithMessage("can't marshalling notification message").WithWrapError(mErr).
+			WithKind(richerror.KindUnexpected), s.logger)
 
 		return
 	}
 
 	if pErr := s.publisher.Publish(ctx, s.cfg.ChannelName, jsonData); pErr != nil {
-		errlog.WithoutErr(richerror.New(op).WithMessage("can't publish notification message").WithWrapError(mErr).WithKind(richerror.KindUnexpected), s.logger)
+		errlog.WithoutErr(richerror.New(op).WithMessage("can't publish notification message").
+			WithWrapError(pErr).WithKind(richerror.KindUnexpected), s.logger)
 
 		return
 	}

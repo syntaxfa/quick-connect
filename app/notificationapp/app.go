@@ -22,6 +22,11 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
+const (
+	pingPeriodNumerator   = 9
+	pingPeriodDenominator = 10
+)
+
 type Application struct {
 	cfg              Config
 	trap             <-chan os.Signal
@@ -36,7 +41,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, re *redis.Ada
 		panic(tErr)
 	}
 
-	cfg.Notification.PingPeriod = (cfg.Notification.PongWait * 9) / 10
+	cfg.Notification.PingPeriod = (cfg.Notification.PongWait * pingPeriodNumerator) / pingPeriodDenominator
 
 	cache := cachemanager.New(re, logger)
 
@@ -128,11 +133,11 @@ func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	if sErr := a.clientHTTPServer.Stop(ctx); sErr != nil {
-		a.logger.Error("client http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+		a.logger.ErrorContext(ctx, "client http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
 
 	if sErr := a.adminHTTPServer.Stop(ctx); sErr != nil {
-		a.logger.Error("admin http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+		a.logger.ErrorContext(ctx, "admin http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
 }
 

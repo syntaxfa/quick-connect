@@ -27,7 +27,7 @@ func (c Client) GetComment(ctx context.Context, commentID uint64) (service.GetCo
 	}
 
 	return service.GetCommentResponse{
-		ID:   res.CommentId,
-		Body: res.Body,
+		ID:   res.GetCommentId(),
+		Body: res.GetBody(),
 	}, nil
 }

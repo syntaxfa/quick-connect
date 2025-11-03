@@ -19,19 +19,28 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 )
 
+const (
+	defaultMetricsPort           = 12330
+	minPort                      = 1
+	maxPort                      = 65535
+	defaultMetricsPath           = "/metrics"
+	readHeaderTimeoutSeconds     = 60
+	serverShutdownTimeoutSeconds = 5
+)
+
 var ErrInvalidPort = errors.New("invalid port number, must between 1 and 65535")
 
 // validateConfig validates configuration and sets default values.
 func validateConfig(cfg Config) (Config, error) {
 	if cfg.Mode == ModePullBase {
 		if cfg.PullConfig.Port == 0 {
-			cfg.PullConfig.Port = 12330
-		} else if cfg.PullConfig.Port < 1 || cfg.PullConfig.Port > 65535 {
+			cfg.PullConfig.Port = defaultMetricsPort
+		} else if cfg.PullConfig.Port < minPort || cfg.PullConfig.Port > maxPort {
 			return cfg, ErrInvalidPort
 		}
 
 		if cfg.PullConfig.Path == "" {
-			cfg.PullConfig.Path = "/metrics"
+			cfg.PullConfig.Path = defaultMetricsPath
 		}
 	}
 
@@ -50,7 +59,7 @@ func newServer(port int) *server {
 		s: &http.Server{
 			Addr:              fmt.Sprintf(":%d", port),
 			Handler:           mux,
-			ReadHeaderTimeout: time.Second * 60,
+			ReadHeaderTimeout: time.Second * readHeaderTimeoutSeconds,
 		},
 		mux: mux,
 	}
@@ -88,7 +97,7 @@ func initPullBaseMetric(ctx context.Context, cfg Config, resource *resource.Reso
 	httpserver := newServer(cfg.PullConfig.Port)
 	httpserver.mux.Handle(cfg.PullConfig.Path, promHandler)
 
-	logger.Info("metrics server started",
+	logger.InfoContext(ctx, "metrics server started",
 		slog.String("endpoint", fmt.Sprintf("http://localhost:%d%s", cfg.PullConfig.Port, cfg.PullConfig.Path)),
 		slog.String("mode", "pull"),
 	)
@@ -102,22 +111,22 @@ func initPullBaseMetric(ctx context.Context, cfg Config, resource *resource.Reso
 
 	select {
 	case <-ctx.Done():
-		logger.Info("received shutdown signal, stopping metrics server...")
+		logger.InfoContext(ctx, "received shutdown signal, stopping metrics server...")
 	case err := <-serverErrCh:
-		logger.Error("metrics server error", slog.String("error", err.Error()))
+		logger.ErrorContext(ctx, "metrics server error", slog.String("error", err.Error()))
 	}
 
-	shutdownCtx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+	shutdownCtx, cancelFunc := context.WithTimeout(context.Background(), serverShutdownTimeoutSeconds*time.Second)
 	defer cancelFunc()
 
 	//nolint:contextcheck // Parent context is Done
 	if sErr := httpserver.s.Shutdown(shutdownCtx); sErr != nil {
-		logger.Error("metric http server shutdown error", slog.String("error", sErr.Error()))
+		logger.ErrorContext(ctx, "metric http server shutdown error", slog.String("error", sErr.Error()))
 
 		return fmt.Errorf("metrics server shutdown error: %w", sErr)
 	}
 
-	logger.Info("metrics server stopped successfully")
+	logger.InfoContext(ctx, "metrics server stopped successfully")
 
 	return nil
 }
@@ -131,7 +140,7 @@ func InitMetric(ctx context.Context, cfg Config, resource *resource.Resource, lo
 	var vErr error
 	cfg, vErr = validateConfig(cfg)
 	if vErr != nil {
-		logger.Error("invalid metrics configuration", slog.String("error", vErr.Error()))
+		logger.ErrorContext(ctx, "invalid metrics configuration", slog.String("error", vErr.Error()))
 
 		return vErr
 	}
@@ -145,8 +154,15 @@ func InitMetric(ctx context.Context, cfg Config, resource *resource.Resource, lo
 		}()
 
 		return nil
+	case ModeDisable:
+		logger.DebugContext(ctx, "Metrics disabled, using noop provider")
+
+		otel.SetMeterProvider(noop.MeterProvider{})
+
+		return nil
 	default:
-		logger.Debug("Metrics disabled, using noop provider")
+		logger.DebugContext(ctx, "Metrics mode not provided, using noop provider")
+
 		otel.SetMeterProvider(noop.MeterProvider{})
 
 		return nil

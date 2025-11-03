@@ -1,9 +1,10 @@
 package grpcserver
 
 import (
-	"fmt"
+	"context"
 	"log/slog"
 	"net"
+	"strconv"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
@@ -25,6 +26,7 @@ func New(conf Config, log *slog.Logger, externalOpts ...grpc.ServerOption) Serve
 		)),
 	}
 
+	//nolint:gocritic // Need separate slice for clarity
 	allOpts := append(internalOpts, externalOpts...)
 
 	gr := grpc.NewServer(allOpts...)
@@ -38,23 +40,27 @@ func New(conf Config, log *slog.Logger, externalOpts ...grpc.ServerOption) Serve
 	return Server{cfg: conf, log: log, GrpcServer: gr}
 }
 
-func (s *Server) Start() error {
-	s.log.Info("starting gRPC server at", slog.String("host", s.cfg.Host), slog.Int("port", s.cfg.Port))
+func (s *Server) Start(ctx context.Context) error {
+	s.log.InfoContext(ctx, "starting gRPC server at", slog.String("host", s.cfg.Host), slog.Int("port", s.cfg.Port))
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port))
+	lc := net.ListenConfig{}
+	addr := net.JoinHostPort(s.cfg.Host, strconv.Itoa(s.cfg.Port))
+
+	lis, err := lc.Listen(ctx, "tcp", addr)
 	if err != nil {
-		s.log.Error("error at starting tcp listener", slog.String("error", err.Error()))
+		s.log.ErrorContext(ctx, "error at starting tcp listener", slog.String("error", err.Error()))
 
 		return err
 	}
 
-	if err := s.GrpcServer.Serve(lis); err != nil {
-		s.log.Error("error at serving grpcserver server", slog.String("error", err.Error()))
+	if sErr := s.GrpcServer.Serve(lis); sErr != nil {
+		s.log.ErrorContext(ctx, "error at serving grpcserver server", slog.String("error", sErr.Error()))
 
-		return err
+		return sErr
 	}
 
-	s.log.Info("started gRPC successfully at", slog.String("host", s.cfg.Host), slog.Int("port", s.cfg.Port))
+	s.log.InfoContext(ctx, "started gRPC successfully at", slog.String("host", s.cfg.Host),
+		slog.Int("port", s.cfg.Port))
 
 	return nil
 }

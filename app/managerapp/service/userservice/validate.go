@@ -11,6 +11,17 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
+const (
+	minUsernameLength = 4
+	maxUsernameLength = 191
+	minFullnameLength = 3
+	maxFullnameLength = 191
+	minEmailLength    = 10
+	maxEmailLength    = 255
+	minPasswordLength = 7
+	maxPasswordLength = 64
+)
+
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 var usernameRegex = regexp.MustCompile(`^[\x21-\x7E]+$`)
 
@@ -30,11 +41,11 @@ func (v Validate) ValidateLoginRequest(req UserLoginRequest) error {
 	if err := validation.ValidateStruct(&req,
 		validation.Field(&req.Username,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(4, 191).Error(servermsg.MsgInvalidLengthOfUsername),
+			validation.Length(minUsernameLength, maxUsernameLength).Error(servermsg.MsgInvalidLengthOfUsername),
 			validation.Match(usernameRegex).Error(servermsg.MsgInvalidUsernameFormat)),
 		validation.Field(&req.Password,
 			validation.Required,
-			validation.Length(7, 64).Error(servermsg.MsgInvalidLengthOfPassword)),
+			validation.Length(minPasswordLength, maxPasswordLength).Error(servermsg.MsgInvalidLengthOfPassword)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
 
@@ -60,17 +71,17 @@ func (v Validate) ValidateUserCreateRequest(req UserCreateRequest) error {
 	if err := validation.ValidateStruct(&req,
 		validation.Field(&req.Username,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(4, 191).Error(servermsg.MsgInvalidLengthOfUsername),
+			validation.Length(minUsernameLength, maxUsernameLength).Error(servermsg.MsgInvalidLengthOfUsername),
 			validation.Match(usernameRegex).Error(servermsg.MsgInvalidUsernameFormat)),
 		validation.Field(&req.Password,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(7, 64).Error(servermsg.MsgInvalidLengthOfPassword)),
+			validation.Length(minPasswordLength, maxPasswordLength).Error(servermsg.MsgInvalidLengthOfPassword)),
 		validation.Field(&req.Fullname,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(3, 191).Error(servermsg.MsgInvalidLengthOfFullname)),
+			validation.Length(minFullnameLength, maxFullnameLength).Error(servermsg.MsgInvalidLengthOfFullname)),
 		validation.Field(&req.Email,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(10, 255).Error(servermsg.MsgInvalidLengthOfEmail),
+			validation.Length(minEmailLength, maxEmailLength).Error(servermsg.MsgInvalidLengthOfEmail),
 			validation.Match(emailRegex).Error(servermsg.MsgInvalidEmailFormat)),
 		validation.Field(&req.PhoneNumber,
 			validation.Required.Error(servermsg.MsgFieldRequired)),
@@ -116,7 +127,7 @@ func (v Validate) ValidateListUserRequest(req ListUserRequest) error {
 
 	if err := validation.ValidateStruct(&req,
 		validation.Field(&req.Username,
-			validation.Length(4, 191).Error(servermsg.MsgInvalidLengthOfUsername)),
+			validation.Length(minUsernameLength, maxUsernameLength).Error(servermsg.MsgInvalidLengthOfUsername)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
 
@@ -142,14 +153,14 @@ func (v Validate) UserUpdateFromSuperuserRequest(req UserUpdateFromSuperuserRequ
 	if err := validation.ValidateStruct(&req,
 		validation.Field(&req.Username,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(4, 191).Error(servermsg.MsgInvalidLengthOfUsername),
+			validation.Length(minUsernameLength, maxUsernameLength).Error(servermsg.MsgInvalidLengthOfUsername),
 			validation.Match(usernameRegex).Error(servermsg.MsgInvalidUsernameFormat)),
 		validation.Field(&req.Fullname,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(3, 191).Error(servermsg.MsgInvalidLengthOfFullname)),
+			validation.Length(minFullnameLength, maxFullnameLength).Error(servermsg.MsgInvalidLengthOfFullname)),
 		validation.Field(&req.Email,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(10, 255).Error(servermsg.MsgInvalidLengthOfEmail),
+			validation.Length(minEmailLength, maxEmailLength).Error(servermsg.MsgInvalidLengthOfEmail),
 			validation.Match(emailRegex).Error(servermsg.MsgInvalidEmailFormat)),
 		validation.Field(&req.PhoneNumber,
 			validation.Required.Error(servermsg.MsgFieldRequired)),
