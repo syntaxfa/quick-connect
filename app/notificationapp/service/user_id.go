@@ -15,50 +15,62 @@ type UserIDCacheValue struct {
 }
 
 func (s Service) getUserIDFromExternalUserID(ctx context.Context, externalUserID string) (types.ID, error) {
-	_, pErr := ulid.Parse(externalUserID)
-	if pErr == nil {
+	if _, pErr := ulid.Parse(externalUserID); pErr == nil {
 		return types.ID(externalUserID), nil
 	}
 
 	key := s.getUserIDCacheKey(externalUserID)
 	var cacheValue UserIDCacheValue
-	if gErr := s.cache.Get(ctx, key, &cacheValue); gErr != nil {
-		if !errors.Is(gErr, cachemanager.ErrKeyNotFound) {
-			return "", gErr
+	gErr := s.cache.Get(ctx, key, &cacheValue)
+
+	if gErr == nil {
+		return cacheValue.UserID, nil
+	}
+
+	if !errors.Is(gErr, cachemanager.ErrKeyNotFound) {
+		return "", gErr
+	}
+
+	return s.handleCacheMiss(ctx, externalUserID, key)
+}
+
+func (s Service) handleCacheMiss(ctx context.Context, externalUserID string, cacheKey string) (types.ID, error) {
+	exist, eErr := s.repo.IsExistUserIDFromExternalUserID(ctx, externalUserID)
+	if eErr != nil {
+		return "", eErr
+	}
+
+	var userID types.ID
+
+	if exist {
+		var guErr error
+		userID, guErr = s.repo.GetUserIDFromExternalUserID(ctx, externalUserID)
+		if guErr != nil {
+			return "", guErr
 		}
 
-		exist, eErr := s.repo.IsExistUserIDFromExternalUserID(ctx, externalUserID)
-		if eErr != nil {
-			return "", eErr
-		}
-
-		if exist {
-			userID, gErr := s.repo.GetUserIDFromExternalUserID(ctx, externalUserID)
-			if gErr != nil {
-				return "", gErr
-			}
-
-			fmt.Println(s.cfg.UserIDCacheExpiration)
-
-			if sErr := s.cache.Set(ctx, key, UserIDCacheValue{UserID: userID}, s.cfg.UserIDCacheExpiration); sErr != nil {
-				return "", sErr
-			}
-
-			return userID, nil
-		}
-		userID := types.ID(ulid.Make().String())
-		if cErr := s.repo.CreateUserIDFromExternalUserID(ctx, externalUserID, userID); cErr != nil {
-			return "", cErr
-		}
-
-		if sErr := s.cache.Set(ctx, key, UserIDCacheValue{UserID: userID}, s.cfg.UserIDCacheExpiration); sErr != nil {
-			return "", sErr
+		if setErr := s.setCacheUserID(ctx, cacheKey, userID); setErr != nil {
+			return "", setErr
 		}
 
 		return userID, nil
 	}
 
-	return cacheValue.UserID, nil
+	userID = types.ID(ulid.Make().String())
+
+	if setErr := s.repo.CreateUserIDFromExternalUserID(ctx, externalUserID, userID); setErr != nil {
+		return "", setErr
+	}
+
+	if err := s.setCacheUserID(ctx, cacheKey, userID); err != nil {
+		return "", err
+	}
+
+	return userID, nil
+}
+
+func (s Service) setCacheUserID(ctx context.Context, key string, userID types.ID) error {
+	return s.cache.Set(ctx, key, UserIDCacheValue{UserID: userID}, s.cfg.UserIDCacheExpiration)
 }
 
 func (s Service) getUserIDCacheKey(externalUserID string) string {

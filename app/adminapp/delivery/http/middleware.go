@@ -12,7 +12,8 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, authAd *manager.AuthAdapter, loginPath string, logger *slog.Logger) func(nex echo.HandlerFunc) echo.HandlerFunc {
+func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, authAd *manager.AuthAdapter, loginPath string,
+	logger *slog.Logger) func(nex echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			const op = "delivery.middleware.setTokenToRequestContext"
@@ -40,20 +41,22 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 
 			token, tErr := authAd.TokenRefresh(c.Request().Context(), &authpb.TokenRefreshRequest{RefreshToken: refreshToken})
 			if tErr != nil {
-				errlog.WithoutErr(richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected).WithMessage("refresh token is not valid"), logger)
+				errlog.WithoutErr(richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected).
+					WithMessage("refresh token is not valid"), logger)
 
 				clearAuthCookie(c)
 
 				return redirectToLogin(c)
 			}
 
-			if claims, err := jwtValidator.ValidateToken(token.AccessToken); err == nil {
+			if claims, err := jwtValidator.ValidateToken(token.GetAccessToken()); err == nil {
 				setUserToContext(c, claims)
 			}
 
-			setAuthCookie(c, token.AccessToken, token.RefreshToken, int(token.AccessExpiresIn), int(token.RefreshExpiresIn))
+			setAuthCookie(c, token.GetAccessToken(), token.GetRefreshToken(), int(token.GetAccessExpiresIn()),
+				int(token.GetRefreshExpiresIn()))
 
-			setTokenToContext(c, token.AccessToken)
+			setTokenToContext(c, token.GetAccessToken())
 
 			return next(c)
 		}
@@ -61,7 +64,7 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 }
 
 func setTokenToContext(c echo.Context, accessToken string) {
-	c.Set(types.AuthorizationKey, "Bearer "+accessToken)
+	c.Set(string(types.AuthorizationKey), "Bearer "+accessToken)
 }
 
 func setUserToContext(c echo.Context, claims *types.UserClaims) {

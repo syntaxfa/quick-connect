@@ -11,6 +11,10 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 )
 
+const (
+	clientTimeoutInSeconds = 10
+)
+
 type ClientServer struct {
 	httpServer        httpserver.Server
 	handler           Handler
@@ -44,12 +48,14 @@ func (s ClientServer) registerRoutes() {
 
 	v1 := s.httpServer.Router.Group("/v1")
 
-	httpClient := &http.Client{Timeout: time.Second * 10}
+	httpClient := &http.Client{Timeout: time.Second * clientTimeoutInSeconds}
 
 	notifications := v1.Group("/notifications")
 	notifications.POST("/list", s.handler.findNotifications, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
-	notifications.GET("/:notificationID/mark-as-read", s.handler.markNotificationAsRead, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
-	notifications.GET("/mark-all-as-read", s.handler.markAllNotificationAsRead, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
+	notifications.GET("/:notificationID/mark-as-read", s.handler.markNotificationAsRead,
+		validateExternalToken(s.getExternalUserID, s.logger, httpClient))
+	notifications.GET("/mark-all-as-read", s.handler.markAllNotificationAsRead,
+		validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 	notifications.GET("/ws", s.handler.wsNotification, validateExternalToken(s.getExternalUserID, s.logger, httpClient))
 
 	settings := v1.Group("/settings")

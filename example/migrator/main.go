@@ -28,9 +28,10 @@ func main() {
 		SSLMode:  cfg.SSLMode,
 	}, "example/migrator/migrations")
 
-	if n, uErr := migrate.Down(1); uErr != nil {
+	n, uErr := migrate.Down(1)
+	if uErr != nil {
 		log.Fatalln(uErr.Error())
-	} else {
-		log.Printf("migrations %d\n", n)
 	}
+
+	log.Printf("migrations %d\n", n)
 }

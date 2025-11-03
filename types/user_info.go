@@ -3,10 +3,11 @@ package types
 import "github.com/golang-jwt/jwt/v5"
 
 type UserClaims struct {
+	jwt.RegisteredClaims
+
 	UserID    ID        `json:"user_id"`
 	Roles     []Role    `json:"roles"`
 	TokenType TokenType `json:"token_type"`
-	jwt.RegisteredClaims
 }
 
 type TokenType string
@@ -29,11 +30,11 @@ const (
 var AllUserRole = []Role{RoleSuperUser, RoleSupport, RoleStory, RoleFile, RoleNotification}
 
 func IsValidRole(role Role) bool {
-	if role == RoleSuperUser || role == RoleSupport || role == RoleStory || role == RoleFile || role == RoleNotification {
-		return true
+	for _, r := range AllUserRole {
+		if role == r {
+			return true
+		}
 	}
 
 	return false
 }
-
-const UserContextKey = "user_claims"

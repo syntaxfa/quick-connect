@@ -38,7 +38,7 @@ func newReceiver(pubSub *redis2.PubSub) *receiver {
 	}
 }
 
-func (r *receiver) ReceiveMessage(ctx context.Context) (message []byte, err error) {
+func (r *receiver) ReceiveMessage(ctx context.Context) ([]byte, error) {
 	redisMsg, rErr := r.pubSub.ReceiveMessage(ctx)
 	if rErr != nil {
 		return nil, rErr

@@ -183,7 +183,8 @@ func (s Service) getTemplates(ctx context.Context, names []string) (map[string]T
 	return finalTemplates, nil
 }
 
-func (s Service) RenderNotificationTemplates(ctx context.Context, channel ChannelType, lang string, notifications ...Notification) ([]NotificationMessage, error) {
+func (s Service) RenderNotificationTemplates(ctx context.Context, channel ChannelType, lang string,
+	notifications ...Notification) ([]NotificationMessage, error) {
 	const op = "service.template.RenderNotificationTemplates"
 
 	templateNames := make([]string, len(notifications))

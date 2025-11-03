@@ -71,8 +71,6 @@ func messagesHandler(c echo.Context) error {
 			if err := conn.Close(); err != nil {
 				fmt.Println("connection close error", err.Error())
 			}
-
-			break
 		default:
 			messageType, data, err := conn.ReadMessage()
 
@@ -97,7 +95,6 @@ func messagesHandler(c echo.Context) error {
 						c.Logger().Error(err)
 					}
 					fmt.Println("connection closed from server")
-
 				}
 
 				fmt.Println("message receive error")

@@ -2,10 +2,11 @@ package tokenservice
 
 import (
 	"crypto/ed25519"
-	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 	"log/slog"
 	"os"
 	"time"
+
+	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 )
 
 type Config struct {

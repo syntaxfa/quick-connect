@@ -71,8 +71,8 @@ func (a Application) Start() {
 
 func (a Application) Stop(ctx context.Context) {
 	if sErr := a.httpServer.Stop(ctx); sErr != nil {
-		a.logger.Error("http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+		a.logger.ErrorContext(ctx, "http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
 
-	a.logger.Info("http server gracefully shutdown")
+	a.logger.InfoContext(ctx, "http server gracefully shutdown")
 }

@@ -41,7 +41,8 @@ func (s Server) registerRoutes() {
 
 	s.httpserver.Router.Static("/static", "app/adminapp/static")
 
-	rootGr := s.httpserver.Router.Group("", setTokenToRequestContextMiddleware(s.jwtValidator, s.handler.authAd, "/login", s.handler.logger))
+	rootGr := s.httpserver.Router.Group("", setTokenToRequestContextMiddleware(s.jwtValidator, s.handler.authAd,
+		"/login", s.handler.logger))
 
 	// auth Group
 	authGr := rootGr.Group("")
@@ -85,7 +86,7 @@ func (s Server) registerSwagger() {
 }
 
 func grpcContext(c echo.Context) context.Context {
-	token := c.Get(types.AuthorizationKey)
+	token := c.Get(string(types.AuthorizationKey))
 
 	return context.WithValue(c.Request().Context(), types.AuthorizationKey, token)
 }

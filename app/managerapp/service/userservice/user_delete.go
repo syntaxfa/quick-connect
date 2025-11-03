@@ -20,7 +20,8 @@ func (s Service) UserDelete(ctx context.Context, userID types.ID) error {
 	}
 
 	if dErr := s.repo.DeleteUser(ctx, userID); dErr != nil {
-		return errlog.ErrLog(richerror.New(op).WithWrapError(dErr).WithKind(richerror.KindUnexpected).WithMessage(fmt.Sprintf("can't delete user id: %s", userID)), s.logger)
+		return errlog.ErrLog(richerror.New(op).WithWrapError(dErr).WithKind(richerror.KindUnexpected).
+			WithMessage(fmt.Sprintf("can't delete user id: %s", userID)), s.logger)
 	}
 
 	return nil

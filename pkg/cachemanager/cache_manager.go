@@ -102,7 +102,7 @@ func (c *CacheManager) MGet(ctx context.Context, destMap map[string]any, keys ..
 	}
 
 	if len(results) != len(keys) {
-		return nil, fmt.Errorf("mismatched number of keys and results")
+		return nil, errors.New("mismatched number of keys and results")
 	}
 
 	for i, result := range results {
@@ -133,7 +133,8 @@ func (c *CacheManager) MGet(ctx context.Context, destMap map[string]any, keys ..
 		// Unmarshal the JSON bytes into the destination pointer.
 		if uErr := json.Unmarshal(data, dest); uErr != nil {
 			missedKeys = append(missedKeys, key)
-			c.logger.Warn(fmt.Sprintf("failed to unmarshal cache for key `%s`, treating as miss", key), slog.String("error", uErr.Error()))
+			c.logger.WarnContext(ctx, fmt.Sprintf("failed to unmarshal cache for key `%s`, treating as miss", key),
+				slog.String("error", uErr.Error()))
 
 			continue
 		}

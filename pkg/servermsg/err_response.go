@@ -32,6 +32,8 @@ func mapKindToHTTPStatusCode(kind richerror.Kind) int {
 		return http.StatusBadRequest
 	case richerror.KindConflict:
 		return http.StatusConflict
+	case richerror.KindUnexpected:
+		return http.StatusInternalServerError
 	default:
 		return http.StatusInternalServerError
 	}
@@ -102,7 +104,8 @@ func GRPCMsg(err error, t *translation.Translate, logger *slog.Logger) error {
 		code = mapKindToGRPCCode(richErr.Kind())
 		errFields = richErr.ErrorFields()
 
-		logger.Warn("gRPC request failed", "code", code.String(), "operation", richErr.Operation(), "detail", richErr.ExtraDetail())
+		logger.Warn("gRPC request failed", "code", code.String(), "operation", richErr.Operation(),
+			"detail", richErr.ExtraDetail())
 
 		translationMessage := t.TranslateMessage(message)
 
@@ -113,10 +116,11 @@ func GRPCMsg(err error, t *translation.Translate, logger *slog.Logger) error {
 		if len(errFields) > 0 && code == codes.InvalidArgument {
 			badRequestDetails := &errdetailspb.BadRequest{}
 			for field, desc := range errFields {
-				badRequestDetails.FieldViolations = append(badRequestDetails.FieldViolations, &errdetailspb.FieldViolation{
-					Field:       field,
-					Description: desc,
-				})
+				badRequestDetails.FieldViolations = append(badRequestDetails.FieldViolations,
+					&errdetailspb.FieldViolation{
+						Field:       field,
+						Description: desc,
+					})
 			}
 
 			st := status.New(code, translationMessage)
@@ -130,11 +134,11 @@ func GRPCMsg(err error, t *translation.Translate, logger *slog.Logger) error {
 		}
 
 		return status.Error(code, translationMessage)
-	} else {
-		logger.Error("gRPC request failed with unexpected error", slog.String("error", err.Error()))
-
-		return status.Error(internalCode, MsgSomethingWentWrong)
 	}
+
+	logger.Error("gRPC request failed with unexpected error", slog.String("error", err.Error()))
+
+	return status.Error(internalCode, MsgSomethingWentWrong)
 }
 
 func GRPCCodeToHTTPStatusCode(code codes.Code) int {
@@ -149,6 +153,33 @@ func GRPCCodeToHTTPStatusCode(code codes.Code) int {
 		return http.StatusForbidden
 	case codes.AlreadyExists:
 		return http.StatusConflict
+
+	case codes.OK:
+		return http.StatusOK
+	case codes.Canceled:
+		return http.StatusRequestTimeout // 408
+	case codes.DeadlineExceeded:
+		return http.StatusGatewayTimeout // 504
+	case codes.ResourceExhausted:
+		return http.StatusTooManyRequests // 429
+	case codes.FailedPrecondition:
+		return http.StatusPreconditionFailed // 412
+	case codes.Aborted:
+		return http.StatusConflict // 409
+	case codes.OutOfRange:
+		return http.StatusBadRequest // 400
+	case codes.Unimplemented:
+		return http.StatusNotImplemented // 501
+	case codes.Unavailable:
+		return http.StatusServiceUnavailable // 503
+
+	case codes.Unknown:
+		return http.StatusInternalServerError
+	case codes.Internal:
+		return http.StatusInternalServerError
+	case codes.DataLoss:
+		return http.StatusInternalServerError
+
 	default:
 		return http.StatusInternalServerError
 	}

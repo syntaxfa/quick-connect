@@ -12,7 +12,8 @@ import (
 
 type Repository interface {
 	Save(ctx context.Context, req SendNotificationRequest) (Notification, error)
-	FindNotificationByUserID(ctx context.Context, userID types.ID, paginated paginate.RequestBase, isRead *bool, isInApp *bool) ([]Notification, paginate.ResponseBase, error)
+	FindNotificationByUserID(ctx context.Context, userID types.ID, paginated paginate.RequestBase, isRead *bool,
+		isInApp *bool) ([]Notification, paginate.ResponseBase, error)
 	MarkAsRead(ctx context.Context, notificationID, userID types.ID) error
 	MarkAllAsReadByUserID(ctx context.Context, userID types.ID) error
 	IsExistUserIDFromExternalUserID(ctx context.Context, externalUserID string) (bool, error)
@@ -43,7 +44,8 @@ type Service struct {
 	renderSvc *RenderService
 }
 
-func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Repository, logger *slog.Logger, hub *Hub, publisher pubsub.Publisher) Service {
+func New(cfg Config, vld Validate, cache *cachemanager.CacheManager, repo Repository, logger *slog.Logger, hub *Hub,
+	publisher pubsub.Publisher) Service {
 	go hub.Run(context.Background())
 
 	return Service{

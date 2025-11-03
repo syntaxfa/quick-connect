@@ -16,6 +16,11 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
+const (
+	pingPeriodNumerator   = 9
+	pingPeriodDenominator = 10
+)
+
 type Application struct {
 	cfg         Config
 	trap        <-chan os.Signal
@@ -25,9 +30,7 @@ type Application struct {
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
-	cfg.ChatService.PingPeriod = (cfg.ChatService.PongWait * 9) / 10
-
-	fmt.Printf("%+v", cfg)
+	cfg.ChatService.PingPeriod = (cfg.ChatService.PongWait * pingPeriodNumerator) / pingPeriodDenominator
 
 	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.HTTPServer.Cors.AllowOrigins, logger))
 
@@ -96,7 +99,7 @@ func (a Application) Stop(ctx context.Context) bool {
 func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	if sErr := a.httpServer.Stop(ctx); sErr != nil {
-		a.logger.Error("http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+		a.logger.ErrorContext(ctx, "http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
 }
 

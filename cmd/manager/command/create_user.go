@@ -28,7 +28,7 @@ type CreateUser struct {
 	roles       []string
 }
 
-func (c CreateUser) Command(cfg managerapp.Config, logger *slog.Logger, trap chan os.Signal) *cobra.Command {
+func (c CreateUser) Command(cfg managerapp.Config, logger *slog.Logger, _ chan os.Signal) *cobra.Command {
 	c.cfg = cfg
 	c.logger = logger
 
@@ -54,12 +54,22 @@ go run ./cmd/manager create-user -u admin -p 'password' -r superuser -f Admin us
 	cmd.Flags().StringVarP(&c.phoneNumber, "phone_number", "n", "", "phone number for the new user (required)")
 	cmd.Flags().StringSliceVarP(&c.roles, "role", "r", []string{}, "Roles to assign (e.g., --role=superuser --role=support (required)")
 
-	cmd.MarkFlagRequired("username")
-	cmd.MarkFlagRequired("password")
-	cmd.MarkFlagRequired("fullname")
-	cmd.MarkFlagRequired("email")
-	cmd.MarkFlagRequired("phone_number")
-	cmd.MarkFlagRequired("role")
+	mustMarkRequired := func(flagName string) {
+		if err := cmd.MarkFlagRequired(flagName); err != nil {
+			c.logger.Error("failed to setup required flag",
+				slog.String("flag", flagName),
+				slog.String("error", err.Error()))
+
+			panic(err)
+		}
+	}
+
+	mustMarkRequired("username")
+	mustMarkRequired("password")
+	mustMarkRequired("fullname")
+	mustMarkRequired("email")
+	mustMarkRequired("phone_number")
+	mustMarkRequired("role")
 
 	return cmd
 }

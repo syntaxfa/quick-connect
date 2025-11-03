@@ -18,7 +18,8 @@ type defaultRecordProcessor struct {
 	logger        *slog.Logger
 }
 
-func newProcessor(retrialPolicy RetrialPolicy, store Store, messageBroker MessageBroker, machineID string, logger *slog.Logger) *defaultRecordProcessor {
+func newProcessor(retrialPolicy RetrialPolicy, store Store, messageBroker MessageBroker, machineID string,
+	logger *slog.Logger) *defaultRecordProcessor {
 	return &defaultRecordProcessor{
 		messageBroker: messageBroker,
 		store:         store,

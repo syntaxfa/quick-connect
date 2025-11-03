@@ -7,11 +7,11 @@ import (
 	textTmpl "text/template"
 )
 
-var textTemplate string = `login code is: {{.otp_code}}
+var textTemplate = `login code is: {{.otp_code}}
 
 quick connect`
 
-var htmlTemplate string = `
+var htmlTemplate = `
 <!DOCTYPE html>
 <html>
 <body>

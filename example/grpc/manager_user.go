@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func main() {
+func managerUser() {
 	cfg := grpcclient.Config{
 		Host:    "localhost",
 		Port:    2541,
@@ -44,7 +44,7 @@ func main() {
 
 	userAdapter := manager.NewUserAdapter(grpcClient.Conn())
 
-	ctxWithValue := context.WithValue(context.Background(), types.AuthorizationKey, "Bearer "+resp.AccessToken)
+	ctxWithValue := context.WithValue(context.Background(), types.AuthorizationKey, "Bearer "+resp.GetAccessToken())
 
 	//createUserResp, createErr := userAdapter.CreateUser(ctxWithValue, &userpb.CreateUserRequest{
 	//	Username:    "ayda",
@@ -88,7 +88,7 @@ func main() {
 
 	userUpResp, UserUpErr := userAdapter.UserUpdateFromSuperuser(ctxWithValue, &userpb.UserUpdateFromSuperUserRequest{
 		UserId:      "01K8XSS8B8XYGM1Y5DYWRXG0S3",
-		Username:    userDetailResp.Username,
+		Username:    userDetailResp.GetUsername(),
 		Fullname:    "ayda family",
 		Email:       "aydafamily@gmail.com",
 		PhoneNumber: "09119111111",

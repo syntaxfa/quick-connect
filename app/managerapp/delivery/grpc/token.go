@@ -3,8 +3,8 @@ package grpc
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 func (h Handler) GetPublicKey(_ context.Context, _ *empty.Empty) (*authpb.GetPublicKeyResponse, error) {

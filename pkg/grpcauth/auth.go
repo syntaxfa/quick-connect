@@ -34,7 +34,7 @@ func NewAuthInterceptor(validator TokenValidator, manager RoleManager) grpc.Unar
 			return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
 		}
 
-		values := md.Get(types.AuthorizationKey)
+		values := md.Get(string(types.AuthorizationKey))
 		if len(values) == 0 {
 			return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
 		}

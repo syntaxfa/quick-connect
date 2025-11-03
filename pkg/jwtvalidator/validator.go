@@ -31,7 +31,8 @@ func (v *Validator) ValidateToken(tokenString string) (*types.UserClaims, error)
 
 	publicKeyBytes, dErr := hex.DecodeString(v.publicKeyString)
 	if dErr != nil {
-		return nil, errlog.ErrLog(richerror.New(op).WithWrapError(dErr).WithMessage("invalid public key").WithKind(richerror.KindUnAuthorized), v.logger)
+		return nil, errlog.ErrLog(richerror.New(op).WithWrapError(dErr).WithMessage("invalid public key").
+			WithKind(richerror.KindUnAuthorized), v.logger)
 	}
 
 	v.publicKey = ed25519.PublicKey(publicKeyBytes)
@@ -39,13 +40,15 @@ func (v *Validator) ValidateToken(tokenString string) (*types.UserClaims, error)
 	token, err := jwt.ParseWithClaims(tokenString, &types.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// validate algorithm signature.
 		if _, ok := token.Method.(*jwt.SigningMethodEd25519); !ok {
-			return nil, errlog.ErrLog(richerror.New(op).WithMessage(servermsg.MsgInvalidTokenAlgorithm).WithKind(richerror.KindUnAuthorized), v.logger)
+			return nil, errlog.ErrLog(richerror.New(op).WithMessage(servermsg.MsgInvalidTokenAlgorithm).
+				WithKind(richerror.KindUnAuthorized), v.logger)
 		}
 
 		return v.publicKey, nil
 	})
 	if err != nil {
-		return nil, errlog.ErrLog(richerror.New(op).WithMessage(servermsg.MsgInvalidToken).WithWrapError(err).WithKind(richerror.KindUnAuthorized), v.logger)
+		return nil, errlog.ErrLog(richerror.New(op).WithMessage(servermsg.MsgInvalidToken).WithWrapError(err).
+			WithKind(richerror.KindUnAuthorized), v.logger)
 	}
 
 	if !token.Valid {

@@ -2,7 +2,6 @@ package config_test
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -45,7 +44,7 @@ var options = config.Option{
 func getYamlFilePath() string {
 	workingDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("an error occurred when trying get current directory, err: %s\n", err.Error())
+		panic(fmt.Sprintf("an error occurred when trying get current directory, err: %s\n", err.Error()))
 	}
 
 	return filepath.Join(workingDir, "config.yml")
@@ -116,16 +115,16 @@ db:
 	ymlFile, _ := os.Create("config.yml")
 	defer func() {
 		if err := ymlFile.Close(); err != nil {
-			fmt.Printf("%s", err.Error())
+			t.Errorf("failed to close yaml file: %s", err.Error())
 		}
 
 		if err := os.Remove("config.yml"); err != nil {
-			fmt.Printf("%s", err.Error())
+			t.Errorf("failed to remove yaml file: %s", err.Error())
 		}
 	}()
 
 	if _, err := ymlFile.Write(ymlConfig); err != nil {
-		fmt.Printf("%s", err.Error())
+		t.Fatalf("failed to write yaml config: %s", err.Error())
 	}
 
 	config.Load(options, &cfg, defaultConfig())
@@ -152,7 +151,7 @@ func TestLoadingConfigFromEnvironment(t *testing.T) {
 		},
 	}
 
-	os.Setenv(fmt.Sprintf("%s%s__%s__%s", options.Prefix, "db", "options", "max_thread_count"), "65")
+	t.Setenv(fmt.Sprintf("%s%s__%s__%s", options.Prefix, "db", "options", "max_thread_count"), "65")
 	defer os.Unsetenv(fmt.Sprintf("%s%s__%s__%s", options.Prefix, "db", "options", "max_thread_count"))
 
 	config.Load(options, &cfg, defaultConfig())

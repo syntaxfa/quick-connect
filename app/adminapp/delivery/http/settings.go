@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ShowSettingsPage renders the settings page
+// ShowSettingsPage renders the settings page.
 func (h Handler) ShowSettingsPage(c echo.Context) error {
 	user, _ := getUserFromContext(c)
 

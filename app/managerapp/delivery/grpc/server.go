@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
@@ -26,7 +27,7 @@ func (s Server) Start() error {
 	authpb.RegisterAuthServiceServer(s.server.GrpcServer, s.handler)
 	userpb.RegisterUserServiceServer(s.server.GrpcServer, s.handler)
 
-	return s.server.Start()
+	return s.server.Start(context.Background())
 }
 
 func (s Server) Stop() {
