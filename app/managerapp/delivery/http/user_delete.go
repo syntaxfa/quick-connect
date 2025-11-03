@@ -19,7 +19,7 @@ import (
 // @Param userID path string true "ID of the user to delete"
 // @Success 204 {string} string user deleted
 // @Failure 404 {string} string user not found
-// @Failure 500 {string} something went wrong
+// @Failure 500 {string} something went wrong.
 func (h Handler) UserDelete(c echo.Context) error {
 	if sErr := h.userSvc.UserDelete(c.Request().Context(), types.ID(c.Param("userID"))); sErr != nil {
 		return servermsg.HTTPMsg(c, sErr, h.t)

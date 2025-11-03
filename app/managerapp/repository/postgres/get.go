@@ -86,27 +86,31 @@ func (d *DB) GetUserRolesByUserID(ctx context.Context, userID types.ID) ([]types
 
 	rows, qrErr := d.conn.Conn().Query(ctx, queryGetUserRolesByUserID, userID)
 	if qrErr != nil {
-		return nil, richerror.New(op).WithWrapError(qrErr).WithKind(richerror.KindUnexpected).WithMessage("error in Query method for user roles")
+		return nil, richerror.New(op).WithWrapError(qrErr).WithKind(richerror.KindUnexpected).
+			WithMessage("error in Query method for user roles")
 	}
 
 	var roles = make([]types.Role, 0)
 	for rows.Next() {
 		var role types.Role
 		if sErr := rows.Scan(&role); sErr != nil {
-			return nil, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected).WithMessage("error in scan rows user roles")
+			return nil, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected).
+				WithMessage("error in scan rows user roles")
 		}
 
 		roles = append(roles, role)
 	}
 
 	if rErr := rows.Err(); rErr != nil {
-		return nil, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected).WithMessage("error in rows user roles after scan")
+		return nil, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected).
+			WithMessage("error in rows user roles after scan")
 	}
 
 	return roles, nil
 }
 
-func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase, username string) ([]userservice.User, paginate.ResponseBase, error) {
+func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase,
+	username string) ([]userservice.User, paginate.ResponseBase, error) {
 	const op = "repository.postgres.get.GetUserList"
 
 	filters := map[paginate.FilterParameter]paginate.Filter{}

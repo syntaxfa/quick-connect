@@ -9,6 +9,13 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
 
+const (
+	minTemplateNameLength   = 1
+	maxTemplateNameLength   = 255
+	minExternalUserIDLength = 1
+	maxExternalUserIDLength = 255
+)
+
 type Validate struct {
 	t *translation.Translate
 }
@@ -25,7 +32,7 @@ func (v Validate) ValidateSendNotificationRequest(req SendNotificationRequest) e
 	if err := validation.ValidateStruct(&req,
 		validation.Field(&req.ExternalUserID,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(1, 255).Error(servermsg.MsgInvalidLengthOfUserID),
+			validation.Length(minExternalUserIDLength, maxExternalUserIDLength).Error(servermsg.MsgInvalidLengthOfUserID),
 		),
 		validation.Field(&req.Type,
 			validation.Required.Error(servermsg.MsgFieldRequired),
@@ -33,7 +40,7 @@ func (v Validate) ValidateSendNotificationRequest(req SendNotificationRequest) e
 		),
 		validation.Field(&req.TemplateName,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(1, 255).Error(servermsg.MsgInvalidLengthOfTemplateName),
+			validation.Length(minTemplateNameLength, maxTemplateNameLength).Error(servermsg.MsgInvalidLengthOfTemplateName),
 		),
 		validation.Field(&req.ChannelDeliveries,
 			validation.Required.Error(servermsg.MsgFieldRequired),
@@ -130,7 +137,7 @@ func (v Validate) ValidateAddTemplateRequest(req AddTemplateRequest) error {
 	if err := validation.ValidateStruct(&req,
 		validation.Field(&req.Name,
 			validation.Required.Error(servermsg.MsgFieldRequired),
-			validation.Length(1, 255).Error(servermsg.MsgInvalidLengthOfTemplateName),
+			validation.Length(minTemplateNameLength, maxTemplateNameLength).Error(servermsg.MsgInvalidLengthOfTemplateName),
 		),
 		validation.Field(&req.Contents,
 			validation.Required.Error(servermsg.MsgFieldRequired),

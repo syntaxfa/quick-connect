@@ -8,7 +8,7 @@ import (
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 )
 
-// ShowProfilePage renders the user's profile page
+// ShowProfilePage renders the user's profile page.
 func (h Handler) ShowProfilePage(c echo.Context) error {
 	ctx := grpcContext(c)
 
@@ -45,7 +45,7 @@ func (h Handler) ShowProfileView(c echo.Context) error {
 }
 
 // ShowProfileEditForm renders the EDITABLE profile form partial
-// (Called by 'Edit' button)
+// (Called by 'Edit' button).
 func (h Handler) ShowProfileEditForm(c echo.Context) error {
 	ctx := grpcContext(c)
 
@@ -62,7 +62,7 @@ func (h Handler) ShowProfileEditForm(c echo.Context) error {
 }
 
 // UpdateProfile handles the submission of the edit form
-// (Called by 'Save' button)
+// (Called by 'Save' button).
 func (h Handler) UpdateProfile(c echo.Context) error {
 	ctx := grpcContext(c)
 

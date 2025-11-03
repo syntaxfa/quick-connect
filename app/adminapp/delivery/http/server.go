@@ -41,7 +41,8 @@ func (s Server) registerRoutes() {
 
 	s.httpserver.Router.Static("/static", "app/adminapp/static")
 
-	rootGr := s.httpserver.Router.Group("", setTokenToRequestContextMiddleware(s.jwtValidator, s.handler.authAd, "/login", s.handler.logger))
+	rootGr := s.httpserver.Router.Group("", setTokenToRequestContextMiddleware(s.jwtValidator, s.handler.authAd,
+		"/login", s.handler.logger))
 
 	// auth Group
 	authGr := rootGr.Group("")

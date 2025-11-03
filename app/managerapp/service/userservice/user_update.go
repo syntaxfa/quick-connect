@@ -9,7 +9,8 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-func (s Service) UserUpdateFromSuperuser(ctx context.Context, userID types.ID, req UserUpdateFromSuperuserRequest) (UserUpdateResponse, error) {
+func (s Service) UserUpdateFromSuperuser(ctx context.Context, userID types.ID,
+	req UserUpdateFromSuperuserRequest) (UserUpdateResponse, error) {
 	const op = "service.user_update.UserUpdateFromSuperuser"
 
 	if vErr := s.vld.UserUpdateFromSuperuserRequest(req); vErr != nil {
@@ -29,13 +30,15 @@ func (s Service) UserUpdateFromSuperuser(ctx context.Context, userID types.ID, r
 	}
 
 	if req.Username != user.Username {
-		exist, existErr := s.repo.IsExistUserByUsername(ctx, req.Username)
-		if existErr != nil {
-			return UserUpdateResponse{}, errlog.ErrLog(richerror.New(op).WithWrapError(existErr).WithKind(richerror.KindUnexpected), s.logger)
+		userExist, usExistErr := s.repo.IsExistUserByUsername(ctx, req.Username)
+		if usExistErr != nil {
+			return UserUpdateResponse{}, errlog.ErrLog(richerror.New(op).WithWrapError(usExistErr).
+				WithKind(richerror.KindUnexpected), s.logger)
 		}
 
-		if exist {
-			return UserUpdateResponse{}, errlog.ErrLog(richerror.New(op).WithKind(richerror.KindConflict).WithMessage(servermsg.MsgConflictUsername), s.logger)
+		if userExist {
+			return UserUpdateResponse{}, errlog.ErrLog(richerror.New(op).WithKind(richerror.KindConflict).
+				WithMessage(servermsg.MsgConflictUsername), s.logger)
 		}
 	}
 

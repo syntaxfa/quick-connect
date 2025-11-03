@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+
 	"github.com/syntaxfa/quick-connect/example/observability/internal/microservice2/service"
 	"github.com/syntaxfa/quick-connect/protobuf/example/golang/examplepb"
 )

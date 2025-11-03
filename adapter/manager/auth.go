@@ -33,11 +33,13 @@ func (ad *AuthAdapter) Login(ctx context.Context, req *authpb.LoginRequest, opts
 }
 
 // TokenVerify calls the TokenVerify PRC on the AuthService.
-func (ad *AuthAdapter) TokenVerify(ctx context.Context, req *authpb.TokenVerifyRequest, opts ...grpc.CallOption) (*authpb.TokenVerifyResponse, error) {
+func (ad *AuthAdapter) TokenVerify(ctx context.Context, req *authpb.TokenVerifyRequest,
+	opts ...grpc.CallOption) (*authpb.TokenVerifyResponse, error) {
 	return ad.client.TokenVerify(ctx, req, opts...)
 }
 
 // TokenRefresh calls the TokenRefresh RPC on the AuthService.
-func (ad *AuthAdapter) TokenRefresh(ctx context.Context, req *authpb.TokenRefreshRequest, opts ...grpc.CallOption) (*authpb.TokenRefreshResponse, error) {
+func (ad *AuthAdapter) TokenRefresh(ctx context.Context, req *authpb.TokenRefreshRequest,
+	opts ...grpc.CallOption) (*authpb.TokenRefreshResponse, error) {
 	return ad.client.TokenRefresh(ctx, req, opts...)
 }

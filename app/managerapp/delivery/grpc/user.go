@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"

@@ -19,19 +19,28 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 )
 
+const (
+	defaultMetricsPort           = 12330
+	minPort                      = 1
+	maxPort                      = 65535
+	defaultMetricsPath           = "/metrics"
+	readHeaderTimeoutSeconds     = 60
+	serverShutdownTimeoutSeconds = 5
+)
+
 var ErrInvalidPort = errors.New("invalid port number, must between 1 and 65535")
 
 // validateConfig validates configuration and sets default values.
 func validateConfig(cfg Config) (Config, error) {
 	if cfg.Mode == ModePullBase {
 		if cfg.PullConfig.Port == 0 {
-			cfg.PullConfig.Port = 12330
-		} else if cfg.PullConfig.Port < 1 || cfg.PullConfig.Port > 65535 {
+			cfg.PullConfig.Port = defaultMetricsPort
+		} else if cfg.PullConfig.Port < minPort || cfg.PullConfig.Port > maxPort {
 			return cfg, ErrInvalidPort
 		}
 
 		if cfg.PullConfig.Path == "" {
-			cfg.PullConfig.Path = "/metrics"
+			cfg.PullConfig.Path = defaultMetricsPath
 		}
 	}
 
@@ -50,7 +59,7 @@ func newServer(port int) *server {
 		s: &http.Server{
 			Addr:              fmt.Sprintf(":%d", port),
 			Handler:           mux,
-			ReadHeaderTimeout: time.Second * 60,
+			ReadHeaderTimeout: time.Second * readHeaderTimeoutSeconds,
 		},
 		mux: mux,
 	}
@@ -107,7 +116,7 @@ func initPullBaseMetric(ctx context.Context, cfg Config, resource *resource.Reso
 		logger.ErrorContext(ctx, "metrics server error", slog.String("error", err.Error()))
 	}
 
-	shutdownCtx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+	shutdownCtx, cancelFunc := context.WithTimeout(context.Background(), serverShutdownTimeoutSeconds*time.Second)
 	defer cancelFunc()
 
 	//nolint:contextcheck // Parent context is Done

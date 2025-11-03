@@ -28,7 +28,7 @@ func (h Handler) Login(c echo.Context) error {
 		Password: c.FormValue("password"),
 	}
 
-	if loginReq.Username == "" || loginReq.Password == "" {
+	if loginReq.GetUsername() == "" || loginReq.GetPassword() == "" {
 		return h.renderErrorPartial(c, http.StatusBadRequest, h.t.TranslateMessage(servermsg.MsgUsernameAndPasswordAreRequired))
 	}
 
@@ -38,12 +38,13 @@ func (h Handler) Login(c echo.Context) error {
 		return h.renderGRPCError(c, "gRPC login call failed", err)
 	}
 
-	setAuthCookie(c, loginResp.AccessToken, loginResp.RefreshToken, int(loginResp.GetAccessExpiresIn()), int(loginResp.GetRefreshExpiresIn()))
+	setAuthCookie(c, loginResp.GetAccessToken(), loginResp.GetRefreshToken(), int(loginResp.GetAccessExpiresIn()),
+		int(loginResp.GetRefreshExpiresIn()))
 
 	return redirectToDashboard(c)
 }
 
-// ShowLogoutConfirm renders the logout confirmation modal
+// ShowLogoutConfirm renders the logout confirmation modal.
 func (h Handler) ShowLogoutConfirm(c echo.Context) error {
 	return c.Render(http.StatusOK, "logout_confirm_modal", nil)
 }

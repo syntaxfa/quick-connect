@@ -16,6 +16,11 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
+const (
+	pingPeriodNumerator   = 9
+	pingPeriodDenominator = 10
+)
+
 type Application struct {
 	cfg         Config
 	trap        <-chan os.Signal
@@ -25,7 +30,7 @@ type Application struct {
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
-	cfg.ChatService.PingPeriod = (cfg.ChatService.PongWait * 9) / 10
+	cfg.ChatService.PingPeriod = (cfg.ChatService.PongWait * pingPeriodNumerator) / pingPeriodDenominator
 
 	fmt.Printf("%+v", cfg)
 

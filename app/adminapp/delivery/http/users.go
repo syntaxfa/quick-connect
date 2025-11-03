@@ -10,14 +10,16 @@ import (
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 )
 
-// PaginationPage struct for template page loops
+const defaultPageSize = 10
+
+// PaginationPage struct for template page loops.
 type PaginationPage struct {
 	PageNumber int
 	URL        string
 	IsCurrent  bool
 }
 
-// PaginationData struct for template
+// PaginationData struct for template.
 type PaginationData struct {
 	TotalNumber   uint64
 	CurrentPage   uint64
@@ -33,7 +35,7 @@ type PaginationData struct {
 }
 
 // ShowUsersPage renders the main user page shell
-// It fetches the total user count for the stat card
+// It fetches the total user count for the stat card.
 func (h Handler) ShowUsersPage(c echo.Context) error {
 	ctx := grpcContext(c)
 	user, _ := getUserFromContext(c)
@@ -66,7 +68,7 @@ func (h Handler) ShowUsersPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "main_layout", data)
 }
 
-// ListUsersPartial renders the table and pagination (called by HTMX)
+// ListUsersPartial renders the table and pagination (called by HTMX).
 func (h Handler) ListUsersPartial(c echo.Context) error {
 	ctx := grpcContext(c)
 
@@ -85,7 +87,7 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 
 	listReq := &userpb.UserListRequest{
 		CurrentPage:   page,
-		PageSize:      10, // Define page size (e.g., 10)
+		PageSize:      defaultPageSize, // Define page size (e.g., 10)
 		SortDirection: userpb.SortDirection(sortDirInt),
 		Username:      usernameQuery,
 	}
@@ -115,7 +117,7 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 	return nil
 }
 
-// ShowDeleteUserConfirm renders the delete confirmation modal
+// ShowDeleteUserConfirm renders the delete confirmation modal.
 func (h Handler) ShowDeleteUserConfirm(c echo.Context) error {
 	userID := c.QueryParam("id")
 	username := c.QueryParam("username")
@@ -128,7 +130,7 @@ func (h Handler) ShowDeleteUserConfirm(c echo.Context) error {
 	return c.Render(http.StatusOK, "delete_user_confirm_modal", data)
 }
 
-// DeleteUser handles deleting a user (called by HTMX)
+// DeleteUser handles deleting a user (called by HTMX).
 func (h Handler) DeleteUser(c echo.Context) error {
 	ctx := grpcContext(c)
 	userID := c.Param("id")
@@ -146,7 +148,7 @@ func (h Handler) DeleteUser(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-// buildPaginationData is a helper to create the pagination struct
+// buildPaginationData is a helper to create the pagination struct.
 func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string, sortDir int) PaginationData {
 	p := PaginationData{
 		TotalNumber:   resp.GetTotalNumber(),
@@ -168,6 +170,7 @@ func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string
 
 	// Build page number links (e.g., show max 5 pages)
 	maxPagesToShow := 5
+	//nolint:gosec // G115: CurrentPage is pagination number, overflow is not a realistic concern
 	start := int(math.Max(1, float64(int(p.CurrentPage)-maxPagesToShow/2)))
 	end := int(math.Min(float64(p.TotalPage), float64(start+maxPagesToShow-1)))
 
@@ -180,7 +183,8 @@ func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string
 		p.Pages = append(p.Pages, PaginationPage{
 			PageNumber: i,
 			URL:        fmt.Sprintf("%s?page=%d&username=%s&sort_direction=%d", p.BaseURL, i, p.Query, p.SortDirection),
-			IsCurrent:  i == int(p.CurrentPage),
+			//nolint:gosec // G115: CurrentPage is pagination number, overflow is not a realistic concern
+			IsCurrent: i == int(p.CurrentPage),
 		})
 	}
 
@@ -202,7 +206,7 @@ func (h Handler) DetailUser(c echo.Context) error {
 	return c.Render(http.StatusOK, "user_detail_modal", data)
 }
 
-// ShowEditUserModal fetches user details and renders the edit form modal
+// ShowEditUserModal fetches user details and renders the edit form modal.
 func (h Handler) ShowEditUserModal(c echo.Context) error {
 	ctx := grpcContext(c)
 
@@ -219,7 +223,7 @@ func (h Handler) ShowEditUserModal(c echo.Context) error {
 	return c.Render(http.StatusOK, "user_edit_modal", data)
 }
 
-// UpdateUser handles the submission of the edit user form
+// UpdateUser handles the submission of the edit user form.
 func (h Handler) UpdateUser(c echo.Context) error {
 	ctx := grpcContext(c)
 	userID := c.Param("id")
@@ -255,7 +259,7 @@ func (h Handler) UpdateUser(c echo.Context) error {
 	return c.Render(http.StatusOK, "user_detail_modal", data)
 }
 
-// ShowCreateUserModal renders the create user form modal
+// ShowCreateUserModal renders the create user form modal.
 func (h Handler) ShowCreateUserModal(c echo.Context) error {
 	data := map[string]interface{}{
 		"AllRoles": GetAllRoles(),
@@ -264,7 +268,7 @@ func (h Handler) ShowCreateUserModal(c echo.Context) error {
 	return c.Render(http.StatusOK, "user_create_modal", data)
 }
 
-// CreateUser handles the submission of the new user form
+// CreateUser handles the submission of the new user form.
 func (h Handler) CreateUser(c echo.Context) error {
 	ctx := grpcContext(c)
 

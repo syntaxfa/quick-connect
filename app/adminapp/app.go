@@ -56,7 +56,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 		panic(gpuErr)
 	}
 
-	jwtValidator := jwtvalidator.New(getPuResp.PublicKey, logger)
+	jwtValidator := jwtvalidator.New(getPuResp.GetPublicKey(), logger)
 
 	return Application{
 		cfg:               cfg,

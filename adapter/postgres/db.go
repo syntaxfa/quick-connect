@@ -22,11 +22,11 @@ func New(cfg Config, logger *slog.Logger) *Database {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode)
 
-	config, pErr := pgxpool.ParseConfig(connStr)
-	if pErr != nil {
-		logger.Error("unable ro parse postgres config", slog.String("error", pErr.Error()))
+	config, parseErr := pgxpool.ParseConfig(connStr)
+	if parseErr != nil {
+		logger.Error("unable ro parse postgres config", slog.String("error", parseErr.Error()))
 
-		panic(pErr)
+		panic(parseErr)
 	}
 
 	config.ConnConfig.Tracer = otelpgx.NewTracer()
@@ -39,13 +39,13 @@ func New(cfg Config, logger *slog.Logger) *Database {
 	if cErr != nil {
 		logger.Error("unable ro create connection pool", slog.String("error", cErr.Error()))
 
-		panic(pErr)
+		panic(cErr)
 	}
 
-	if pErr := pool.Ping(context.Background()); pErr != nil {
-		logger.Error("connection with postgres is not establish!", slog.String("error", pErr.Error()))
+	if pingErr := pool.Ping(context.Background()); pingErr != nil {
+		logger.Error("connection with postgres is not establish!", slog.String("error", pingErr.Error()))
 
-		panic(pErr)
+		panic(pingErr)
 	}
 
 	if oErr := otelpgx.RecordStats(pool); oErr != nil {

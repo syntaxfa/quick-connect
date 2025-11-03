@@ -27,65 +27,89 @@ func validateExternalToken(getUserIDURL string, logger *slog.Logger, httpClient 
 				return echo.NewHTTPError(http.StatusUnauthorized, "identify token is required")
 			}
 
-			data := map[string]string{
-				"token": token,
+			userID, err := fetchUserIDFromToken(c, token, getUserIDURL, httpClient, logger, op)
+			if err != nil {
+				return err
 			}
 
-			jsonData, mErr := json.Marshal(data)
-			if mErr != nil {
-				errlog.WithoutErr(richerror.New(op).WithWrapError(mErr).WithKind(richerror.KindUnexpected), logger)
-
-				return echo.NewHTTPError(http.StatusInternalServerError)
-			}
-
-			// #nosec G107
-			req, reqErr := http.NewRequestWithContext(c.Request().Context(), http.MethodPost,
-				getUserIDURL, bytes.NewBuffer(jsonData))
-			if reqErr != nil {
-				errlog.WithoutErr(richerror.New(op).WithWrapError(reqErr).WithKind(richerror.KindUnexpected), logger)
-
-				return echo.NewHTTPError(http.StatusInternalServerError)
-			}
-
-			req.Header.Set("Content-Type", "application/json")
-
-			resp, pErr := httpClient.Do(req)
-			if pErr != nil {
-				errlog.WithoutErr(richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected), logger)
-
-				return echo.NewHTTPError(http.StatusInternalServerError)
-			}
-
-			defer func() {
-				if cErr := resp.Body.Close(); cErr != nil {
-					errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), logger)
-				}
-			}()
-
-			body, rErr := io.ReadAll(resp.Body)
-			if rErr != nil {
-				errlog.WithoutErr(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected), logger)
-
-				return echo.NewHTTPError(http.StatusInternalServerError)
-			}
-
-			if resp.Status != "200 OK" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Identify token is not valid")
-			}
-
-			fmt.Println(string(body))
-
-			var response Response
-			uErr := json.Unmarshal(body, &response)
-			if uErr != nil {
-				errlog.WithoutErr(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected), logger)
-
-				return echo.NewHTTPError(http.StatusInternalServerError)
-			}
-
-			c.Set("user_id", response.UserID)
-
+			c.Set("user_id", userID)
 			return next(c)
 		}
 	}
+}
+
+func fetchUserIDFromToken(c echo.Context, token, getUserIDURL string, httpClient *http.Client, logger *slog.Logger,
+	op string) (string, error) {
+	jsonData, err := createTokenRequest(token, logger, op)
+	if err != nil {
+		return "", echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	resp, err := sendTokenValidationRequest(c, getUserIDURL, jsonData, httpClient, logger, op)
+	if err != nil {
+		return "", echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer closeResponseBody(resp.Body, logger, op)
+
+	return parseUserIDFromResponse(resp, logger, op)
+}
+
+func createTokenRequest(token string, logger *slog.Logger, op string) ([]byte, error) {
+	data := map[string]string{"token": token}
+
+	jsonData, mErr := json.Marshal(data)
+	if mErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(mErr).WithKind(richerror.KindUnexpected), logger)
+		return nil, mErr
+	}
+
+	return jsonData, nil
+}
+
+func sendTokenValidationRequest(c echo.Context, getUserIDURL string, jsonData []byte, httpClient *http.Client,
+	logger *slog.Logger, op string) (*http.Response, error) {
+	// #nosec G107
+	req, reqErr := http.NewRequestWithContext(c.Request().Context(), http.MethodPost, getUserIDURL, bytes.NewBuffer(jsonData))
+	if reqErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(reqErr).WithKind(richerror.KindUnexpected), logger)
+		return nil, reqErr
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, pErr := httpClient.Do(req)
+	if pErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(pErr).WithKind(richerror.KindUnexpected), logger)
+		return nil, pErr
+	}
+
+	return resp, nil
+}
+
+func closeResponseBody(body io.ReadCloser, logger *slog.Logger, op string) {
+	if cErr := body.Close(); cErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), logger)
+	}
+}
+
+func parseUserIDFromResponse(resp *http.Response, logger *slog.Logger, op string) (string, error) {
+	body, rErr := io.ReadAll(resp.Body)
+	if rErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected), logger)
+		return "", echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if resp.Status != "200 OK" {
+		return "", echo.NewHTTPError(http.StatusUnauthorized, "Identify token is not valid")
+	}
+
+	fmt.Println(string(body))
+
+	var response Response
+	if uErr := json.Unmarshal(body, &response); uErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected), logger)
+		return "", echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return response.UserID, nil
 }

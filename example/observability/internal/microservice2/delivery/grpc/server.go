@@ -1,6 +1,8 @@
 package grpc
 
 import (
+	"context"
+
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/protobuf/example/golang/examplepb"
 )
@@ -20,7 +22,7 @@ func New(server grpcserver.Server, handler Handler) Server {
 func (s Server) Start() error {
 	examplepb.RegisterCommentServiceServer(s.grpcServer.GrpcServer, s.handler)
 
-	return s.grpcServer.Start()
+	return s.grpcServer.Start(context.Background())
 }
 
 func (s Server) Stop() {

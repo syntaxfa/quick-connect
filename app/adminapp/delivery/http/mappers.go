@@ -16,13 +16,13 @@ type User struct {
 	LastOnlineAt string
 }
 
-// RoleInfo struct helper for templates
+// RoleInfo struct helper for templates.
 type RoleInfo struct {
 	Name  string // "SUPERUSER", "SUPPORT"
 	Value int32  // 1, 2
 }
 
-// GetAllRoles returns all available roles for the template
+// GetAllRoles returns all available roles for the template.
 func GetAllRoles() []RoleInfo {
 	return []RoleInfo{
 		{Name: string(types.RoleSuperUser), Value: int32(userpb.Role_ROLE_SUPERUSER)},
@@ -33,7 +33,7 @@ func GetAllRoles() []RoleInfo {
 	}
 }
 
-// HasRole checks if a user has a specific role (used by template)
+// HasRole checks if a user has a specific role (used by template).
 func HasRole(userRoles []string, targetRole string) bool {
 	for _, r := range userRoles {
 		if r == targetRole {
@@ -43,7 +43,7 @@ func HasRole(userRoles []string, targetRole string) bool {
 	return false
 }
 
-// ParseRolesFromForm converts string roles from form back to gRPC Enum
+// ParseRolesFromForm converts string roles from form back to gRPC Enum.
 func ParseRolesFromForm(roleStrings []string) []userpb.Role {
 	var roles []userpb.Role
 	roleMap := map[string]userpb.Role{
@@ -64,7 +64,7 @@ func ParseRolesFromForm(roleStrings []string) []userpb.Role {
 
 func convertUserPbToUser(userPb *userpb.User) User {
 	var roles []string
-	for _, role := range userPb.Roles {
+	for _, role := range userPb.GetRoles() {
 		switch role {
 		case userpb.Role_ROLE_SUPERUSER:
 			roles = append(roles, string(types.RoleSuperUser))

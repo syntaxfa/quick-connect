@@ -12,7 +12,8 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, authAd *manager.AuthAdapter, loginPath string, logger *slog.Logger) func(nex echo.HandlerFunc) echo.HandlerFunc {
+func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, authAd *manager.AuthAdapter, loginPath string,
+	logger *slog.Logger) func(nex echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			const op = "delivery.middleware.setTokenToRequestContext"
@@ -40,7 +41,8 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 
 			token, tErr := authAd.TokenRefresh(c.Request().Context(), &authpb.TokenRefreshRequest{RefreshToken: refreshToken})
 			if tErr != nil {
-				errlog.WithoutErr(richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected).WithMessage("refresh token is not valid"), logger)
+				errlog.WithoutErr(richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected).
+					WithMessage("refresh token is not valid"), logger)
 
 				clearAuthCookie(c)
 
@@ -51,7 +53,8 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 				setUserToContext(c, claims)
 			}
 
-			setAuthCookie(c, token.AccessToken, token.RefreshToken, int(token.AccessExpiresIn), int(token.RefreshExpiresIn))
+			setAuthCookie(c, token.GetAccessToken(), token.GetRefreshToken(), int(token.GetAccessExpiresIn()),
+				int(token.GetRefreshExpiresIn()))
 
 			setTokenToContext(c, token.GetAccessToken())
 

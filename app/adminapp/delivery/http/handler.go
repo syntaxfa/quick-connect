@@ -64,8 +64,7 @@ func (h Handler) renderGRPCError(c echo.Context, operationName string, err error
 	finalErrorMessage := h.t.TranslateMessage(st.Message())
 
 	for _, detail := range st.Details() {
-		switch d := detail.(type) {
-		case *errdetailspb.BadRequest:
+		if d, assertOk := detail.(*errdetailspb.BadRequest); assertOk {
 			var htmlBuilder strings.Builder
 			htmlBuilder.WriteString("<ul class='error-list'>")
 

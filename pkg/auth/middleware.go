@@ -20,7 +20,7 @@ func New(validator *jwtvalidator.Validator) *Middleware {
 	}
 }
 
-// RequireAuth (Authentication)
+// RequireAuth (Authentication).
 func (m *Middleware) RequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")

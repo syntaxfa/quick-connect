@@ -102,7 +102,8 @@ func GRPCMsg(err error, t *translation.Translate, logger *slog.Logger) error {
 		code = mapKindToGRPCCode(richErr.Kind())
 		errFields = richErr.ErrorFields()
 
-		logger.Warn("gRPC request failed", "code", code.String(), "operation", richErr.Operation(), "detail", richErr.ExtraDetail())
+		logger.Warn("gRPC request failed", "code", code.String(), "operation", richErr.Operation(),
+			"detail", richErr.ExtraDetail())
 
 		translationMessage := t.TranslateMessage(message)
 
@@ -113,10 +114,11 @@ func GRPCMsg(err error, t *translation.Translate, logger *slog.Logger) error {
 		if len(errFields) > 0 && code == codes.InvalidArgument {
 			badRequestDetails := &errdetailspb.BadRequest{}
 			for field, desc := range errFields {
-				badRequestDetails.FieldViolations = append(badRequestDetails.FieldViolations, &errdetailspb.FieldViolation{
-					Field:       field,
-					Description: desc,
-				})
+				badRequestDetails.FieldViolations = append(badRequestDetails.FieldViolations,
+					&errdetailspb.FieldViolation{
+						Field:       field,
+						Description: desc,
+					})
 			}
 
 			st := status.New(code, translationMessage)

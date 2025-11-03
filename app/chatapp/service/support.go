@@ -2,34 +2,38 @@ package service
 
 import (
 	"encoding/json"
-	"log/slog"
-	"time"
-
-	"github.com/gorilla/websocket"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"log/slog"
 )
 
+const supportChannelSize = 256
+
 type WSSupport struct {
-	id       string
-	hub      *Hub
-	conn     Connection
-	send     chan Message
-	username string
-	logger   *slog.Logger
-	cfg      Config
+	id           string
+	hub          *Hub
+	conn         Connection
+	send         chan Message
+	username     string
+	logger       *slog.Logger
+	cfg          Config
+	wsConnection *wsConnection
 }
 
 func NewSupport(cfg Config, id string, hub *Hub, conn Connection, username string, logger *slog.Logger) *WSSupport {
-	return &WSSupport{
+	wsSupport := &WSSupport{
 		cfg:      cfg,
 		id:       id,
 		hub:      hub,
 		conn:     conn,
-		send:     make(chan Message, 256),
+		send:     make(chan Message, supportChannelSize),
 		username: username,
 		logger:   logger,
 	}
+
+	wsSupport.wsConnection = newWsConnection(cfg, conn, wsSupport.send, logger)
+
+	return wsSupport
 }
 
 func (c *WSSupport) GetID() string {
@@ -76,43 +80,5 @@ func (c *WSSupport) ReadPump() {
 }
 
 func (c *WSSupport) WritePump() {
-	const op = "service.support.WritePump"
-
-	ticker := time.NewTicker(c.cfg.PingPeriod)
-
-	defer func() {
-		ticker.Stop()
-		if cErr := c.conn.Close(); cErr != nil {
-			errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
-		}
-	}()
-
-	for {
-		select {
-		case message, ok := <-c.send:
-			if !ok {
-				if wErr := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); wErr != nil {
-					errlog.WithoutErr(richerror.New(op).WithMessage("error sending websocket close message").WithKind(richerror.KindUnexpected), c.logger)
-				}
-
-				return
-			}
-
-			msgBytes, mErr := json.Marshal(message)
-			if mErr != nil {
-				errlog.WithoutErr(richerror.New(op).WithWrapError(mErr).WithMessage("error marshalling message"), c.logger)
-
-				continue
-			}
-
-			if wErr := c.conn.WriteMessage(websocket.TextMessage, msgBytes); wErr != nil {
-				errlog.WithoutErr(richerror.New(op).WithWrapError(wErr).WithMessage("error writing message"), c.logger)
-			}
-
-		case <-ticker.C:
-			if wErr := c.conn.WriteMessage(websocket.PingMessage, nil); wErr != nil {
-				return
-			}
-		}
-	}
+	c.wsConnection.writePump("service.support.WritePump")
 }

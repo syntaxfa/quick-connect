@@ -11,12 +11,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// TemplateRenderer is a custom html/template renderer for Echo framework
+// TemplateRenderer is a custom html/template renderer for Echo framework.
 type TemplateRenderer struct {
 	templates *template.Template
 }
 
-// NewTemplateRenderer creates a new TemplateRenderer
+// NewTemplateRenderer creates a new TemplateRenderer.
 func NewTemplateRenderer(basePath string) *TemplateRenderer {
 	// Define custom functions
 	funcMap := template.FuncMap{
@@ -84,12 +84,12 @@ func NewTemplateRenderer(basePath string) *TemplateRenderer {
 	}
 }
 
-// Render returns a template document
+// Render returns a template document.
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, _ echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-// getInitials is a helper function to get initials from a full name
+// getInitials is a helper function to get initials from a full name.
 func getInitials(fullname string) string {
 	fullname = strings.TrimSpace(fullname)
 	if fullname == "" {

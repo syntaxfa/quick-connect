@@ -41,7 +41,7 @@ formatters:
     golines:
       # Target maximum line length.
       # Default: 100
-      max-len: 120
+      max-len: 140
 
 linters:
   enable:
@@ -95,7 +95,7 @@ linters:
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     - noctx # finds sending http request without context.Context
     - nolintlint # reports ill-formed or insufficient nolint directives
-    - nonamedreturns # reports all named returns
+#    - nonamedreturns # reports all named returns
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
     - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - predeclared # finds code that shadows one of Go's predeclared identifiers
@@ -446,6 +446,9 @@ linters:
       - common-false-positives
     # Excluding configuration per-path, per-linter, per-text and per-source.
     rules:
+      - text: 'var-naming: avoid meaningless package names'
+        linters: [ revive ]
+        path: 'types/.*\.go$'
       - source: 'TODO'
         linters: [ godot ]
       - text: 'should have a package comment'
@@ -468,3 +471,7 @@ linters:
           - gosec
           - noctx
           - wrapcheck
+    paths:
+      - example/
+      - example/.*
+      - .*/example/.*

@@ -22,6 +22,11 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
+const (
+	pingPeriodNumerator   = 9
+	pingPeriodDenominator = 10
+)
+
 type Application struct {
 	cfg              Config
 	trap             <-chan os.Signal
@@ -36,7 +41,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, re *redis.Ada
 		panic(tErr)
 	}
 
-	cfg.Notification.PingPeriod = (cfg.Notification.PongWait * 9) / 10
+	cfg.Notification.PingPeriod = (cfg.Notification.PongWait * pingPeriodNumerator) / pingPeriodDenominator
 
 	cache := cachemanager.New(re, logger)
 
