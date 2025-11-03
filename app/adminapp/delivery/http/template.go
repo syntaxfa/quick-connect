@@ -85,7 +85,7 @@ func NewTemplateRenderer(basePath string) *TemplateRenderer {
 }
 
 // Render returns a template document
-func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, _ echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 

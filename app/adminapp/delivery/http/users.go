@@ -50,7 +50,7 @@ func (h Handler) ShowUsersPage(c echo.Context) error {
 		// Don't fail the whole page, just log it and render with 0
 		h.logger.Error("Failed to get user count for stats", "error", err)
 	} else {
-		totalUsers = listResp.TotalNumber
+		totalUsers = listResp.GetTotalNumber()
 	}
 
 	data := map[string]interface{}{
@@ -95,8 +95,8 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 		return h.renderGRPCError(c, "ListUsersPartial", err)
 	}
 
-	users := make([]User, len(listResp.Users))
-	for i, pbUser := range listResp.Users {
+	users := make([]User, len(listResp.GetUsers()))
+	for i, pbUser := range listResp.GetUsers() {
 		users[i] = convertUserPbToUser(pbUser)
 	}
 
@@ -149,11 +149,11 @@ func (h Handler) DeleteUser(c echo.Context) error {
 // buildPaginationData is a helper to create the pagination struct
 func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string, sortDir int) PaginationData {
 	p := PaginationData{
-		TotalNumber:   resp.TotalNumber,
-		CurrentPage:   resp.CurrentPage,
-		TotalPage:     resp.TotalPage,
-		HasPrev:       resp.CurrentPage > 1,
-		HasNext:       resp.CurrentPage < resp.TotalPage,
+		TotalNumber:   resp.GetTotalNumber(),
+		CurrentPage:   resp.GetCurrentPage(),
+		TotalPage:     resp.GetTotalPage(),
+		HasPrev:       resp.GetCurrentPage() > 1,
+		HasNext:       resp.GetCurrentPage() < resp.GetTotalPage(),
 		BaseURL:       "/users/list", // Base URL for pagination links
 		Query:         query,
 		SortDirection: sortDir,

@@ -12,9 +12,9 @@ func redirectToDashboard(c echo.Context) error {
 		c.Response().Header().Set("HX-Redirect", "/dashboard")
 
 		return c.NoContent(http.StatusOK)
-	} else {
-		return c.Redirect(http.StatusSeeOther, "/dashboard")
 	}
+
+	return c.Redirect(http.StatusSeeOther, "/dashboard")
 }
 
 func redirectToLogin(c echo.Context) error {
@@ -24,7 +24,7 @@ func redirectToLogin(c echo.Context) error {
 		c.Response().Header().Set("HX-Redirect", "/login")
 
 		return c.NoContent(http.StatusOK)
-	} else {
-		return c.Redirect(http.StatusSeeOther, "/login")
 	}
+
+	return c.Redirect(http.StatusSeeOther, "/login")
 }

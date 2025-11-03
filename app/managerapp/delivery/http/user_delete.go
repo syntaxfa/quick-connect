@@ -8,7 +8,7 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-// UserDelete
+// UserDelete deletes a user by ID.
 // @Router /users/{userID} [DELETE]
 // @Security JWT
 // @Summary delete user

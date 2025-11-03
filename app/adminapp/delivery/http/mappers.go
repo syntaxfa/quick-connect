@@ -1,8 +1,6 @@
 package http
 
 import (
-	"time"
-
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 	"github.com/syntaxfa/quick-connect/types"
 )
@@ -81,15 +79,21 @@ func convertUserPbToUser(userPb *userpb.User) User {
 		}
 	}
 
+	lastOnline := ""
+	if userPb.GetLastOnlineAt() != nil {
+		t := userPb.GetLastOnlineAt().AsTime()
+		lastOnline = t.Format("Jan 02, 2006 at 3:04 PM")
+	}
+
 	return User{
-		ID:           userPb.Id,
-		Username:     userPb.Username,
-		Fullname:     userPb.Fullname,
-		Email:        userPb.Email,
-		PhoneNumber:  userPb.PhoneNumber,
-		Avatar:       userPb.Avatar,
+		ID:           userPb.GetId(),
+		Username:     userPb.GetUsername(),
+		Fullname:     userPb.GetFullname(),
+		Email:        userPb.GetEmail(),
+		PhoneNumber:  userPb.GetPhoneNumber(),
+		Avatar:       userPb.GetAvatar(),
 		Roles:        roles,
-		LastOnlineAt: time.Now().Add(-15 * time.Minute).Format("Jan 02, 2006 at 3:04 PM"),
+		LastOnlineAt: lastOnline,
 	}
 }
 

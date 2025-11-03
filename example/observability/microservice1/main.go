@@ -73,7 +73,7 @@ func main() {
 		"system.memory.heap",
 		metric.WithDescription("Memory usage of the allocated heap objects khekhe"),
 		metric.WithUnit("By"),
-		metric.WithInt64Callback(func(ctx context.Context, o metric.Int64Observer) error {
+		metric.WithInt64Callback(func(_ context.Context, o metric.Int64Observer) error {
 			memoryUsage := getMemoryUsage()
 			o.Observe(int64(memoryUsage))
 

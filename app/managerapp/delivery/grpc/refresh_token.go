@@ -8,7 +8,7 @@ import (
 )
 
 func (h Handler) TokenRefresh(_ context.Context, req *authpb.TokenRefreshRequest) (*authpb.TokenRefreshResponse, error) {
-	resp, sErr := h.tokenSvc.RefreshTokens(req.RefreshToken)
+	resp, sErr := h.tokenSvc.RefreshTokens(req.GetRefreshToken())
 	if sErr != nil {
 		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
 	}

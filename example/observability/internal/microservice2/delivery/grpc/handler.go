@@ -19,7 +19,7 @@ func NewHandler(svc service.Service) Handler {
 }
 
 func (h Handler) GetComment(ctx context.Context, req *examplepb.GetCommentByIDRequest) (*examplepb.GetCommentResponse, error) {
-	resp, err := h.svc.GetCommentByID(ctx, req.CommentId)
+	resp, err := h.svc.GetCommentByID(ctx, req.GetCommentId())
 	if err != nil {
 		return nil, err
 	}

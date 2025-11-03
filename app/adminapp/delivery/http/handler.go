@@ -76,7 +76,6 @@ func (h Handler) renderGRPCError(c echo.Context, operationName string, err error
 
 			htmlBuilder.WriteString("</ul>")
 			finalErrorMessage = htmlBuilder.String()
-			break
 		}
 	}
 

@@ -128,11 +128,11 @@ func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	if sErr := a.clientHTTPServer.Stop(ctx); sErr != nil {
-		a.logger.Error("client http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+		a.logger.ErrorContext(ctx, "client http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
 
 	if sErr := a.adminHTTPServer.Stop(ctx); sErr != nil {
-		a.logger.Error("admin http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+		a.logger.ErrorContext(ctx, "admin http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
 }
 

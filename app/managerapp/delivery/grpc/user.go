@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
@@ -23,7 +22,7 @@ func (h Handler) CreateUser(ctx context.Context, req *userpb.CreateUserRequest) 
 }
 
 func (h Handler) UserDetail(ctx context.Context, req *userpb.UserDetailRequest) (*userpb.User, error) {
-	resp, sErr := h.userSvc.UserProfile(ctx, types.ID(req.UserId))
+	resp, sErr := h.userSvc.UserProfile(ctx, types.ID(req.GetUserId()))
 	if sErr != nil {
 		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
 	}
@@ -32,7 +31,7 @@ func (h Handler) UserDetail(ctx context.Context, req *userpb.UserDetailRequest) 
 }
 
 func (h Handler) UserDelete(ctx context.Context, req *userpb.UserDeleteRequest) (*empty.Empty, error) {
-	if sErr := h.userSvc.UserDelete(ctx, types.ID(req.UserId)); sErr != nil {
+	if sErr := h.userSvc.UserDelete(ctx, types.ID(req.GetUserId())); sErr != nil {
 		return &empty.Empty{}, servermsg.GRPCMsg(sErr, h.t, h.logger)
 	}
 
@@ -40,7 +39,7 @@ func (h Handler) UserDelete(ctx context.Context, req *userpb.UserDeleteRequest) 
 }
 
 func (h Handler) UserUpdateFromSuperuser(ctx context.Context, req *userpb.UserUpdateFromSuperUserRequest) (*userpb.User, error) {
-	resp, sErr := h.userSvc.UserUpdateFromSuperuser(ctx, types.ID(req.UserId), convertUserUpdateFromSuperuserToEntity(req))
+	resp, sErr := h.userSvc.UserUpdateFromSuperuser(ctx, types.ID(req.GetUserId()), convertUserUpdateFromSuperuserToEntity(req))
 	if sErr != nil {
 		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
 	}

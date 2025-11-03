@@ -88,7 +88,7 @@ func initPullBaseMetric(ctx context.Context, cfg Config, resource *resource.Reso
 	httpserver := newServer(cfg.PullConfig.Port)
 	httpserver.mux.Handle(cfg.PullConfig.Path, promHandler)
 
-	logger.Info("metrics server started",
+	logger.InfoContext(ctx, "metrics server started",
 		slog.String("endpoint", fmt.Sprintf("http://localhost:%d%s", cfg.PullConfig.Port, cfg.PullConfig.Path)),
 		slog.String("mode", "pull"),
 	)
@@ -102,9 +102,9 @@ func initPullBaseMetric(ctx context.Context, cfg Config, resource *resource.Reso
 
 	select {
 	case <-ctx.Done():
-		logger.Info("received shutdown signal, stopping metrics server...")
+		logger.InfoContext(ctx, "received shutdown signal, stopping metrics server...")
 	case err := <-serverErrCh:
-		logger.Error("metrics server error", slog.String("error", err.Error()))
+		logger.ErrorContext(ctx, "metrics server error", slog.String("error", err.Error()))
 	}
 
 	shutdownCtx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
@@ -112,12 +112,12 @@ func initPullBaseMetric(ctx context.Context, cfg Config, resource *resource.Reso
 
 	//nolint:contextcheck // Parent context is Done
 	if sErr := httpserver.s.Shutdown(shutdownCtx); sErr != nil {
-		logger.Error("metric http server shutdown error", slog.String("error", sErr.Error()))
+		logger.ErrorContext(ctx, "metric http server shutdown error", slog.String("error", sErr.Error()))
 
 		return fmt.Errorf("metrics server shutdown error: %w", sErr)
 	}
 
-	logger.Info("metrics server stopped successfully")
+	logger.InfoContext(ctx, "metrics server stopped successfully")
 
 	return nil
 }
@@ -131,7 +131,7 @@ func InitMetric(ctx context.Context, cfg Config, resource *resource.Resource, lo
 	var vErr error
 	cfg, vErr = validateConfig(cfg)
 	if vErr != nil {
-		logger.Error("invalid metrics configuration", slog.String("error", vErr.Error()))
+		logger.ErrorContext(ctx, "invalid metrics configuration", slog.String("error", vErr.Error()))
 
 		return vErr
 	}
@@ -146,7 +146,7 @@ func InitMetric(ctx context.Context, cfg Config, resource *resource.Resource, lo
 
 		return nil
 	default:
-		logger.Debug("Metrics disabled, using noop provider")
+		logger.DebugContext(ctx, "Metrics disabled, using noop provider")
 		otel.SetMeterProvider(noop.MeterProvider{})
 
 		return nil

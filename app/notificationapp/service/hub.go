@@ -65,7 +65,7 @@ func (h *Hub) Run(ctx context.Context) {
 						for _, connection := range h.clients[client.userID] {
 							close(connection.send)
 							if cErr := connection.conn.Close(); cErr != nil {
-								errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), h.logger)
+								errlog.WithoutErrContext(ctx, richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), h.logger)
 							}
 						}
 						delete(h.clients, client.userID)
@@ -86,7 +86,7 @@ func (h *Hub) Run(ctx context.Context) {
 						if connection == client {
 							close(client.send)
 							if cErr := client.conn.Close(); cErr != nil {
-								errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), h.logger)
+								errlog.WithoutErrContext(ctx, richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), h.logger)
 							}
 
 							h.clients[client.userID] = append(h.clients[client.userID][:i], h.clients[client.userID][i+1:]...)
@@ -103,12 +103,12 @@ func (h *Hub) Run(ctx context.Context) {
 	for {
 		message, rErr := subscribe.ReceiveMessage(ctx)
 		if rErr != nil {
-			errlog.WithoutErr(richerror.New(op).WithMessage("can't receive message").WithWrapError(rErr).WithKind(richerror.KindUnexpected), h.logger)
+			errlog.WithoutErrContext(ctx, richerror.New(op).WithMessage("can't receive message").WithWrapError(rErr).WithKind(richerror.KindUnexpected), h.logger)
 		}
 
 		var notification NotificationMessage
 		if uErr := json.Unmarshal(message, &notification); uErr != nil {
-			errlog.WithoutErr(richerror.New(op).WithMessage("can't unmarshalling message").WithWrapError(uErr).WithKind(richerror.KindUnexpected), h.logger)
+			errlog.WithoutErrContext(ctx, richerror.New(op).WithMessage("can't unmarshalling message").WithWrapError(uErr).WithKind(richerror.KindUnexpected), h.logger)
 
 			continue
 		}
@@ -118,10 +118,10 @@ func (h *Hub) Run(ctx context.Context) {
 			for _, client := range connections {
 				select {
 				case client.send <- &notification:
-					h.logger.Debug("notification sent to client", slog.String("notification_id",
+					h.logger.DebugContext(ctx, "notification sent to client", slog.String("notification_id",
 						string(notification.ID)))
 				default:
-					h.logger.Warn("failed to send notification to client, client send buffer full",
+					h.logger.WarnContext(ctx, "failed to send notification to client, client send buffer full",
 						slog.String("user_id", string(notification.UserID)))
 				}
 			}

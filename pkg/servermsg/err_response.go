@@ -130,11 +130,11 @@ func GRPCMsg(err error, t *translation.Translate, logger *slog.Logger) error {
 		}
 
 		return status.Error(code, translationMessage)
-	} else {
-		logger.Error("gRPC request failed with unexpected error", slog.String("error", err.Error()))
-
-		return status.Error(internalCode, MsgSomethingWentWrong)
 	}
+
+	logger.Error("gRPC request failed with unexpected error", slog.String("error", err.Error()))
+
+	return status.Error(internalCode, MsgSomethingWentWrong)
 }
 
 func GRPCCodeToHTTPStatusCode(code codes.Code) int {

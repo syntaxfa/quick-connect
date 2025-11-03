@@ -8,7 +8,7 @@ import (
 )
 
 func (h Handler) TokenVerify(_ context.Context, req *authpb.TokenVerifyRequest) (*authpb.TokenVerifyResponse, error) {
-	userClaims, sErr := h.tokenSvc.ValidateToken(req.Token)
+	userClaims, sErr := h.tokenSvc.ValidateToken(req.GetToken())
 	if sErr != nil {
 		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
 	}

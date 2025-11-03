@@ -85,7 +85,7 @@ func (s Server) registerSwagger() {
 }
 
 func grpcContext(c echo.Context) context.Context {
-	token := c.Get(types.AuthorizationKey)
+	token := c.Get(string(types.AuthorizationKey))
 
 	return context.WithValue(c.Request().Context(), types.AuthorizationKey, token)
 }

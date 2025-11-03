@@ -28,7 +28,7 @@ type CreateUser struct {
 	roles       []string
 }
 
-func (c CreateUser) Command(cfg managerapp.Config, logger *slog.Logger, trap chan os.Signal) *cobra.Command {
+func (c CreateUser) Command(cfg managerapp.Config, logger *slog.Logger, _ chan os.Signal) *cobra.Command {
 	c.cfg = cfg
 	c.logger = logger
 

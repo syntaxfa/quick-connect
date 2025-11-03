@@ -1,3 +1,4 @@
+//nolint:revive // types package is intentional for shared domain types
 package types
 
 import "github.com/golang-jwt/jwt/v5"
@@ -35,5 +36,3 @@ func IsValidRole(role Role) bool {
 
 	return false
 }
-
-const UserContextKey = "user_claims"
