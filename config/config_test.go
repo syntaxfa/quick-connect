@@ -2,7 +2,6 @@ package config_test
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -45,7 +44,7 @@ var options = config.Option{
 func getYamlFilePath() string {
 	workingDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("an error occurred when trying get current directory, err: %s\n", err.Error())
+		panic(fmt.Sprintf("an error occurred when trying get current directory, err: %s\n", err.Error()))
 	}
 
 	return filepath.Join(workingDir, "config.yml")

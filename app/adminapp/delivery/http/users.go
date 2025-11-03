@@ -245,7 +245,7 @@ func (h Handler) UpdateUser(c echo.Context) error {
 		return h.renderGRPCError(c, "UpdateUser", aErr)
 	}
 
-	c.Response().Header().Set("HX-Trigger", "userListChanged")
+	c.Response().Header().Set("Hx-Trigger", "userListChanged")
 
 	data := map[string]interface{}{
 		"User": convertUserPbToUser(userPb),
@@ -281,7 +281,7 @@ func (h Handler) CreateUser(c echo.Context) error {
 		return h.renderGRPCError(c, "CreateUser", aErr)
 	}
 
-	c.Response().Header().Set("HX-Trigger", "userListChanged")
+	c.Response().Header().Set("Hx-Trigger", "userListChanged")
 
 	return c.NoContent(http.StatusCreated)
 }

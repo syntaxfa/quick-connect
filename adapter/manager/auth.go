@@ -3,9 +3,9 @@ package manager
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
 	"google.golang.org/grpc"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // AuthAdapter acts as a client adapter for the manager's AuthService gRPC service.

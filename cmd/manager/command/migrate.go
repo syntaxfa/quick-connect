@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 
 	"github.com/spf13/cobra"
@@ -76,7 +75,7 @@ func (m Migrate) run(args []string) {
 			m.logger.Info(fmt.Sprintf("downgrade %d migrations!", n), slog.Int("migration_count", n))
 		}
 	default:
-		log.Println("please specify a migrations direction with up or down")
+		m.logger.Warn("please specify a migrations direction with up or down")
 	}
 
 	m.logger.Info(fmt.Sprintf("migrations %s successfully run with CLI", args[0]))

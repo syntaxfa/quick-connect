@@ -52,7 +52,7 @@ func (h Handler) ShowLogoutConfirm(c echo.Context) error {
 func (h Handler) Logout(c echo.Context) error {
 	clearAuthCookie(c)
 
-	c.Response().Header().Set("HX-Redirect", "/login")
+	c.Response().Header().Set("Hx-Redirect", "/login")
 
 	return c.NoContent(http.StatusOK)
 }

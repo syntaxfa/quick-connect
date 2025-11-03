@@ -44,10 +44,12 @@ func fetchUserIDFromToken(c echo.Context, token, getUserIDURL string, httpClient
 		return "", echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
+	//nolint:bodyclose // Body is closed correctly in the 'closeResponseBody' helper function
 	resp, err := sendTokenValidationRequest(c, getUserIDURL, jsonData, httpClient, logger, op)
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusInternalServerError)
 	}
+
 	defer closeResponseBody(resp.Body, logger, op)
 
 	return parseUserIDFromResponse(resp, logger, op)

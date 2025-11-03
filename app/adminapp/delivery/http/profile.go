@@ -3,9 +3,9 @@ package http
 import (
 	"net/http"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/labstack/echo/v4"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // ShowProfilePage renders the user's profile page.

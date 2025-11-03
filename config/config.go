@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"strings"
 
 	"github.com/knadh/koanf/parsers/yaml"
@@ -33,14 +33,14 @@ func Load(options Option, config, defaultConfig interface{}) {
 	// Load default configuration from Default function.
 	if defaultConfig != nil {
 		if err := k.Load(structs.Provider(defaultConfig, "koanf"), nil); err != nil {
-			log.Fatalf("error loading default config: %s", err.Error())
+			panic(fmt.Sprintf("error loading default config: %s", err.Error()))
 		}
 	}
 
 	// Load configuration from YAML file if provided.
 	if options.YamlFilePath != "" {
 		if err := k.Load(file.Provider(options.YamlFilePath), yaml.Parser()); err != nil {
-			log.Fatalf("error when trying to loading yml config file: %s", err.Error())
+			panic(fmt.Sprintf("error when trying to loading yml config file: %s", err.Error()))
 		}
 	}
 
@@ -55,11 +55,11 @@ func Load(options Option, config, defaultConfig interface{}) {
 
 	// Load environment variables with the specified prefix and callback.
 	if err := k.Load(env.Provider(options.Prefix, options.Delimiter, callback), nil); err != nil {
-		log.Fatalf("error when loading environment variables: %s", err.Error())
+		panic(fmt.Sprintf("error when loading environment variables: %s", err.Error()))
 	}
 
 	// Unmarshal into provided config structure (passing address).
 	if err := k.Unmarshal("", &config); err != nil {
-		log.Fatalf("error unmarshalling config: %s", err.Error())
+		panic(fmt.Sprintf("error unmarshalling config: %s", err.Error()))
 	}
 }
