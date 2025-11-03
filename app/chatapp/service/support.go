@@ -2,9 +2,10 @@ package service
 
 import (
 	"encoding/json"
+	"log/slog"
+
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
-	"log/slog"
 )
 
 const supportChannelSize = 256

@@ -78,7 +78,6 @@ func (s Service) publishNotification(ctxTimeout time.Duration, notification Noti
 		errlog.WithoutErr(richerror.New(op).WithWrapError(usErr).WithMessage(fmt.Sprintf("can't get user setting for user id: %s",
 			notification.UserID)), s.logger)
 	}
-	fmt.Println(userSetting)
 
 	if !s.CheckNotificationAccessToSend(notification, userSetting, ChannelTypeInApp) {
 		return

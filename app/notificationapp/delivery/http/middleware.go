@@ -3,7 +3,6 @@ package http
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -102,8 +101,6 @@ func parseUserIDFromResponse(resp *http.Response, logger *slog.Logger, op string
 	if resp.Status != "200 OK" {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "Identify token is not valid")
 	}
-
-	fmt.Println(string(body))
 
 	var response Response
 	if uErr := json.Unmarshal(body, &response); uErr != nil {

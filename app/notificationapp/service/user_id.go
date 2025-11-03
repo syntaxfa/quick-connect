@@ -70,8 +70,6 @@ func (s Service) handleCacheMiss(ctx context.Context, externalUserID string, cac
 }
 
 func (s Service) setCacheUserID(ctx context.Context, key string, userID types.ID) error {
-	fmt.Println(s.cfg.UserIDCacheExpiration)
-
 	return s.cache.Set(ctx, key, UserIDCacheValue{UserID: userID}, s.cfg.UserIDCacheExpiration)
 }
 

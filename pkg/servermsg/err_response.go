@@ -32,6 +32,8 @@ func mapKindToHTTPStatusCode(kind richerror.Kind) int {
 		return http.StatusBadRequest
 	case richerror.KindConflict:
 		return http.StatusConflict
+	case richerror.KindUnexpected:
+		return http.StatusInternalServerError
 	default:
 		return http.StatusInternalServerError
 	}
@@ -151,6 +153,33 @@ func GRPCCodeToHTTPStatusCode(code codes.Code) int {
 		return http.StatusForbidden
 	case codes.AlreadyExists:
 		return http.StatusConflict
+
+	case codes.OK:
+		return http.StatusOK
+	case codes.Canceled:
+		return http.StatusRequestTimeout // 408
+	case codes.DeadlineExceeded:
+		return http.StatusGatewayTimeout // 504
+	case codes.ResourceExhausted:
+		return http.StatusTooManyRequests // 429
+	case codes.FailedPrecondition:
+		return http.StatusPreconditionFailed // 412
+	case codes.Aborted:
+		return http.StatusConflict // 409
+	case codes.OutOfRange:
+		return http.StatusBadRequest // 400
+	case codes.Unimplemented:
+		return http.StatusNotImplemented // 501
+	case codes.Unavailable:
+		return http.StatusServiceUnavailable // 503
+
+	case codes.Unknown:
+		return http.StatusInternalServerError
+	case codes.Internal:
+		return http.StatusInternalServerError
+	case codes.DataLoss:
+		return http.StatusInternalServerError
+
 	default:
 		return http.StatusInternalServerError
 	}

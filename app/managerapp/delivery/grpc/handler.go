@@ -13,6 +13,7 @@ import (
 type Handler struct {
 	authpb.UnimplementedAuthServiceServer
 	userpb.UnimplementedUserServiceServer
+
 	logger   *slog.Logger
 	tokenSvc tokenservice.Service
 	userSvc  userservice.Service

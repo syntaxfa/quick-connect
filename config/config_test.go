@@ -116,16 +116,16 @@ db:
 	ymlFile, _ := os.Create("config.yml")
 	defer func() {
 		if err := ymlFile.Close(); err != nil {
-			fmt.Printf("%s", err.Error())
+			t.Errorf("failed to close yaml file: %s", err.Error())
 		}
 
 		if err := os.Remove("config.yml"); err != nil {
-			fmt.Printf("%s", err.Error())
+			t.Errorf("failed to remove yaml file: %s", err.Error())
 		}
 	}()
 
 	if _, err := ymlFile.Write(ymlConfig); err != nil {
-		fmt.Printf("%s", err.Error())
+		t.Fatalf("failed to write yaml config: %s", err.Error())
 	}
 
 	config.Load(options, &cfg, defaultConfig())

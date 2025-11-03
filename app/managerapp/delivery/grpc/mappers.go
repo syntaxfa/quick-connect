@@ -42,6 +42,8 @@ func convertUserRoleToEntity(pbRoles []userpb.Role) []types.Role {
 			roles = append(roles, types.RoleFile)
 		case userpb.Role_ROLE_NOTIFICATION:
 			roles = append(roles, types.RoleNotification)
+		case userpb.Role_ROLE_UNSPECIFIED:
+			continue
 		}
 	}
 
@@ -101,9 +103,13 @@ func convertUserListRequestToEntity(req *userpb.UserListRequest) userservice.Lis
 		},
 	}
 
-	switch req.SortDirection {
+	switch req.GetSortDirection() {
 	case userpb.SortDirection_SORT_DIRECTION_ASC:
 		request.Paginated.Descending = false
+	case userpb.SortDirection_SORT_DIRECTION_DESC:
+		request.Paginated.Descending = true
+	case userpb.SortDirection_SORT_DIRECTION_UNSPECIFIED:
+		request.Paginated.Descending = true
 	default:
 		request.Paginated.Descending = true
 	}

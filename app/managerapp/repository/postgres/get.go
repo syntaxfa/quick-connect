@@ -26,28 +26,7 @@ type nullableFields struct {
 
 func (d *DB) GetUserByUsername(ctx context.Context, username string) (userservice.User, error) {
 	const op = "repository.postgres.GetUserByUsername"
-
-	var user userservice.User
-	var nullable nullableFields
-
-	if qErr := d.conn.Conn().QueryRow(ctx, queryGetUserByUsername, username).Scan(
-		&user.ID, &user.Username, &user.HashedPassword, &user.Fullname, &user.Email, &user.PhoneNumber, &nullable.Avatar,
-		&user.LastOnlineAt); qErr != nil {
-		return userservice.User{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected).WithMessage("get user")
-	}
-
-	if nullable.Avatar.Valid {
-		user.Avatar = nullable.Avatar.String
-	}
-
-	roles, grErr := d.GetUserRolesByUserID(ctx, user.ID)
-	if grErr != nil {
-		return userservice.User{}, richerror.New(op).WithWrapError(grErr).WithKind(richerror.KindUnexpected)
-	}
-
-	user.Roles = roles
-
-	return user, nil
+	return d.getUserBy(ctx, op, queryGetUserByUsername, username)
 }
 
 const queryGetUserByID = `SELECT id, username, hashed_password, fullname, email, phone_number, avatar, last_online_at
@@ -57,11 +36,15 @@ limit 1;`
 
 func (d *DB) GetUserByID(ctx context.Context, userID types.ID) (userservice.User, error) {
 	const op = "repository.postgres.GetUserByID"
+	return d.getUserBy(ctx, op, queryGetUserByID, userID)
+}
 
+// getUserBy is a private helper function that encapsulates the duplicated user fetching logic.
+func (d *DB) getUserBy(ctx context.Context, op string, query string, arg interface{}) (userservice.User, error) {
 	var user userservice.User
 	var nullable nullableFields
 
-	if qErr := d.conn.Conn().QueryRow(ctx, queryGetUserByID, userID).Scan(
+	if qErr := d.conn.Conn().QueryRow(ctx, query, arg).Scan(
 		&user.ID, &user.Username, &user.HashedPassword, &user.Fullname, &user.Email, &user.PhoneNumber, &nullable.Avatar,
 		&user.LastOnlineAt); qErr != nil {
 		return userservice.User{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected).WithMessage("get user")

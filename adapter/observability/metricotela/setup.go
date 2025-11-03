@@ -154,8 +154,15 @@ func InitMetric(ctx context.Context, cfg Config, resource *resource.Resource, lo
 		}()
 
 		return nil
-	default:
+	case ModeDisable:
 		logger.DebugContext(ctx, "Metrics disabled, using noop provider")
+
+		otel.SetMeterProvider(noop.MeterProvider{})
+
+		return nil
+	default:
+		logger.DebugContext(ctx, "Metrics mode not provided, using noop provider")
+
 		otel.SetMeterProvider(noop.MeterProvider{})
 
 		return nil

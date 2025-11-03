@@ -32,8 +32,6 @@ type Application struct {
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	cfg.ChatService.PingPeriod = (cfg.ChatService.PongWait * pingPeriodNumerator) / pingPeriodDenominator
 
-	fmt.Printf("%+v", cfg)
-
 	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.HTTPServer.Cors.AllowOrigins, logger))
 
 	chatSvc := service.New(cfg.ChatService, nil, logger)

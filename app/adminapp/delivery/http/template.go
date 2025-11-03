@@ -1,3 +1,4 @@
+//nolint:forbidigo // Using fmt.Print for startup logging is intentional in this file.
 package http
 
 import (

@@ -70,7 +70,6 @@ func (m Migrate) run(args []string) {
 			m.logger.Info(fmt.Sprintf("applied %d migrations!", n), slog.Int("migration_count", n))
 		}
 	case "down":
-		fmt.Println("down")
 		if n, err := mgr.Down(limit); err != nil {
 			m.logger.Error("error migrations down", slog.String("error", err.Error()))
 		} else {

@@ -109,12 +109,7 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 		"Pagination": pagination,
 	}
 
-	err = c.Render(http.StatusOK, "users_list_partial", data)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	return nil
+	return c.Render(http.StatusOK, "users_list_partial", data)
 }
 
 // ShowDeleteUserConfirm renders the delete confirmation modal.

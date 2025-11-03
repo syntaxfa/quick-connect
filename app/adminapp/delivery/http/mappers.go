@@ -76,6 +76,8 @@ func convertUserPbToUser(userPb *userpb.User) User {
 			roles = append(roles, string(types.RoleStory))
 		case userpb.Role_ROLE_FILE:
 			roles = append(roles, string(types.RoleFile))
+		case userpb.Role_ROLE_UNSPECIFIED:
+			continue
 		}
 	}
 
