@@ -14,7 +14,7 @@ func AuthClientInterceptor(ctx context.Context, method string, req, reply interf
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 
-	ctx = metadata.AppendToOutgoingContext(ctx, types.AuthorizationKey, token)
+	ctx = metadata.AppendToOutgoingContext(ctx, string(types.AuthorizationKey), token)
 
 	return invoker(ctx, method, req, reply, cc, opts...)
 }

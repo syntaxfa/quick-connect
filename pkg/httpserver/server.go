@@ -76,7 +76,7 @@ func (s Server) Start() error {
 }
 
 func (s Server) Stop(ctx context.Context) error {
-	s.log.Info("http server gracefully shutdown", slog.Int("port", s.cfg.Port))
+	s.log.InfoContext(ctx, "http server gracefully shutdown", slog.Int("port", s.cfg.Port))
 
 	return s.Router.Shutdown(ctx)
 }
