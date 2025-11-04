@@ -1,5 +1,5 @@
 -- +migrate Up
-CREATE TABLE ID NOT EXISTS external_users (
+CREATE TABLE IF NOT EXISTS external_users (
     "user_id" VARCHAR(26) NOT NULL UNIQUE,
     "external_user_id" VARCHAR(255) NOT NULL UNIQUE
 );
