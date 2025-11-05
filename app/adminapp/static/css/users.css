@@ -764,3 +764,82 @@
         transform: scale(0.8);
     }
 }
+
+/* ========== STYLES FOR ROLE FILTER DROPDOWN ========== */
+.filter-dropdown {
+    position: relative;
+}
+
+.filter-dropdown .filter-btn {
+    display: flex;
+    align-items: center;
+}
+
+.filter-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--card-bg, rgba(30, 41, 59, 0.9));
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color, rgba(71, 85, 105, 0.3));
+    border-radius: 12px;
+    padding: 1rem;
+    z-index: 10;
+    margin-top: 0.5rem;
+    min-width: 250px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.filter-dropdown-content.show {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.filter-dropdown-content .role-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 0.5rem;
+}
+
+.filter-dropdown-content .role-checkbox:last-child {
+    margin-bottom: 0;
+}
+
+.filter-dropdown-content .role-checkbox:hover {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: var(--primary-accent, #06b6d4);
+}
+
+.filter-dropdown-content .role-checkbox input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-accent, #06b6d4);
+    cursor: pointer;
+}
+
+.filter-dropdown-content .role-checkbox {
+    cursor: pointer;
+}
+
+.filter-dropdown-content .role-checkbox label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary, #94a3b8);
+    cursor: pointer;
+    width: 100%;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

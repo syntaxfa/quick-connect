@@ -109,6 +109,7 @@ func convertUserListRequestToEntity(req *userpb.UserListRequest) userservice.Lis
 			CurrentPage: req.GetCurrentPage(),
 			PageSize:    req.GetPageSize(),
 		},
+		Roles: convertUserRoleToEntity(req.GetRoles()),
 	}
 
 	switch req.GetSortDirection() {
