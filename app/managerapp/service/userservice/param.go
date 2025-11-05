@@ -62,3 +62,8 @@ type ListUserResponse struct {
 	Results  []User                `json:"results"`
 	Paginate paginate.ResponseBase `json:"paginate"`
 }
+
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
+}
