@@ -185,3 +185,32 @@ func (v Validate) UserUpdateFromSuperuserRequest(req UserUpdateFromSuperuserRequ
 
 	return nil
 }
+
+func (v Validate) ChangePasswordRequest(req ChangePasswordRequest) error {
+	const op = "service.validate.ChangePasswordRequest"
+
+	if err := validation.ValidateStruct(&req,
+		validation.Field(&req.OldPassword,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.Length(minPasswordLength, maxPasswordLength).Error(servermsg.MsgInvalidLengthOfPassword)),
+		validation.Field(&req.NewPassword,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.Length(minPasswordLength, maxPasswordLength).Error(servermsg.MsgInvalidLengthOfPassword)),
+	); err != nil {
+		fieldErrors := make(map[string]string)
+
+		vErr := validation.Errors{}
+		if errors.As(err, &vErr) {
+			for key, value := range vErr {
+				if value != nil {
+					fieldErrors[key] = v.t.TranslateMessage(value.Error())
+				}
+			}
+		}
+
+		return richerror.New(op).WithMessage(servermsg.MsgInvalidInput).WithKind(richerror.KindInvalid).
+			WithErrorFields(fieldErrors).WithMeta(map[string]interface{}{"req": req})
+	}
+
+	return nil
+}

@@ -32,4 +32,5 @@ const (
 	// Admin app.
 
 	MsgUsernameAndPasswordAreRequired = "username and password are required"
+	MsgPasswordIsNotCorrect           = "password is not correct"
 )

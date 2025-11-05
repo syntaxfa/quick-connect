@@ -83,6 +83,11 @@ message UserListResponse {
   repeated User users = 5;
 }
 
+message UserChangePasswordRequest {
+  string old_password = 1;
+  string new_password = 2;
+}
+
 service UserService {
   rpc CreateUser (CreateUserRequest) returns (User);
   rpc UserDetail (UserDetailRequest) returns (User);
@@ -91,4 +96,5 @@ service UserService {
   rpc UserUpdateFromOwn (UserUpdateFromOwnRequest) returns (User);
   rpc UserList (UserListRequest) returns (UserListResponse);
   rpc UserProfile (google.protobuf.Empty) returns (User);
+  rpc UserChangePassword (UserChangePasswordRequest) returns (google.protobuf.Empty);
 }
