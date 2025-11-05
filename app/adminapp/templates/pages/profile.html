@@ -8,8 +8,15 @@
         </div>
     </div>
 
-    <div id="profile-content-wrapper" hx-target="this" hx-swap="outerHTML">
-        {{template "profile_view" .}}
+    <div id="profile-content-wrapper"
+         hx-get="/profile/view"
+         hx-trigger="load, profileUpdated from:body"
+         hx-target="this"
+         hx-swap="innerHTML"
+    >
+        <div style="padding: 4rem; text-align: center; color: #94a3b8;">
+            Loading profile...
+        </div>
     </div>
 
 </div>

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 	empty "google.golang.org/protobuf/types/known/emptypb"
 )
@@ -71,7 +72,7 @@ func (h Handler) UpdateProfile(c echo.Context) error {
 	email := c.FormValue("email")
 	phoneNumber := c.FormValue("phone_number")
 
-	userPb, aErr := h.userAd.UserUpdateFromOwn(ctx, &userpb.UserUpdateFromOwnRequest{
+	_, aErr := h.userAd.UserUpdateFromOwn(ctx, &userpb.UserUpdateFromOwnRequest{
 		Username:    username,
 		Fullname:    fullname,
 		Email:       email,
@@ -81,9 +82,9 @@ func (h Handler) UpdateProfile(c echo.Context) error {
 		return h.renderGRPCError(c, "UpdateProfile", aErr)
 	}
 
-	data := map[string]interface{}{
-		"User": convertUserPbToUser(userPb),
-	}
+	setHxTrigger(c, "profileUpdated")
 
-	return c.Render(http.StatusOK, "profile_view", data)
+	setTriggerAfterSettle(c, h.t.TranslateMessage(servermsg.MsgProfileUpdatedSuccessfully))
+
+	return c.NoContent(http.StatusOK)
 }

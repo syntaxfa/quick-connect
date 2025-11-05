@@ -1,0 +1,66 @@
+{{define "profile_edit_form"}}
+<div id="profile-content-wrapper" class="profile-content" style="animation-delay: 0.1s;">
+
+    <form class="profile-card"
+          hx-put="/profile"
+          hx-indicator="#save-spinner"
+
+          hx-target="#modal-error-message"
+          hx-swap="innerHTML"
+          hx-on::after-request="if(!event.detail.xhr.getResponseHeader('X-Http-Status')) htmx.trigger(document.body, 'profileUpdated')"
+    >
+        <div class="profile-card-header">
+            <div class="profile-avatar-wrapper">
+                <div class="profile-avatar-info">
+                    <h2 class="profile-fullname">Edit Profile</h2>
+                    <span class="profile-username">Update your personal details.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-card-body">
+
+            <div id="modal-error-message" style="margin-bottom: 1.5rem;"></div>
+
+            <div class="profile-form">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" value="{{.User.Username}}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" class="form-input" value="{{.User.Fullname}}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" value="{{.User.Email}}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="phone_number">Phone Number</label>
+                    <input type="tel" id="phone_number" name="phone_number" class="form-input" value="{{.User.PhoneNumber}}">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions" style="background: rgba(30, 41, 59, 0.4); padding: 1.5rem 2rem;">
+            <button type="button" class="btn-secondary"
+                    hx-get="/profile/view"
+                    hx-target="#profile-content-wrapper"
+                    hx-swap="innerHTML"
+                    hx-indicator="this">
+                Cancel
+            </button>
+
+            <button type="submit" class="btn-primary">
+                <span>Save Changes</span>
+                <span class="htmx-indicator" id="save-spinner">
+                    <svg class="nav-icon" style="width: 20px; height: 20px; animation: spin 1s linear infinite;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity: 0.2;"></circle>
+                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" style="opacity: 1;"></path>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </form>
+</div>
+{{end}}

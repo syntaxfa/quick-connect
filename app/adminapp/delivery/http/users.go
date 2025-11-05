@@ -137,9 +137,10 @@ func (h Handler) DeleteUser(c echo.Context) error {
 
 	_, err := h.userAd.UserDelete(ctx, &userpb.UserDeleteRequest{UserId: userID})
 	if err != nil {
-		// TODO: Return an error partial or message
 		return h.renderGRPCError(c, "DeleteUser", err)
 	}
+
+	setTriggerAfterSettle(c, h.t.TranslateMessage(servermsg.MsgUserDeletedSuccessfully))
 
 	return c.NoContent(http.StatusOK)
 }
@@ -241,18 +242,16 @@ func (h Handler) UpdateUser(c echo.Context) error {
 		Roles:       roles,
 	}
 
-	userPb, aErr := h.userAd.UserUpdateFromSuperuser(ctx, req)
+	_, aErr := h.userAd.UserUpdateFromSuperuser(ctx, req)
 	if aErr != nil {
 		return h.renderGRPCError(c, "UpdateUser", aErr)
 	}
 
-	c.Response().Header().Set("Hx-Trigger", "userListChanged")
+	setHxTrigger(c, "userListChanged")
 
-	data := map[string]interface{}{
-		"User": convertUserPbToUser(userPb),
-	}
+	setTriggerAfterSettle(c, servermsg.MsgUserUpdatedSuccessfully)
 
-	return c.Render(http.StatusOK, "user_detail_modal", data)
+	return c.NoContent(http.StatusOK)
 }
 
 // ShowCreateUserModal renders the create user form modal.
@@ -282,7 +281,9 @@ func (h Handler) CreateUser(c echo.Context) error {
 		return h.renderGRPCError(c, "CreateUser", aErr)
 	}
 
-	c.Response().Header().Set("Hx-Trigger", "userListChanged")
+	setHxTrigger(c, "userListChanged")
+
+	setTriggerAfterSettle(c, servermsg.MsgUserCreatedSuccessfully)
 
 	return c.NoContent(http.StatusCreated)
 }
