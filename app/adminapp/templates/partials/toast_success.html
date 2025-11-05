@@ -1,0 +1,34 @@
+{{define "toast_success"}}
+<style>
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(-20px); }
+        10% { opacity: 1; transform: translateY(0); }
+        90% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-20px); }
+    }
+
+    .toast-success-animation {
+        padding: 1rem 1.5rem;
+        background: rgba(16, 185, 129, 0.85);
+        color: white;
+        border: 1px solid rgba(16, 185, 129, 1);
+        border-radius: 12px;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        animation: fadeInOut 3s ease-in-out forwards;
+    }
+</style>
+
+<div class="toast-success-animation" id="toast-{{.Timestamp}}">
+    {{.Message}}
+</div>
+
+<script>
+    setTimeout(() => {
+        const el = document.getElementById('toast-{{.Timestamp}}');
+        if (el) el.remove();
+    }, 3000);
+</script>
+{{end}}

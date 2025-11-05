@@ -160,3 +160,34 @@ label.role-checkbox {
 .role-checkbox label {
     cursor: default;
 }
+
+#modal-error-message.error,
+#modal-error-message .error-list {
+    color: var(--error-red, #ef4444);
+    margin-bottom: 1.5rem;
+    text-align: left;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.5;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    animation: slideIn 0.3s ease;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+#modal-error-message:empty {
+    display: none;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+#modal-error-message .error-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    background: none;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+}

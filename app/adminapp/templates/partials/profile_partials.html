@@ -18,7 +18,17 @@
                 </div>
             </div>
 
-            <div class="profile-header-actions">
+            <div class="profile-header-actions" style="display: flex; gap: 0.5rem;">
+                <button class="btn-secondary"
+                        style="background: rgba(60, 71, 89, 0.6);"
+                        hx-get="/profile/change-password"
+                        hx-target="#modal-container"
+                        hx-swap="innerHTML">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 18px; height: 18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v-2.25l.938-1.01a1.5 1.5 0 01.43-1.563A6 6 0 0115.75 3v2.25z" />
+                    </svg>
+                    <span>Change Password</span>
+                </button>
                 <button class="btn-secondary"
                         hx-get="/profile/edit"
                         hx-indicator="#profile-spinner-{{.User.ID}}">

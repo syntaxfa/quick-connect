@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/syntaxfa/quick-connect/adapter/manager"
@@ -80,4 +81,17 @@ func (h Handler) renderGRPCError(c echo.Context, operationName string, err error
 	}
 
 	return h.renderErrorPartial(c, httpStatus, finalErrorMessage)
+}
+
+func (h Handler) ShowSuccessToast(c echo.Context) error {
+	message := c.QueryParam("message")
+	if message == "" {
+		message = "Success!"
+	}
+
+	data := map[string]interface{}{
+		"Message":   message,
+		"Timestamp": time.Now().UnixNano(),
+	}
+	return c.Render(http.StatusOK, "toast_success", data)
 }

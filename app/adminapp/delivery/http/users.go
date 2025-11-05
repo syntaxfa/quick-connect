@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 )
 
@@ -284,4 +285,33 @@ func (h Handler) CreateUser(c echo.Context) error {
 	c.Response().Header().Set("Hx-Trigger", "userListChanged")
 
 	return c.NoContent(http.StatusCreated)
+}
+
+func (h Handler) ShowChangePasswordModal(c echo.Context) error {
+	return c.Render(http.StatusOK, "change_password_modal", nil)
+}
+
+func (h Handler) ChangePassword(c echo.Context) error {
+	ctx := grpcContext(c)
+
+	oldPassword := c.FormValue("old_password")
+	newPassword := c.FormValue("new_password")
+
+	if oldPassword == "" || newPassword == "" {
+		return h.renderErrorPartial(c, http.StatusBadRequest, h.t.TranslateMessage(servermsg.MsgUsernameAndPasswordAreRequired))
+	}
+
+	req := &userpb.UserChangePasswordRequest{
+		OldPassword: oldPassword,
+		NewPassword: newPassword,
+	}
+
+	_, aErr := h.userAd.UserChangePassword(ctx, req)
+	if aErr != nil {
+		return h.renderGRPCError(c, "ChangePassword", aErr)
+	}
+
+	setTriggerAfterSettle(c, h.t.TranslateMessage(servermsg.MsgPasswordChangedSuccessfully))
+
+	return c.NoContent(http.StatusOK)
 }
