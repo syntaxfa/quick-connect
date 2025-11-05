@@ -805,6 +805,12 @@ const docTemplate = `{
                 "paginated": {
                     "$ref": "#/definitions/paginate.RequestBase"
                 },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Role"
+                    }
+                },
                 "username": {
                     "type": "string"
                 }
