@@ -43,6 +43,7 @@ func (s Server) registerRoutes() {
 
 	rootGr := s.httpserver.Router.Group("", setTokenToRequestContextMiddleware(s.jwtValidator, s.handler.authAd,
 		"/login", s.handler.logger))
+	rootGr.GET("/toast/success", s.handler.ShowSuccessToast)
 
 	// auth Group
 	authGr := rootGr.Group("")
@@ -76,6 +77,8 @@ func (s Server) registerRoutes() {
 	profileGr.PUT("", s.handler.UpdateProfile)
 	profileGr.GET("/view", s.handler.ShowProfileView)
 	profileGr.GET("/edit", s.handler.ShowProfileEditForm)
+	profileGr.GET("/change-password", s.handler.ShowChangePasswordModal)
+	profileGr.POST("/change-password", s.handler.ChangePassword)
 
 	// Settings Group
 	settingGr := rootGr.Group("/settings")
