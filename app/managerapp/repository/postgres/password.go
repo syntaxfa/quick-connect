@@ -2,33 +2,26 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
 //nolint:gosec // G101: This is a SQL query template, not a hardcoded credential
-const queryPasswordIsCorrect = `SELECT EXISTS (
-	SELECT 1
-	FROM users
-	WHERE id = $1 AND hashed_password = $2
-);`
+const queryGetUserHashedPassword = `SELECT hashed_password
+FROM users
+WHERE id = $1
+limit 1;`
 
-func (d *DB) PasswordIsCorrect(ctx context.Context, userID types.ID, hashedPassword string) (bool, error) {
-	const op = "repository.postgres.password.PasswordIsCorrect"
+func (d *DB) GetUserHashedPassword(ctx context.Context, userID types.ID) (string, error) {
+	const op = "repository.postgres.password.GetUserHashedPassword"
 
-	var exists bool
-	if qErr := d.conn.Conn().QueryRow(ctx, queryPasswordIsCorrect, userID, hashedPassword).Scan(&exists); qErr != nil {
-		if errors.Is(qErr, pgx.ErrNoRows) {
-			return false, nil
-		}
-
-		return false, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	var hashedPass string
+	if qErr := d.conn.Conn().QueryRow(ctx, queryGetUserHashedPassword, userID).Scan(&hashedPass); qErr != nil {
+		return "", richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
 	}
 
-	return true, nil
+	return hashedPass, nil
 }
 
 //nolint:gosec // G101: This is a SQL query template, not a hardcoded credential

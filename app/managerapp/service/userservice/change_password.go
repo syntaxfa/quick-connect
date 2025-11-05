@@ -24,24 +24,22 @@ func (s Service) ChangePassword(ctx context.Context, userID types.ID, req Change
 			WithKind(richerror.KindNotFound), s.logger)
 	}
 
-	oldHashedPass, ohErr := HashPassword(req.OldPassword)
-	if ohErr != nil {
-		return errlog.ErrContext(ctx, richerror.New(op).WithWrapError(ohErr).WithKind(richerror.KindUnexpected), s.logger)
+	userHashedPass, gErr := s.repo.GetUserHashedPassword(ctx, userID)
+	if gErr != nil {
+		return errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
-	if isCorrect, cErr := s.repo.PasswordIsCorrect(ctx, userID, oldHashedPass); cErr != nil {
-		return errlog.ErrContext(ctx, richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), s.logger)
-	} else if !isCorrect {
-		return errlog.ErrContext(ctx, richerror.New(op).WithMessage(servermsg.MsgPasswordIsNotCorrect).
-			WithKind(richerror.KindForbidden), s.logger)
+	if !VerifyPassword(userHashedPass, req.OldPassword) {
+		return errlog.ErrContext(ctx, richerror.New(op).WithMessage(servermsg.MsgPasswordIsNotCorrect).WithKind(richerror.KindForbidden).
+			WithMeta(map[string]interface{}{"user_id": userID}), s.logger)
 	}
 
-	newHashedPass, nhErr := HashPassword(req.NewPassword)
+	newHashPass, nhErr := HashPassword(req.NewPassword)
 	if nhErr != nil {
 		return errlog.ErrContext(ctx, richerror.New(op).WithWrapError(nhErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
-	if changeErr := s.repo.ChangePassword(ctx, userID, newHashedPass); changeErr != nil {
+	if changeErr := s.repo.ChangePassword(ctx, userID, newHashPass); changeErr != nil {
 		return errlog.ErrContext(ctx, richerror.New(op).WithWrapError(changeErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
