@@ -16,3 +16,11 @@ func setTriggerAfterSettle(c echo.Context, successMsg string) {
 
 	c.Response().Header().Set("Hx-Trigger-After-Settle", `{"showSuccessToast": `+string(eventDetailBytes)+`}`)
 }
+
+func setHxTrigger(c echo.Context, value string) {
+	c.Response().Header().Set("Hx-Trigger", value)
+}
+
+func setHxRedirect(c echo.Context, value string) {
+	c.Response().Header().Set("Hx-Redirect", value)
+}

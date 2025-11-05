@@ -34,4 +34,8 @@ const (
 	MsgUsernameAndPasswordAreRequired = "username and password are required"
 	MsgPasswordIsNotCorrect           = "password is not correct"
 	MsgPasswordChangedSuccessfully    = "password changed successfully"
+	MsgUserDeletedSuccessfully        = "user deleted successfully"
+	MsgUserUpdatedSuccessfully        = "user updated successfully"
+	MsgUserCreatedSuccessfully        = "user created successfully"
+	MsgProfileUpdatedSuccessfully     = "profile updated successfully"
 )
