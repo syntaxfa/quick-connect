@@ -7,10 +7,7 @@ import (
 )
 
 func redirectToDashboard(c echo.Context) error {
-	//nolint:goconst // It's ok
-	isHTMX := c.Request().Header.Get("Hx-Request") == "true"
-
-	if isHTMX {
+	if isHTMX(c) {
 		c.Response().Header().Set("Hx-Redirect", "/dashboard")
 
 		return c.NoContent(http.StatusOK)
@@ -20,9 +17,7 @@ func redirectToDashboard(c echo.Context) error {
 }
 
 func redirectToLogin(c echo.Context) error {
-	isHTMX := c.Request().Header.Get("Hx-Request") == "true"
-
-	if isHTMX {
+	if isHTMX(c) {
 		c.Response().Header().Set("Hx-Redirect", "/login")
 
 		return c.NoContent(http.StatusOK)
