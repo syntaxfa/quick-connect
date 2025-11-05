@@ -1,4 +1,4 @@
-package main
+package manageruser
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func managerUser() {
+func ManagerUser() {
 	cfg := grpcclient.Config{
 		Host:    "localhost",
 		Port:    2541,
@@ -120,4 +120,12 @@ func managerUser() {
 	fmt.Printf("%+v\n", userListResp)
 
 	fmt.Println("-----------------")
+	fmt.Println("change password")
+	if _, userChangeErr := userAdapter.UserChangePassword(ctxWithValue, &userpb.UserChangePasswordRequest{
+		OldPassword: "Password",
+		NewPassword: "Berlin11228",
+	}); userChangeErr != nil {
+		errorhandler.HandleGRPCError(userChangeErr, slog.Default())
+	}
+	fmt.Println("password changed")
 }

@@ -59,3 +59,9 @@ func (ud *UserAdapter) UserList(ctx context.Context, req *userpb.UserListRequest
 func (ud *UserAdapter) UserProfile(ctx context.Context, req *empty.Empty, opts ...grpc.CallOption) (*userpb.User, error) {
 	return ud.client.UserProfile(ctx, req, opts...)
 }
+
+// UserChangePassword calls the UserChangePassword on the UserService.
+func (ud *UserAdapter) UserChangePassword(ctx context.Context, req *userpb.UserChangePasswordRequest,
+	opts ...grpc.CallOption) (*empty.Empty, error) {
+	return ud.client.UserChangePassword(ctx, req, opts...)
+}

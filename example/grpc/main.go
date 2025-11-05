@@ -1,7 +1,12 @@
 package main
 
-func main() {
-	managerAuth()
+import (
+	"github.com/syntaxfa/quick-connect/example/grpc/interval/managerauth"
+	"github.com/syntaxfa/quick-connect/example/grpc/interval/manageruser"
+)
 
-	managerUser()
+func main() {
+	managerauth.ManagerAuth()
+
+	manageruser.ManagerUser()
 }
