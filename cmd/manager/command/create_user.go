@@ -7,11 +7,14 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/redis"
 	"github.com/syntaxfa/quick-connect/app/managerapp"
 	postgres2 "github.com/syntaxfa/quick-connect/app/managerapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
+	"github.com/syntaxfa/quick-connect/pkg/cachemanager"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 	"github.com/syntaxfa/quick-connect/types"
 )
@@ -88,13 +91,21 @@ func (c CreateUser) run() {
 
 	t, tErr := translation.New(translation.DefaultLanguages...)
 	if tErr != nil {
-		errlog.WithoutErr(tErr, logger)
+		errlog.WithoutErr(richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected), logger)
 
 		return
 	}
 
 	userVld := userservice.NewValidate(t)
-	userSvc := userservice.New(tokenSvc, userVld, repo, c.logger)
+	re := redis.New(c.cfg.Redis, c.logger)
+	defer func() {
+		if cErr := re.Close(); cErr != nil {
+			errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), c.logger)
+		}
+	}()
+
+	cache := cachemanager.New(re, c.logger)
+	userSvc := userservice.New(c.cfg.User, tokenSvc, userVld, repo, repo, c.logger, cache)
 
 	var roles = make([]types.Role, 0)
 	for _, role := range c.roles {

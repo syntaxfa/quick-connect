@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
+	"github.com/syntaxfa/quick-connect/pkg/cachemanager"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/types"
 )
@@ -24,18 +25,31 @@ type Repository interface {
 	UpdateUser(ctx context.Context, userID types.ID, req UserUpdateFromSuperuserRequest) error
 }
 
-type Service struct {
-	tokenSvc TokenSvc
-	vld      Validate
-	repo     Repository
-	logger   *slog.Logger
+type ExternalUserRepository interface {
+	IsExistUserIDFromExternalUserID(ctx context.Context, externalUserID string) (bool, error)
+	GetUserIDFromExternalUserID(ctx context.Context, externalUserID string) (types.ID, error)
+	CreateUserIDFromExternalUserID(ctx context.Context, externalUserID string, userID types.ID) error
 }
 
-func New(tokenSvc TokenSvc, vld Validate, repo Repository, logger *slog.Logger) Service {
+type Service struct {
+	cfg              Config
+	tokenSvc         TokenSvc
+	vld              Validate
+	repo             Repository
+	externalUserRepo ExternalUserRepository
+	logger           *slog.Logger
+	cache            *cachemanager.CacheManager
+}
+
+func New(cfg Config, tokenSvc TokenSvc, vld Validate, repo Repository, externalUserRepo ExternalUserRepository, logger *slog.Logger,
+	cache *cachemanager.CacheManager) Service {
 	return Service{
-		tokenSvc: tokenSvc,
-		vld:      vld,
-		repo:     repo,
-		logger:   logger,
+		cfg:              cfg,
+		tokenSvc:         tokenSvc,
+		vld:              vld,
+		repo:             repo,
+		externalUserRepo: externalUserRepo,
+		logger:           logger,
+		cache:            cache,
 	}
 }
