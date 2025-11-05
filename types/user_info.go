@@ -25,9 +25,11 @@ const (
 	RoleStory        Role = "story"
 	RoleFile         Role = "file"
 	RoleNotification Role = "notification"
+	RoleClient       Role = "client"
+	RoleGuest        Role = "guest"
 )
 
-var AllUserRole = []Role{RoleSuperUser, RoleSupport, RoleStory, RoleFile, RoleNotification}
+var AllUserRole = []Role{RoleSuperUser, RoleSupport, RoleStory, RoleFile, RoleNotification, RoleClient, RoleGuest}
 
 func IsValidRole(role Role) bool {
 	for _, r := range AllUserRole {
