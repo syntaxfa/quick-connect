@@ -42,3 +42,13 @@ func IsValidRole(role Role) bool {
 
 	return false
 }
+
+func IsAdminRole(role Role) bool {
+	for _, r := range AdminRoles {
+		if role == r {
+			return true
+		}
+	}
+
+	return false
+}
