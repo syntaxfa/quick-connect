@@ -14,6 +14,8 @@ enum Role {
     ROLE_STORY = 3;
     ROLE_FILE = 4;
     ROLE_NOTIFICATION = 5;
+    ROLE_CLIENT = 6;
+    ROLE_GUEST = 7;
 }
 
 message CreateUserRequest {
