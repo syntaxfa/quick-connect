@@ -128,6 +128,8 @@ func (v Validate) ValidateListUserRequest(req ListUserRequest) error {
 	if err := validation.ValidateStruct(&req,
 		validation.Field(&req.Username,
 			validation.Length(minUsernameLength, maxUsernameLength).Error(servermsg.MsgInvalidLengthOfUsername)),
+		validation.Field(&req.Roles,
+			validation.By(v.validateUserRole)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
 

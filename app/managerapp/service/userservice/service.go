@@ -20,7 +20,8 @@ type Repository interface {
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserByID(ctx context.Context, userID types.ID) (User, error)
 	CreateUser(ctx context.Context, req UserCreateRequest) (User, error)
-	GetUserList(ctx context.Context, paginated paginate.RequestBase, username string) ([]User, paginate.ResponseBase, error)
+	GetUserList(ctx context.Context, paginated paginate.RequestBase, username string,
+		roles []types.Role) ([]User, paginate.ResponseBase, error)
 	DeleteUser(ctx context.Context, userID types.ID) error
 	UpdateUser(ctx context.Context, userID types.ID, req UserUpdateFromSuperuserRequest) error
 	GetUserHashedPassword(ctx context.Context, userID types.ID) (string, error)

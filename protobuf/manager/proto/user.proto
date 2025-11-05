@@ -73,6 +73,7 @@ message UserListRequest {
   uint64 page_size = 2;
   SortDirection sort_direction = 3;
   string username = 4;
+  repeated Role roles = 5;
 }
 
 message UserListResponse {

@@ -18,7 +18,7 @@ func (s Service) UserList(ctx context.Context, req ListUserRequest) (ListUserRes
 		return ListUserResponse{}, richerror.New(op).WithKind(richerror.KindBadRequest)
 	}
 
-	users, paginateRes, uErr := s.repo.GetUserList(ctx, req.Paginated, req.Username)
+	users, paginateRes, uErr := s.repo.GetUserList(ctx, req.Paginated, req.Username, req.Roles)
 	if uErr != nil {
 		return ListUserResponse{}, errlog.ErrLog(richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected), s.logger)
 	}

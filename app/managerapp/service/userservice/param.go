@@ -55,6 +55,7 @@ type UserProfileResponse struct {
 
 type ListUserRequest struct {
 	Username  string               `json:"username"`
+	Roles     []types.Role         `json:"roles"`
 	Paginated paginate.RequestBase `json:"paginated"`
 }
 
