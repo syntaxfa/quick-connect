@@ -165,3 +165,18 @@ func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase,
 		TotalPage:    (totalCount + paginated.PageSize - 1) / paginated.PageSize,
 	}, nil
 }
+
+const queryGetUserIDFromExternalUserID = `SELECT user_id FROM external_users
+WHERE external_user_id = $1
+LIMIT 1;`
+
+func (d *DB) GetUserIDFromExternalUserID(ctx context.Context, externalUserID string) (types.ID, error) {
+	const op = "repository.postgres.get.GetUserIDFromExternalUserID"
+
+	var userID string
+	if qErr := d.conn.Conn().QueryRow(ctx, queryGetUserIDFromExternalUserID, externalUserID).Scan(&userID); qErr != nil {
+		return "", richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+
+	return types.ID(userID), nil
+}

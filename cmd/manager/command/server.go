@@ -6,7 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/redis"
 	"github.com/syntaxfa/quick-connect/app/managerapp"
+	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
 )
 
 type Server struct {
@@ -30,11 +33,22 @@ func (s Server) Command(cfg managerapp.Config, logger *slog.Logger, trap chan os
 }
 
 func (s Server) run(trap chan os.Signal) {
-	psqAdapter := postgres.New(s.cfg.Postgres, s.logger)
+	const op = "command.server.run"
 
-	app := managerapp.Setup(s.cfg, s.logger, trap, psqAdapter)
+	psqAdapter := postgres.New(s.cfg.Postgres, s.logger)
+	reAdapter := redis.New(s.cfg.Redis, s.logger)
+
+	app := managerapp.Setup(s.cfg, s.logger, trap, psqAdapter, reAdapter)
 	app.Start()
 
 	psqAdapter.Close()
 	s.logger.Info("postgres connection closed")
+
+	func() {
+		if cErr := reAdapter.Close(); cErr != nil {
+			errlog.WithoutErr(richerror.New(op).WithWrapError(cErr).WithKind(richerror.KindUnexpected), s.logger)
+		}
+	}()
+
+	s.logger.Info("redis connection closed")
 }

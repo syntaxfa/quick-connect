@@ -32,3 +32,9 @@ postgres:
 grpc_server:
   host: "localhost"
   port: 2541
+user:
+  user_id_cache_expiration: 86400s
+redis:
+  host: "localhost"
+  port: 12434
+  password: "Z9265UQfrFiCYWMMJF4uvTEmJA7rEauJ"
