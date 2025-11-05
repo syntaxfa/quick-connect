@@ -23,6 +23,8 @@ type Repository interface {
 	GetUserList(ctx context.Context, paginated paginate.RequestBase, username string) ([]User, paginate.ResponseBase, error)
 	DeleteUser(ctx context.Context, userID types.ID) error
 	UpdateUser(ctx context.Context, userID types.ID, req UserUpdateFromSuperuserRequest) error
+	GetUserHashedPassword(ctx context.Context, userID types.ID) (string, error)
+	ChangePassword(ctx context.Context, userID types.ID, hashedPassword string) error
 }
 
 type ExternalUserRepository interface {

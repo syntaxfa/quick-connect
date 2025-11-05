@@ -27,6 +27,7 @@ const (
 	UserService_UserUpdateFromOwn_FullMethodName       = "/manager.UserService/UserUpdateFromOwn"
 	UserService_UserList_FullMethodName                = "/manager.UserService/UserList"
 	UserService_UserProfile_FullMethodName             = "/manager.UserService/UserProfile"
+	UserService_UserChangePassword_FullMethodName      = "/manager.UserService/UserChangePassword"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -40,6 +41,7 @@ type UserServiceClient interface {
 	UserUpdateFromOwn(ctx context.Context, in *UserUpdateFromOwnRequest, opts ...grpc.CallOption) (*User, error)
 	UserList(ctx context.Context, in *UserListRequest, opts ...grpc.CallOption) (*UserListResponse, error)
 	UserProfile(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*User, error)
+	UserChangePassword(ctx context.Context, in *UserChangePasswordRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type userServiceClient struct {
@@ -120,6 +122,16 @@ func (c *userServiceClient) UserProfile(ctx context.Context, in *empty.Empty, op
 	return out, nil
 }
 
+func (c *userServiceClient) UserChangePassword(ctx context.Context, in *UserChangePasswordRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, UserService_UserChangePassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -131,6 +143,7 @@ type UserServiceServer interface {
 	UserUpdateFromOwn(context.Context, *UserUpdateFromOwnRequest) (*User, error)
 	UserList(context.Context, *UserListRequest) (*UserListResponse, error)
 	UserProfile(context.Context, *empty.Empty) (*User, error)
+	UserChangePassword(context.Context, *UserChangePasswordRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -161,6 +174,9 @@ func (UnimplementedUserServiceServer) UserList(context.Context, *UserListRequest
 }
 func (UnimplementedUserServiceServer) UserProfile(context.Context, *empty.Empty) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserProfile not implemented")
+}
+func (UnimplementedUserServiceServer) UserChangePassword(context.Context, *UserChangePasswordRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserChangePassword not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -309,6 +325,24 @@ func _UserService_UserProfile_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_UserChangePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserChangePasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UserChangePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UserChangePassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UserChangePassword(ctx, req.(*UserChangePasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -343,6 +377,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserProfile",
 			Handler:    _UserService_UserProfile_Handler,
+		},
+		{
+			MethodName: "UserChangePassword",
+			Handler:    _UserService_UserChangePassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

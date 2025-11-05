@@ -275,6 +275,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "This API change user password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "change password",
+                "parameters": [
+                    {
+                        "description": "change password",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userservice.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/users/list": {
             "post": {
                 "security": [
@@ -717,15 +774,30 @@ const docTemplate = `{
                 "support",
                 "story",
                 "file",
-                "notification"
+                "notification",
+                "client",
+                "guest"
             ],
             "x-enum-varnames": [
                 "RoleSuperUser",
                 "RoleSupport",
                 "RoleStory",
                 "RoleFile",
-                "RoleNotification"
+                "RoleNotification",
+                "RoleClient",
+                "RoleGuest"
             ]
+        },
+        "userservice.ChangePasswordRequest": {
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "old_password": {
+                    "type": "string"
+                }
+            }
         },
         "userservice.ListUserRequest": {
             "type": "object",
@@ -979,7 +1051,7 @@ const docTemplate = `{
     }
 }`
 
-// SwaggerInfo holds exported Swagger Info so clients can modify it.
+// SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "",
 	Host:             "",

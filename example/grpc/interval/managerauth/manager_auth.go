@@ -1,4 +1,4 @@
-package main
+package managerauth
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
 )
 
-func managerAuth() {
+func ManagerAuth() {
 	cfg := grpcclient.Config{
 		Host:    "localhost",
 		Port:    2541,
