@@ -8,12 +8,14 @@ import (
 	"sync"
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/redis"
 	grpcdelivery "github.com/syntaxfa/quick-connect/app/managerapp/delivery/grpc"
 	"github.com/syntaxfa/quick-connect/app/managerapp/delivery/http"
 	postgres2 "github.com/syntaxfa/quick-connect/app/managerapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
 	"github.com/syntaxfa/quick-connect/pkg/auth"
+	"github.com/syntaxfa/quick-connect/pkg/cachemanager"
 	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
@@ -32,7 +34,7 @@ type Application struct {
 	grpcServer grpcdelivery.Server
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) Application {
 	t, tErr := translation.New(translation.DefaultLanguages...)
 	if tErr != nil {
 		panic(tErr)
@@ -40,9 +42,10 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 
 	tokenSvc := tokenservice.New(cfg.Token, logger)
 	vldUser := userservice.NewValidate(t)
+	cache := cachemanager.New(re, logger)
 
 	userRepo := postgres2.New(psqAdapter)
-	userSvc := userservice.New(tokenSvc, vldUser, userRepo, logger)
+	userSvc := userservice.New(cfg.User, tokenSvc, vldUser, userRepo, userRepo, logger, cache)
 	handler := http.NewHandler(t, tokenSvc, userSvc)
 
 	jwtValidator := jwtvalidator.New(cfg.Token.PublicKeyString, logger)

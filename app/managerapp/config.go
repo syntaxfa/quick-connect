@@ -4,7 +4,9 @@ import (
 	"time"
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/redis"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
+	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
@@ -17,4 +19,6 @@ type Config struct {
 	Token           tokenservice.Config `koanf:"token"`
 	Postgres        postgres.Config     `koanf:"postgres"`
 	GRPCServer      grpcserver.Config   `koanf:"grpc_server"`
+	User            userservice.Config  `koanf:"user"`
+	Redis           redis.Config        `koanf:"redis"`
 }

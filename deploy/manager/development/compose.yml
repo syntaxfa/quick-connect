@@ -44,3 +44,19 @@ services:
     networks:
       - app_net
       - web_net
+
+  redis:
+    image: redis:8.2.3
+    container_name: redis
+    hostname: redis
+    restart: always
+    command: redis-server --requirepass ${MANAGER_REDIS__PASSWORD} --port ${MANAGER_REDIS__PORT}
+    environment:
+      REDIS_PASSWORD: ${MANAGER_REDIS__PASSWORD}
+      REDIS_PORT: ${MANAGER_REDIS__PORT}
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis.conf
+    ports:
+      - ${MANAGER_REDIS__PORT}:${MANAGER_REDIS__PORT}
+    networks:
+      - app_net
