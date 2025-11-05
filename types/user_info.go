@@ -31,6 +31,8 @@ const (
 
 var AllUserRole = []Role{RoleSuperUser, RoleSupport, RoleStory, RoleFile, RoleNotification, RoleClient, RoleGuest}
 
+var AdminRoles = []Role{RoleSuperUser, RoleSupport, RoleStory, RoleFile, RoleNotification}
+
 func IsValidRole(role Role) bool {
 	for _, r := range AllUserRole {
 		if role == r {
