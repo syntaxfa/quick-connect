@@ -1,9 +1,9 @@
 package http
 
 import (
-	"fmt"
 	"math"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -33,6 +33,7 @@ type PaginationData struct {
 	BaseURL       string
 	Query         string
 	SortDirection int
+	Roles         []string
 }
 
 // ShowUsersPage renders the main user page shell
@@ -60,6 +61,7 @@ func (h Handler) ShowUsersPage(c echo.Context) error {
 		"TotalUsers":   totalUsers,
 		"TemplateName": "users_page",
 		"User":         user,
+		"AllRoles":     GetAllRoles(),
 	}
 
 	if isHTMX(c) {
@@ -86,11 +88,15 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 
 	usernameQuery := c.QueryParam("username")
 
+	roleStrings := c.QueryParams()["roles"]
+	roles := ParseRolesFromForm(roleStrings)
+
 	listReq := &userpb.UserListRequest{
 		CurrentPage:   page,
 		PageSize:      defaultPageSize, // Define page size (e.g., 10)
 		SortDirection: userpb.SortDirection(sortDirInt),
 		Username:      usernameQuery,
+		Roles:         roles,
 	}
 
 	listResp, err := h.userAd.UserList(ctx, listReq)
@@ -103,7 +109,7 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 		users[i] = convertUserPbToUser(pbUser)
 	}
 
-	pagination := h.buildPaginationData(listResp, usernameQuery, int(sortDirInt))
+	pagination := h.buildPaginationData(listResp, usernameQuery, int(sortDirInt), roleStrings)
 
 	data := map[string]interface{}{
 		"Users":      users,
@@ -146,7 +152,7 @@ func (h Handler) DeleteUser(c echo.Context) error {
 }
 
 // buildPaginationData is a helper to create the pagination struct.
-func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string, sortDir int) PaginationData {
+func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string, sortDir int, roleStrings []string) PaginationData {
 	p := PaginationData{
 		TotalNumber:   resp.GetTotalNumber(),
 		CurrentPage:   resp.GetCurrentPage(),
@@ -156,6 +162,7 @@ func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string
 		BaseURL:       "/users/list", // Base URL for pagination links
 		Query:         query,
 		SortDirection: sortDir,
+		Roles:         roleStrings,
 	}
 
 	if p.HasPrev {
@@ -163,6 +170,17 @@ func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string
 	}
 	if p.HasNext {
 		p.NextPage = p.CurrentPage + 1
+	}
+
+	buildURL := func(page int) string {
+		v := url.Values{}
+		v.Set("page", strconv.Itoa(page))
+		v.Set("username", p.Query)
+		v.Set("sort_direction", strconv.Itoa(p.SortDirection))
+		for _, r := range p.Roles {
+			v.Add("roles", r)
+		}
+		return p.BaseURL + "?" + v.Encode()
 	}
 
 	// Build page number links (e.g., show max 5 pages)
@@ -179,7 +197,7 @@ func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string
 	for i := start; i <= end; i++ {
 		p.Pages = append(p.Pages, PaginationPage{
 			PageNumber: i,
-			URL:        fmt.Sprintf("%s?page=%d&username=%s&sort_direction=%d", p.BaseURL, i, p.Query, p.SortDirection),
+			URL:        buildURL(i),
 			//nolint:gosec // G115: CurrentPage is pagination number, overflow is not a realistic concern
 			IsCurrent: i == int(p.CurrentPage),
 		})

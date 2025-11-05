@@ -194,37 +194,6 @@
     });
 </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('menu-toggle-btn');
-        const overlay = document.getElementById('sidebar-overlay');
-
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', function() {
-                sidebar.classList.toggle('open');
-                overlay.classList.toggle('active');
-            });
-        }
-
-        if (overlay) {
-            overlay.addEventListener('click', function() {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-            });
-        }
-
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                if (window.innerWidth <= 640) {
-                    sidebar.classList.remove('open');
-                    overlay.classList.remove('active');
-                }
-            });
-        });
-    });
-</script>
-
 <div id="modal-container"></div>
 
 <div id="toast-container"
@@ -237,6 +206,24 @@
      hx-swap="beforeend"
      hx-vars="message: event.detail.message"
 ></div>
+
+<script>
+    function toggleRoleFilter(btn) {
+        const content = btn.nextElementSibling;
+        if (content) {
+            content.classList.toggle('show');
+        }
+    }
+
+    window.addEventListener('click', function(e) {
+        document.querySelectorAll('.filter-dropdown-content.show').forEach(function(dropdown) {
+            const btn = dropdown.previousElementSibling;
+            if (btn && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
