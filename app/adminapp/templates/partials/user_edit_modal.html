@@ -5,8 +5,10 @@
 
         <form
                 hx-post="/users/{{.User.ID}}/update"
-                hx-target="closest .modal-backdrop"
-                hx-swap="outerHTML"
+
+                hx-target="#modal-error-message"
+                hx-swap="innerHTML"
+                hx-on::after-request="if(!event.detail.xhr.getResponseHeader('X-Http-Status')) this.closest('.modal-backdrop').remove()"
         >
             <div class="modal-header">
                 <h3 class="modal-title">Edit User @{{.User.Username}}</h3>
