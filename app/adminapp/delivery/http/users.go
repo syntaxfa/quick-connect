@@ -283,6 +283,8 @@ func (h Handler) CreateUser(c echo.Context) error {
 
 	c.Response().Header().Set("Hx-Trigger", "userListChanged")
 
+	setTriggerAfterSettle(c, servermsg.MsgUserCreatedSuccessfully)
+
 	return c.NoContent(http.StatusCreated)
 }
 

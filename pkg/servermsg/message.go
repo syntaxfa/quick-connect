@@ -36,4 +36,5 @@ const (
 	MsgPasswordChangedSuccessfully    = "password changed successfully"
 	MsgUserDeletedSuccessfully        = "user deleted successfully"
 	MsgUserUpdatedSuccessfully        = "user updated successfully"
+	MsgUserCreatedSuccessfully        = "user created successfully"
 )

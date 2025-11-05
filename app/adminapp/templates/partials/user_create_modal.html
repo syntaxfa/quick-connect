@@ -6,7 +6,8 @@
                 hx-post="/users/create"
                 hx-target="#modal-error-message"
                 hx-swap="innerHTML"
-                hx-on::after-request="if(event.detail.successful) this.closest('.modal-backdrop').remove()"
+
+                hx-on::after-request="if(!event.detail.xhr.getResponseHeader('X-Http-Status')) this.closest('.modal-backdrop').remove()"
         >
             <div class="modal-header">
                 <h3 class="modal-title">Create New User</h3>
