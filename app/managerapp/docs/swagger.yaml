@@ -116,6 +116,10 @@ definitions:
     properties:
       paginated:
         $ref: '#/definitions/paginate.RequestBase'
+      roles:
+        items:
+          $ref: '#/definitions/types.Role'
+        type: array
       username:
         type: string
     type: object

@@ -3,10 +3,12 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
+	"github.com/lib/pq"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
-	pagesql "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset/sql"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/types"
 )
@@ -92,48 +94,81 @@ func (d *DB) GetUserRolesByUserID(ctx context.Context, userID types.ID) ([]types
 	return roles, nil
 }
 
-func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase,
-	username string) ([]userservice.User, paginate.ResponseBase, error) {
-	const op = "repository.postgres.get.GetUserList"
-
-	filters := map[paginate.FilterParameter]paginate.Filter{}
+func (d *DB) buildUserListFilters(username string, roles []types.Role) (string, string, []interface{}) {
+	args := make([]interface{}, 0)
+	whereClauses := make([]string, 0)
+	joinClause := ""
+	argCount := 1
 
 	if username != "" {
-		filters["username"] = paginate.Filter{Operation: paginate.FilterOperationEqual, Values: []interface{}{username}}
+		whereClauses = append(whereClauses, fmt.Sprintf("u.username ILIKE $%d", argCount))
+		args = append(args, "%"+username+"%")
+		argCount++
 	}
 
-	fields := []string{
-		"id", "username", "fullname", "email", "phone_number", "avatar", "last_online_at",
+	if len(roles) > 0 {
+		joinClause = "JOIN user_roles ur ON u.id = ur.user_id"
+		whereClauses = append(whereClauses, fmt.Sprintf("ur.role = ANY($%d)", argCount))
+		args = append(args, pq.Array(roles))
 	}
-	sortColumn := "id"
+
+	whereQuery := ""
+	if len(whereClauses) > 0 {
+		whereQuery = "WHERE " + strings.Join(whereClauses, " AND ")
+	}
+
+	return joinClause, whereQuery, args
+}
+
+func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase,
+	username string, roles []types.Role) ([]userservice.User, paginate.ResponseBase, error) {
+	const op = "repository.postgres.get.GetUserList"
+
 	offset := (paginated.CurrentPage - 1) * paginated.PageSize
 	limit := paginated.PageSize
+	sortColumn := "id"
+	sortDirection := "ASC"
+	if paginated.Descending {
+		sortDirection = "DESC"
+	}
 
-	query, countQuery, args := pagesql.WriteQuery(pagesql.Parameters{
-		Table:      "users",
-		Fields:     fields,
-		Filters:    filters,
-		SortColumn: sortColumn,
-		Descending: paginated.Descending,
-		Limit:      limit,
-		Offset:     offset,
-	})
+	joinClause, whereQuery, args := d.buildUserListFilters(username, roles)
 
-	rows, qErr := d.conn.Conn().Query(ctx, query, args...)
+	const (
+		limitArgDelta  = 1
+		offsetArgDelta = 2
+	)
+
+	argCount := len(args)
+	query := fmt.Sprintf(`
+		SELECT DISTINCT u.id, u.username, u.fullname, u.email, u.phone_number, u.avatar, u.last_online_at
+		FROM users u
+		%s
+		%s
+		ORDER BY u.%s %s
+		LIMIT $%d OFFSET $%d`,
+		joinClause, whereQuery, sortColumn, sortDirection, argCount+limitArgDelta, argCount+offsetArgDelta)
+
+	mainQueryArgs := make([]interface{}, 0, len(args)+offsetArgDelta)
+	mainQueryArgs = append(mainQueryArgs, args...)
+	mainQueryArgs = append(mainQueryArgs, limit, offset)
+
+	rows, qErr := d.conn.Conn().Query(ctx, query, mainQueryArgs...)
 	if qErr != nil {
-		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected).
+			WithMessage("query error")
 	}
 	defer rows.Close()
 
 	var users []userservice.User
-
 	for rows.Next() {
 		var user userservice.User
 		var nullable nullableFields
 
-		if sErr := rows.Scan(&user.ID, &user.Username, &user.Fullname, &user.Email, &user.PhoneNumber,
-			&nullable.Avatar, &user.LastOnlineAt); sErr != nil {
-			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
+		if sErr := rows.Scan(&user.ID, &user.Username, &user.Fullname, &user.Email, &user.PhoneNumber, &nullable.Avatar,
+			&user.LastOnlineAt); sErr != nil {
+			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected).
+				WithMessage("scan error")
 		}
 
 		if nullable.Avatar.Valid {
@@ -147,15 +182,17 @@ func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase,
 		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
 	}
 
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(DISTINCT u.id)
+		FROM users u
+		%s
+		%s`,
+		joinClause, whereQuery)
+
 	var totalCount uint64
-	if username != "" {
-		if sErr := d.conn.Conn().QueryRow(ctx, countQuery, username).Scan(&totalCount); sErr != nil {
-			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
-		}
-	} else {
-		if sErr := d.conn.Conn().QueryRow(ctx, countQuery).Scan(&totalCount); sErr != nil {
-			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
-		}
+	if sErr := d.conn.Conn().QueryRow(ctx, countQuery, args...).Scan(&totalCount); sErr != nil {
+		return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected).
+			WithMessage("count query error")
 	}
 
 	return users, paginate.ResponseBase{
