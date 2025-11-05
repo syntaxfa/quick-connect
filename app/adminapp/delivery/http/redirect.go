@@ -8,7 +8,7 @@ import (
 
 func redirectToDashboard(c echo.Context) error {
 	if isHTMX(c) {
-		c.Response().Header().Set("Hx-Redirect", "/dashboard")
+		setHxRedirect(c, "/dashboard")
 
 		return c.NoContent(http.StatusOK)
 	}
@@ -18,7 +18,7 @@ func redirectToDashboard(c echo.Context) error {
 
 func redirectToLogin(c echo.Context) error {
 	if isHTMX(c) {
-		c.Response().Header().Set("Hx-Redirect", "/login")
+		setHxRedirect(c, "/login")
 
 		return c.NoContent(http.StatusOK)
 	}

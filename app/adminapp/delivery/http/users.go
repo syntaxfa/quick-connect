@@ -247,7 +247,7 @@ func (h Handler) UpdateUser(c echo.Context) error {
 		return h.renderGRPCError(c, "UpdateUser", aErr)
 	}
 
-	c.Response().Header().Set("Hx-Trigger", "userListChanged")
+	setHxTrigger(c, "userListChanged")
 
 	setTriggerAfterSettle(c, servermsg.MsgUserUpdatedSuccessfully)
 
@@ -281,7 +281,7 @@ func (h Handler) CreateUser(c echo.Context) error {
 		return h.renderGRPCError(c, "CreateUser", aErr)
 	}
 
-	c.Response().Header().Set("Hx-Trigger", "userListChanged")
+	setHxTrigger(c, "userListChanged")
 
 	setTriggerAfterSettle(c, servermsg.MsgUserCreatedSuccessfully)
 
