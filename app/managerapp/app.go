@@ -153,8 +153,8 @@ func setupRoleManager() *rolemanager.RoleManager {
 		"/manager.UserService/UserDetail":              {types.RoleSuperUser},
 		"/manager.UserService/UserUpdateFromSuperuser": {types.RoleSuperUser},
 		"/manager.UserService/UserList":                {types.RoleSuperUser},
-		"/manager.UserService/UserProfile":             types.AllUserRole,
-		"/manager.UserService/UserUpdateFromOwn":       types.AllUserRole,
+		"/manager.UserService/UserProfile":             types.AdminRoles,
+		"/manager.UserService/UserUpdateFromOwn":       types.AdminRoles,
 	}
 
 	return rolemanager.NewRoleManager(methodRoles)

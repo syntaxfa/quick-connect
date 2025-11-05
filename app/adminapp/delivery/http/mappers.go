@@ -30,6 +30,8 @@ func GetAllRoles() []RoleInfo {
 		{Name: string(types.RoleStory), Value: int32(userpb.Role_ROLE_STORY)},
 		{Name: string(types.RoleFile), Value: int32(userpb.Role_ROLE_FILE)},
 		{Name: string(types.RoleNotification), Value: int32(userpb.Role_ROLE_NOTIFICATION)},
+		{Name: string(types.RoleClient), Value: int32(userpb.Role_ROLE_CLIENT)},
+		{Name: string(types.RoleGuest), Value: int32(userpb.Role_ROLE_GUEST)},
 	}
 }
 
@@ -52,6 +54,8 @@ func ParseRolesFromForm(roleStrings []string) []userpb.Role {
 		string(types.RoleStory):        userpb.Role_ROLE_STORY,
 		string(types.RoleFile):         userpb.Role_ROLE_FILE,
 		string(types.RoleNotification): userpb.Role_ROLE_NOTIFICATION,
+		string(types.RoleClient):       userpb.Role_ROLE_CLIENT,
+		string(types.RoleGuest):        userpb.Role_ROLE_GUEST,
 	}
 
 	for _, rs := range roleStrings {
@@ -76,6 +80,10 @@ func convertUserPbToUser(userPb *userpb.User) User {
 			roles = append(roles, string(types.RoleStory))
 		case userpb.Role_ROLE_FILE:
 			roles = append(roles, string(types.RoleFile))
+		case userpb.Role_ROLE_CLIENT:
+			roles = append(roles, string(types.RoleClient))
+		case userpb.Role_ROLE_GUEST:
+			roles = append(roles, string(types.RoleGuest))
 		case userpb.Role_ROLE_UNSPECIFIED:
 			continue
 		}
