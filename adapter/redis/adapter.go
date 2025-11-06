@@ -94,3 +94,18 @@ func (a *Adapter) GetTTL(ctx context.Context, key string) (time.Duration, error)
 
 	return ttl, nil
 }
+
+// Incr implement the Incr method of the cachemanager.CacheClient interface for Redis.
+func (a *Adapter) Incr(ctx context.Context, key string) (int64, error) {
+	return a.client.Incr(ctx, key).Result()
+}
+
+// Decr implement the Decr method of the cachemanager.CacheClient interface for Redis.
+func (a *Adapter) Decr(ctx context.Context, key string) (int64, error) {
+	return a.client.Decr(ctx, key).Result()
+}
+
+// Expire implement the Expire method of the cachemanager.CacheClient interface for Redis.
+func (a *Adapter) Expire(ctx context.Context, key string, expiration time.Duration) error {
+	return a.client.Expire(ctx, key, expiration).Err()
+}
