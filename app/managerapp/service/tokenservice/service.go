@@ -19,6 +19,8 @@ type Config struct {
 	Issuer           string        `koanf:"issuer"`
 	AccessAudience   string        `koanf:"access_audience"`
 	RefreshAudience  string        `koanf:"refresh_audience"`
+	GuestExpiry      time.Duration `koanf:"guest_expiry"`
+	GuestAudience    string        `koanf:"guest_audience"`
 }
 
 type Service struct {

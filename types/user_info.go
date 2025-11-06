@@ -15,6 +15,8 @@ type TokenType string
 const (
 	TokenTypeAccess  TokenType = "access"
 	TokenTypeRefresh TokenType = "refresh"
+	TokenTypeGuest   TokenType = "guest"
+	TokenTypeClient  TokenType = "client"
 )
 
 type Role string
