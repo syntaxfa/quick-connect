@@ -43,3 +43,5 @@ redis:
 delivery:
   register_guest_max_hint: 10
   register_guest_duration_limit: 60s
+  update_guest_max_hint: 10
+  update_guest_duration_limit: 60s

@@ -138,7 +138,7 @@ definitions:
         type: string
       fullname:
         type: string
-      phoneNumber:
+      phone_number:
         type: string
     type: object
   userservice.RegisterGuestUserResponse:
@@ -156,6 +156,36 @@ definitions:
       phone_number:
         type: string
       qc_token:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/types.Role'
+        type: array
+      username:
+        type: string
+    type: object
+  userservice.UpdateGuestUserRequest:
+    properties:
+      email:
+        type: string
+      fullname:
+        type: string
+      phone_number:
+        type: string
+    type: object
+  userservice.UpdateGuestUserResponse:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      fullname:
+        type: string
+      id:
+        type: string
+      last_online_at:
+        type: string
+      phone_number:
         type: string
       roles:
         items:
@@ -742,6 +772,46 @@ paths:
           schema:
             type: string
       summary: RegisterGuestUser
+      tags:
+      - User
+  /users/update-guest:
+    put:
+      consumes:
+      - application/json
+      description: update guest user and return guest user profile
+      parameters:
+      - description: check token validation
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/userservice.UpdateGuestUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/userservice.UpdateGuestUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: UpdateGuestUser
       tags:
       - User
 schemes:
