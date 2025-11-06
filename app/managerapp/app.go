@@ -50,7 +50,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 
 	jwtValidator := jwtvalidator.New(cfg.Token.PublicKeyString, logger)
 	authMid := auth.New(jwtValidator)
-	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler, authMid)
+	httpServer := http.New(cfg.Delivery, httpserver.New(cfg.HTTPServer, logger), handler, authMid, cache, logger)
 
 	roleManager := setupRoleManager()
 	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, roleManager)

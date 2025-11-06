@@ -33,6 +33,15 @@ type CacheClient interface {
 	// If the key is not found, it returns ErrKeyNotFound.
 	// If the key exists nut has no TTL (it's persistent), it returns 0.
 	GetTTL(ctx context.Context, key string) (time.Duration, error)
+
+	// Incr atomically increments the integer value of a key by one.
+	Incr(ctx context.Context, key string) (int64, error)
+
+	// Decr atomically decrements the integer value of a key by one.
+	Decr(ctx context.Context, key string) (int64, error)
+
+	// Expire sets a timeout on a key.
+	Expire(ctx context.Context, key string, expiration time.Duration) error
 }
 
 // CacheManager creates a new instance of CacheManager.
@@ -170,4 +179,37 @@ func (c *CacheManager) GetTTL(ctx context.Context, key string) (time.Duration, e
 	}
 
 	return ttl, nil
+}
+
+// Incr atomically increments the integer value of a key by one.
+// This is a pass-through method and does not involve JSON marshalling.
+func (c *CacheManager) Incr(ctx context.Context, key string) (int64, error) {
+	val, err := c.client.Incr(ctx, key)
+	if err != nil {
+		return 0, fmt.Errorf("cachemanager: failed to incr key '%s': %s", key, err.Error())
+	}
+
+	return val, nil
+}
+
+// Decr atomically decrements the integer value of a key by one.
+// This is a pass-through method and does not involve JSON marshalling.
+func (c *CacheManager) Decr(ctx context.Context, key string) (int64, error) {
+	val, err := c.client.Decr(ctx, key)
+	if err != nil {
+		return 0, fmt.Errorf("cachemanager: failed to decr key '%s': %s", key, err.Error())
+	}
+
+	return val, nil
+}
+
+// Expire sets a timeout on a key.
+// This is a pass-through method.
+func (c *CacheManager) Expire(ctx context.Context, key string, expiration time.Duration) error {
+	err := c.client.Expire(ctx, key, expiration)
+	if err != nil {
+		return fmt.Errorf("cachemanager: failed to expire key '%s': %s", key, err.Error())
+	}
+
+	return nil
 }
