@@ -70,13 +70,23 @@ type ChangePasswordRequest struct {
 }
 
 type RegisterGuestUserRequest struct {
-	Fullname    string
-	Email       string
-	PhoneNumber string
+	Fullname    string `json:"fullname"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
 }
 
 type RegisterGuestUserResponse struct {
 	User
 
 	QCToken string `json:"qc_token"`
+}
+
+type UpdateGuestUserRequest struct {
+	Fullname    string `json:"fullname"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
+}
+
+type UpdateGuestUserResponse struct {
+	User
 }

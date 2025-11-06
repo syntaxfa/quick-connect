@@ -244,3 +244,12 @@ func (v Validate) ValidateRegisterGuestUserRequest(req RegisterGuestUserRequest)
 
 	return nil
 }
+
+func (v Validate) ValidateUpdateGuestUserRequest(req UpdateGuestUserRequest) error {
+	//nolint: staticcheck // wrong lint, it's ok
+	return v.ValidateRegisterGuestUserRequest(RegisterGuestUserRequest{
+		Fullname:    req.Fullname,
+		Email:       req.Email,
+		PhoneNumber: req.PhoneNumber,
+	})
+}
