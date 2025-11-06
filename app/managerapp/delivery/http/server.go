@@ -65,6 +65,8 @@ func (s Server) registerRoutes() {
 	user.POST("/change-password", s.handler.ChangePassword, s.authMid.RequireAuth)
 	user.POST("/register-guest", s.handler.RegisterGuestUser,
 		ratelimit.ByIPAddressMiddleware(s.cache, s.cfg.RegisterGuestMaxHint, s.cfg.RegisterGuestDurationLimit, s.logger))
+	user.PUT("/update-guest", s.handler.UpdateGuestUser, s.authMid.RequireAuth, s.authMid.RequireRole([]types.Role{types.RoleGuest}),
+		ratelimit.ByIPAddressMiddleware(s.cache, s.cfg.UpdateGuestMaxHint, s.cfg.UpdateGuestDurationLimit, s.logger))
 }
 
 func (s Server) registerSwagger() {
