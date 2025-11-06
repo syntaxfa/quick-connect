@@ -2,25 +2,35 @@ package http
 
 import (
 	"context"
+	"log/slog"
 
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/syntaxfa/quick-connect/app/managerapp/docs"
 	"github.com/syntaxfa/quick-connect/pkg/auth"
+	"github.com/syntaxfa/quick-connect/pkg/cachemanager"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
+	"github.com/syntaxfa/quick-connect/pkg/ratelimit"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
 type Server struct {
+	cfg        Config
 	httpserver httpserver.Server
 	handler    Handler
 	authMid    *auth.Middleware
+	cache      *cachemanager.CacheManager
+	logger     *slog.Logger
 }
 
-func New(httpServer httpserver.Server, handler Handler, authMid *auth.Middleware) Server {
+func New(cfg Config, httpServer httpserver.Server, handler Handler, authMid *auth.Middleware,
+	cache *cachemanager.CacheManager, logger *slog.Logger) Server {
 	return Server{
+		cfg:        cfg,
 		httpserver: httpServer,
 		handler:    handler,
 		authMid:    authMid,
+		cache:      cache,
+		logger:     logger,
 	}
 }
 
@@ -53,7 +63,8 @@ func (s Server) registerRoutes() {
 	user.POST("/login", s.handler.UserLogin)
 	user.GET("/profile", s.handler.UserProfile, s.authMid.RequireAuth)
 	user.POST("/change-password", s.handler.ChangePassword, s.authMid.RequireAuth)
-	user.POST("/register-guest", s.handler.RegisterGuestUser)
+	user.POST("/register-guest", s.handler.RegisterGuestUser,
+		ratelimit.ByIPAddressMiddleware(s.cache, s.cfg.RegisterGuestMaxHint, s.cfg.RegisterGuestDurationLimit, s.logger))
 }
 
 func (s Server) registerSwagger() {
