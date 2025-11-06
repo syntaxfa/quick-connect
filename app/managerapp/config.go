@@ -5,6 +5,7 @@ import (
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/adapter/redis"
+	"github.com/syntaxfa/quick-connect/app/managerapp/delivery/http"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
@@ -21,4 +22,5 @@ type Config struct {
 	GRPCServer      grpcserver.Config   `koanf:"grpc_server"`
 	User            userservice.Config  `koanf:"user"`
 	Redis           redis.Config        `koanf:"redis"`
+	Delivery        http.Config         `koanf:"delivery"`
 }
