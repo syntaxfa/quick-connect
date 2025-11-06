@@ -12,6 +12,7 @@ import (
 
 type TokenSvc interface {
 	GenerateTokenPair(userID types.ID, roles []types.Role) (*tokenservice.TokenGenerateResponse, error)
+	GenerateGuestToken(ctx context.Context, userID types.ID) (string, error)
 }
 
 type Repository interface {

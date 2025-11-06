@@ -53,6 +53,7 @@ func (s Server) registerRoutes() {
 	user.POST("/login", s.handler.UserLogin)
 	user.GET("/profile", s.handler.UserProfile, s.authMid.RequireAuth)
 	user.POST("/change-password", s.handler.ChangePassword, s.authMid.RequireAuth)
+	user.POST("/register-guest", s.handler.RegisterGuestUser)
 }
 
 func (s Server) registerSwagger() {

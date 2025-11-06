@@ -68,3 +68,15 @@ type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
 }
+
+type RegisterGuestUserRequest struct {
+	Fullname    string
+	Email       string
+	PhoneNumber string
+}
+
+type RegisterGuestUserResponse struct {
+	User
+
+	QCToken string `json:"qc_token"`
+}

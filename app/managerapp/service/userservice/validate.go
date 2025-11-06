@@ -216,3 +216,31 @@ func (v Validate) ChangePasswordRequest(req ChangePasswordRequest) error {
 
 	return nil
 }
+
+func (v Validate) ValidateRegisterGuestUserRequest(req RegisterGuestUserRequest) error {
+	const op = "service.validate.ValidateRegisterGuestUserRequest"
+
+	if err := validation.ValidateStruct(&req,
+		validation.Field(&req.Fullname,
+			validation.Length(minFullnameLength, maxFullnameLength).Error(servermsg.MsgInvalidLengthOfFullname)),
+		validation.Field(&req.Email,
+			validation.Length(minEmailLength, maxEmailLength).Error(servermsg.MsgInvalidLengthOfEmail),
+			validation.Match(emailRegex).Error(servermsg.MsgInvalidEmailFormat)),
+	); err != nil {
+		fieldErrors := make(map[string]string)
+
+		vErr := validation.Errors{}
+		if errors.As(err, &vErr) {
+			for key, value := range vErr {
+				if value != nil {
+					fieldErrors[key] = v.t.TranslateMessage(value.Error())
+				}
+			}
+		}
+
+		return richerror.New(op).WithMessage(servermsg.MsgInvalidInput).WithKind(richerror.KindInvalid).
+			WithErrorFields(fieldErrors).WithMeta(map[string]interface{}{"req": req})
+	}
+
+	return nil
+}
