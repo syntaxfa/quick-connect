@@ -18,6 +18,8 @@ token:
   issuer: quick-connect-auth-service
   access_audience: all-quick-connect-service
   refresh_audience: all-quick-connect-service
+  guest_expiry: 8640h
+  guest_audience: chat-service
 postgres:
   host: "localhost"
   port: 11579

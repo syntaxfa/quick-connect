@@ -1,6 +1,7 @@
 package tokenservice
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -67,4 +68,16 @@ func (s Service) generateToken(userID types.ID, roles []types.Role, tokenType ty
 	}
 
 	return signedToken, nil
+}
+
+func (s Service) GenerateGuestToken(ctx context.Context, userID types.ID) (string, error) {
+	const op = "auth.service.generate.GenerateGuestToken"
+
+	guestToken, gErr := s.generateToken(userID, []types.Role{types.RoleGuest}, types.TokenTypeGuest, s.cfg.GuestExpiry,
+		s.cfg.GuestAudience)
+	if gErr != nil {
+		return "", errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return guestToken, nil
 }

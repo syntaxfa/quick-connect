@@ -132,6 +132,38 @@ definitions:
           $ref: '#/definitions/userservice.User'
         type: array
     type: object
+  userservice.RegisterGuestUserRequest:
+    properties:
+      email:
+        type: string
+      fullname:
+        type: string
+      phoneNumber:
+        type: string
+    type: object
+  userservice.RegisterGuestUserResponse:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      fullname:
+        type: string
+      id:
+        type: string
+      last_online_at:
+        type: string
+      phone_number:
+        type: string
+      qc_token:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/types.Role'
+        type: array
+      username:
+        type: string
+    type: object
   userservice.User:
     properties:
       avatar:
@@ -676,6 +708,40 @@ paths:
       security:
       - JWT: []
       summary: UserProfile
+      tags:
+      - User
+  /users/register-guest:
+    post:
+      consumes:
+      - application/json
+      description: register guest user and generate QCToken (long expire time)
+      parameters:
+      - description: check token validation
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/userservice.RegisterGuestUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/userservice.RegisterGuestUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: RegisterGuestUser
       tags:
       - User
 schemes:

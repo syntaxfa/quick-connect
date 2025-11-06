@@ -19,3 +19,7 @@ type TokenVerifyRequest struct {
 type TokenRefreshRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
+
+type TokenGuestResponse struct {
+	QCToken string `json:"qc_token"`
+}
