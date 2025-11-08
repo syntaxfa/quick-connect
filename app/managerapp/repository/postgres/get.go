@@ -23,7 +23,10 @@ FROM user_roles
 WHERE user_id = $1;`
 
 type nullableFields struct {
-	Avatar sql.NullString
+	Fullname    sql.NullString
+	Email       sql.NullString
+	PhoneNumber sql.NullString
+	Avatar      sql.NullString
 }
 
 func (d *DB) GetUserByUsername(ctx context.Context, username string) (userservice.User, error) {
@@ -47,9 +50,21 @@ func (d *DB) getUserBy(ctx context.Context, op string, query string, arg interfa
 	var nullable nullableFields
 
 	if qErr := d.conn.Conn().QueryRow(ctx, query, arg).Scan(
-		&user.ID, &user.Username, &user.HashedPassword, &user.Fullname, &user.Email, &user.PhoneNumber, &nullable.Avatar,
+		&user.ID, &user.Username, &user.HashedPassword, &nullable.Fullname, &nullable.Email, &nullable.PhoneNumber, &nullable.Avatar,
 		&user.LastOnlineAt); qErr != nil {
 		return userservice.User{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected).WithMessage("get user")
+	}
+
+	if nullable.Fullname.Valid {
+		user.Fullname = nullable.Fullname.String
+	}
+
+	if nullable.Email.Valid {
+		user.Email = nullable.Email.String
+	}
+
+	if nullable.PhoneNumber.Valid {
+		user.PhoneNumber = nullable.PhoneNumber.String
 	}
 
 	if nullable.Avatar.Valid {
@@ -165,10 +180,22 @@ func (d *DB) GetUserList(ctx context.Context, paginated paginate.RequestBase,
 		var user userservice.User
 		var nullable nullableFields
 
-		if sErr := rows.Scan(&user.ID, &user.Username, &user.Fullname, &user.Email, &user.PhoneNumber, &nullable.Avatar,
+		if sErr := rows.Scan(&user.ID, &user.Username, &nullable.Fullname, &nullable.Email, &nullable.PhoneNumber, &nullable.Avatar,
 			&user.LastOnlineAt); sErr != nil {
 			return nil, paginate.ResponseBase{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected).
 				WithMessage("scan error")
+		}
+
+		if nullable.Fullname.Valid {
+			user.Fullname = nullable.Fullname.String
+		}
+
+		if nullable.Email.Valid {
+			user.Email = nullable.Email.String
+		}
+
+		if nullable.PhoneNumber.Valid {
+			user.PhoneNumber = nullable.PhoneNumber.String
 		}
 
 		if nullable.Avatar.Valid {

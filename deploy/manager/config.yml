@@ -1,3 +1,4 @@
+api_key: "vrOKIvVWwrDFirTmv24t25fv2131vv"
 shutdown_timeout: 120s
 http_server:
   port: 2531
@@ -20,6 +21,8 @@ token:
   refresh_audience: all-quick-connect-service
   guest_expiry: 8640h
   guest_audience: chat-service
+  client_expiry: 720h
+  client_audience: char-service
 postgres:
   host: "localhost"
   port: 11579
@@ -36,6 +39,7 @@ grpc_server:
   port: 2541
 user:
   user_id_cache_expiration: 86400s
+  password_default_length: 25
 redis:
   host: "localhost"
   port: 12434
@@ -45,3 +49,7 @@ delivery:
   register_guest_duration_limit: 60s
   update_guest_max_hint: 10
   update_guest_duration_limit: 60s
+internal_http_server:
+  port: 2533
+  cors:
+    allow_origins:

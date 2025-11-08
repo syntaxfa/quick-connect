@@ -2,7 +2,6 @@ package userservice
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
@@ -31,20 +30,14 @@ func (s Service) RegisterGuestUser(ctx context.Context, req RegisterGuestUserReq
 
 	if req.Fullname != "" {
 		userCreateReq.Fullname = req.Fullname
-	} else {
-		userCreateReq.Fullname = userCreateReq.Username
 	}
 
 	if req.Email != "" {
 		userCreateReq.Email = req.Email
-	} else {
-		userCreateReq.Email = fmt.Sprintf("%s@anomymous.none", userCreateReq.Username)
 	}
 
 	if req.PhoneNumber != "" {
 		userCreateReq.PhoneNumber = req.PhoneNumber
-	} else {
-		userCreateReq.PhoneNumber = "None"
 	}
 
 	user, cErr := s.repo.CreateUser(ctx, userCreateReq)
