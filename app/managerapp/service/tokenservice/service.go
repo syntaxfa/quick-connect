@@ -21,6 +21,8 @@ type Config struct {
 	RefreshAudience  string        `koanf:"refresh_audience"`
 	GuestExpiry      time.Duration `koanf:"guest_expiry"`
 	GuestAudience    string        `koanf:"guest_audience"`
+	ClientExpiry     time.Duration `koanf:"client_expiry"`
+	ClientAudience   string        `koanf:"client_audience"`
 }
 
 type Service struct {

@@ -112,6 +112,40 @@ definitions:
       old_password:
         type: string
     type: object
+  userservice.IdentifyClientRequest:
+    properties:
+      email:
+        type: string
+      fullname:
+        type: string
+      phone_number:
+        type: string
+      user_id:
+        type: string
+    type: object
+  userservice.IdentifyClientResponse:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      fullname:
+        type: string
+      id:
+        type: string
+      last_online_at:
+        type: string
+      phone_number:
+        type: string
+      qc_token:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/types.Role'
+        type: array
+      username:
+        type: string
+    type: object
   userservice.ListUserRequest:
     properties:
       paginated:
@@ -338,6 +372,45 @@ definitions:
 info:
   contact: {}
 paths:
+  /auth/identify-client:
+    post:
+      consumes:
+      - application/json
+      description: register guest user and generate QCToken (long expire time)
+      parameters:
+      - description: API Key for authorization
+        in: query
+        name: APIKey
+        required: true
+        type: string
+      - description: check token validation
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/userservice.IdentifyClientRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/userservice.IdentifyClientResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: IdentifyClient
+      tags:
+      - Internal
   /health-check:
     get:
       consumes:

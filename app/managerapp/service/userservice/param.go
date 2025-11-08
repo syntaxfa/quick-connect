@@ -90,3 +90,16 @@ type UpdateGuestUserRequest struct {
 type UpdateGuestUserResponse struct {
 	User
 }
+
+type IdentifyClientRequest struct {
+	ExternalUserID string `json:"user_id"`
+	Fullname       string `json:"fullname"`
+	Email          string `json:"email"`
+	PhoneNumber    string `json:"phone_number"`
+}
+
+type IdentifyClientResponse struct {
+	User
+
+	QCToken string `json:"qc_token"`
+}

@@ -81,3 +81,15 @@ func (s Service) GenerateGuestToken(ctx context.Context, userID types.ID) (strin
 
 	return guestToken, nil
 }
+
+func (s Service) GenerateClientToken(ctx context.Context, userID types.ID, roles []types.Role) (string, error) {
+	const op = "auth.service.generate.GenerateClientToken"
+
+	guestToken, gErr := s.generateToken(userID, roles, types.TokenTypeClient, s.cfg.ClientExpiry,
+		s.cfg.GuestAudience)
+	if gErr != nil {
+		return "", errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return guestToken, nil
+}
