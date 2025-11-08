@@ -253,3 +253,37 @@ func (v Validate) ValidateUpdateGuestUserRequest(req UpdateGuestUserRequest) err
 		PhoneNumber: req.PhoneNumber,
 	})
 }
+
+func (v Validate) ValidateIdentifyClientRequest(req IdentifyClientRequest) error {
+	const op = "service.validate.ValidateIdentifyClient"
+
+	if err := validation.ValidateStruct(&req,
+		validation.Field(&req.ExternalUserID,
+			validation.Required.Error(servermsg.MsgFieldRequired)),
+		validation.Field(&req.Fullname,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.Length(minFullnameLength, maxFullnameLength).Error(servermsg.MsgInvalidLengthOfFullname)),
+		validation.Field(&req.Email,
+			validation.Required.Error(servermsg.MsgFieldRequired),
+			validation.Length(minEmailLength, maxEmailLength).Error(servermsg.MsgInvalidLengthOfEmail),
+			validation.Match(emailRegex).Error(servermsg.MsgInvalidEmailFormat)),
+		validation.Field(&req.PhoneNumber,
+			validation.Required.Error(servermsg.MsgFieldRequired)),
+	); err != nil {
+		fieldErrors := make(map[string]string)
+
+		vErr := validation.Errors{}
+		if errors.As(err, &vErr) {
+			for key, value := range vErr {
+				if value != nil {
+					fieldErrors[key] = v.t.TranslateMessage(value.Error())
+				}
+			}
+		}
+
+		return richerror.New(op).WithMessage(servermsg.MsgInvalidInput).WithKind(richerror.KindInvalid).
+			WithErrorFields(fieldErrors).WithMeta(map[string]interface{}{"req": req})
+	}
+
+	return nil
+}

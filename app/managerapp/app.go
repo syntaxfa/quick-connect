@@ -27,11 +27,12 @@ import (
 )
 
 type Application struct {
-	cfg        Config
-	trap       <-chan os.Signal
-	logger     *slog.Logger
-	httpServer http.Server
-	grpcServer grpcdelivery.Server
+	cfg                Config
+	trap               <-chan os.Signal
+	logger             *slog.Logger
+	httpServer         http.Server
+	internalHTTPServer http.InternalServer
+	grpcServer         grpcdelivery.Server
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) Application {
@@ -52,22 +53,27 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	authMid := auth.New(jwtValidator)
 	httpServer := http.New(cfg.Delivery, httpserver.New(cfg.HTTPServer, logger), handler, authMid, cache, logger)
 
+	internalHandler := http.NewInternalHandler(userSvc, t)
+	internalHTTPServer := http.NewInternalServer(httpserver.New(cfg.InternalHTTPServer, logger), internalHandler, logger, cfg.APIKey)
+
 	roleManager := setupRoleManager()
 	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, roleManager)
 	grpcHandler := grpcdelivery.NewHandler(logger, tokenSvc, userSvc, t)
 	grpcServer := grpcdelivery.New(grpcserver.New(cfg.GRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)), grpcHandler, logger)
 
 	return Application{
-		cfg:        cfg,
-		trap:       trap,
-		logger:     logger,
-		httpServer: httpServer,
-		grpcServer: grpcServer,
+		cfg:                cfg,
+		trap:               trap,
+		logger:             logger,
+		httpServer:         httpServer,
+		grpcServer:         grpcServer,
+		internalHTTPServer: internalHTTPServer,
 	}
 }
 
 func (a Application) Start() {
 	httpServerChan := make(chan error, 1)
+	internalHTTPServerChan := make(chan error, 1)
 	grpcServerChan := make(chan error, 1)
 
 	go func() {
@@ -75,6 +81,14 @@ func (a Application) Start() {
 
 		if sErr := a.httpServer.Start(); sErr != nil {
 			httpServerChan <- sErr
+		}
+	}()
+
+	go func() {
+		a.logger.Info(fmt.Sprintf("internal http server started on %d", a.cfg.InternalHTTPServer.Port))
+
+		if sErr := a.internalHTTPServer.Start(); sErr != nil {
+			internalHTTPServerChan <- sErr
 		}
 	}()
 
@@ -87,6 +101,9 @@ func (a Application) Start() {
 	select {
 	case err := <-httpServerChan:
 		a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.HTTPServer.Port), slog.String("error", err.Error()))
+	case err := <-internalHTTPServerChan:
+		a.logger.Error(fmt.Sprintf("error in internal http server on %d", a.cfg.InternalHTTPServer.Port),
+			slog.String("error", err.Error()))
 	case err := <-grpcServerChan:
 		a.logger.Error(fmt.Sprintf("error in grpc server on %d", a.cfg.GRPCServer.Port), slog.String("error", err.Error()))
 	case <-a.trap:
@@ -110,8 +127,12 @@ func (a Application) Stop(ctx context.Context) bool {
 
 	go func() {
 		var shutdownWg sync.WaitGroup
+
 		shutdownWg.Add(1)
 		go a.StopHTTPServer(ctx, &shutdownWg)
+
+		shutdownWg.Add(1)
+		go a.StopInternalHTTPServer(ctx, &shutdownWg)
 
 		shutdownWg.Add(1)
 		go a.StopGRPCServer(&shutdownWg)
@@ -132,6 +153,13 @@ func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	if sErr := a.httpServer.Stop(ctx); sErr != nil {
 		a.logger.ErrorContext(ctx, "http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+	}
+}
+
+func (a Application) StopInternalHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if sErr := a.internalHTTPServer.Stop(ctx); sErr != nil {
+		a.logger.ErrorContext(ctx, "internal http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
 }
 

@@ -14,13 +14,15 @@ import (
 )
 
 type Config struct {
-	ShutdownTimeout time.Duration       `koanf:"shutdown_timeout"`
-	HTTPServer      httpserver.Config   `koanf:"http_server"`
-	Logger          logger.Config       `koanf:"logger"`
-	Token           tokenservice.Config `koanf:"token"`
-	Postgres        postgres.Config     `koanf:"postgres"`
-	GRPCServer      grpcserver.Config   `koanf:"grpc_server"`
-	User            userservice.Config  `koanf:"user"`
-	Redis           redis.Config        `koanf:"redis"`
-	Delivery        http.Config         `koanf:"delivery"`
+	ShutdownTimeout    time.Duration       `koanf:"shutdown_timeout"`
+	HTTPServer         httpserver.Config   `koanf:"http_server"`
+	Logger             logger.Config       `koanf:"logger"`
+	Token              tokenservice.Config `koanf:"token"`
+	Postgres           postgres.Config     `koanf:"postgres"`
+	GRPCServer         grpcserver.Config   `koanf:"grpc_server"`
+	User               userservice.Config  `koanf:"user"`
+	Redis              redis.Config        `koanf:"redis"`
+	Delivery           http.Config         `koanf:"delivery"`
+	InternalHTTPServer httpserver.Config   `koanf:"internal_http_server"`
+	APIKey             string              `koanf:"api_key"`
 }
