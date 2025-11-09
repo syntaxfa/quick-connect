@@ -3,6 +3,7 @@ package chatapp
 import (
 	"time"
 
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
@@ -15,4 +16,5 @@ type Config struct {
 	Logger          logger.Config     `koanf:"logger"`
 	Websocket       websocket.Config  `koanf:"websocket"`
 	ChatService     service.Config    `koanf:"chat"`
+	Postgres        postgres.Config   `koanf:"postgres"`
 }
