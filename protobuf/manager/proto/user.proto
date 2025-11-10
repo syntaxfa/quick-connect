@@ -16,6 +16,7 @@ enum Role {
     ROLE_NOTIFICATION = 5;
     ROLE_CLIENT = 6;
     ROLE_GUEST = 7;
+    ROLE_BOT = 8;
 }
 
 message CreateUserRequest {
