@@ -37,3 +37,28 @@ func (s *Service) GetUserActiveConversation(ctx context.Context, userID types.ID
 
 	return conversation, nil
 }
+
+// ListConversations handles the business logic for listing conversations.
+func (s *Service) ListConversations(ctx context.Context, req ListConversationsRequest) (ListConversationsResponse, error) {
+	const op = "service.conversation.ListConversations"
+
+	if bErr := req.Paginated.BasicValidation(); bErr != nil {
+		return ListConversationsResponse{}, richerror.New(op).WithKind(richerror.KindBadRequest).
+			WithWrapError(bErr)
+	}
+
+	if vErr := s.vld.ValidateListConversationsRequest(req); vErr != nil {
+		return ListConversationsResponse{}, vErr
+	}
+
+	convos, paginateRes, rErr := s.repo.GetConversationList(ctx, req.Paginated, req.AssignedSupportID, req.Statuses)
+	if rErr != nil {
+		return ListConversationsResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(rErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return ListConversationsResponse{
+		Results:  convos,
+		Paginate: paginateRes,
+	}, nil
+}
