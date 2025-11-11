@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"log/slog"
 
 	"github.com/google/uuid"
@@ -21,6 +22,8 @@ type Repository interface {
 	CreateActiveConversation(ctx context.Context, id, userID types.ID, conversationStatus ConversationStatus) (Conversation, error)
 	GetUserActiveConversation(ctx context.Context, userID types.ID) (Conversation, error)
 	SaveMessage(message Message) error
+	GetConversationList(ctx context.Context, paginated paginate.RequestBase, assignedSupportID types.ID,
+		statuses []ConversationStatus) ([]Conversation, paginate.ResponseBase, error)
 }
 
 type Service struct {
@@ -29,9 +32,10 @@ type Service struct {
 	repo           Repository
 	websocketConns map[string]Connection
 	logger         *slog.Logger
+	vld            Validate
 }
 
-func New(cfg Config, repo Repository, logger *slog.Logger) *Service {
+func New(cfg Config, repo Repository, logger *slog.Logger, vld Validate) *Service {
 	hub := NewHub(logger)
 	go hub.Run()
 
@@ -41,6 +45,7 @@ func New(cfg Config, repo Repository, logger *slog.Logger) *Service {
 		repo:           repo,
 		websocketConns: make(map[string]Connection),
 		logger:         logger,
+		vld:            vld,
 	}
 }
 
