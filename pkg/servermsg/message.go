@@ -38,4 +38,8 @@ const (
 	MsgUserUpdatedSuccessfully        = "user updated successfully"
 	MsgUserCreatedSuccessfully        = "user created successfully"
 	MsgProfileUpdatedSuccessfully     = "profile updated successfully"
+
+	// Chat App.
+
+	MsgInvalidConversationStatus = "invalid conversation status"
 )

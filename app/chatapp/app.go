@@ -54,7 +54,8 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	}
 
 	chatRepo := postgres2.New(psqAdapter)
-	chatSvc := service.New(cfg.ChatService, chatRepo, logger)
+	vld := service.NewValidate(t)
+	chatSvc := service.New(cfg.ChatService, chatRepo, logger, vld)
 	chatHandler := http.NewHandler(upgrader, logger, chatSvc, t)
 
 	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC)
