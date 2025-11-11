@@ -28,7 +28,7 @@ func (h Handler) RefreshToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	resp, sErr := h.tokenSvc.RefreshTokens(req.RefreshToken)
+	resp, sErr := h.userSvc.RefreshToken(c.Request().Context(), req.RefreshToken)
 	if sErr != nil {
 		return servermsg.HTTPMsg(c, sErr, h.t)
 	}
