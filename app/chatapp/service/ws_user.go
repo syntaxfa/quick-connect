@@ -79,7 +79,7 @@ func (u *wsUser) readPump(op string, broadcastChan chan<- Message, unregisterFun
 			continue
 		}
 
-		msg.Sender = u.id
+		//msg.Sender = u.id
 
 		// Send to the destination channel provided as an argument
 		broadcastChan <- msg

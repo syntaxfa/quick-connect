@@ -75,12 +75,12 @@ func (h *Hub) Run() {
 		case message := <-h.broadcastToSupport:
 			h.SendMessageToSupport(message)
 
-		case message := <-h.broadcastToClient:
-			if message.Recipient == "" {
-				h.BroadcastToAllClient(message)
-			} else {
-				h.SendPrivateMessageToClient(message)
-			}
+			//case message := <-h.broadcastToClient:
+			//	if message.Recipient == "" {
+			//		h.BroadcastToAllClient(message)
+			//	} else {
+			//		h.SendPrivateMessageToClient(message)
+			//	}
 		}
 	}
 }
@@ -117,10 +117,10 @@ func (h *Hub) SendMessageToSupport(message Message) {
 		support.Send(message)
 	}
 
-	if sender, ok := h.clients[message.Sender]; ok {
-		message.Type = MessageTypeEcho
-		sender.Send(message)
-	}
+	//if sender, ok := h.clients[message.Sender]; ok {
+	//	message.Type = MessageTypeEcho
+	//	sender.Send(message)
+	//}
 }
 
 func (h *Hub) BroadcastToAllClient(message Message) {
@@ -131,22 +131,22 @@ func (h *Hub) BroadcastToAllClient(message Message) {
 		client.Send(message)
 	}
 
-	if sender, ok := h.supports[message.Sender]; ok {
-		message.Type = MessageTypeEcho
-		sender.Send(message)
-	}
+	//if sender, ok := h.supports[message.Sender]; ok {
+	//	message.Type = MessageTypeEcho
+	//	sender.Send(message)
+	//}
 }
 
 func (h *Hub) SendPrivateMessageToClient(message Message) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
-	if client, clientOk := h.clients[message.Recipient]; clientOk {
-		client.Send(message)
-
-		if sender, supportOk := h.supports[message.Sender]; supportOk {
-			message.Type = MessageTypeEcho
-			sender.Send(message)
-		}
-	}
+	//if client, clientOk := h.clients[message.Recipient]; clientOk {
+	//	client.Send(message)
+	//
+	//	if sender, supportOk := h.supports[message.Sender]; supportOk {
+	//		message.Type = MessageTypeEcho
+	//		sender.Send(message)
+	//	}
+	//}
 }

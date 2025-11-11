@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
     "phone_number" VARCHAR(24) NULL,
     "avatar" VARCHAR(255) NULL,
     "last_online_at" TIMESTAMP DEFAULT NOW(),
-    "created_at" TIMESTAMP DEFAULT NOW(),
-    "updated_at" TIMESTAMP DEFAULT NOW()
+    "created_at" TIMESTAMP NOT NULL DEFAULT NOW(),
+    "updated_at" TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_username_users ON users(username);
