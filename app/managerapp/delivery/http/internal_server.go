@@ -6,8 +6,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	echoSwagger "github.com/swaggo/echo-swagger"
-	"github.com/syntaxfa/quick-connect/app/managerapp/docs"
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
@@ -45,10 +43,6 @@ func NewInternalHandler(userSvc userservice.Service, t *translation.Translate) I
 func (s InternalServer) Start() error {
 	s.registerRoutes()
 
-	rootGr := s.httpServer.Router.Group("", AccessToPrivateEndpoint(s.apiKey))
-
-	rootGr.POST("/auth/identify-client", s.handler.IdentifyClient)
-
 	return s.httpServer.Start()
 }
 
@@ -57,15 +51,9 @@ func (s InternalServer) Stop(ctx context.Context) error {
 }
 
 func (s InternalServer) registerRoutes() {
-	s.registerInternalSwagger()
-}
+	rootGr := s.httpServer.Router.Group("", AccessToPrivateEndpoint(s.apiKey))
 
-func (s InternalServer) registerInternalSwagger() {
-	docs.SwaggerInfo.Title = "Manager Internal API"
-	docs.SwaggerInfo.Description = "Manager restfull API documentation, just APIs with Internal tag!"
-	docs.SwaggerInfo.Version = "1.0.0"
-
-	s.httpServer.Router.GET("/swagger/*any", echoSwagger.WrapHandler)
+	rootGr.POST("/auth/identify-client", s.handler.IdentifyClient)
 }
 
 // IdentifyClient docs

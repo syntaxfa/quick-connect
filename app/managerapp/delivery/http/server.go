@@ -63,9 +63,11 @@ func (s Server) registerRoutes() {
 	user.POST("/login", s.handler.UserLogin)
 	user.GET("/profile", s.handler.UserProfile, s.authMid.RequireAuth)
 	user.POST("/change-password", s.handler.ChangePassword, s.authMid.RequireAuth)
-	user.POST("/register-guest", s.handler.RegisterGuestUser,
+
+	guest := user.Group("/guest")
+	guest.POST("/register", s.handler.RegisterGuestUser,
 		ratelimit.ByIPAddressMiddleware(s.cache, s.cfg.RegisterGuestMaxHint, s.cfg.RegisterGuestDurationLimit, s.logger))
-	user.PUT("/update-guest", s.handler.UpdateGuestUser, s.authMid.RequireAuth, s.authMid.RequireRole([]types.Role{types.RoleGuest}),
+	guest.PUT("/update", s.handler.UpdateGuestUser, s.authMid.RequireAuth, s.authMid.RequireRole([]types.Role{types.RoleGuest}),
 		ratelimit.ByIPAddressMiddleware(s.cache, s.cfg.UpdateGuestMaxHint, s.cfg.UpdateGuestDurationLimit, s.logger))
 }
 
