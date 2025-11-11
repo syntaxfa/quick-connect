@@ -934,6 +934,15 @@
                 }
             }
         },
+        "types.ID": {
+            "type": "string",
+            "enum": [
+                "01J00000000000000000000BOT"
+            ],
+            "x-enum-varnames": [
+                "BotUserID"
+            ]
+        },
         "types.Role": {
             "type": "string",
             "enum": [
@@ -943,7 +952,8 @@
                 "file",
                 "notification",
                 "client",
-                "guest"
+                "guest",
+                "bot"
             ],
             "x-enum-varnames": [
                 "RoleSuperUser",
@@ -952,7 +962,8 @@
                 "RoleFile",
                 "RoleNotification",
                 "RoleClient",
-                "RoleGuest"
+                "RoleGuest",
+                "RoleBot"
             ]
         },
         "userservice.ChangePasswordRequest": {
@@ -996,7 +1007,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1076,7 +1087,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1125,7 +1136,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1157,7 +1168,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1215,7 +1226,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1269,7 +1280,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1341,7 +1352,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"

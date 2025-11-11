@@ -941,6 +941,15 @@ const docTemplate = `{
                 }
             }
         },
+        "types.ID": {
+            "type": "string",
+            "enum": [
+                "01J00000000000000000000BOT"
+            ],
+            "x-enum-varnames": [
+                "BotUserID"
+            ]
+        },
         "types.Role": {
             "type": "string",
             "enum": [
@@ -950,7 +959,8 @@ const docTemplate = `{
                 "file",
                 "notification",
                 "client",
-                "guest"
+                "guest",
+                "bot"
             ],
             "x-enum-varnames": [
                 "RoleSuperUser",
@@ -959,7 +969,8 @@ const docTemplate = `{
                 "RoleFile",
                 "RoleNotification",
                 "RoleClient",
-                "RoleGuest"
+                "RoleGuest",
+                "RoleBot"
             ]
         },
         "userservice.ChangePasswordRequest": {
@@ -1003,7 +1014,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1083,7 +1094,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1132,7 +1143,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1164,7 +1175,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1222,7 +1233,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1276,7 +1287,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"
@@ -1348,7 +1359,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "last_online_at": {
                     "type": "string"

@@ -7,8 +7,8 @@ import (
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
 )
 
-func (h Handler) TokenRefresh(_ context.Context, req *authpb.TokenRefreshRequest) (*authpb.TokenRefreshResponse, error) {
-	resp, sErr := h.tokenSvc.RefreshTokens(req.GetRefreshToken())
+func (h Handler) TokenRefresh(ctx context.Context, req *authpb.TokenRefreshRequest) (*authpb.TokenRefreshResponse, error) {
+	resp, sErr := h.userSvc.RefreshToken(ctx, req.GetRefreshToken())
 	if sErr != nil {
 		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
 	}
