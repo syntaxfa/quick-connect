@@ -5,18 +5,22 @@ import (
 
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/syntaxfa/quick-connect/app/chatapp/docs"
+	"github.com/syntaxfa/quick-connect/pkg/auth"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
+	"github.com/syntaxfa/quick-connect/types"
 )
 
 type Server struct {
 	httpServer httpserver.Server
 	handler    Handler
+	authMid    *auth.Middleware
 }
 
-func New(server httpserver.Server, handler Handler) Server {
+func New(server httpserver.Server, handler Handler, authMid *auth.Middleware) Server {
 	return Server{
 		httpServer: server,
 		handler:    handler,
+		authMid:    authMid,
 	}
 }
 
@@ -35,7 +39,13 @@ func (s Server) RegisterRoutes() {
 
 	s.httpServer.Router.GET("/health-check", s.handler.healthCheck)
 
-	v1 := s.httpServer.Router.Group("/v1")
+	rootGr := s.httpServer.Router.Group("")
+
+	conGr := rootGr.Group("/conversations")
+	conGr.GET("/open-conversation", s.handler.GetOpenConversation, s.authMid.RequireAuth,
+		s.authMid.RequireRole([]types.Role{types.RoleGuest, types.RoleClient}))
+
+	v1 := rootGr.Group("/v1")
 
 	chats := v1.Group("/chats")
 	chats.GET("/clients", s.handler.WSClientHandler)

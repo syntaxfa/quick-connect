@@ -36,7 +36,7 @@ func (s Service) RefreshToken(ctx context.Context, refreshToken string) (*tokens
 
 	user, guErr := s.repo.GetUserByID(ctx, claims.UserID)
 	if guErr != nil {
-		return nil, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(existErr).WithKind(richerror.KindUnexpected), s.logger)
+		return nil, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(guErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
 	return s.tokenSvc.GenerateTokenPair(user.ID, user.Roles)

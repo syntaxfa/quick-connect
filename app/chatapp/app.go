@@ -10,9 +10,15 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/app/chatapp/delivery/http"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
+	"github.com/syntaxfa/quick-connect/pkg/auth"
+	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
+	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
@@ -22,28 +28,51 @@ const (
 )
 
 type Application struct {
-	cfg         Config
-	trap        <-chan os.Signal
-	chatHandler http.Handler
-	logger      *slog.Logger
-	httpServer  http.Server
+	cfg               Config
+	trap              <-chan os.Signal
+	chatHandler       http.Handler
+	logger            *slog.Logger
+	httpServer        http.Server
+	managerGRPCClient *grpcclient.Client
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
+	const op = "Setup"
+
 	cfg.ChatService.PingPeriod = (cfg.ChatService.PongWait * pingPeriodNumerator) / pingPeriodDenominator
 
 	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.HTTPServer.Cors.AllowOrigins, logger))
 
 	chatSvc := service.New(cfg.ChatService, nil, logger)
 	chatHandler := http.NewHandler(upgrader, logger, chatSvc)
-	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), chatHandler)
+
+	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC)
+	if grpcErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(grpcErr).WithKind(richerror.KindUnexpected), logger)
+
+		panic(grpcErr)
+	}
+
+	authAd := manager.NewAuthAdapter(managerGRPCClient.Conn())
+	resp, pubErr := authAd.GetPublicKey(context.Background())
+	if pubErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(pubErr).WithKind(richerror.KindUnexpected), logger)
+
+		panic(pubErr)
+	}
+
+	jwtValidator := jwtvalidator.New(resp.GetPublicKey(), logger)
+	authMid := auth.New(jwtValidator)
+
+	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), chatHandler, authMid)
 
 	return Application{
-		cfg:         cfg,
-		chatHandler: chatHandler,
-		logger:      logger,
-		httpServer:  httpServer,
-		trap:        trap,
+		cfg:               cfg,
+		chatHandler:       chatHandler,
+		logger:            logger,
+		httpServer:        httpServer,
+		trap:              trap,
+		managerGRPCClient: managerGRPCClient,
 	}
 }
 
@@ -81,8 +110,12 @@ func (a Application) Stop(ctx context.Context) bool {
 
 	go func() {
 		var shutdownWg sync.WaitGroup
+
 		shutdownWg.Add(1)
 		go a.StopHTTPServer(ctx, &shutdownWg)
+
+		shutdownWg.Add(1)
+		go a.StopGRPCClient(ctx, &shutdownWg)
 
 		shutdownWg.Wait()
 		close(shutdownDone)
@@ -100,6 +133,13 @@ func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	if sErr := a.httpServer.Stop(ctx); sErr != nil {
 		a.logger.ErrorContext(ctx, "http server gracefully shutdown failed", slog.String("error", sErr.Error()))
+	}
+}
+
+func (a Application) StopGRPCClient(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if cErr := a.managerGRPCClient.Close(); cErr != nil {
+		a.logger.ErrorContext(ctx, "http server gracefully shutdown failed", slog.String("error", cErr.Error()))
 	}
 }
 
