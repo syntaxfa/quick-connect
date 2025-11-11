@@ -29,9 +29,10 @@ const (
 	RoleNotification Role = "notification"
 	RoleClient       Role = "client"
 	RoleGuest        Role = "guest"
+	RoleBot          Role = "bot"
 )
 
-var AllUserRole = []Role{RoleSuperUser, RoleSupport, RoleStory, RoleFile, RoleNotification, RoleClient, RoleGuest}
+var AllUserRole = []Role{RoleSuperUser, RoleSupport, RoleStory, RoleFile, RoleNotification, RoleClient, RoleGuest, RoleBot}
 
 var AdminRoles = []Role{RoleSuperUser, RoleSupport, RoleStory, RoleFile, RoleNotification}
 

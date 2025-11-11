@@ -23,10 +23,11 @@ FROM user_roles
 WHERE user_id = $1;`
 
 type nullableFields struct {
-	Fullname    sql.NullString
-	Email       sql.NullString
-	PhoneNumber sql.NullString
-	Avatar      sql.NullString
+	HashedPassword sql.NullString
+	Fullname       sql.NullString
+	Email          sql.NullString
+	PhoneNumber    sql.NullString
+	Avatar         sql.NullString
 }
 
 func (d *DB) GetUserByUsername(ctx context.Context, username string) (userservice.User, error) {
@@ -50,7 +51,7 @@ func (d *DB) getUserBy(ctx context.Context, op string, query string, arg interfa
 	var nullable nullableFields
 
 	if qErr := d.conn.Conn().QueryRow(ctx, query, arg).Scan(
-		&user.ID, &user.Username, &user.HashedPassword, &nullable.Fullname, &nullable.Email, &nullable.PhoneNumber, &nullable.Avatar,
+		&user.ID, &user.Username, &nullable.HashedPassword, &nullable.Fullname, &nullable.Email, &nullable.PhoneNumber, &nullable.Avatar,
 		&user.LastOnlineAt); qErr != nil {
 		return userservice.User{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected).WithMessage("get user")
 	}
@@ -69,6 +70,10 @@ func (d *DB) getUserBy(ctx context.Context, op string, query string, arg interfa
 
 	if nullable.Avatar.Valid {
 		user.Avatar = nullable.Avatar.String
+	}
+
+	if nullable.HashedPassword.Valid {
+		user.HashedPassword = nullable.HashedPassword.String
 	}
 
 	roles, grErr := d.GetUserRolesByUserID(ctx, user.ID)
