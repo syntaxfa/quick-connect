@@ -47,6 +47,40 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/conversations/active": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "get user active conversation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "GetActiveConversation",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.Conversation"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/health-check": {
             "get": {
                 "description": "health check chat service",
@@ -77,6 +111,64 @@ const docTemplate = `{
             }
         }
     },
+    "definitions": {
+        "service.Conversation": {
+            "type": "object",
+            "properties": {
+                "assigned_support_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "client_user_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "closed_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "last_message_sender_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "last_message_snippet": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/service.ConversationStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ConversationStatus": {
+            "type": "string",
+            "enum": [
+                "new",
+                "open",
+                "closed",
+                "bot_handling"
+            ],
+            "x-enum-varnames": [
+                "ConversationStatusNew",
+                "ConversationStatusOpen",
+                "ConversationStatusClosed",
+                "ConversationStatusBotHandling"
+            ]
+        },
+        "types.ID": {
+            "type": "string",
+            "enum": [
+                "01J00000000000000000000BOT"
+            ],
+            "x-enum-varnames": [
+                "BotUserID"
+            ]
+        }
+    },
     "securityDefinitions": {
         "JWT": {
             "description": "JWT security accessToken. Please add it in the format \"Bearer {AccessToken}\" to authorize your requests.",
@@ -87,7 +179,7 @@ const docTemplate = `{
     }
 }`
 
-// SwaggerInfo holds exported Swagger Info so clients can modify it.
+// SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "",
 	Host:             "",

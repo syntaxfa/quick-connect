@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/chatapp"
 )
 
@@ -29,7 +30,14 @@ func (s Server) Command(cfg chatapp.Config, logger *slog.Logger, trap chan os.Si
 }
 
 func (s Server) run(trap <-chan os.Signal) {
-	app := chatapp.Setup(s.cfg, s.logger, trap)
+	psqAdapter := postgres.New(s.cfg.Postgres, s.logger)
+	defer func() {
+		psqAdapter.Close()
+
+		s.logger.Info("postgres connection closed")
+	}()
+
+	app := chatapp.Setup(s.cfg, s.logger, trap, psqAdapter)
 
 	app.Start()
 }

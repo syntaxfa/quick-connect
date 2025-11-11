@@ -730,6 +730,80 @@ paths:
       summary: change password
       tags:
       - User
+  /users/guest/register:
+    post:
+      consumes:
+      - application/json
+      description: register guest user and generate QCToken (long expire time)
+      parameters:
+      - description: check token validation
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/userservice.RegisterGuestUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/userservice.RegisterGuestUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: RegisterGuestUser
+      tags:
+      - Guest
+  /users/guest/update:
+    put:
+      consumes:
+      - application/json
+      description: update guest user and return guest user profile
+      parameters:
+      - description: check token validation
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/userservice.UpdateGuestUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/userservice.UpdateGuestUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: UpdateGuestUser
+      tags:
+      - Guest
   /users/list:
     post:
       consumes:
@@ -819,80 +893,6 @@ paths:
       security:
       - JWT: []
       summary: UserProfile
-      tags:
-      - User
-  /users/register-guest:
-    post:
-      consumes:
-      - application/json
-      description: register guest user and generate QCToken (long expire time)
-      parameters:
-      - description: check token validation
-        in: body
-        name: Request
-        required: true
-        schema:
-          $ref: '#/definitions/userservice.RegisterGuestUserRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/userservice.RegisterGuestUserResponse'
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/servermsg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: RegisterGuestUser
-      tags:
-      - User
-  /users/update-guest:
-    put:
-      consumes:
-      - application/json
-      description: update guest user and return guest user profile
-      parameters:
-      - description: check token validation
-        in: body
-        name: Request
-        required: true
-        schema:
-          $ref: '#/definitions/userservice.UpdateGuestUserRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/userservice.UpdateGuestUserResponse'
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/servermsg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      security:
-      - JWT: []
-      summary: UpdateGuestUser
       tags:
       - User
 schemes:

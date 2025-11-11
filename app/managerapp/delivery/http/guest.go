@@ -12,7 +12,7 @@ import (
 // RegisterGuestUser docs
 // @Summary RegisterGuestUser
 // @Description register guest user and generate QCToken (long expire time)
-// @Tags User
+// @Tags Guest
 // @Accept json
 // @Produce json
 // @Param Request body userservice.RegisterGuestUserRequest true "check token validation"
@@ -20,7 +20,7 @@ import (
 // @Failure 400 {string} string Bad Request
 // @Failure 422 {object} servermsg.ErrorResponse
 // @Failure 500 {string} something went wrong
-// @Router /users/register-guest [POST].
+// @Router /users/guest/register [POST].
 func (h Handler) RegisterGuestUser(c echo.Context) error {
 	var req userservice.RegisterGuestUserRequest
 	if bErr := c.Bind(&req); bErr != nil {
@@ -38,7 +38,7 @@ func (h Handler) RegisterGuestUser(c echo.Context) error {
 // UpdateGuestUser docs
 // @Summary UpdateGuestUser
 // @Description update guest user and return guest user profile
-// @Tags User
+// @Tags Guest
 // @Accept json
 // @Produce json
 // @Param Request body userservice.UpdateGuestUserRequest true "check token validation"
@@ -48,7 +48,7 @@ func (h Handler) RegisterGuestUser(c echo.Context) error {
 // @Failure 422 {object} servermsg.ErrorResponse
 // @Failure 500 {string} something went wrong
 // @Security JWT
-// @Router /users/update-guest [PUT].
+// @Router /users/guest/update [PUT].
 func (h Handler) UpdateGuestUser(c echo.Context) error {
 	var req userservice.UpdateGuestUserRequest
 	if bErr := c.Bind(&req); bErr != nil {
