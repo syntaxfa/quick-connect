@@ -20,7 +20,7 @@ chat:
 postgres:
   host: "localhost"
   port: 11579
-  db_name: defaultdb
+  db_name: chat_db
   password: "8SHDSgdihmMH9EQsXfRZzLHes3F3kgxa"
   username: LoPgYJqYGZ53
   ssl_mode: disable
