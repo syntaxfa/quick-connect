@@ -1,3 +1,43 @@
+definitions:
+  service.Conversation:
+    properties:
+      assigned_support_id:
+        $ref: '#/definitions/types.ID'
+      client_user_id:
+        $ref: '#/definitions/types.ID'
+      closed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        $ref: '#/definitions/types.ID'
+      last_message_sender_id:
+        $ref: '#/definitions/types.ID'
+      last_message_snippet:
+        type: string
+      status:
+        $ref: '#/definitions/service.ConversationStatus'
+      updated_at:
+        type: string
+    type: object
+  service.ConversationStatus:
+    enum:
+    - new
+    - open
+    - closed
+    - bot_handling
+    type: string
+    x-enum-varnames:
+    - ConversationStatusNew
+    - ConversationStatusOpen
+    - ConversationStatusClosed
+    - ConversationStatusBotHandling
+  types.ID:
+    enum:
+    - 01J00000000000000000000BOT
+    type: string
+    x-enum-varnames:
+    - BotUserID
 info:
   contact: {}
 paths:
@@ -23,6 +63,27 @@ paths:
       summary: client chat websocket
       tags:
       - Websocket
+  /conversations/active:
+    get:
+      consumes:
+      - application/json
+      description: get user active conversation
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Conversation'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: GetActiveConversation
+      tags:
+      - Chat
   /health-check:
     get:
       consumes:

@@ -42,7 +42,7 @@ func (s Server) RegisterRoutes() {
 	rootGr := s.httpServer.Router.Group("")
 
 	conGr := rootGr.Group("/conversations")
-	conGr.GET("/open-conversation", s.handler.GetOpenConversation, s.authMid.RequireAuth,
+	conGr.GET("/active", s.handler.GetActiveConversation, s.authMid.RequireAuth,
 		s.authMid.RequireRole([]types.Role{types.RoleGuest, types.RoleClient}))
 
 	v1 := rootGr.Group("/v1")

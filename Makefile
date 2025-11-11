@@ -38,7 +38,7 @@ chat-swag-init:
 	swag init -g cmd/chat/main.go -o app/chatapp/docs/ --tags=Websocket,Chat
 
 manager-swag-init:
-	swag init -g cmd/manager/main.go -o app/managerapp/docs/ --tags=Manager,User,Token,Internal
+	swag init -g cmd/manager/main.go -o app/managerapp/docs/ --tags=Manager,User,Token,Internal,Guest
 
 notification-swag-init:
 	swag init -g cmd/notification/main.go -o app/notificationapp/docs/ --tags=Notification,NotificationClient,NotificationAdmin

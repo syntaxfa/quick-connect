@@ -1,11 +1,13 @@
 package service
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/google/uuid"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/types"
 )
 
 type Connection interface {
@@ -15,6 +17,9 @@ type Connection interface {
 }
 
 type Repository interface {
+	IsUserHaveActiveConversation(ctx context.Context, userID types.ID) (bool, error)
+	CreateActiveConversation(ctx context.Context, id, userID types.ID, conversationStatus ConversationStatus) (Conversation, error)
+	GetUserActiveConversation(ctx context.Context, userID types.ID) (Conversation, error)
 	SaveMessage(message Message) error
 }
 

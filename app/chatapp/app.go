@@ -11,7 +11,9 @@ import (
 	"sync"
 
 	"github.com/syntaxfa/quick-connect/adapter/manager"
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/chatapp/delivery/http"
+	postgres2 "github.com/syntaxfa/quick-connect/app/chatapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/auth"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
@@ -19,6 +21,7 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/pkg/translation"
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
@@ -36,15 +39,23 @@ type Application struct {
 	managerGRPCClient *grpcclient.Client
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database) Application {
 	const op = "Setup"
 
 	cfg.ChatService.PingPeriod = (cfg.ChatService.PongWait * pingPeriodNumerator) / pingPeriodDenominator
 
 	upgrader := websocket.NewGorillaUpgrader(cfg.Websocket, checkOrigin(cfg.HTTPServer.Cors.AllowOrigins, logger))
 
-	chatSvc := service.New(cfg.ChatService, nil, logger)
-	chatHandler := http.NewHandler(upgrader, logger, chatSvc)
+	t, tErr := translation.New(translation.DefaultLanguages...)
+	if tErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected), logger)
+
+		panic(tErr)
+	}
+
+	chatRepo := postgres2.New(psqAdapter)
+	chatSvc := service.New(cfg.ChatService, chatRepo, logger)
+	chatHandler := http.NewHandler(upgrader, logger, chatSvc, t)
 
 	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC)
 	if grpcErr != nil {
