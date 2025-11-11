@@ -46,6 +46,8 @@ func (s Server) RegisterRoutes() {
 		s.authMid.RequireRole([]types.Role{types.RoleGuest, types.RoleClient}))
 	conGr.POST("/new", s.handler.ConversationNewList, s.authMid.RequireAuth,
 		s.authMid.RequireRole([]types.Role{types.RoleSupport}))
+	conGr.POST("", s.handler.OwnConversationList, s.authMid.RequireAuth,
+		s.authMid.RequireRole([]types.Role{types.RoleSupport}))
 
 	v1 := rootGr.Group("/v1")
 

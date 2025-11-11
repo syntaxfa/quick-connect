@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/lib/pq"
 	"strings"
 
+	"github.com/lib/pq"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
