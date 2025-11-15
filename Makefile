@@ -34,6 +34,12 @@ generate-proto:
 			$$file; \
 	done
 
+update-proto-tools:
+	@echo "Updating Go protoc plugins..."
+	@go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	@echo "Go protoc plugins updated successfully."
+
 chat-swag-init:
 	swag init -g cmd/chat/main.go -o app/chatapp/docs/ --tags=Websocket,Chat
 

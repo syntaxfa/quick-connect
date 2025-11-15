@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"log/slog"
 
 	"github.com/google/uuid"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/types"
 )
