@@ -33,10 +33,7 @@
     </button>
 
     <button class="support-tab"
-            hx-get="/support/list/my?statuses=open"
-            hx-trigger="click"
-            onclick="switchSupportTab(this)">
-      My Conversations
+            id="my-conversations-tab-btn" onclick="switchSupportTab(this)"> My Conversations
     </button>
   </div>
 
@@ -46,8 +43,8 @@
         hx-get="/support/list/my"
         hx-target="#support-list-container"
         hx-swap="innerHTML"
-        hx-trigger="submit, change from:#conv-sort-select, change from:.status-filter-checkbox"
-  >
+        hx-trigger="submit, change from:#conv-sort-select, change from:.status-filter-checkbox, click from:#my-conversations-tab-btn" >
+    >
     <select class="sort-select" name="sort_direction" id="conv-sort-select">
       <option value="2" selected>Newest First (DESC)</option>
       <option value="1">Oldest First (ASC)</option>
@@ -110,9 +107,9 @@
     });
     selectedTab.classList.add('active');
 
-    // 2. Show/hide filters
+    // 2. Show/hide filters based on the clicked tab's ID
     const filters = document.getElementById('my-conversations-filters');
-    if (selectedTab.getAttribute('hx-get').includes('/support/list/my')) {
+    if (selectedTab.id === 'my-conversations-tab-btn') {
       filters.style.display = 'flex';
     } else {
       filters.style.display = 'none';
