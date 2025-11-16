@@ -6,6 +6,7 @@ import (
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
+	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
@@ -19,4 +20,5 @@ type Config struct {
 	ChatService     service.Config    `koanf:"chat"`
 	Postgres        postgres.Config   `koanf:"postgres"`
 	ManagerAppGRPC  grpcclient.Config `koanf:"manager_app_grpc"`
+	GRPCServer      grpcserver.Config `koanf:"grpc_server"`
 }

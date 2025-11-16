@@ -12,17 +12,23 @@ import (
 
 	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	grpcdelivery "github.com/syntaxfa/quick-connect/app/chatapp/delivery/grpc"
 	"github.com/syntaxfa/quick-connect/app/chatapp/delivery/http"
 	postgres2 "github.com/syntaxfa/quick-connect/app/chatapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/auth"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
+	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/pkg/rolemanager"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
+	"github.com/syntaxfa/quick-connect/types"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -37,6 +43,7 @@ type Application struct {
 	logger            *slog.Logger
 	httpServer        http.Server
 	managerGRPCClient *grpcclient.Client
+	grpcServer        grpcdelivery.Server
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database) Application {
@@ -78,6 +85,11 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), chatHandler, authMid)
 
+	roleManager := setupRoleManager()
+	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, roleManager)
+	grpcHandler := grpcdelivery.NewHandler()
+	grpcServer := grpcdelivery.New(grpcserver.New(cfg.GRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)), grpcHandler, logger)
+
 	return Application{
 		cfg:               cfg,
 		chatHandler:       chatHandler,
@@ -85,11 +97,14 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		httpServer:        httpServer,
 		trap:              trap,
 		managerGRPCClient: managerGRPCClient,
+		grpcServer:        grpcServer,
 	}
 }
 
 func (a Application) Start() {
 	httpServerChan := make(chan error, 1)
+	grpcServerChan := make(chan error, 1)
+
 	go func() {
 		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.HTTPServer.Port))
 
@@ -98,9 +113,17 @@ func (a Application) Start() {
 		}
 	}()
 
+	go func() {
+		if sErr := a.grpcServer.Start(); sErr != nil {
+			grpcServerChan <- sErr
+		}
+	}()
+
 	select {
 	case err := <-httpServerChan:
 		a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.HTTPServer.Port), slog.String("error", err.Error()))
+	case err := <-grpcServerChan:
+		a.logger.Error(fmt.Sprintf("error in grpc server on %d", a.cfg.GRPCServer.Port), slog.String("error", err.Error()))
 	case <-a.trap:
 		a.logger.Info("received http server shutdown signal!!!")
 	}
@@ -129,6 +152,9 @@ func (a Application) Stop(ctx context.Context) bool {
 		shutdownWg.Add(1)
 		go a.StopGRPCClient(ctx, &shutdownWg)
 
+		shutdownWg.Add(1)
+		go a.StopGRPCServer(&shutdownWg)
+
 		shutdownWg.Wait()
 		close(shutdownDone)
 	}()
@@ -153,6 +179,11 @@ func (a Application) StopGRPCClient(ctx context.Context, wg *sync.WaitGroup) {
 	if cErr := a.managerGRPCClient.Close(); cErr != nil {
 		a.logger.ErrorContext(ctx, "http server gracefully shutdown failed", slog.String("error", cErr.Error()))
 	}
+}
+
+func (a Application) StopGRPCServer(wg *sync.WaitGroup) {
+	defer wg.Done()
+	a.grpcServer.Stop()
 }
 
 func checkOrigin(allowedOrigins []string, logger *slog.Logger) func(r *http2.Request) bool {
@@ -202,4 +233,10 @@ func checkOrigin(allowedOrigins []string, logger *slog.Logger) func(r *http2.Req
 
 		return false
 	}
+}
+
+func setupRoleManager() *rolemanager.RoleManager {
+	methodRoles := map[string][]types.Role{}
+
+	return rolemanager.NewRoleManager(methodRoles)
 }
