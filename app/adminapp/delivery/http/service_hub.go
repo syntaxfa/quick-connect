@@ -33,29 +33,6 @@ func (h Handler) ShowDashboard(c echo.Context) error {
 	return c.Render(http.StatusOK, "main_layout", data)
 }
 
-// ShowSupportService renders the support service page.
-func (h Handler) ShowSupportService(c echo.Context) error {
-	user, _ := getUserFromContext(c)
-
-	// TODO: Fetch support tickets data
-	data := map[string]interface{}{
-		"Title": "Support Management",
-		"Stats": map[string]interface{}{
-			"Active":  supportActive,
-			"Pending": supportPending,
-			"Closed":  supportClosed,
-		},
-		"TemplateName": "support_page",
-		"User":         user,
-	}
-
-	if isHTMX(c) {
-		return c.Render(http.StatusOK, "support_page", data)
-	}
-
-	return c.Render(http.StatusOK, "main_layout", data)
-}
-
 // ShowNotificationService renders the notification service page.
 func (h Handler) ShowNotificationService(c echo.Context) error {
 	user, _ := getUserFromContext(c)

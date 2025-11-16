@@ -1,0 +1,40 @@
+{{define "support_list_partial"}}
+<div class="conversation-list" style="animation: fadeInUp 0.4s ease;">
+    {{range .Conversations}}
+    <div class="conversation-item" id="conv-{{.ID}}">
+
+        <div class="conv-avatar" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6);">
+            <span>{{.ClientUserID | initials}}</span>
+        </div>
+
+        <div class="conv-info">
+            <span class="conv-name">Client {{.ClientUserID}}</span>
+            {{if and .LastMessageSenderID (ne .LastMessageSenderID $.CurrentUserID)}}
+            <span class="conv-snippet unread">{{.LastMessageSnippet}}</span>
+            {{else if eq .LastMessageSenderID $.CurrentUserID}}
+            <span class="conv-snippet replied">You: {{.LastMessageSnippet}}</span>
+            {{else}}
+            <span class="conv-snippet">{{.LastMessageSnippet}}</span>
+            {{end}}
+        </div>
+
+        <div class="conv-meta">
+            <span class="conv-time">{{.UpdatedAt}}</span>
+
+            <div class="conv-meta-bottom">
+                {{if and .LastMessageSenderID (ne .LastMessageSenderID $.CurrentUserID)}}
+                <span class="conv-unread-dot"></span>
+                {{end}}
+                <span class="conv-status-badge status-{{.Status}}">{{.Status}}</span>
+            </div>
+
+        </div>
+    </div>
+    {{else}}
+    <div style="text-align: center; padding: 3rem; color: #94a3b8;">
+        No conversations found.
+    </div>
+    {{end}}
+</div>
+
+{{end}}
