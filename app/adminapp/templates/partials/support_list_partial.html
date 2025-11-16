@@ -2,15 +2,32 @@
 <div class="conversation-list" style="animation: fadeInUp 0.4s ease;">
     {{range .Conversations}}
     <div class="conversation-item" id="conv-{{.ID}}">
+
         <div class="conv-avatar" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6);">
-            <span>{{.ClientUserID | initials}}</span> </div>
+            <span>{{.ClientUserID | initials}}</span>
+        </div>
+
         <div class="conv-info">
             <span class="conv-name">Client {{.ClientUserID}}</span>
+            {{if and .LastMessageSenderID (ne .LastMessageSenderID $.CurrentUserID)}}
+            <span class="conv-snippet unread">{{.LastMessageSnippet}}</span>
+            {{else if eq .LastMessageSenderID $.CurrentUserID}}
+            <span class="conv-snippet replied">You: {{.LastMessageSnippet}}</span>
+            {{else}}
             <span class="conv-snippet">{{.LastMessageSnippet}}</span>
+            {{end}}
         </div>
+
         <div class="conv-meta">
             <span class="conv-time">{{.UpdatedAt}}</span>
-            <span class="conv-status-badge status-{{.Status}}">{{.Status}}</span>
+
+            <div class="conv-meta-bottom">
+                {{if and .LastMessageSenderID (ne .LastMessageSenderID $.CurrentUserID)}}
+                <span class="conv-unread-dot"></span>
+                {{end}}
+                <span class="conv-status-badge status-{{.Status}}">{{.Status}}</span>
+            </div>
+
         </div>
     </div>
     {{else}}
@@ -20,46 +37,4 @@
     {{end}}
 </div>
 
-<div class="pagination" style="animation: fadeInUp 0.4s ease 0.1s backwards;">
-    <div class="pagination-info">
-        Showing <span class="font-semibold">{{len .Conversations}}</span> of <span class="font-semibold">{{.Pagination.TotalNumber}}</span> conversations
-    </div>
-    <div class="pagination-controls">
-
-        <button class="pagination-btn"
-                {{if .Pagination.HasPrev}}
-                hx-get="{{.Pagination.BaseURL}}?page={{.Pagination.PrevPage}}&sort_direction={{.Pagination.SortDirection}}{{range .Pagination.Roles}}&statuses={{urlquery .}}{{end}}"
-                hx-target="#support-list-container"
-                hx-swap="innerHTML"
-                {{else}}
-                disabled
-                {{end}}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-        </button>
-
-        {{range .Pagination.Pages}}
-        <button class="pagination-btn {{if .IsCurrent}}active{{end}}"
-                hx-get="{{.URL}}"
-                hx-target="#support-list-container"
-                hx-swap="innerHTML">
-            {{.PageNumber}}
-        </button>
-        {{end}}
-
-        <button class="pagination-btn"
-                {{if .Pagination.HasNext}}
-                hx-get="{{.Pagination.BaseURL}}?page={{.Pagination.NextPage}}&sort_direction={{.Pagination.SortDirection}}{{range .Pagination.Roles}}&statuses={{urlquery .}}{{end}}"
-                hx-target="#support-list-container"
-                hx-swap="innerHTML"
-                {{else}}
-                disabled
-                {{end}}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-        </button>
-    </div>
-</div>
 {{end}}

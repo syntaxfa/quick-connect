@@ -120,7 +120,7 @@ func convertClaimsToUser(claims *types.UserClaims) User {
 	}
 
 	return User{
-		ID:    claims.ID,
+		ID:    string(claims.UserID),
 		Roles: roles,
 	}
 }

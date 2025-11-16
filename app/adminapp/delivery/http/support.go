@@ -49,6 +49,7 @@ func (h Handler) ShowSupportService(c echo.Context) error {
 // ListNewConversationsPartial renders the list of "New" conversations.
 func (h Handler) ListNewConversationsPartial(c echo.Context) error {
 	ctx := grpcContext(c)
+	user, _ := getUserFromContext(c)
 
 	page, _ := strconv.ParseUint(c.QueryParam("page"), 10, 64)
 	if page == 0 {
@@ -82,6 +83,7 @@ func (h Handler) ListNewConversationsPartial(c echo.Context) error {
 	data := map[string]interface{}{
 		"Conversations": conversations,
 		"Pagination":    pagination,
+		"CurrentUserID": user.ID,
 	}
 
 	// This partial is reusable for both lists.
@@ -91,6 +93,7 @@ func (h Handler) ListNewConversationsPartial(c echo.Context) error {
 // ListMyConversationsPartial renders the list of "My" (assigned) conversations.
 func (h Handler) ListMyConversationsPartial(c echo.Context) error {
 	ctx := grpcContext(c)
+	user, _ := getUserFromContext(c)
 
 	// 1. Parse Query Parameters.
 	page, _ := strconv.ParseUint(c.QueryParam("page"), 10, 64)
@@ -141,6 +144,7 @@ func (h Handler) ListMyConversationsPartial(c echo.Context) error {
 	data := map[string]interface{}{
 		"Conversations": conversations,
 		"Pagination":    pagination,
+		"CurrentUserID": user.ID,
 	}
 
 	// Reusing the same partial
