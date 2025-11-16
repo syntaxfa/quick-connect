@@ -1,15 +1,123 @@
 {{define "support_page"}}
-<div class="dashboard-content" style="animation: fadeInUp 0.5s ease;">
-  <div class="dashboard-header">
-    <h1 class="dashboard-title">{{.Title}}</h1>
-    <p class="dashboard-subtitle">Manage support tickets and customer inquiries.</p>
+<div class="support-content">
+
+  <div class="users-header"> <div class="header-left">
+    <h1 class="page-title">Support Center</h1>
+    <p class="page-subtitle">Manage customer conversations</p>
+  </div>
   </div>
 
-  <pre style="color: white; background: #1e293b; padding: 1rem; border-radius: 8px;">
-Data:
-Active:  {{.Stats.Active}}
-Pending: {{.Stats.Pending}}
-Closed:  {{.Stats.Closed}}
-    </pre>
+  <div class="users-stats"> <div class="stat-card">
+    <div class="stat-card-icon new"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193l-15.4 1.093c-1.133.08-2.1-.84-2.1-1.973V10.608c0-.97 0.616-1.813 1.5-2.097L16.5 3.793c.884-.284 1.803 0.182 2.121 1.003l1.629 5.714z" />
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.793l-1.629 5.714M18.75 5.25h-1.5" />
+    </svg>
+    </div>
+    <div class="stat-card-content">
+      <span class="stat-value">{{if .TotalNewConversations}}{{.TotalNewConversations}}{{else}}0{{end}}</span>
+      <span class="stat-label">New Conversations</span>
+    </div>
+  </div>
+  </div>
+
+  <div class="support-tabs"
+       hx-target="#support-list-container"
+       hx-swap="innerHTML"
+       style="margin-bottom: 2rem;">
+
+    <button class="support-tab active"
+            hx-get="/support/list/new"
+            hx-trigger="click"
+            onclick="switchSupportTab(this)">
+      New ({{.TotalNewConversations}})
+    </button>
+
+    <button class="support-tab"
+            hx-get="/support/list/my?statuses=open"
+            hx-trigger="click"
+            onclick="switchSupportTab(this)">
+      My Conversations
+    </button>
+  </div>
+
+  <form class="users-filters"
+        id="my-conversations-filters"
+        style="display: none;"
+        hx-get="/support/list/my"
+        hx-target="#support-list-container"
+        hx-swap="innerHTML"
+        hx-trigger="submit, change from:#conv-sort-select, change from:.status-filter-checkbox"
+  >
+    <select class="sort-select" name="sort_direction" id="conv-sort-select">
+      <option value="2" selected>Newest First (DESC)</option>
+      <option value="1">Oldest First (ASC)</option>
+    </select>
+
+    <div class="filter-dropdown">
+      <button type="button" class="filter-btn" onclick="toggleRoleFilter(this)">
+        <span>Filter by Status</span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 1rem; height: 1rem; margin-left: 0.5rem;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
+      <div class="filter-dropdown-content">
+        <label class="role-checkbox" for="filter-status-open">
+          <input
+                  type="checkbox"
+                  name="statuses"
+                  id="filter-status-open"
+                  class="status-filter-checkbox"
+                  value="open"
+                  checked
+          >
+          Open
+        </label>
+        {{range .AllStatuses}}
+        {{if ne .Value "open"}} <label class="role-checkbox" for="filter-status-{{.Value}}">
+        <input
+                type="checkbox"
+                name="statuses"
+                id="filter-status-{{.Value}}"
+                class="status-filter-checkbox"
+                value="{{.Value}}"
+        >
+        {{.Name}}
+      </label>
+        {{end}}
+        {{end}}
+      </div>
+    </div>
+    <button type="submit" style="display: none;">Search</button>
+  </form>
+
+  <div id="support-list-container"
+       hx-get="/support/list/new"
+       hx-trigger="load, conversationListChanged from:body"
+       hx-swap="innerHTML">
+
+    <div style="display: flex; justify-content: center; padding: 4rem;">
+      <span style="color: #94a3b8; font-size: 1rem; font-family: 'JetBrains Mono', monospace;">Loading new conversations...</span>
+    </div>
+  </div>
+
 </div>
+
+<script>
+  function switchSupportTab(selectedTab) {
+    // 1. Switch active class
+    document.querySelectorAll('.support-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    selectedTab.classList.add('active');
+
+    // 2. Show/hide filters
+    const filters = document.getElementById('my-conversations-filters');
+    if (selectedTab.getAttribute('hx-get').includes('/support/list/my')) {
+      filters.style.display = 'flex';
+    } else {
+      filters.style.display = 'none';
+    }
+  }
+</script>
+
 {{end}}
