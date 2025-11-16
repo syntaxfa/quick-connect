@@ -235,13 +235,14 @@ func (x *Conversation) GetClosedAt() *timestamp.Timestamp {
 }
 
 type ConversationListRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CurrentPage   uint64                 `protobuf:"varint,1,opt,name=current_page,json=currentPage,proto3" json:"current_page,omitempty"`
-	PageSize      uint64                 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	SortDirection SortDirection          `protobuf:"varint,3,opt,name=sort_direction,json=sortDirection,proto3,enum=chat.SortDirection" json:"sort_direction,omitempty"`
-	Statuses      []Status               `protobuf:"varint,4,rep,packed,name=statuses,proto3,enum=chat.Status" json:"statuses,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	CurrentPage       uint64                 `protobuf:"varint,1,opt,name=current_page,json=currentPage,proto3" json:"current_page,omitempty"`
+	PageSize          uint64                 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	SortDirection     SortDirection          `protobuf:"varint,3,opt,name=sort_direction,json=sortDirection,proto3,enum=chat.SortDirection" json:"sort_direction,omitempty"`
+	AssignedSupportId string                 `protobuf:"bytes,4,opt,name=assigned_support_id,json=assignedSupportId,proto3" json:"assigned_support_id,omitempty"`
+	Statuses          []Status               `protobuf:"varint,5,rep,packed,name=statuses,proto3,enum=chat.Status" json:"statuses,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ConversationListRequest) Reset() {
@@ -293,6 +294,13 @@ func (x *ConversationListRequest) GetSortDirection() SortDirection {
 		return x.SortDirection
 	}
 	return SortDirection_SORT_DIRECTION_UNSPECIFIED
+}
+
+func (x *ConversationListRequest) GetAssignedSupportId() string {
+	if x != nil {
+		return x.AssignedSupportId
+	}
+	return ""
 }
 
 func (x *ConversationListRequest) GetStatuses() []Status {
@@ -394,12 +402,13 @@ const file_chat_proto_conversation_proto_rawDesc = "" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x127\n" +
-	"\tclosed_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\bclosedAt\"\xbf\x01\n" +
+	"\tclosed_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\bclosedAt\"\xef\x01\n" +
 	"\x17ConversationListRequest\x12!\n" +
 	"\fcurrent_page\x18\x01 \x01(\x04R\vcurrentPage\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x04R\bpageSize\x12:\n" +
-	"\x0esort_direction\x18\x03 \x01(\x0e2\x13.chat.SortDirectionR\rsortDirection\x12(\n" +
-	"\bstatuses\x18\x04 \x03(\x0e2\f.chat.StatusR\bstatuses\"\xd6\x01\n" +
+	"\x0esort_direction\x18\x03 \x01(\x0e2\x13.chat.SortDirectionR\rsortDirection\x12.\n" +
+	"\x13assigned_support_id\x18\x04 \x01(\tR\x11assignedSupportId\x12(\n" +
+	"\bstatuses\x18\x05 \x03(\x0e2\f.chat.StatusR\bstatuses\"\xd6\x01\n" +
 	"\x18ConversationListResponse\x12!\n" +
 	"\fcurrent_page\x18\x01 \x01(\x04R\vcurrentPage\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x04R\bpageSize\x12!\n" +

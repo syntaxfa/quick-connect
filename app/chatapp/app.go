@@ -87,7 +87,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 
 	roleManager := setupRoleManager()
 	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, roleManager)
-	grpcHandler := grpcdelivery.NewHandler()
+	grpcHandler := grpcdelivery.NewHandler(chatSvc, t, logger)
 	grpcServer := grpcdelivery.New(grpcserver.New(cfg.GRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)), grpcHandler, logger)
 
 	return Application{

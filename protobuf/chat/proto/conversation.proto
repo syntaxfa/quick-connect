@@ -36,7 +36,8 @@ message ConversationListRequest {
   uint64 current_page = 1;
   uint64 page_size = 2;
   SortDirection sort_direction = 3;
-  repeated Status statuses = 4;
+  string assigned_support_id = 4;
+  repeated Status statuses = 5;
 }
 
 message ConversationListResponse {

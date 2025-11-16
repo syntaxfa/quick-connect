@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/syntaxfa/quick-connect/example/grpc/interval/managerauth"
-	"github.com/syntaxfa/quick-connect/example/grpc/interval/manageruser"
+	"github.com/syntaxfa/quick-connect/example/grpc/interval/chatconversation"
 )
 
 func main() {
-	managerauth.ManagerAuth()
+	//managerauth.ManagerAuth()
 
-	manageruser.ManagerUser()
+	//manageruser.ManagerUser()
+
+	chatconversation.ChatConversation()
 }
