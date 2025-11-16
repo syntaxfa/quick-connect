@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "protobuf/chat/golang/conversationpb";
+
+import "google/protobuf/timestamp.proto";
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_NEW = 1;
+  STATUS_OPEN = 2;
+  STATUS_CLOSED = 3;
+  STATUS_BOT_HANDLING = 4;
+}
+
+message Conversation {
+  string id = 1;
+  string client_user_id = 2;
+  string assigned_support_id = 3;
+  Status status = 4;
+  string last_message_snippet = 5;
+  string last_message_sender_id = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  google.protobuf.Timestamp closed_at = 9;
+}
+
+enum SortDirection {
+  SORT_DIRECTION_UNSPECIFIED = 0;
+  SORT_DIRECTION_ASC = 1;
+  SORT_DIRECTION_DESC = 2;
+}
+
+message ConversationListRequest {
+  uint64 current_page = 1;
+  uint64 page_size = 2;
+  SortDirection sort_direction = 3;
+  string assigned_support_id = 4;
+  repeated Status statuses = 5;
+}
+
+message ConversationListResponse {
+  uint64 current_page = 1;
+  uint64 page_size = 2;
+  uint64 total_number = 3;
+  uint64 total_page = 4;
+  repeated Conversation conversations = 5;
+}
+
+service ConversationService {
+  rpc ConversationNewList (ConversationListRequest) returns (ConversationListResponse);
+  rpc ConversationOwnList (ConversationListRequest) returns (ConversationListResponse);
+}
