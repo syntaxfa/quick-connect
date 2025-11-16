@@ -55,7 +55,6 @@ func (s Server) registerRoutes() {
 	// Dashboard - Main hub
 	dashGr := rootGr.Group("")
 	dashGr.GET("/dashboard", s.handler.ShowDashboard)
-	dashGr.GET("/support", s.handler.ShowSupportService)
 	dashGr.GET("/notification", s.handler.ShowNotificationService)
 	dashGr.GET("/story", s.handler.ShowStoryService)
 
@@ -83,6 +82,12 @@ func (s Server) registerRoutes() {
 	// Settings Group
 	settingGr := rootGr.Group("/settings")
 	settingGr.GET("", s.handler.ShowSettingsPage)
+
+	// Support (Chat) Group
+	supportGr := rootGr.Group("/support")
+	supportGr.GET("", s.handler.ShowSupportService)
+	supportGr.GET("/list/new", s.handler.ListNewConversationsPartial)
+	supportGr.GET("/list/my", s.handler.ListMyConversationsPartial)
 }
 
 func (s Server) registerSwagger() {

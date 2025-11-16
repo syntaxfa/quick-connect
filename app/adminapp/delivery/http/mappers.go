@@ -1,6 +1,8 @@
 package http
 
 import (
+	"github.com/syntaxfa/quick-connect/app/chatapp/service"
+	"github.com/syntaxfa/quick-connect/protobuf/chat/golang/conversationpb"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 	"github.com/syntaxfa/quick-connect/types"
 )
@@ -118,7 +120,86 @@ func convertClaimsToUser(claims *types.UserClaims) User {
 	}
 
 	return User{
-		ID:    claims.ID,
+		ID:    string(claims.UserID),
 		Roles: roles,
+	}
+}
+
+type Conversation struct {
+	ID                  string
+	ClientUserID        string
+	AssignedSupportID   string
+	Status              string
+	LastMessageSnippet  string
+	LastMessageSenderID string
+	UpdatedAt           string
+}
+
+// ConversationStatusInfo struct helper for templates.
+type ConversationStatusInfo struct {
+	Name  string // "OPEN", "CLOSED"
+	Value string // "open", "closed" (value for query param)
+	PbVal int32  // Protobuf enum value
+}
+
+// GetAllConversationStatuses returns filterable statuses for the template.
+func GetAllConversationStatuses() []ConversationStatusInfo {
+	return []ConversationStatusInfo{
+		{Name: "Open", Value: string(service.ConversationStatusOpen), PbVal: int32(conversationpb.Status_STATUS_OPEN)},
+		{Name: "Closed", Value: string(service.ConversationStatusClosed), PbVal: int32(conversationpb.Status_STATUS_CLOSED)},
+	}
+}
+
+// ParseStatusesFromForm converts string statuses from form back to gRPC Enum.
+func ParseStatusesFromForm(statusStrings []string) []conversationpb.Status {
+	var statuses []conversationpb.Status
+	statusMap := map[string]conversationpb.Status{
+		string(service.ConversationStatusOpen):        conversationpb.Status_STATUS_OPEN,
+		string(service.ConversationStatusClosed):      conversationpb.Status_STATUS_CLOSED,
+		string(service.ConversationStatusBotHandling): conversationpb.Status_STATUS_BOT_HANDLING,
+		string(service.ConversationStatusNew):         conversationpb.Status_STATUS_NEW,
+	}
+
+	for _, ss := range statusStrings {
+		if val, ok := statusMap[ss]; ok {
+			statuses = append(statuses, val)
+		}
+	}
+	return statuses
+}
+
+// convertConversationPbToConversation maps the gRPC Conversation object to the template-friendly Conversation struct.
+func convertConversationPbToConversation(convPb *conversationpb.Conversation) Conversation {
+	updatedAt := ""
+	if convPb.GetUpdatedAt() != nil {
+		t := convPb.GetUpdatedAt().AsTime()
+		updatedAt = t.Format("3:04 PM")
+	}
+
+	return Conversation{
+		ID:                  convPb.GetId(),
+		ClientUserID:        convPb.GetClientUserId(),
+		AssignedSupportID:   convPb.GetAssignedSupportId(),
+		Status:              convertStatusPbToString(convPb.GetStatus()),
+		LastMessageSnippet:  convPb.GetLastMessageSnippet(),
+		LastMessageSenderID: convPb.GetLastMessageSenderId(),
+		UpdatedAt:           updatedAt,
+	}
+}
+
+func convertStatusPbToString(statusPb conversationpb.Status) string {
+	switch statusPb {
+	case conversationpb.Status_STATUS_NEW:
+		return string(service.ConversationStatusNew)
+	case conversationpb.Status_STATUS_OPEN:
+		return string(service.ConversationStatusOpen)
+	case conversationpb.Status_STATUS_CLOSED:
+		return string(service.ConversationStatusClosed)
+	case conversationpb.Status_STATUS_BOT_HANDLING:
+		return string(service.ConversationStatusBotHandling)
+	case conversationpb.Status_STATUS_UNSPECIFIED:
+		return "unknown"
+	default:
+		return "unknown"
 	}
 }
