@@ -7,6 +7,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/syntaxfa/quick-connect/adapter/chat"
 	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/app/adminapp/delivery/http"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
@@ -25,6 +26,7 @@ type Application struct {
 	logger            *slog.Logger
 	httpServer        http.Server
 	managerGRPCClient *grpcclient.Client
+	chatGRPCClient    *grpcclient.Client
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
@@ -47,7 +49,16 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 	authAdapter := manager.NewAuthAdapter(managerGRPCClient.Conn())
 	userAdapter := manager.NewUserAdapter(managerGRPCClient.Conn())
 
-	handler := http.NewHandler(logger, t, authAdapter, userAdapter)
+	chatGRPCClient, chatErr := grpcclient.New(cfg.ChatAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
+	if chatErr != nil {
+		logger.Error("failed to create manager gRPC client", slog.String("error", chatErr.Error()))
+
+		panic(chatErr)
+	}
+
+	conversationAd := chat.NewConversationAdapter(chatGRPCClient.Conn())
+
+	handler := http.NewHandler(logger, t, authAdapter, userAdapter, conversationAd)
 
 	getPuResp, gpuErr := authAdapter.GetPublicKey(context.Background())
 	if gpuErr != nil {
@@ -64,6 +75,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 		logger:            logger,
 		httpServer:        http.New(httpserver.New(cfg.HTTPServer, logger), handler, cfg.TemplatePath, jwtValidator),
 		managerGRPCClient: managerGRPCClient,
+		chatGRPCClient:    chatGRPCClient,
 	}
 }
 

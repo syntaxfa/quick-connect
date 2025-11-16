@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/syntaxfa/quick-connect/adapter/chat"
 	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
@@ -17,18 +18,21 @@ import (
 )
 
 type Handler struct {
-	logger *slog.Logger
-	t      *translation.Translate
-	authAd *manager.AuthAdapter
-	userAd *manager.UserAdapter
+	logger         *slog.Logger
+	t              *translation.Translate
+	authAd         *manager.AuthAdapter
+	userAd         *manager.UserAdapter
+	conversationAd *chat.ConversationAdapter
 }
 
-func NewHandler(logger *slog.Logger, t *translation.Translate, authAd *manager.AuthAdapter, userAd *manager.UserAdapter) Handler {
+func NewHandler(logger *slog.Logger, t *translation.Translate, authAd *manager.AuthAdapter, userAd *manager.UserAdapter,
+	conversationAd *chat.ConversationAdapter) Handler {
 	return Handler{
-		t:      t,
-		logger: logger,
-		authAd: authAd,
-		userAd: userAd,
+		t:              t,
+		logger:         logger,
+		authAd:         authAd,
+		userAd:         userAd,
+		conversationAd: conversationAd,
 	}
 }
 
