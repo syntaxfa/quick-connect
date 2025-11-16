@@ -22,3 +22,8 @@ func (ca *ConversationAdapter) ConversationNewList(ctx context.Context, req *con
 	opts ...grpc.CallOption) (*conversationpb.ConversationListResponse, error) {
 	return ca.client.ConversationNewList(ctx, req, opts...)
 }
+
+func (ca *ConversationAdapter) ConversationOwnList(ctx context.Context, req *conversationpb.ConversationListRequest,
+	opts ...grpc.CallOption) (*conversationpb.ConversationListResponse, error) {
+	return ca.client.ConversationOwnList(ctx, req, opts...)
+}

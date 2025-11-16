@@ -50,4 +50,18 @@ func ChatConversation() {
 	}
 
 	fmt.Printf("%+v\n", conNewList)
+
+	conOwnList, conOwnListErr := conAd.ConversationOwnList(ctxWithValue, &conversationpb.ConversationListRequest{
+		CurrentPage:   0,
+		PageSize:      10,
+		SortDirection: 1,
+		Statuses:      []conversationpb.Status{conversationpb.Status_STATUS_OPEN, conversationpb.Status_STATUS_CLOSED},
+	})
+	if conOwnListErr != nil {
+		errorhandler.HandleGRPCError(conOwnListErr, logger)
+
+		return
+	}
+
+	fmt.Printf("%+v\n", conOwnList)
 }
