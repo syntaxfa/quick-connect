@@ -1,0 +1,40 @@
+{{define "support_own_list_partial"}}
+<div class="conversation-list-container" hx-get="/support/own-list?status={{.Pagination.Status}}" hx-swap="outerHTML">
+    {{range .Conversations}}
+    <div class="conversation-item">
+        <div class="conversation-avatar">
+            <span>{{.ClientUserID | initials}}</span>
+        </div>
+        <div class="conversation-content">
+            <div class="conversation-header">
+                <span class="conversation-user">{{.ClientUserID}}</span>
+                <span class="conversation-time">{{.UpdatedAt}}</span>
+            </div>
+            <div class="conversation-snippet">
+                {{if eq .LastMessageSenderID .ClientUserID}}
+                <span class="sender-prefix">Client: </span>
+                {{else}}
+                <span class="sender-prefix">You: </span>
+                {{end}}
+                <span class="snippet-text">{{.LastMessageSnippet}}</span>
+            </div>
+        </div>
+        <div class="conversation-status">
+            {{if eq .Status "STATUS_OPEN"}}
+            <span class="status-dot open"></span>
+            {{else if eq .Status "STATUS_CLOSED"}}
+            <span class="status-dot closed"></span>
+            {{end}}
+        </div>
+    </div>
+    {{else}}
+    <div class="no-conversations">No conversations found.</div>
+    {{end}}
+
+    {{if gt .Pagination.TotalPage 1}}
+    <div class="pagination">
+        {{template "pagination" .Pagination}}
+    </div>
+    {{end}}
+</div>
+{{end}}

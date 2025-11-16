@@ -1,15 +1,46 @@
 {{define "support_page"}}
-<div class="dashboard-content" style="animation: fadeInUp 0.5s ease;">
-  <div class="dashboard-header">
-    <h1 class="dashboard-title">{{.Title}}</h1>
-    <p class="dashboard-subtitle">Manage support tickets and customer inquiries.</p>
-  </div>
+<div class="support-content">
+    <div class="support-header">
+        <h1 class="page-title">Support Hub</h1>
+        <p class="page-subtitle">Manage customer conversations</p>
+    </div>
 
-  <pre style="color: white; background: #1e293b; padding: 1rem; border-radius: 8px;">
-Data:
-Active:  {{.Stats.Active}}
-Pending: {{.Stats.Pending}}
-Closed:  {{.Stats.Closed}}
-    </pre>
+    <div class="support-layout">
+        <div class="support-column">
+            <div class="column-header">
+                <h2>New Conversations</h2>
+                <span class="stat-badge">{{.TotalNew}}</span>
+            </div>
+            <div id="new-conversations-list"
+                 hx-get="/support/new-list"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+                <div class="loading-placeholder">Loading...</div>
+            </div>
+        </div>
+
+        <div class="support-column">
+            <div class="column-header">
+                <h2>My Conversations</h2>
+                <span class="stat-badge">{{.TotalMine}}</span>
+            </div>
+            <div class="support-filters"
+                 hx-get="/support/own-list"
+                 hx-target="#own-conversations-list"
+                 hx-swap="innerHTML">
+                <select name="status" class="filter-select">
+                    <option value="">All</option>
+                    <option value="STATUS_OPEN">Open</option>
+                    <option value="STATUS_CLOSED">Closed</option>
+                </select>
+            </div>
+            <div id="own-conversations-list"
+                 hx-get="/support/own-list"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+                <div class="loading-placeholder">Loading...</div>
+            </div>
+        </div>
+    </div>
 </div>
 {{end}}

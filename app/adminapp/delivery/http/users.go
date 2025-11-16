@@ -34,6 +34,7 @@ type PaginationData struct {
 	Query         string
 	SortDirection int
 	Roles         []string
+	Status        string
 }
 
 // ShowUsersPage renders the main user page shell

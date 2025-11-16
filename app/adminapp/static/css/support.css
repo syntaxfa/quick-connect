@@ -1,0 +1,129 @@
+/* Support Page Layout */
+.support-content {
+    padding: 2rem;
+}
+
+.support-header {
+    margin-bottom: 2rem;
+}
+
+.support-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.support-column .column-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.support-column .column-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+/* Conversation List */
+.conversation-list-container {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.conversation-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.conversation-item:hover {
+    background-color: #f8fafc;
+}
+
+.conversation-item:last-child {
+    border-bottom: none;
+}
+
+.conversation-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 1rem;
+}
+
+.conversation-content {
+    flex-grow: 1;
+}
+
+.conversation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.conversation-user {
+    font-weight: 600;
+}
+
+.conversation-time {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.conversation-snippet {
+    font-size: 0.875rem;
+    color: #475569;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+
+.sender-prefix {
+    font-weight: 500;
+}
+
+.conversation-status .status-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+}
+
+.conversation-status .status-dot.open {
+    background-color: #22c55e;
+}
+
+.conversation-status .status-dot.closed {
+    background-color: #64748b;
+}
+
+.no-conversations {
+    padding: 2rem;
+    text-align: center;
+    color: #94a3b8;
+}
+
+/* Filters */
+.support-filters {
+    margin-bottom: 1rem;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    background-color: white;
+}

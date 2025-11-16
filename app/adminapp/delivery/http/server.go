@@ -55,9 +55,14 @@ func (s Server) registerRoutes() {
 	// Dashboard - Main hub
 	dashGr := rootGr.Group("")
 	dashGr.GET("/dashboard", s.handler.ShowDashboard)
-	dashGr.GET("/support", s.handler.ShowSupportService)
 	dashGr.GET("/notification", s.handler.ShowNotificationService)
 	dashGr.GET("/story", s.handler.ShowStoryService)
+
+	// Support Management Group
+	supportGr := rootGr.Group("/support")
+	supportGr.GET("", s.handler.ShowSupportPage)
+	supportGr.GET("/new-list", s.handler.ListNewConversationsPartial)
+	supportGr.GET("/own-list", s.handler.ListOwnConversationsPartial)
 
 	// Users Management Group
 	userGr := rootGr.Group("/users")
