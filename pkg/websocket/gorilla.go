@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -26,6 +27,31 @@ func (c *GorillaConnection) Close() error {
 	return c.conn.Close()
 }
 
+// SetReadLimit sets the maximum size for a message read from the peer.
+func (c *GorillaConnection) SetReadLimit(limit int64) {
+	c.conn.SetReadLimit(limit)
+}
+
+// SetReadDeadline sets the read deadline on the underlying connection.
+func (c *GorillaConnection) SetReadDeadline(t time.Time) error {
+	return c.conn.SetReadDeadline(t)
+}
+
+// SetWriteDeadline sets the write deadline on the underlying connection.
+func (c *GorillaConnection) SetWriteDeadline(t time.Time) error {
+	return c.conn.SetWriteDeadline(t)
+}
+
+// SetPongHandler sets the handler for pong messages received from the peer.
+func (c *GorillaConnection) SetPongHandler(h func(appData string) error) {
+	c.conn.SetPongHandler(h)
+}
+
+// SetCloseHandler sets the handler for close messages received from the peer.
+func (c *GorillaConnection) SetCloseHandler(h func(code int, text string) error) {
+	c.conn.SetCloseHandler(h)
+}
+
 type GorillaUpgrader struct {
 	upgrader websocket.Upgrader
 }
@@ -48,3 +74,17 @@ func (u *GorillaUpgrader) Upgrade(w http.ResponseWriter, r *http.Request) (*Gori
 
 	return &GorillaConnection{conn: conn}, nil
 }
+
+// We define a dummy type here just for the static check.
+type serviceConnection interface {
+	ReadMessage() (messageType int, p []byte, err error)
+	WriteMessage(messageType int, data []byte) error
+	Close() error
+	SetReadLimit(limit int64)
+	SetReadDeadline(t time.Time) error
+	SetWriteDeadline(t time.Time) error
+	SetPongHandler(h func(appData string) error)
+	SetCloseHandler(h func(code int, text string) error)
+}
+
+var _ serviceConnection = (*GorillaConnection)(nil)
