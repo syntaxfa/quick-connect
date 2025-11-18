@@ -3,9 +3,11 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/lib/pq"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
@@ -17,6 +19,12 @@ const queryGetUserActiveConversation = `SELECT id, client_user_id, assigned_supp
 last_message_sender_id, created_at, updated_at, closed_at
 FROM conversations
 WHERE client_user_id = $1 AND status IN ('new', 'open', 'bot_handling')
+limit 1;`
+
+const queryGetConversationByID = `SELECT id, client_user_id, assigned_support_id, status, last_message_snippet,
+last_message_sender_id, created_at, updated_at, closed_at
+FROM conversations
+WHERE id = $1
 limit 1;`
 
 type nullableFields struct {
@@ -32,13 +40,23 @@ func (d *DB) GetUserActiveConversation(ctx context.Context, userID types.ID) (se
 	return d.GetConversationBy(ctx, op, queryGetUserActiveConversation, userID)
 }
 
+func (d *DB) GetConversationByID(ctx context.Context, conversationID types.ID) (service.Conversation, error) {
+	const op = "repository.postgres.get.GetConversationByID"
+
+	return d.GetConversationBy(ctx, op, queryGetConversationByID, conversationID)
+}
+
 func (d *DB) GetConversationBy(ctx context.Context, op string, query string, arg interface{}) (service.Conversation, error) {
 	var conversation service.Conversation
 	var nullable nullableFields
 
 	if sErr := d.conn.Conn().QueryRow(ctx, query, arg).Scan(&conversation.ID, &conversation.ClientUserID, &nullable.AssignedSupportID,
 		&conversation.Status, &nullable.LastMessageSnippet, &nullable.LastMessageSenderID, &conversation.CreatedAt,
-		&conversation.UpdatedAt, &conversation.ClosedAt); sErr != nil {
+		&conversation.UpdatedAt, &nullable.ClosedAt); sErr != nil {
+		if errors.Is(sErr, pgx.ErrNoRows) {
+			return service.Conversation{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindNotFound)
+		}
+
 		return service.Conversation{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected)
 	}
 
@@ -52,6 +70,10 @@ func (d *DB) GetConversationBy(ctx context.Context, op string, query string, arg
 
 	if nullable.LastMessageSenderID.Valid {
 		conversation.LastMessageSenderID = types.ID(nullable.LastMessageSenderID.String)
+	}
+
+	if nullable.ClosedAt.Valid {
+		conversation.ClosedAt = &nullable.ClosedAt.Time
 	}
 
 	return conversation, nil
@@ -182,4 +204,35 @@ func (d *DB) GetConversationList(ctx context.Context, paginated paginate.Request
 		TotalNumbers: totalCount,
 		TotalPage:    (totalCount + paginated.PageSize - 1) / paginated.PageSize,
 	}, nil
+}
+
+const queryGetConversationParticipants = `
+SELECT client_user_id, assigned_support_id
+FROM conversations
+WHERE id = $1;`
+
+func (d *DB) GetConversationParticipants(ctx context.Context, conversationID types.ID) ([]types.ID, error) {
+	const op = "repository.postgres.get.GetConversationParticipants"
+
+	var clientUserID types.ID
+	var nullAssignedSupportID sql.NullString
+
+	if err := d.conn.Conn().QueryRow(ctx, queryGetConversationParticipants, conversationID).Scan(
+		&clientUserID,
+		&nullAssignedSupportID,
+	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, richerror.New(op).WithWrapError(err).WithKind(richerror.KindNotFound)
+		}
+
+		return nil, richerror.New(op).WithWrapError(err).WithKind(richerror.KindUnexpected)
+	}
+
+	participants := []types.ID{clientUserID}
+
+	if nullAssignedSupportID.Valid && nullAssignedSupportID.String != "" {
+		participants = append(participants, types.ID(nullAssignedSupportID.String))
+	}
+
+	return participants, nil
 }

@@ -17,6 +17,8 @@ chat:
   write_wait: 10s
   pong_wait: 60s
   max_message_size: 512
+  chat_channel_name: "chat:messages"
+  message_snippet_char_number: 50
 postgres:
   host: "localhost"
   port: 11579
@@ -36,3 +38,7 @@ manager_app_grpc:
 grpc_server:
   host: "localhost"
   port: 2551
+redis:
+  host: "localhost"
+  port: 12434
+  password: "Z9265UQfrFiCYWMMJF4uvTEmJA7rEauJ"

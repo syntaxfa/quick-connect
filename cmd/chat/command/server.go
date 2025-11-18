@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/redis"
 	"github.com/syntaxfa/quick-connect/app/chatapp"
 )
 
@@ -37,7 +38,16 @@ func (s Server) run(trap <-chan os.Signal) {
 		s.logger.Info("postgres connection closed")
 	}()
 
-	app := chatapp.Setup(s.cfg, s.logger, trap, psqAdapter)
+	re := redis.New(s.cfg.Redis, s.logger)
+	defer func() {
+		if cErr := re.Close(); cErr != nil {
+			s.logger.Error("redis connection failed", slog.String("error", cErr.Error()))
+		}
+
+		s.logger.Info("redis connection closed")
+	}()
+
+	app := chatapp.Setup(s.cfg, s.logger, trap, psqAdapter, re)
 
 	app.Start()
 }

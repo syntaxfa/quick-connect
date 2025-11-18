@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
@@ -9,14 +10,17 @@ import (
 )
 
 type Handler struct {
+	appCtx   context.Context
 	upgrader *websocket.GorillaUpgrader
 	logger   *slog.Logger
 	svc      *service.Service
 	t        *translation.Translate
 }
 
-func NewHandler(upgrader *websocket.GorillaUpgrader, logger *slog.Logger, svc *service.Service, t *translation.Translate) Handler {
+func NewHandler(appCtx context.Context, upgrader *websocket.GorillaUpgrader, logger *slog.Logger, svc *service.Service,
+	t *translation.Translate) Handler {
 	return Handler{
+		appCtx:   appCtx,
 		upgrader: upgrader,
 		logger:   logger,
 		svc:      svc,
