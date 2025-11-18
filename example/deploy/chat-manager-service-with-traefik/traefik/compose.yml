@@ -10,7 +10,7 @@ volumes:
 
 services:
   traefik:
-    image: traefik:v3.5.4
+    image: traefik:v3.6.2
     restart: ${RESTART_POLICY}
     container_name: traefik-${HOSTNAME}
     hostname: traefik
