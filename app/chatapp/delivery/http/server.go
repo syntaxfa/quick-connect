@@ -49,11 +49,10 @@ func (s Server) RegisterRoutes() {
 	conGr.POST("", s.handler.OwnConversationList, s.authMid.RequireAuth,
 		s.authMid.RequireRole([]types.Role{types.RoleSupport}))
 
-	v1 := rootGr.Group("/v1")
-
-	chats := v1.Group("/chats")
-	chats.GET("/clients", s.handler.WSClientHandler)
-	chats.GET("/supports", s.handler.WSSupportHandler)
+	chats := rootGr.Group("/chats")
+	chats.GET("/clients", s.handler.WSClientHandler, s.authMid.RequireAuth,
+		s.authMid.RequireRole([]types.Role{types.RoleClient, types.RoleGuest}))
+	chats.GET("/supports", s.handler.WSSupportHandler, s.authMid.RequireAuth, s.authMid.RequireRole([]types.Role{types.RoleSupport}))
 }
 
 func (s Server) registerSwagger() {

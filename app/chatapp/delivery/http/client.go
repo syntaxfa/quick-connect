@@ -1,8 +1,6 @@
 package http
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,12 +13,5 @@ import (
 //	@Produce		json
 //	@Router			/chats/clients [GET].
 func (h Handler) WSClientHandler(c echo.Context) error {
-	conn, uErr := h.upgrader.Upgrade(c.Response(), c.Request())
-	if uErr != nil {
-		return echo.NewHTTPError(http.StatusNotAcceptable, "could not upgrade connection")
-	}
-
-	h.svc.JoinClient(conn, "guest")
-
-	return nil
+	return h.upgradeToWebsocket(c)
 }
