@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/redis"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
 	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
@@ -21,4 +22,5 @@ type Config struct {
 	Postgres        postgres.Config   `koanf:"postgres"`
 	ManagerAppGRPC  grpcclient.Config `koanf:"manager_app_grpc"`
 	GRPCServer      grpcserver.Config `koanf:"grpc_server"`
+	Redis           redis.Config      `koanf:"redis"`
 }

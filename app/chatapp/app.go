@@ -12,6 +12,8 @@ import (
 
 	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/pubsub/redispubsub"
+	"github.com/syntaxfa/quick-connect/adapter/redis"
 	grpcdelivery "github.com/syntaxfa/quick-connect/app/chatapp/delivery/grpc"
 	"github.com/syntaxfa/quick-connect/app/chatapp/delivery/http"
 	postgres2 "github.com/syntaxfa/quick-connect/app/chatapp/repository/postgres"
@@ -44,10 +46,15 @@ type Application struct {
 	httpServer        http.Server
 	managerGRPCClient *grpcclient.Client
 	grpcServer        grpcdelivery.Server
+	chatHub           *service.Hub       // To control the hub lifecycle
+	mainCtx           context.Context    // Main context for background services
+	mainCancel        context.CancelFunc // Function to cancel main context
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) Application {
 	const op = "Setup"
+
+	mainCtx, mainCancel := context.WithCancel(context.Background())
 
 	cfg.ChatService.PingPeriod = (cfg.ChatService.PongWait * pingPeriodNumerator) / pingPeriodDenominator
 
@@ -60,10 +67,15 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		panic(tErr)
 	}
 
+	pubsubClient := redispubsub.New(re)
+
 	chatRepo := postgres2.New(psqAdapter)
 	vld := service.NewValidate(t)
-	chatSvc := service.New(cfg.ChatService, chatRepo, logger, vld)
-	chatHandler := http.NewHandler(upgrader, logger, chatSvc, t)
+
+	chatHub := service.NewHub(cfg.ChatService, logger, pubsubClient)
+
+	chatSvc := service.New(cfg.ChatService, chatRepo, chatHub, pubsubClient, logger, vld)
+	chatHandler := http.NewHandler(mainCtx, upgrader, logger, chatSvc, t)
 
 	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC)
 	if grpcErr != nil {
@@ -98,12 +110,18 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		trap:              trap,
 		managerGRPCClient: managerGRPCClient,
 		grpcServer:        grpcServer,
+		chatHub:           chatHub,
+		mainCtx:           mainCtx,
+		mainCancel:        mainCancel,
 	}
 }
 
 func (a Application) Start() {
 	httpServerChan := make(chan error, 1)
 	grpcServerChan := make(chan error, 1)
+
+	go a.chatHub.Run(a.mainCtx)
+	a.logger.Info("chat hub started")
 
 	go func() {
 		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.HTTPServer.Port))
@@ -141,6 +159,9 @@ func (a Application) Start() {
 }
 
 func (a Application) Stop(ctx context.Context) bool {
+	// This cancels the mainCtx passed to hub.Run()
+	a.mainCancel()
+
 	shutdownDone := make(chan struct{})
 
 	go func() {

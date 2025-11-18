@@ -1,0 +1,38 @@
+package postgres
+
+import (
+	"context"
+
+	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/types"
+)
+
+const queryUpdateConversationSnippet = `
+UPDATE conversations
+SET last_message_snippet = $2,
+    last_message_sender_id = $3
+WHERE id = $1;`
+
+func (d *DB) UpdateConversationSnippet(ctx context.Context, conversationID, lastMessageSenderID types.ID, snippet string) error {
+	const op = "repository.postgres.update.UpdateConversationSnippet"
+
+	cmdTag, err := d.conn.Conn().Exec(ctx, queryUpdateConversationSnippet,
+		conversationID,
+		snippet,
+		lastMessageSenderID,
+	)
+
+	if err != nil {
+		return richerror.New(op).WithWrapError(err).WithKind(richerror.KindUnexpected)
+	}
+
+	if cmdTag.RowsAffected() == 0 {
+		// This might happen if the conversation ID is wrong, but it's not necessarily
+		// a critical error that should stop the message flow. We can just log it.
+		// For now, we return nil as the operation "succeeded" (no DB error).
+		// Or return a specific "not found" error if the service layer needs to know.
+		return richerror.New(op).WithKind(richerror.KindNotFound).WithMessage("conversation not found for snippet update")
+	}
+
+	return nil
+}
