@@ -236,7 +236,10 @@ func checkOrigin(allowedOrigins []string, logger *slog.Logger) func(r *http2.Req
 }
 
 func setupRoleManager() *rolemanager.RoleManager {
-	methodRoles := map[string][]types.Role{}
+	methodRoles := map[string][]types.Role{
+		"/chat.ConversationService/ConversationNewList": {types.RoleSupport},
+		"/chat.ConversationService/ConversationOwnList": {types.RoleSupport},
+	}
 
 	return rolemanager.NewRoleManager(methodRoles)
 }
