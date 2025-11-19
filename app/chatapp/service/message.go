@@ -8,19 +8,21 @@ import (
 
 // ClientMessage defines the structure received from a websocket client.
 type ClientMessage struct {
-	Type           MessageType `json:"type"`
-	SubType        string      `json:"sub_type"`
-	ConversationID types.ID    `json:"conversation_id"`
-	Content        string      `json:"content"`
-	SenderID       types.ID    `json:"-"` // Filled by the service
+	Type            MessageType `json:"type"`
+	SubType         string      `json:"sub_type"`
+	ConversationID  types.ID    `json:"conversation_id"`
+	Content         string      `json:"content"`
+	ClientMessageID string      `json:"client_message_id"`
+	SenderID        types.ID    `json:"-"` // Filled by the service
 }
 
 // ServerMessage defines the structure sent to a websocket client.
 type ServerMessage struct {
-	Type      MessageType `json:"type"`
-	SubType   string      `json:"sub_type"`
-	Timestamp time.Time   `json:"timestamp"`
-	Payload   interface{} `json:"payload"`
+	Type            MessageType `json:"type"`
+	SubType         string      `json:"sub_type"`
+	Timestamp       time.Time   `json:"timestamp"`
+	Payload         interface{} `json:"payload"`
+	ClientMessageID string      `json:"client_message_id"`
 }
 
 // SystemMessagePayload defines the payload for system-type ServerMessages.
@@ -37,11 +39,12 @@ type PubSubMessage struct {
 }
 
 // NewTextMessage creates a "text" type ServerMessage from a database Message object.
-func NewTextMessage(dbMessage Message) ServerMessage {
+func NewTextMessage(dbMessage Message, clientMessageID string) ServerMessage {
 	return ServerMessage{
-		Type:      MessageTypeText,
-		Timestamp: dbMessage.CreatedAt,
-		Payload:   dbMessage,
+		Type:            MessageTypeText,
+		Timestamp:       dbMessage.CreatedAt,
+		Payload:         dbMessage,
+		ClientMessageID: clientMessageID,
 	}
 }
 

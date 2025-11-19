@@ -7,7 +7,7 @@ import (
 )
 
 func (h Handler) wsNotification(c echo.Context) error {
-	conn, uErr := h.upgrader.Upgrade(c.Response(), c.Request())
+	conn, uErr := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if uErr != nil {
 		return echo.NewHTTPError(http.StatusNotAcceptable, "could not upgrade connection")
 	}

@@ -66,8 +66,8 @@ func NewGorillaUpgrader(cfg Config, checkOrigin func(r *http.Request) bool) *Gor
 	}
 }
 
-func (u *GorillaUpgrader) Upgrade(w http.ResponseWriter, r *http.Request) (*GorillaConnection, error) {
-	conn, err := u.upgrader.Upgrade(w, r, nil)
+func (u *GorillaUpgrader) Upgrade(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (*GorillaConnection, error) {
+	conn, err := u.upgrader.Upgrade(w, r, responseHeader)
 	if err != nil {
 		return nil, err
 	}

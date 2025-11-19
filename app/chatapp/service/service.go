@@ -160,7 +160,7 @@ func (s *Service) handleTextMessage(ctx context.Context, msg ClientMessage) {
 		errlog.WithoutErrContext(ctx, richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected), s.logger)
 	}
 
-	wsMsg := NewTextMessage(savedMsg)
+	wsMsg := NewTextMessage(savedMsg, msg.ClientMessageID)
 
 	// Publish to all conversation participants (including the sender)
 	s.publishToConversation(ctx, msg.ConversationID, wsMsg)
