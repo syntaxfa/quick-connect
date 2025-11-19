@@ -1,15 +1,6 @@
 /**
  * Quick Connect Chat SDK
- * نسخه: 1.0.0
- *
- * نحوه استفاده:
- * <script src="quick-connect-sdk.js"></script>
- * <script>
- *   QuickConnect.init({
- *     managerUrl: 'https://your-manager-url.com',
- *     chatUrl: 'wss://your-chat-url.com'
- *   });
- * </script>
+ * Version: 1.3.0 (Mobile Fullscreen & Layout Fixes)
  */
 
 (function(window, document) {
@@ -18,7 +9,8 @@
     const QuickConnect = {
         config: {
             managerUrl: 'http://localhost:2531',
-            chatUrl: 'ws://localhost:2530',
+            chatUrl: 'ws://localhost:2530/chats/clients',
+            chatApiUrl: 'http://localhost:2530',
             position: 'bottom-left',
             theme: 'purple',
             lang: 'fa'
@@ -28,14 +20,16 @@
             isOpen: false,
             isConnected: false,
             token: null,
+            userId: null,
             userState: null,
-            conversationId: '01KAAWW5V95WFFDERJZCTDE2QQ',
+            conversationId: null,
             messages: [],
             typingUsers: new Set(),
             ws: null,
             lastTypingSent: 0,
             typingTimeouts: {},
-            reconnectAttempts: 0
+            reconnectAttempts: 0,
+            reconnectInterval: 3000
         },
 
         // Initialize SDK
@@ -51,10 +45,26 @@
 
         // Setup SDK
         setup: function() {
+            if (document.getElementById('qc-widget')) return;
+
             this.injectStyles();
             this.injectHTML();
             this.attachEventListeners();
             this.initializeAuth();
+        },
+
+        // Helper: Parse JWT
+        parseJwt: function(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
         },
 
         // Inject CSS Styles
@@ -86,6 +96,7 @@
           display: flex;
           align-items: center;
           justify-content: center;
+          z-index: 1000000;
         }
 
         #qc-btn:hover {
@@ -93,7 +104,11 @@
           box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
         }
 
-        #qc-btn.hidden { display: none; }
+        #qc-btn.hidden {
+          display: none !important;
+          opacity: 0;
+          pointer-events: none;
+        }
 
         #qc-badge {
           position: absolute;
@@ -132,7 +147,7 @@
           width: 380px;
           height: 600px;
           background: linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #1e1b4b 100%);
-          border-radius: 16px;
+          border-radius: 20px;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
           overflow: hidden;
           flex-direction: column;
@@ -144,10 +159,11 @@
 
         #qc-header {
           background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
-          padding: 16px;
+          padding: 18px;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          flex-shrink: 0;
         }
 
         #qc-header-info {
@@ -157,22 +173,23 @@
         }
 
         #qc-avatar {
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           background: white;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           position: relative;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         #qc-status-dot {
           position: absolute;
           bottom: 0;
           right: 0;
-          width: 12px;
-          height: 12px;
+          width: 13px;
+          height: 13px;
           background: #10b981;
           border: 2px solid white;
           border-radius: 50%;
@@ -183,22 +200,22 @@
         #qc-header-text h3 {
           color: white;
           font-size: 18px;
-          font-weight: bold;
+          font-weight: 800;
           margin-bottom: 2px;
         }
 
         #qc-header-text p {
-          color: rgba(255, 255, 255, 0.8);
-          font-size: 12px;
+          color: rgba(255, 255, 255, 0.85);
+          font-size: 13px;
         }
 
         #qc-close-btn {
           background: rgba(255, 255, 255, 0.2);
           border: none;
           color: white;
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
           cursor: pointer;
           transition: background 0.2s;
           display: flex;
@@ -211,7 +228,8 @@
         #qc-profile-banner {
           display: none;
           background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
-          padding: 12px 16px;
+          padding: 14px 18px;
+          flex-shrink: 0;
         }
 
         #qc-profile-banner.show { display: block; }
@@ -220,13 +238,13 @@
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 8px;
+          margin-bottom: 10px;
         }
 
         #qc-profile-header p {
           color: white;
           font-size: 14px;
-          font-weight: 500;
+          font-weight: 600;
         }
 
         #qc-profile-close {
@@ -242,32 +260,32 @@
         #qc-profile-form {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 10px;
         }
 
         #qc-profile-form input {
           width: 100%;
-          padding: 10px 12px;
-          border-radius: 8px;
+          padding: 12px 14px;
+          border-radius: 10px;
           border: none;
           background: rgba(255, 255, 255, 0.9);
-          font-size: 13px;
+          font-size: 14px;
         }
 
         #qc-profile-actions {
           display: flex;
-          gap: 8px;
+          gap: 10px;
         }
 
         #qc-profile-submit {
           flex: 1;
-          padding: 10px;
+          padding: 12px;
           background: white;
           color: #ea580c;
           border: none;
-          border-radius: 8px;
-          font-weight: 600;
-          font-size: 13px;
+          border-radius: 10px;
+          font-weight: 700;
+          font-size: 14px;
           cursor: pointer;
           transition: background 0.2s;
         }
@@ -277,11 +295,12 @@
         #qc-messages {
           flex: 1;
           overflow-y: auto;
-          padding: 16px;
+          padding: 20px;
           background: rgba(15, 23, 42, 0.5);
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 16px;
+          width: 100%;
         }
 
         #qc-messages::-webkit-scrollbar { width: 6px; }
@@ -290,6 +309,7 @@
 
         .qc-msg {
           display: flex;
+          width: 100%;
           animation: qc-slideIn 0.2s ease;
         }
 
@@ -298,10 +318,12 @@
         .qc-msg.system { justify-content: center; }
 
         .qc-msg-bubble {
-          max-width: 75%;
-          padding: 12px 16px;
-          border-radius: 16px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          max-width: 75%; /* Decreased from 85% to prevent edge sticking */
+          padding: 14px 18px;
+          border-radius: 18px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+          position: relative;
+          min-width: 60px;
         }
 
         .qc-msg.own .qc-msg-bubble {
@@ -314,55 +336,63 @@
           background: #1e293b;
           color: white;
           border-bottom-left-radius: 4px;
+          border: 1px solid #334155;
         }
 
         .qc-msg.system .qc-msg-bubble {
-          background: rgba(51, 65, 85, 0.5);
+          background: rgba(51, 65, 85, 0.6);
           color: #cbd5e1;
           font-size: 12px;
-          padding: 6px 12px;
-          border-radius: 12px;
+          padding: 8px 16px;
+          border-radius: 20px;
+          border: 1px solid rgba(255,255,255,0.1);
+          max-width: 90%;
+          text-align: center;
         }
 
         .qc-msg-content {
-          font-size: 14px;
-          line-height: 1.5;
-          word-wrap: break-word;
+          font-size: 15px;
+          line-height: 1.6;
+          word-break: break-word;
+          overflow-wrap: anywhere;
+          white-space: pre-wrap;
         }
 
         .qc-msg-footer {
           display: flex;
           align-items: center;
           justify-content: flex-end;
-          gap: 4px;
-          margin-top: 4px;
+          gap: 6px;
+          margin-top: 8px;
         }
 
         .qc-msg-time {
           font-size: 11px;
           opacity: 0.7;
+          font-weight: 300;
         }
 
         .qc-msg-status {
-          width: 16px;
-          height: 16px;
-          opacity: 0.7;
+          width: 14px;
+          height: 14px;
+          opacity: 0.8;
         }
 
         .qc-typing {
           display: flex;
-          gap: 4px;
-          padding: 12px 16px;
+          gap: 5px;
+          padding: 14px 18px;
           background: #1e293b;
-          border-radius: 16px;
+          border-radius: 18px;
           border-bottom-left-radius: 4px;
           width: fit-content;
+          border: 1px solid #334155;
         }
 
         .qc-typing-dot {
           width: 8px;
           height: 8px;
-          background: #64748b;
+          background: #94a3b8;
           border-radius: 50%;
           animation: qc-typing 1.4s infinite;
         }
@@ -372,7 +402,7 @@
 
         @keyframes qc-typing {
           0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-8px); }
+          30% { transform: translateY(-6px); }
         }
 
         #qc-emoji-picker {
@@ -380,6 +410,7 @@
           background: #1e293b;
           border-top: 1px solid #334155;
           padding: 12px;
+          flex-shrink: 0;
         }
 
         #qc-emoji-picker.show { display: block; }
@@ -395,7 +426,7 @@
           border: none;
           font-size: 24px;
           cursor: pointer;
-          padding: 4px;
+          padding: 6px;
           border-radius: 8px;
           transition: background 0.2s;
         }
@@ -405,22 +436,23 @@
         #qc-input-area {
           background: #0f172a;
           border-top: 1px solid #334155;
-          padding: 16px;
+          padding: 18px;
+          flex-shrink: 0;
         }
 
         #qc-input-container {
           display: flex;
           align-items: flex-end;
-          gap: 8px;
+          gap: 10px;
         }
 
         #qc-emoji-toggle, #qc-send-btn {
-          background: rgba(71, 85, 105, 0.5);
+          background: rgba(71, 85, 105, 0.4);
           border: none;
           color: #94a3b8;
-          width: 40px;
-          height: 40px;
-          border-radius: 12px;
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
           cursor: pointer;
           transition: all 0.2s;
           display: flex;
@@ -450,8 +482,8 @@
         #qc-input-wrapper {
           flex: 1;
           background: #1e293b;
-          border-radius: 12px;
-          padding: 10px 14px;
+          border-radius: 14px;
+          padding: 12px 16px;
           border: 1px solid #334155;
           transition: border-color 0.2s;
         }
@@ -463,14 +495,47 @@
           background: transparent;
           border: none;
           color: white;
-          font-size: 14px;
+          font-size: 15px;
           outline: none;
           resize: none;
           max-height: 100px;
           font-family: inherit;
+          line-height: 1.5;
         }
 
         #qc-input::placeholder { color: #64748b; }
+
+        /* Mobile Responsive Styles */
+        @media screen and (max-width: 600px) {
+            #qc-widget {
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                top: 0 !important;
+                width: 100%;
+                height: 100%;
+                z-index: 9999999;
+            }
+
+            #qc-window {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                border: none;
+            }
+
+            /* Ensure messages take available space properly */
+            #qc-messages {
+                padding-bottom: 20px;
+            }
+
+            /* Restore button visibility if closed on mobile */
+            #qc-btn {
+                position: absolute;
+                bottom: 20px;
+                left: 20px;
+            }
+        }
       `;
             document.head.appendChild(style);
         },
@@ -484,7 +549,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
-          <span id="qc-badge">3</span>
+          <span id="qc-badge">1</span>
         </button>
 
         <div id="qc-window">
@@ -573,8 +638,12 @@
 
         // Attach Event Listeners
         attachEventListeners: function() {
-            document.getElementById('qc-btn').onclick = () => this.openChat();
-            document.getElementById('qc-close-btn').onclick = () => this.closeChat();
+            const btn = document.getElementById('qc-btn');
+            const closeBtn = document.getElementById('qc-close-btn');
+
+            if(btn) btn.onclick = () => this.openChat();
+            if(closeBtn) closeBtn.onclick = () => this.closeChat();
+
             document.getElementById('qc-emoji-toggle').onclick = () => this.toggleEmojiPicker();
             document.getElementById('qc-send-btn').onclick = () => this.sendMessage();
             document.getElementById('qc-profile-close').onclick = () => this.hideProfileBanner();
@@ -590,36 +659,82 @@
             };
         },
 
-        // Authentication
-        initializeAuth: function() {
+        // Authentication Logic
+        initializeAuth: async function() {
             const token = localStorage.getItem('QC_TOKEN');
             const userState = localStorage.getItem('QC_USER_STATE');
 
             if (token && userState) {
                 this.state.token = token;
                 this.state.userState = userState;
-                this.connectWebSocket();
             } else {
-                this.registerGuest();
+                await this.registerGuest();
+            }
+
+            // Extract user ID from token
+            if (this.state.token) {
+                const decoded = this.parseJwt(this.state.token);
+                if (decoded && decoded.user_id) {
+                    this.state.userId = decoded.user_id;
+                }
+                // Connect flow
+                await this.fetchActiveConversation();
+                this.connectWebSocket();
             }
         },
 
-        registerGuest: function() {
-            // Simulate API call
-            setTimeout(() => {
-                const token = 'guest_token_' + Date.now();
-                localStorage.setItem('QC_TOKEN', token);
-                localStorage.setItem('QC_USER_STATE', 'guest');
+        registerGuest: async function() {
+            try {
+                const response = await fetch(`${this.config.managerUrl}/users/guest/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fullname: "Guest Visitor"
+                    })
+                });
 
-                this.state.token = token;
-                this.state.userState = 'guest';
+                if (!response.ok) throw new Error('Guest registration failed');
 
-                this.connectWebSocket();
-                this.showProfileBanner();
-            }, 500);
+                const data = await response.json();
+                if (data.qc_token) {
+                    localStorage.setItem('QC_TOKEN', data.qc_token);
+                    localStorage.setItem('QC_USER_STATE', 'guest');
+                    this.state.token = data.qc_token;
+                    this.state.userState = 'guest';
+                    this.showProfileBanner();
+                }
+            } catch (error) {
+                console.error("QC SDK: Auth Error", error);
+            }
         },
 
-        updateProfile: function() {
+        fetchActiveConversation: async function() {
+            if (!this.state.token) return;
+
+            try {
+                const response = await fetch(`${this.config.chatApiUrl}/conversations/active`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${this.state.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch conversation');
+
+                const data = await response.json();
+                if (data && data.id) {
+                    this.state.conversationId = data.id;
+                    localStorage.setItem('QC_CONVERSATION_ID', data.id);
+                }
+            } catch (error) {
+                console.error("QC SDK: Active conversation fetch error", error);
+            }
+        },
+
+        updateProfile: async function() {
             const name = document.getElementById('qc-profile-name').value;
             const email = document.getElementById('qc-profile-email').value;
 
@@ -628,38 +743,70 @@
                 return;
             }
 
-            // Simulate API call
-            console.log('Updating profile:', { name, email });
-            this.hideProfileBanner();
-            this.addSystemMessage('پروفایل شما با موفقیت ثبت شد ✅');
+            if (this.state.userState !== 'guest' || !this.state.token) return;
+
+            try {
+                await fetch(`${this.config.managerUrl}/users/guest/update`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.state.token}`
+                    },
+                    body: JSON.stringify({
+                        fullname: name,
+                        email: email
+                    })
+                });
+                this.hideProfileBanner();
+                this.addSystemMessage('پروفایل شما با موفقیت ثبت شد ✅');
+            } catch (e) {
+                console.error("Profile Update Error", e);
+            }
         },
 
-        // WebSocket
+        // WebSocket Logic
         connectWebSocket: function() {
-            // Simulate WebSocket connection
-            setTimeout(() => {
+            if (this.state.ws && (this.state.ws.readyState === WebSocket.OPEN || this.state.ws.readyState === WebSocket.CONNECTING)) return;
+
+            const protocols = [this.state.token];
+            try {
+                this.state.ws = new WebSocket(this.config.chatUrl, protocols);
+            } catch (e) {
+                console.error("WebSocket creation failed", e);
+                return;
+            }
+
+            this.state.ws.onopen = () => {
                 this.state.isConnected = true;
                 this.updateConnectionStatus();
                 this.addSystemMessage('به چت پشتیبانی خوش آمدید! 👋');
+            };
 
-                // Simulate support message
-                setTimeout(() => {
-                    this.receiveMessage({
-                        type: 'text',
-                        payload: {
-                            id: 'msg_' + Date.now(),
-                            content: 'سلام! چطور میتونم کمکتون کنم؟ 😊',
-                            created_at: new Date().toISOString(),
-                            isSupport: true
-                        }
-                    });
-                }, 1500);
-            }, 1000);
+            this.state.ws.onclose = () => {
+                this.state.isConnected = false;
+                this.updateConnectionStatus();
+                setTimeout(() => this.connectWebSocket(), this.state.reconnectInterval);
+            };
+
+            this.state.ws.onerror = (err) => {
+                console.error("QC WS Error", err);
+            };
+
+            this.state.ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    this.handleIncomingMessage(message);
+                } catch (e) {
+                    console.error("Parse Error", e);
+                }
+            };
         },
 
         updateConnectionStatus: function() {
             const statusText = document.getElementById('qc-status-text');
             const statusDot = document.getElementById('qc-status-dot');
+
+            if(!statusText || !statusDot) return;
 
             if (this.state.isConnected) {
                 statusText.textContent = 'آنلاین';
@@ -670,53 +817,31 @@
             }
         },
 
-        // UI Control
-        openChat: function() {
-            this.state.isOpen = true;
-            document.getElementById('qc-btn').classList.add('hidden');
-            document.getElementById('qc-window').classList.add('open');
-            document.getElementById('qc-input').focus();
-        },
-
-        closeChat: function() {
-            this.state.isOpen = false;
-            document.getElementById('qc-btn').classList.remove('hidden');
-            document.getElementById('qc-window').classList.remove('open');
-        },
-
-        toggleEmojiPicker: function() {
-            const picker = document.getElementById('qc-emoji-picker');
-            picker.classList.toggle('show');
-        },
-
-        insertEmoji: function(emoji) {
-            const input = document.getElementById('qc-input');
-            input.value += emoji;
-            input.focus();
-            document.getElementById('qc-emoji-picker').classList.remove('show');
-        },
-
-        showProfileBanner: function() {
-            document.getElementById('qc-profile-banner').classList.add('show');
-        },
-
-        hideProfileBanner: function() {
-            document.getElementById('qc-profile-banner').classList.remove('show');
-        },
-
-        // Messaging
+        // Messaging Logic
         sendMessage: function() {
             const input = document.getElementById('qc-input');
             const content = input.value.trim();
 
-            if (!content || !this.state.isConnected) return;
+            if (!content || !this.state.isConnected || !this.state.ws) return;
 
+            const tempId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            const payload = {
+                type: 'text',
+                content: content,
+                conversation_id: this.state.conversationId || "",
+                client_message_id: tempId
+            };
+
+            this.state.ws.send(JSON.stringify(payload));
+
+            // Optimistic UI Add
             const message = {
-                id: 'local_' + Date.now(),
+                id: tempId,
                 content: content,
                 created_at: new Date().toISOString(),
                 isOwn: true,
-                status: 'sent'
+                status: 'pending'
             };
 
             this.state.messages.push(message);
@@ -725,19 +850,46 @@
             input.value = '';
             input.style.height = 'auto';
             this.sendTypingStopped();
+        },
 
-            // Simulate response
-            setTimeout(() => {
+        handleIncomingMessage: function(msg) {
+            if (msg.type === 'text') {
+                const incomingClientId = msg.client_message_id;
+
+                if (incomingClientId) {
+                    const pendingIndex = this.state.messages.findIndex(m => m.id === incomingClientId);
+
+                    if (pendingIndex !== -1) {
+                        const msgRef = this.state.messages[pendingIndex];
+                        msgRef.status = 'sent';
+                        if(msg.payload && msg.payload.id) {
+                            msgRef.id = msg.payload.id;
+                        }
+                        this.renderMessages();
+                        return;
+                    }
+                }
+
+                if (this.state.userId && msg.payload.sender_id === this.state.userId) {
+                    return;
+                }
+
+                if (msg.payload && msg.payload.conversation_id && !this.state.conversationId) {
+                    this.state.conversationId = msg.payload.conversation_id;
+                    localStorage.setItem('QC_CONVERSATION_ID', this.state.conversationId);
+                }
+
                 this.receiveMessage({
                     type: 'text',
                     payload: {
-                        id: 'msg_' + Date.now(),
-                        content: 'پیام شما دریافت شد. یک لحظه صبر کنید...',
-                        created_at: new Date().toISOString(),
-                        isSupport: true
+                        ...msg.payload,
+                        isOwn: false
                     }
                 });
-            }, 1000);
+
+            } else if (msg.type === 'system') {
+                this.handleSystemMessage(msg);
+            }
         },
 
         receiveMessage: function(data) {
@@ -747,8 +899,6 @@
                     isOwn: false
                 });
                 this.renderMessages();
-            } else if (data.type === 'system') {
-                this.handleSystemMessage(data);
             }
         },
 
@@ -763,17 +913,24 @@
         },
 
         handleSystemMessage: function(data) {
-            // Handle typing indicators
             if (data.sub_type === 'typing_started') {
                 this.state.typingUsers.add(data.payload.sender_id);
                 this.renderMessages();
 
-                setTimeout(() => {
+                if (this.state.typingTimeouts[data.payload.sender_id]) {
+                    clearTimeout(this.state.typingTimeouts[data.payload.sender_id]);
+                }
+
+                this.state.typingTimeouts[data.payload.sender_id] = setTimeout(() => {
                     this.state.typingUsers.delete(data.payload.sender_id);
                     this.renderMessages();
                 }, 6000);
+
             } else if (data.sub_type === 'typing_stopped') {
                 this.state.typingUsers.delete(data.payload.sender_id);
+                if (this.state.typingTimeouts[data.payload.sender_id]) {
+                    clearTimeout(this.state.typingTimeouts[data.payload.sender_id]);
+                }
                 this.renderMessages();
             }
         },
@@ -785,25 +942,35 @@
                 this.state.lastTypingSent = now;
             }
 
-            // Auto-resize textarea
             const input = document.getElementById('qc-input');
             input.style.height = 'auto';
             input.style.height = input.scrollHeight + 'px';
         },
 
         sendTypingStarted: function() {
-            // Send typing_started via WebSocket
-            console.log('Typing started');
+            if (!this.state.ws || !this.state.conversationId) return;
+            this.state.ws.send(JSON.stringify({
+                type: 'system',
+                sub_type: 'typing_started',
+                conversation_id: this.state.conversationId
+            }));
         },
 
         sendTypingStopped: function() {
-            // Send typing_stopped via WebSocket
-            console.log('Typing stopped');
+            if (!this.state.ws || !this.state.conversationId) return;
+            this.state.ws.send(JSON.stringify({
+                type: 'system',
+                sub_type: 'typing_stopped',
+                conversation_id: this.state.conversationId
+            }));
+            this.state.lastTypingSent = 0;
         },
 
-        // Render
+        // Render Logic
         renderMessages: function() {
             const container = document.getElementById('qc-messages');
+            if (!container) return;
+
             container.innerHTML = '';
 
             this.state.messages.forEach(msg => {
@@ -818,16 +985,29 @@
           `;
                 } else {
                     msgEl.className = `qc-msg ${msg.isOwn ? 'own' : 'other'}`;
+
+                    let statusIcon = '';
+                    if (msg.isOwn) {
+                        if (msg.status === 'pending') {
+                            statusIcon = `
+                            <svg class="qc-msg-status" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>`;
+                        } else {
+                            statusIcon = `
+                            <svg class="qc-msg-status" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>`;
+                        }
+                    }
+
                     msgEl.innerHTML = `
             <div class="qc-msg-bubble">
               <div class="qc-msg-content">${this.escapeHtml(msg.content)}</div>
               <div class="qc-msg-footer">
                 <span class="qc-msg-time">${this.formatTime(msg.created_at)}</span>
-                ${msg.isOwn ? `
-                  <svg class="qc-msg-status" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                ` : ''}
+                ${statusIcon}
               </div>
             </div>
           `;
@@ -836,7 +1016,6 @@
                 container.appendChild(msgEl);
             });
 
-            // Add typing indicator
             if (this.state.typingUsers.size > 0) {
                 const typingEl = document.createElement('div');
                 typingEl.className = 'qc-msg other';
@@ -850,7 +1029,6 @@
                 container.appendChild(typingEl);
             }
 
-            // Scroll to bottom
             container.scrollTop = container.scrollHeight;
         },
 
@@ -866,13 +1044,60 @@
             return div.innerHTML;
         },
 
+        // UI Control
+        openChat: function() {
+            this.state.isOpen = true;
+            const btn = document.getElementById('qc-btn');
+            const win = document.getElementById('qc-window');
+            const input = document.getElementById('qc-input');
+
+            if (btn) btn.classList.add('hidden');
+            if (win) win.classList.add('open');
+
+            if (input) {
+                setTimeout(() => input.focus(), 100);
+            }
+        },
+
+        closeChat: function() {
+            this.state.isOpen = false;
+            const btn = document.getElementById('qc-btn');
+            const win = document.getElementById('qc-window');
+
+            if (btn) btn.classList.remove('hidden');
+            if (win) win.classList.remove('open');
+        },
+
+        toggleEmojiPicker: function() {
+            const picker = document.getElementById('qc-emoji-picker');
+            picker.classList.toggle('show');
+        },
+
+        insertEmoji: function(emoji) {
+            const input = document.getElementById('qc-input');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('qc-emoji-picker').classList.remove('show');
+        },
+
+        showProfileBanner: function() {
+            const banner = document.getElementById('qc-profile-banner');
+            if(banner) banner.classList.add('show');
+        },
+
+        hideProfileBanner: function() {
+            const banner = document.getElementById('qc-profile-banner');
+            if(banner) banner.classList.remove('show');
+        },
+
         // Public API
         login: function(token) {
             localStorage.setItem('QC_TOKEN', token);
             localStorage.setItem('QC_USER_STATE', 'client');
             this.state.token = token;
             this.state.userState = 'client';
-            this.connectWebSocket();
+            if (this.state.ws) this.state.ws.close();
+            this.initializeAuth();
         },
 
         logout: function() {
@@ -894,7 +1119,7 @@
         }
     };
 
-    // Auto-initialize on load
+    // Auto-initialize
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             QuickConnect.init();
@@ -903,7 +1128,6 @@
         QuickConnect.init();
     }
 
-    // Expose to global scope
     window.QuickConnect = QuickConnect;
 
 })(window, document);
