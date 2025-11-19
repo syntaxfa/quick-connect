@@ -1,6 +1,6 @@
 /**
  * Quick Connect Chat SDK
- * Version: 1.3.0 (Mobile Fullscreen & Layout Fixes)
+ * Version: 1.5.0 (Notification Badge Logic Added)
  */
 
 (function(window, document) {
@@ -11,7 +11,7 @@
             managerUrl: 'http://localhost:2531',
             chatUrl: 'ws://localhost:2530/chats/clients',
             chatApiUrl: 'http://localhost:2530',
-            position: 'bottom-left',
+            position: 'bottom-right',
             theme: 'purple',
             lang: 'fa'
         },
@@ -29,7 +29,8 @@
             lastTypingSent: 0,
             typingTimeouts: {},
             reconnectAttempts: 0,
-            reconnectInterval: 3000
+            reconnectInterval: 3000,
+            unreadCount: 0 // New: Counter state
         },
 
         // Initialize SDK
@@ -80,6 +81,11 @@
           z-index: 999999;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           direction: rtl;
+          pointer-events: none;
+        }
+
+        #qc-widget > * {
+          pointer-events: auto;
         }
 
         #qc-btn {
@@ -121,10 +127,11 @@
           border-radius: 50%;
           font-size: 12px;
           font-weight: bold;
-          display: flex;
+          display: flex; /* Managed by JS logic now */
           align-items: center;
           justify-content: center;
           animation: qc-bounce 1s infinite;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         @keyframes qc-pulse {
@@ -153,6 +160,9 @@
           flex-direction: column;
           border: 1px solid rgba(168, 85, 247, 0.3);
           animation: qc-slideIn 0.3s ease;
+          position: absolute;
+          bottom: 80px;
+          ${this.config.position.includes('right') ? 'right' : 'left'}: 0;
         }
 
         #qc-window.open { display: flex; }
@@ -318,7 +328,7 @@
         .qc-msg.system { justify-content: center; }
 
         .qc-msg-bubble {
-          max-width: 75%; /* Decreased from 85% to prevent edge sticking */
+          max-width: 75%;
           padding: 14px 18px;
           border-radius: 18px;
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -399,11 +409,6 @@
 
         .qc-typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .qc-typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes qc-typing {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
-        }
 
         #qc-emoji-picker {
           display: none;
@@ -514,7 +519,6 @@
                 top: 0 !important;
                 width: 100%;
                 height: 100%;
-                z-index: 9999999;
             }
 
             #qc-window {
@@ -522,18 +526,20 @@
                 height: 100%;
                 border-radius: 0;
                 border: none;
+                bottom: 0;
+                right: 0;
+                left: 0;
             }
 
-            /* Ensure messages take available space properly */
             #qc-messages {
                 padding-bottom: 20px;
             }
 
-            /* Restore button visibility if closed on mobile */
             #qc-btn {
                 position: absolute;
                 bottom: 20px;
-                left: 20px;
+                right: 20px;
+                left: auto;
             }
         }
       `;
@@ -544,12 +550,13 @@
         injectHTML: function() {
             const container = document.createElement('div');
             container.id = 'qc-widget';
+            // Badge is hidden by default using style="display: none"
             container.innerHTML = `
         <button id="qc-btn" aria-label="Open chat">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
-          <span id="qc-badge">1</span>
+          <span id="qc-badge" style="display: none">0</span>
         </button>
 
         <div id="qc-window">
@@ -817,6 +824,18 @@
             }
         },
 
+        updateBadgeUI: function() {
+            const badge = document.getElementById('qc-badge');
+            if (!badge) return;
+
+            if (this.state.unreadCount > 0) {
+                badge.style.display = 'flex';
+                badge.textContent = this.state.unreadCount;
+            } else {
+                badge.style.display = 'none';
+            }
+        },
+
         // Messaging Logic
         sendMessage: function() {
             const input = document.getElementById('qc-input');
@@ -872,6 +891,12 @@
 
                 if (this.state.userId && msg.payload.sender_id === this.state.userId) {
                     return;
+                }
+
+                // Check if chat is closed to increment badge
+                if (!this.state.isOpen) {
+                    this.state.unreadCount++;
+                    this.updateBadgeUI();
                 }
 
                 if (msg.payload && msg.payload.conversation_id && !this.state.conversationId) {
@@ -1047,6 +1072,9 @@
         // UI Control
         openChat: function() {
             this.state.isOpen = true;
+            this.state.unreadCount = 0; // Reset count
+            this.updateBadgeUI(); // Update UI
+
             const btn = document.getElementById('qc-btn');
             const win = document.getElementById('qc-window');
             const input = document.getElementById('qc-input');
