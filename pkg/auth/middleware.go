@@ -23,11 +23,30 @@ func New(validator *jwtvalidator.Validator) *Middleware {
 // RequireAuth (Authentication).
 func (m *Middleware) RequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		authHeader := c.Request().Header.Get("Authorization")
+		var tokenStr string
+		var err error
 
-		tokenStr, eErr := extractToken(authHeader)
-		if eErr != nil {
-			return c.JSON(http.StatusUnauthorized, eErr.Error())
+		isWebSocket := strings.EqualFold(c.Request().Header.Get("Upgrade"), "websocket")
+
+		if isWebSocket {
+			protocolHeader := c.Request().Header.Get("Sec-WebSocket-Protocol")
+			if protocolHeader == "" {
+				return c.JSON(http.StatusUnauthorized, "websocket protocol (token) missing")
+			}
+
+			parts := strings.Split(protocolHeader, ",")
+			tokenStr = strings.TrimSpace(parts[0])
+		} else {
+			authHeader := c.Request().Header.Get("Authorization")
+
+			tokenStr, err = extractToken(authHeader)
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, err.Error())
+			}
+		}
+
+		if tokenStr == "" {
+			return c.JSON(http.StatusUnauthorized, "token is empty")
 		}
 
 		claims, jErr := m.validator.ValidateToken(tokenStr)
