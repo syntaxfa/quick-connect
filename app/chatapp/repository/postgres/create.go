@@ -52,8 +52,8 @@ func (d *DB) SaveMessage(ctx context.Context, message service.Message) (service.
 	var metaDataBytes []byte
 	var err error
 
-	if len(message.MetaData) > 0 {
-		metaDataBytes, err = json.Marshal(message.MetaData)
+	if len(message.Metadata) > 0 {
+		metaDataBytes, err = json.Marshal(message.Metadata)
 		if err != nil {
 			return service.Message{}, richerror.New(op).WithWrapError(err).WithKind(richerror.KindInvalid).
 				WithMessage("failed to marshal metadata")
