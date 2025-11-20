@@ -15,8 +15,10 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages("conversation_id");
 CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages("sender_id");
 CREATE INDEX IF NOT EXISTS idx_messages_replied_to_message_id ON messages("replied_to_message_id");
+CREATE INDEX IF NOT EXISTS idx_messages_conv_id_desc ON messages("conversation_id", "id" DESC);
 
 -- +migrate Down
+DROP INDEX IF EXISTS idx_messages_conv_id_desc;
 DROP INDEX IF EXISTS idx_messages_replied_to_message_id;
 DROP INDEX IF EXISTS idx_messages_sender_id;
 DROP INDEX IF EXISTS idx_messages_conversation_id;
