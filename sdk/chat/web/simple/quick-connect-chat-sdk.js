@@ -1,6 +1,6 @@
 /**
  * Quick Connect Chat SDK
- * Version: 1.5.1 (Typing Logic & Header Animation Added)
+ * Version: 1.7.0 (Added Infinite Scroll / Pagination)
  */
 
 (function(window, document) {
@@ -30,7 +30,12 @@
             typingTimeouts: {},
             reconnectAttempts: 0,
             reconnectInterval: 3000,
-            unreadCount: 0 // New: Counter state
+            unreadCount: 0,
+            // History State
+            historyLoaded: false,
+            nextCursor: null,
+            hasMore: false,
+            isLoadingHistory: false
         },
 
         // Initialize SDK
@@ -647,6 +652,7 @@
         attachEventListeners: function() {
             const btn = document.getElementById('qc-btn');
             const closeBtn = document.getElementById('qc-close-btn');
+            const messagesContainer = document.getElementById('qc-messages');
 
             if(btn) btn.onclick = () => this.openChat();
             if(closeBtn) closeBtn.onclick = () => this.closeChat();
@@ -664,6 +670,16 @@
                     this.sendMessage();
                 }
             };
+
+            // Added: Scroll Listener for Pagination
+            if (messagesContainer) {
+                messagesContainer.addEventListener('scroll', () => {
+                    // Check if scrolled to top, has more pages, and not currently loading
+                    if (messagesContainer.scrollTop === 0 && this.state.hasMore && !this.state.isLoadingHistory) {
+                        this.fetchChatHistory();
+                    }
+                });
+            }
         },
 
         // Authentication Logic
@@ -735,9 +751,91 @@
                 if (data && data.id) {
                     this.state.conversationId = data.id;
                     localStorage.setItem('QC_CONVERSATION_ID', data.id);
+
+                    // If chat window is already open but history not loaded, load it
+                    if (this.state.isOpen && !this.state.historyLoaded) {
+                        this.fetchChatHistory();
+                    }
                 }
             } catch (error) {
                 console.error("QC SDK: Active conversation fetch error", error);
+            }
+        },
+
+        // Fetch Chat History (With Pagination)
+        fetchChatHistory: async function() {
+            if (!this.state.token || !this.state.conversationId || (this.state.historyLoaded && !this.state.hasMore) || this.state.isLoadingHistory) return;
+
+            this.state.isLoadingHistory = true;
+
+            // Capture current scroll height for pagination position preservation
+            const container = document.getElementById('qc-messages');
+            let previousHeight = 0;
+            if (container) {
+                previousHeight = container.scrollHeight;
+            }
+
+            try {
+                const payload = {
+                    conversation_id: this.state.conversationId,
+                    pagination: {
+                        cursor: this.state.nextCursor, // null for first page
+                        limit: 20
+                    }
+                };
+
+                const response = await fetch(`${this.config.chatApiUrl}/chats`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.state.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch history');
+
+                const data = await response.json();
+
+                if (data && data.results) {
+                    // API returns messages Newest to Oldest. We reverse them for UI.
+                    const historyMessages = data.results.map(msg => ({
+                        id: msg.id,
+                        content: msg.content,
+                        created_at: msg.created_at,
+                        isOwn: msg.sender_id === this.state.userId,
+                        status: 'sent'
+                    })).reverse();
+
+                    // Prepend history to existing messages
+                    this.state.messages = [...historyMessages, ...this.state.messages];
+
+                    // Update pagination state
+                    if (data.paginate) {
+                        this.state.nextCursor = data.paginate.next_cursor;
+                        this.state.hasMore = data.paginate.has_more;
+                    }
+
+                    this.state.historyLoaded = true;
+
+                    // Render: Pass true to preserveScroll if we are loading history
+                    // If it's the very first load (previousHeight close to 0), we don't preserve, we want bottom.
+                    // If it's pagination (previousHeight > 0), we preserve.
+                    const isPagination = previousHeight > 0;
+                    this.renderMessages(isPagination);
+
+                    // Restore Scroll Position for Pagination
+                    if (isPagination && container) {
+                        const newHeight = container.scrollHeight;
+                        // Calculate offset to keep view static relative to messages
+                        container.scrollTop = newHeight - previousHeight;
+                    }
+                }
+
+            } catch (error) {
+                console.error("QC SDK: History Fetch Error", error);
+            } finally {
+                this.state.isLoadingHistory = false;
             }
         },
 
@@ -786,7 +884,9 @@
             this.state.ws.onopen = () => {
                 this.state.isConnected = true;
                 this.updateConnectionStatus();
-                this.addSystemMessage('به چت پشتیبانی خوش آمدید! 👋');
+                if(this.state.messages.length === 0 && this.state.historyLoaded) {
+                    this.addSystemMessage('به چت پشتیبانی خوش آمدید! 👋');
+                }
             };
 
             this.state.ws.onclose = () => {
@@ -955,7 +1055,7 @@
 
                 // Update Header immediately
                 this.updateConnectionStatus();
-                this.renderMessages();
+                this.renderMessages(true); // Preserve scroll when typing indicator appears
 
                 if (this.state.typingTimeouts[senderId]) {
                     clearTimeout(this.state.typingTimeouts[senderId]);
@@ -965,7 +1065,7 @@
                 this.state.typingTimeouts[senderId] = setTimeout(() => {
                     this.state.typingUsers.delete(senderId);
                     this.updateConnectionStatus(); // Revert header
-                    this.renderMessages();
+                    this.renderMessages(true);
                 }, 6000);
 
             } else if (data.sub_type === 'typing_stopped') {
@@ -977,7 +1077,7 @@
 
                 // Update Header immediately
                 this.updateConnectionStatus();
-                this.renderMessages();
+                this.renderMessages(true);
             }
         },
 
@@ -1013,7 +1113,8 @@
         },
 
         // Render Logic
-        renderMessages: function() {
+        // Modified to accept preserveScroll param
+        renderMessages: function(preserveScroll = false) {
             const container = document.getElementById('qc-messages');
             if (!container) return;
 
@@ -1075,7 +1176,10 @@
                 container.appendChild(typingEl);
             }
 
-            container.scrollTop = container.scrollHeight;
+            // Only scroll to bottom if NOT preserving scroll
+            if (!preserveScroll) {
+                container.scrollTop = container.scrollHeight;
+            }
         },
 
         // Utilities
@@ -1095,6 +1199,11 @@
             this.state.isOpen = true;
             this.state.unreadCount = 0; // Reset count
             this.updateBadgeUI(); // Update UI
+
+            // Try to fetch history if not loaded yet and conversation ID is available
+            if (!this.state.historyLoaded && this.state.conversationId) {
+                this.fetchChatHistory();
+            }
 
             const btn = document.getElementById('qc-btn');
             const win = document.getElementById('qc-window');
