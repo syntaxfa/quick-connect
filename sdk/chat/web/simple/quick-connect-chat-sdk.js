@@ -1,6 +1,6 @@
 /**
  * Quick Connect Chat SDK
- * Version: 1.5.1 (Typing Logic & Header Animation Added)
+ * Version: 1.6.0 (Added Chat History Feature)
  */
 
 (function(window, document) {
@@ -30,7 +30,12 @@
             typingTimeouts: {},
             reconnectAttempts: 0,
             reconnectInterval: 3000,
-            unreadCount: 0 // New: Counter state
+            unreadCount: 0,
+            // History State
+            historyLoaded: false,
+            nextCursor: null,
+            hasMore: false,
+            isLoadingHistory: false
         },
 
         // Initialize SDK
@@ -735,9 +740,73 @@
                 if (data && data.id) {
                     this.state.conversationId = data.id;
                     localStorage.setItem('QC_CONVERSATION_ID', data.id);
+
+                    // If chat window is already open but history not loaded (rare case), load it now
+                    if (this.state.isOpen && !this.state.historyLoaded) {
+                        this.fetchChatHistory();
+                    }
                 }
             } catch (error) {
                 console.error("QC SDK: Active conversation fetch error", error);
+            }
+        },
+
+        // NEW: Fetch Chat History
+        fetchChatHistory: async function() {
+            if (!this.state.token || !this.state.conversationId || this.state.historyLoaded || this.state.isLoadingHistory) return;
+
+            this.state.isLoadingHistory = true;
+
+            try {
+                const payload = {
+                    conversation_id: this.state.conversationId,
+                    pagination: {
+                        cursor: this.state.nextCursor, // null for first page
+                        limit: 20
+                    }
+                };
+
+                const response = await fetch(`${this.config.chatApiUrl}/chats`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.state.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch history');
+
+                const data = await response.json();
+
+                if (data && data.results) {
+                    // API returns messages Newest to Oldest. We reverse them for UI (Oldest to Newest).
+                    const historyMessages = data.results.map(msg => ({
+                        id: msg.id,
+                        content: msg.content,
+                        created_at: msg.created_at,
+                        // Check if sender is current user
+                        isOwn: msg.sender_id === this.state.userId,
+                        status: 'sent' // Historical messages are always sent
+                    })).reverse();
+
+                    // Prepend history to existing messages (if any)
+                    this.state.messages = [...historyMessages, ...this.state.messages];
+
+                    // Update pagination state
+                    if (data.paginate) {
+                        this.state.nextCursor = data.paginate.next_cursor;
+                        this.state.hasMore = data.paginate.has_more;
+                    }
+
+                    this.state.historyLoaded = true;
+                    this.renderMessages();
+                }
+
+            } catch (error) {
+                console.error("QC SDK: History Fetch Error", error);
+            } finally {
+                this.state.isLoadingHistory = false;
             }
         },
 
@@ -786,7 +855,12 @@
             this.state.ws.onopen = () => {
                 this.state.isConnected = true;
                 this.updateConnectionStatus();
-                this.addSystemMessage('به چت پشتیبانی خوش آمدید! 👋');
+                if(this.state.messages.length === 0 && this.state.historyLoaded) {
+                    this.addSystemMessage('به چت پشتیبانی خوش آمدید! 👋');
+                } else if (!this.state.historyLoaded) {
+                    // Wait for history to potentially load message, if not loaded yet
+                    // Just a welcome log
+                }
             };
 
             this.state.ws.onclose = () => {
@@ -1095,6 +1169,11 @@
             this.state.isOpen = true;
             this.state.unreadCount = 0; // Reset count
             this.updateBadgeUI(); // Update UI
+
+            // Try to fetch history if not loaded yet and conversation ID is available
+            if (!this.state.historyLoaded && this.state.conversationId) {
+                this.fetchChatHistory();
+            }
 
             const btn = document.getElementById('qc-btn');
             const win = document.getElementById('qc-window');
