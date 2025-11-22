@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
+	"github.com/syntaxfa/quick-connect/pkg/paginate/cursorbased"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/protobuf/chat/golang/conversationpb"
 	"github.com/syntaxfa/quick-connect/types"
@@ -100,5 +101,64 @@ func convertConversationListResponseToPB(resp service.ListConversationsResponse)
 		TotalNumber:   resp.Paginate.TotalNumbers,
 		TotalPage:     resp.Paginate.TotalPage,
 		Conversations: cons,
+	}
+}
+
+func convertChatHistoryRequestToEntity(req *conversationpb.ChatHistoryRequest) service.ChatHistoryRequest {
+	return service.ChatHistoryRequest{
+		UserID:         "",
+		UserRoles:      nil,
+		ConversationID: types.ID(req.GetConversationId()),
+		Pagination: cursorbased.Request{
+			Cursor: types.ID(req.GetCursor()),
+			Limit:  int(req.GetLimit()),
+		},
+	}
+}
+
+func convertMessageTypeToPB(messageType service.MessageType) conversationpb.MessageType {
+	switch messageType {
+	case service.MessageTypeText:
+		return conversationpb.MessageType_TYPE_TEXT
+	case service.MessageTypeMedia:
+		return conversationpb.MessageType_TYPE_MEDIA
+	case service.MessageTypeSystem:
+		return conversationpb.MessageType_TYPE_SYSTEM
+	default:
+		return conversationpb.MessageType_TYPE_UNSPECIFIED
+	}
+}
+
+func convertMessageToPB(message service.Message) *conversationpb.Message {
+	var readAt *timestamppb.Timestamp
+
+	if message.ReadAt != nil {
+		readAt = timestamppb.New(*message.ReadAt)
+	}
+
+	return &conversationpb.Message{
+		Id:                 string(message.ID),
+		ConversationId:     string(message.ConversationID),
+		SenderId:           string(message.SenderID),
+		MessageType:        convertMessageTypeToPB(message.MessageType),
+		Content:            message.Content,
+		Metadata:           message.Metadata,
+		RepliedToMessageId: string(message.RepliedToMessageID),
+		CreatedAt:          timestamppb.New(message.CreatedAt),
+		ReadAt:             readAt,
+	}
+}
+
+func convertChatHistoryResponseToPB(resp service.ChatHistoryResponse) *conversationpb.ChatHistoryResponse {
+	var results []*conversationpb.Message
+
+	for _, msg := range resp.Results {
+		results = append(results, convertMessageToPB(msg))
+	}
+
+	return &conversationpb.ChatHistoryResponse{
+		Results:    results,
+		NextCursor: string(resp.Paginate.NextCursor),
+		HasMore:    resp.Paginate.HasMore,
 	}
 }

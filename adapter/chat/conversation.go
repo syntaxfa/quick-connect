@@ -27,3 +27,8 @@ func (ca *ConversationAdapter) ConversationOwnList(ctx context.Context, req *con
 	opts ...grpc.CallOption) (*conversationpb.ConversationListResponse, error) {
 	return ca.client.ConversationOwnList(ctx, req, opts...)
 }
+
+func (ca *ConversationAdapter) ChatHistory(ctx context.Context, req *conversationpb.ChatHistoryRequest,
+	opts ...grpc.CallOption) (*conversationpb.ChatHistoryResponse, error) {
+	return ca.client.ChatHistory(ctx, req, opts...)
+}

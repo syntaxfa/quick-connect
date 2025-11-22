@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/lib/pq"
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
+	"github.com/syntaxfa/quick-connect/pkg/paginate/cursorbased"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/types"
@@ -235,4 +237,96 @@ func (d *DB) GetConversationParticipants(ctx context.Context, conversationID typ
 	}
 
 	return participants, nil
+}
+
+type nullableMessageFields struct {
+	Content            sql.NullString
+	RepliedToMessageID sql.NullString
+	ReadAt             sql.NullTime
+}
+
+func (d *DB) GetChatHistory(ctx context.Context, conversationID types.ID,
+	req cursorbased.Request) (service.ChatHistoryResponse, error) {
+	const op = "repository.postgres.get.GetChatHistory"
+
+	query := `SELECT id, conversation_id, sender_id, message_type, content, metadata, replied_to_message_id, created_at, read_at
+FROM messages
+WHERE conversation_id = $1`
+
+	fetchLimit := req.Limit + 1
+
+	args := []interface{}{conversationID}
+	argCounter := 2
+
+	if req.Cursor != "" {
+		query += fmt.Sprintf(" AND id < $%d", argCounter)
+		args = append(args, req.Cursor)
+		argCounter++
+	}
+
+	query += fmt.Sprintf(" ORDER BY id DESC LIMIT $%d", argCounter)
+	args = append(args, fetchLimit)
+
+	rows, qErr := d.conn.Conn().Query(ctx, query, args...)
+	if qErr != nil {
+		return service.ChatHistoryResponse{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+	defer rows.Close()
+
+	messages := make([]service.Message, 0, req.Limit)
+
+	for rows.Next() {
+		var msg service.Message
+		var nullable nullableMessageFields
+		var jsonMetadata json.RawMessage
+
+		if sErr := rows.Scan(&msg.ID, &msg.ConversationID, &msg.SenderID, &msg.MessageType, &nullable.Content, &jsonMetadata,
+			&nullable.RepliedToMessageID, &msg.CreatedAt, &nullable.ReadAt); sErr != nil {
+			return service.ChatHistoryResponse{}, richerror.New(op).WithWrapError(sErr).WithKind(richerror.KindUnexpected).
+				WithMessage("failed to scan row")
+		}
+
+		if nullable.ReadAt.Valid {
+			msg.ReadAt = &nullable.ReadAt.Time
+		}
+
+		if nullable.Content.Valid {
+			msg.Content = nullable.Content.String
+		}
+
+		if nullable.RepliedToMessageID.Valid {
+			msg.RepliedToMessageID = types.ID(nullable.RepliedToMessageID.String)
+		}
+
+		if len(jsonMetadata) > 0 {
+			if uErr := json.Unmarshal(jsonMetadata, &msg.Metadata); uErr != nil {
+				return service.ChatHistoryResponse{}, richerror.New(op).WithWrapError(uErr).WithKind(richerror.KindUnexpected).
+					WithMessage("can't unmarshall message metadata")
+			}
+		}
+
+		messages = append(messages, msg)
+	}
+
+	if rErr := rows.Err(); rErr != nil {
+		return service.ChatHistoryResponse{}, richerror.New(op).WithWrapError(rErr).WithKind(richerror.KindUnexpected)
+	}
+
+	pageResp := cursorbased.Response{
+		HasMore: false,
+	}
+
+	if len(messages) > req.Limit {
+		pageResp.HasMore = true
+		messages = messages[:req.Limit]
+		pageResp.NextCursor = messages[len(messages)-1].ID
+	} else {
+		pageResp.HasMore = false
+		pageResp.NextCursor = ""
+	}
+
+	return service.ChatHistoryResponse{
+		Results:  messages,
+		Paginate: pageResp,
+	}, nil
 }

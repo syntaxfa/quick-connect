@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/oklog/ulid/v2"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/paginate/cursorbased"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/pkg/pubsub"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
@@ -29,6 +30,8 @@ type Repository interface {
 	CheckUserInConversation(ctx context.Context, userID, conversationID types.ID) (bool, error)
 	SaveMessage(ctx context.Context, message Message) (Message, error)
 	UpdateConversationSnippet(ctx context.Context, conversationID, lastMessageSenderID types.ID, snippet string) error
+
+	GetChatHistory(ctx context.Context, conversationID types.ID, req cursorbased.Request) (ChatHistoryResponse, error)
 }
 
 // Service handles the business logic for the real-time chat and conversations.

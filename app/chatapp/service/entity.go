@@ -69,13 +69,13 @@ type Conversation struct {
 }
 
 type Message struct {
-	ID                 types.ID    `json:"id"`
-	ConversationID     types.ID    `json:"conversation_id"`
-	SenderID           types.ID    `json:"sender_id"`
-	MessageType        MessageType `json:"message_type"`
-	Content            string      `json:"content"`
-	MetaData           []string    `json:"meta_data"`
-	RepliedToMessageID types.ID    `json:"replied_to_message_id"`
-	CreatedAt          time.Time   `json:"created_at"`
-	ReadAt             *time.Time  `json:"read_at"`
+	ID                 types.ID          `json:"id"`
+	ConversationID     types.ID          `json:"conversation_id"`
+	SenderID           types.ID          `json:"sender_id"`
+	MessageType        MessageType       `json:"message_type"`
+	Content            string            `json:"content"`
+	Metadata           map[string]string `json:"metadata"`
+	RepliedToMessageID types.ID          `json:"replied_to_message_id"`
+	CreatedAt          time.Time         `json:"created_at"`
+	ReadAt             *time.Time        `json:"read_at"`
 }

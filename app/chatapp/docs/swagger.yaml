@@ -1,4 +1,28 @@
 definitions:
+  cursorbased.Request:
+    properties:
+      cursor:
+        allOf:
+        - $ref: '#/definitions/types.ID'
+        description: |-
+          Cursor is unique identifier (ULID) of the last item from the previous page.
+          If empty, it includes the first page
+      limit:
+        description: Limit specifies how many items to fetch.
+        type: integer
+    type: object
+  cursorbased.Response:
+    properties:
+      has_more:
+        description: HasMore indicates if there are mote item available to fetch.
+        type: boolean
+      next_cursor:
+        allOf:
+        - $ref: '#/definitions/types.ID'
+        description: |-
+          Next Counter is the ID of the last item in the current list.
+          The client should user this as the `cursor` for the next request.
+    type: object
   paginate.Filter:
     properties:
       operation:
@@ -64,6 +88,22 @@ definitions:
       message:
         type: string
     type: object
+  service.ChatHistoryRequest:
+    properties:
+      conversation_id:
+        $ref: '#/definitions/types.ID'
+      pagination:
+        $ref: '#/definitions/cursorbased.Request'
+    type: object
+  service.ChatHistoryResponse:
+    properties:
+      paginate:
+        $ref: '#/definitions/cursorbased.Response'
+      results:
+        items:
+          $ref: '#/definitions/service.Message'
+        type: array
+    type: object
   service.Conversation:
     properties:
       assigned_support_id:
@@ -115,6 +155,39 @@ definitions:
           $ref: '#/definitions/service.Conversation'
         type: array
     type: object
+  service.Message:
+    properties:
+      content:
+        type: string
+      conversation_id:
+        $ref: '#/definitions/types.ID'
+      created_at:
+        type: string
+      id:
+        $ref: '#/definitions/types.ID'
+      message_type:
+        $ref: '#/definitions/service.MessageType'
+      meta_data:
+        items:
+          type: string
+        type: array
+      read_at:
+        type: string
+      replied_to_message_id:
+        $ref: '#/definitions/types.ID'
+      sender_id:
+        $ref: '#/definitions/types.ID'
+    type: object
+  service.MessageType:
+    enum:
+    - text
+    - media
+    - system
+    type: string
+    x-enum-varnames:
+    - MessageTypeText
+    - MessageTypeMedia
+    - MessageTypeSystem
   types.ID:
     enum:
     - 01J00000000000000000000BOT
@@ -124,6 +197,42 @@ definitions:
 info:
   contact: {}
 paths:
+  /chats:
+    post:
+      consumes:
+      - application/json
+      description: get conversation chat history
+      parameters:
+      - description: get conversation chat history
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ChatHistoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ChatHistoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: GetChatHistory
+      tags:
+      - Chat
   /chats/clients:
     get:
       consumes:
