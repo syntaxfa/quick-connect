@@ -48,7 +48,39 @@ message ConversationListResponse {
   repeated Conversation conversations = 5;
 }
 
+message ChatHistoryRequest {
+  string conversation_id = 1;
+  string cursor = 2;
+  int32 limit = 3;
+}
+
+enum MessageType {
+  TYPE_UNSPECIFIED = 0;
+  TYPE_TEXT = 1;
+  TYPE_MEDIA = 2;
+  TYPE_SYSTEM = 3;
+}
+
+message Message {
+  string id = 1;
+  string conversation_id = 2;
+  string sender_id = 3;
+  MessageType message_type = 4;
+  string content = 5;
+  map<string, string> metadata = 6;
+  string replied_to_message_id = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp read_at = 9;
+}
+
+message ChatHistoryResponse {
+  repeated Message results = 1;
+  string next_cursor = 2;
+  bool has_more = 3;
+}
+
 service ConversationService {
   rpc ConversationNewList (ConversationListRequest) returns (ConversationListResponse);
   rpc ConversationOwnList (ConversationListRequest) returns (ConversationListResponse);
+  rpc ChatHistory (ChatHistoryRequest) returns (ChatHistoryResponse);
 }

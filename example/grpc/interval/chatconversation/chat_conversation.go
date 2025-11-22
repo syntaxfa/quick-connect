@@ -64,4 +64,18 @@ func ChatConversation() {
 	}
 
 	fmt.Printf("%+v\n", conOwnList)
+
+	fmt.Println("----------------")
+	fmt.Println("chat history:")
+
+	chatHisResp, chatHisErr := conAd.ChatHistory(ctxWithValue, &conversationpb.ChatHistoryRequest{
+		ConversationId: "01KADN5KD2NHJTC03QZK4WZENE",
+		Cursor:         "",
+		Limit:          20,
+	})
+	if chatHisErr != nil {
+		errorhandler.HandleGRPCError(chatHisErr, logger)
+	}
+
+	fmt.Printf("%+v\n", chatHisResp)
 }
