@@ -41,6 +41,7 @@ const (
 
 	// Chat App.
 
-	MsgInvalidConversationStatus = "invalid conversation status"
-	MsgInvalidMessageType        = "invalid message type"
+	MsgInvalidConversationStatus           = "invalid conversation status"
+	MsgInvalidMessageType                  = "invalid message type"
+	MsgYouNotParticipantInThisConversation = "you not participant in this conversation"
 )

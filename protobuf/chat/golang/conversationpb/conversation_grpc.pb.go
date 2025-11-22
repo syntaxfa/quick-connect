@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	ConversationService_ConversationNewList_FullMethodName = "/chat.ConversationService/ConversationNewList"
 	ConversationService_ConversationOwnList_FullMethodName = "/chat.ConversationService/ConversationOwnList"
+	ConversationService_ChatHistory_FullMethodName         = "/chat.ConversationService/ChatHistory"
 )
 
 // ConversationServiceClient is the client API for ConversationService service.
@@ -29,6 +30,7 @@ const (
 type ConversationServiceClient interface {
 	ConversationNewList(ctx context.Context, in *ConversationListRequest, opts ...grpc.CallOption) (*ConversationListResponse, error)
 	ConversationOwnList(ctx context.Context, in *ConversationListRequest, opts ...grpc.CallOption) (*ConversationListResponse, error)
+	ChatHistory(ctx context.Context, in *ChatHistoryRequest, opts ...grpc.CallOption) (*ChatHistoryResponse, error)
 }
 
 type conversationServiceClient struct {
@@ -59,12 +61,23 @@ func (c *conversationServiceClient) ConversationOwnList(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *conversationServiceClient) ChatHistory(ctx context.Context, in *ChatHistoryRequest, opts ...grpc.CallOption) (*ChatHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ChatHistoryResponse)
+	err := c.cc.Invoke(ctx, ConversationService_ChatHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ConversationServiceServer is the server API for ConversationService service.
 // All implementations must embed UnimplementedConversationServiceServer
 // for forward compatibility.
 type ConversationServiceServer interface {
 	ConversationNewList(context.Context, *ConversationListRequest) (*ConversationListResponse, error)
 	ConversationOwnList(context.Context, *ConversationListRequest) (*ConversationListResponse, error)
+	ChatHistory(context.Context, *ChatHistoryRequest) (*ChatHistoryResponse, error)
 	mustEmbedUnimplementedConversationServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedConversationServiceServer) ConversationNewList(context.Contex
 }
 func (UnimplementedConversationServiceServer) ConversationOwnList(context.Context, *ConversationListRequest) (*ConversationListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConversationOwnList not implemented")
+}
+func (UnimplementedConversationServiceServer) ChatHistory(context.Context, *ChatHistoryRequest) (*ChatHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChatHistory not implemented")
 }
 func (UnimplementedConversationServiceServer) mustEmbedUnimplementedConversationServiceServer() {}
 func (UnimplementedConversationServiceServer) testEmbeddedByValue()                             {}
@@ -138,6 +154,24 @@ func _ConversationService_ConversationOwnList_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ConversationService_ChatHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChatHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServiceServer).ChatHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConversationService_ChatHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServiceServer).ChatHistory(ctx, req.(*ChatHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ConversationService_ServiceDesc is the grpc.ServiceDesc for ConversationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var ConversationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ConversationOwnList",
 			Handler:    _ConversationService_ConversationOwnList_Handler,
+		},
+		{
+			MethodName: "ChatHistory",
+			Handler:    _ConversationService_ChatHistory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

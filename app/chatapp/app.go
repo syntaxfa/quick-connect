@@ -260,6 +260,7 @@ func setupRoleManager() *rolemanager.RoleManager {
 	methodRoles := map[string][]types.Role{
 		"/chat.ConversationService/ConversationNewList": {types.RoleSupport},
 		"/chat.ConversationService/ConversationOwnList": {types.RoleSupport},
+		"/chat.ConversationService/ChatHistory":         {types.RoleSupport, types.RoleSuperUser, types.RoleClient, types.RoleGuest},
 	}
 
 	return rolemanager.NewRoleManager(methodRoles)

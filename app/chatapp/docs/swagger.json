@@ -8,6 +8,63 @@
         "contact": {}
     },
     "paths": {
+        "/chats": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "get conversation chat history",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "GetChatHistory",
+                "parameters": [
+                    {
+                        "description": "get conversation chat history",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.ChatHistoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.ChatHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/chats/clients": {
             "get": {
                 "description": "client chat websocket",
@@ -219,6 +276,40 @@
         }
     },
     "definitions": {
+        "cursorbased.Request": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "description": "Cursor is unique identifier (ULID) of the last item from the previous page.\nIf empty, it includes the first page",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/types.ID"
+                        }
+                    ]
+                },
+                "limit": {
+                    "description": "Limit specifies how many items to fetch.",
+                    "type": "integer"
+                }
+            }
+        },
+        "cursorbased.Response": {
+            "type": "object",
+            "properties": {
+                "has_more": {
+                    "description": "HasMore indicates if there are mote item available to fetch.",
+                    "type": "boolean"
+                },
+                "next_cursor": {
+                    "description": "Next Counter is the ID of the last item in the current list.\nThe client should user this as the `cursor` for the next request.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/types.ID"
+                        }
+                    ]
+                }
+            }
+        },
         "paginate.Filter": {
             "type": "object",
             "properties": {
@@ -310,6 +401,31 @@
                 }
             }
         },
+        "service.ChatHistoryRequest": {
+            "type": "object",
+            "properties": {
+                "conversation_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/cursorbased.Request"
+                }
+            }
+        },
+        "service.ChatHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "paginate": {
+                    "$ref": "#/definitions/cursorbased.Response"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.Message"
+                    }
+                }
+            }
+        },
         "service.Conversation": {
             "type": "object",
             "properties": {
@@ -384,6 +500,54 @@
                     }
                 }
             }
+        },
+        "service.Message": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "conversation_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "message_type": {
+                    "$ref": "#/definitions/service.MessageType"
+                },
+                "meta_data": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "read_at": {
+                    "type": "string"
+                },
+                "replied_to_message_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "sender_id": {
+                    "$ref": "#/definitions/types.ID"
+                }
+            }
+        },
+        "service.MessageType": {
+            "type": "string",
+            "enum": [
+                "text",
+                "media",
+                "system"
+            ],
+            "x-enum-varnames": [
+                "MessageTypeText",
+                "MessageTypeMedia",
+                "MessageTypeSystem"
+            ]
         },
         "types.ID": {
             "type": "string",

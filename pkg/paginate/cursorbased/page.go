@@ -25,7 +25,7 @@ type Request struct {
 type Response struct {
 	// Next Counter is the ID of the last item in the current list.
 	// The client should user this as the `cursor` for the next request.
-	NextCursor string `json:"next_cursor"`
+	NextCursor types.ID `json:"next_cursor"`
 	// HasMore indicates if there are mote item available to fetch.
 	HasMore bool `json:"has_more"`
 }

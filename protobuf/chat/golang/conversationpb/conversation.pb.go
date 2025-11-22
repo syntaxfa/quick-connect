@@ -126,6 +126,58 @@ func (SortDirection) EnumDescriptor() ([]byte, []int) {
 	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{1}
 }
 
+type MessageType int32
+
+const (
+	MessageType_TYPE_UNSPECIFIED MessageType = 0
+	MessageType_TYPE_TEXT        MessageType = 1
+	MessageType_TYPE_MEDIA       MessageType = 2
+	MessageType_TYPE_SYSTEM      MessageType = 3
+)
+
+// Enum value maps for MessageType.
+var (
+	MessageType_name = map[int32]string{
+		0: "TYPE_UNSPECIFIED",
+		1: "TYPE_TEXT",
+		2: "TYPE_MEDIA",
+		3: "TYPE_SYSTEM",
+	}
+	MessageType_value = map[string]int32{
+		"TYPE_UNSPECIFIED": 0,
+		"TYPE_TEXT":        1,
+		"TYPE_MEDIA":       2,
+		"TYPE_SYSTEM":      3,
+	}
+)
+
+func (x MessageType) Enum() *MessageType {
+	p := new(MessageType)
+	*p = x
+	return p
+}
+
+func (x MessageType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (MessageType) Descriptor() protoreflect.EnumDescriptor {
+	return file_chat_proto_conversation_proto_enumTypes[2].Descriptor()
+}
+
+func (MessageType) Type() protoreflect.EnumType {
+	return &file_chat_proto_conversation_proto_enumTypes[2]
+}
+
+func (x MessageType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use MessageType.Descriptor instead.
+func (MessageType) EnumDescriptor() ([]byte, []int) {
+	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{2}
+}
+
 type Conversation struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
 	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -386,6 +438,234 @@ func (x *ConversationListResponse) GetConversations() []*Conversation {
 	return nil
 }
 
+type ChatHistoryRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	Cursor         string                 `protobuf:"bytes,2,opt,name=cursor,proto3" json:"cursor,omitempty"`
+	Limit          int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ChatHistoryRequest) Reset() {
+	*x = ChatHistoryRequest{}
+	mi := &file_chat_proto_conversation_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatHistoryRequest) ProtoMessage() {}
+
+func (x *ChatHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_conversation_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatHistoryRequest.ProtoReflect.Descriptor instead.
+func (*ChatHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ChatHistoryRequest) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+func (x *ChatHistoryRequest) GetCursor() string {
+	if x != nil {
+		return x.Cursor
+	}
+	return ""
+}
+
+func (x *ChatHistoryRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type Message struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ConversationId     string                 `protobuf:"bytes,2,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	SenderId           string                 `protobuf:"bytes,3,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
+	MessageType        MessageType            `protobuf:"varint,4,opt,name=message_type,json=messageType,proto3,enum=chat.MessageType" json:"message_type,omitempty"`
+	Content            string                 `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"`
+	Metadata           map[string]string      `protobuf:"bytes,6,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	RepliedToMessageId string                 `protobuf:"bytes,7,opt,name=replied_to_message_id,json=repliedToMessageId,proto3" json:"replied_to_message_id,omitempty"`
+	CreatedAt          *timestamp.Timestamp   `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ReadAt             *timestamp.Timestamp   `protobuf:"bytes,9,opt,name=read_at,json=readAt,proto3" json:"read_at,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *Message) Reset() {
+	*x = Message{}
+	mi := &file_chat_proto_conversation_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Message) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Message) ProtoMessage() {}
+
+func (x *Message) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_conversation_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Message.ProtoReflect.Descriptor instead.
+func (*Message) Descriptor() ([]byte, []int) {
+	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Message) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Message) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+func (x *Message) GetSenderId() string {
+	if x != nil {
+		return x.SenderId
+	}
+	return ""
+}
+
+func (x *Message) GetMessageType() MessageType {
+	if x != nil {
+		return x.MessageType
+	}
+	return MessageType_TYPE_UNSPECIFIED
+}
+
+func (x *Message) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *Message) GetMetadata() map[string]string {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+func (x *Message) GetRepliedToMessageId() string {
+	if x != nil {
+		return x.RepliedToMessageId
+	}
+	return ""
+}
+
+func (x *Message) GetCreatedAt() *timestamp.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Message) GetReadAt() *timestamp.Timestamp {
+	if x != nil {
+		return x.ReadAt
+	}
+	return nil
+}
+
+type ChatHistoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Results       []*Message             `protobuf:"bytes,1,rep,name=results,proto3" json:"results,omitempty"`
+	NextCursor    string                 `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"`
+	HasMore       bool                   `protobuf:"varint,3,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatHistoryResponse) Reset() {
+	*x = ChatHistoryResponse{}
+	mi := &file_chat_proto_conversation_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatHistoryResponse) ProtoMessage() {}
+
+func (x *ChatHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_conversation_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatHistoryResponse.ProtoReflect.Descriptor instead.
+func (*ChatHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ChatHistoryResponse) GetResults() []*Message {
+	if x != nil {
+		return x.Results
+	}
+	return nil
+}
+
+func (x *ChatHistoryResponse) GetNextCursor() string {
+	if x != nil {
+		return x.NextCursor
+	}
+	return ""
+}
+
+func (x *ChatHistoryResponse) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
 var File_chat_proto_conversation_proto protoreflect.FileDescriptor
 
 const file_chat_proto_conversation_proto_rawDesc = "" +
@@ -415,7 +695,30 @@ const file_chat_proto_conversation_proto_rawDesc = "" +
 	"\ftotal_number\x18\x03 \x01(\x04R\vtotalNumber\x12\x1d\n" +
 	"\n" +
 	"total_page\x18\x04 \x01(\x04R\ttotalPage\x128\n" +
-	"\rconversations\x18\x05 \x03(\v2\x12.chat.ConversationR\rconversations*m\n" +
+	"\rconversations\x18\x05 \x03(\v2\x12.chat.ConversationR\rconversations\"k\n" +
+	"\x12ChatHistoryRequest\x12'\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x16\n" +
+	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"\xc8\x03\n" +
+	"\aMessage\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x0fconversation_id\x18\x02 \x01(\tR\x0econversationId\x12\x1b\n" +
+	"\tsender_id\x18\x03 \x01(\tR\bsenderId\x124\n" +
+	"\fmessage_type\x18\x04 \x01(\x0e2\x11.chat.MessageTypeR\vmessageType\x12\x18\n" +
+	"\acontent\x18\x05 \x01(\tR\acontent\x127\n" +
+	"\bmetadata\x18\x06 \x03(\v2\x1b.chat.Message.MetadataEntryR\bmetadata\x121\n" +
+	"\x15replied_to_message_id\x18\a \x01(\tR\x12repliedToMessageId\x129\n" +
+	"\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x123\n" +
+	"\aread_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\x06readAt\x1a;\n" +
+	"\rMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"z\n" +
+	"\x13ChatHistoryResponse\x12'\n" +
+	"\aresults\x18\x01 \x03(\v2\r.chat.MessageR\aresults\x12\x1f\n" +
+	"\vnext_cursor\x18\x02 \x01(\tR\n" +
+	"nextCursor\x12\x19\n" +
+	"\bhas_more\x18\x03 \x01(\bR\ahasMore*m\n" +
 	"\x06Status\x12\x16\n" +
 	"\x12STATUS_UNSPECIFIED\x10\x00\x12\x0e\n" +
 	"\n" +
@@ -426,10 +729,17 @@ const file_chat_proto_conversation_proto_rawDesc = "" +
 	"\rSortDirection\x12\x1e\n" +
 	"\x1aSORT_DIRECTION_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12SORT_DIRECTION_ASC\x10\x01\x12\x17\n" +
-	"\x13SORT_DIRECTION_DESC\x10\x022\xc1\x01\n" +
+	"\x13SORT_DIRECTION_DESC\x10\x02*S\n" +
+	"\vMessageType\x12\x14\n" +
+	"\x10TYPE_UNSPECIFIED\x10\x00\x12\r\n" +
+	"\tTYPE_TEXT\x10\x01\x12\x0e\n" +
+	"\n" +
+	"TYPE_MEDIA\x10\x02\x12\x0f\n" +
+	"\vTYPE_SYSTEM\x10\x032\x85\x02\n" +
 	"\x13ConversationService\x12T\n" +
 	"\x13ConversationNewList\x12\x1d.chat.ConversationListRequest\x1a\x1e.chat.ConversationListResponse\x12T\n" +
-	"\x13ConversationOwnList\x12\x1d.chat.ConversationListRequest\x1a\x1e.chat.ConversationListResponseB%Z#protobuf/chat/golang/conversationpbb\x06proto3"
+	"\x13ConversationOwnList\x12\x1d.chat.ConversationListRequest\x1a\x1e.chat.ConversationListResponse\x12B\n" +
+	"\vChatHistory\x12\x18.chat.ChatHistoryRequest\x1a\x19.chat.ChatHistoryResponseB%Z#protobuf/chat/golang/conversationpbb\x06proto3"
 
 var (
 	file_chat_proto_conversation_proto_rawDescOnce sync.Once
@@ -443,33 +753,45 @@ func file_chat_proto_conversation_proto_rawDescGZIP() []byte {
 	return file_chat_proto_conversation_proto_rawDescData
 }
 
-var file_chat_proto_conversation_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_chat_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_chat_proto_conversation_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_chat_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_chat_proto_conversation_proto_goTypes = []any{
 	(Status)(0),                      // 0: chat.Status
 	(SortDirection)(0),               // 1: chat.SortDirection
-	(*Conversation)(nil),             // 2: chat.Conversation
-	(*ConversationListRequest)(nil),  // 3: chat.ConversationListRequest
-	(*ConversationListResponse)(nil), // 4: chat.ConversationListResponse
-	(*timestamp.Timestamp)(nil),      // 5: google.protobuf.Timestamp
+	(MessageType)(0),                 // 2: chat.MessageType
+	(*Conversation)(nil),             // 3: chat.Conversation
+	(*ConversationListRequest)(nil),  // 4: chat.ConversationListRequest
+	(*ConversationListResponse)(nil), // 5: chat.ConversationListResponse
+	(*ChatHistoryRequest)(nil),       // 6: chat.ChatHistoryRequest
+	(*Message)(nil),                  // 7: chat.Message
+	(*ChatHistoryResponse)(nil),      // 8: chat.ChatHistoryResponse
+	nil,                              // 9: chat.Message.MetadataEntry
+	(*timestamp.Timestamp)(nil),      // 10: google.protobuf.Timestamp
 }
 var file_chat_proto_conversation_proto_depIdxs = []int32{
-	0, // 0: chat.Conversation.status:type_name -> chat.Status
-	5, // 1: chat.Conversation.created_at:type_name -> google.protobuf.Timestamp
-	5, // 2: chat.Conversation.updated_at:type_name -> google.protobuf.Timestamp
-	5, // 3: chat.Conversation.closed_at:type_name -> google.protobuf.Timestamp
-	1, // 4: chat.ConversationListRequest.sort_direction:type_name -> chat.SortDirection
-	0, // 5: chat.ConversationListRequest.statuses:type_name -> chat.Status
-	2, // 6: chat.ConversationListResponse.conversations:type_name -> chat.Conversation
-	3, // 7: chat.ConversationService.ConversationNewList:input_type -> chat.ConversationListRequest
-	3, // 8: chat.ConversationService.ConversationOwnList:input_type -> chat.ConversationListRequest
-	4, // 9: chat.ConversationService.ConversationNewList:output_type -> chat.ConversationListResponse
-	4, // 10: chat.ConversationService.ConversationOwnList:output_type -> chat.ConversationListResponse
-	9, // [9:11] is the sub-list for method output_type
-	7, // [7:9] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	0,  // 0: chat.Conversation.status:type_name -> chat.Status
+	10, // 1: chat.Conversation.created_at:type_name -> google.protobuf.Timestamp
+	10, // 2: chat.Conversation.updated_at:type_name -> google.protobuf.Timestamp
+	10, // 3: chat.Conversation.closed_at:type_name -> google.protobuf.Timestamp
+	1,  // 4: chat.ConversationListRequest.sort_direction:type_name -> chat.SortDirection
+	0,  // 5: chat.ConversationListRequest.statuses:type_name -> chat.Status
+	3,  // 6: chat.ConversationListResponse.conversations:type_name -> chat.Conversation
+	2,  // 7: chat.Message.message_type:type_name -> chat.MessageType
+	9,  // 8: chat.Message.metadata:type_name -> chat.Message.MetadataEntry
+	10, // 9: chat.Message.created_at:type_name -> google.protobuf.Timestamp
+	10, // 10: chat.Message.read_at:type_name -> google.protobuf.Timestamp
+	7,  // 11: chat.ChatHistoryResponse.results:type_name -> chat.Message
+	4,  // 12: chat.ConversationService.ConversationNewList:input_type -> chat.ConversationListRequest
+	4,  // 13: chat.ConversationService.ConversationOwnList:input_type -> chat.ConversationListRequest
+	6,  // 14: chat.ConversationService.ChatHistory:input_type -> chat.ChatHistoryRequest
+	5,  // 15: chat.ConversationService.ConversationNewList:output_type -> chat.ConversationListResponse
+	5,  // 16: chat.ConversationService.ConversationOwnList:output_type -> chat.ConversationListResponse
+	8,  // 17: chat.ConversationService.ChatHistory:output_type -> chat.ChatHistoryResponse
+	15, // [15:18] is the sub-list for method output_type
+	12, // [12:15] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_chat_proto_conversation_proto_init() }
@@ -482,8 +804,8 @@ func file_chat_proto_conversation_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_chat_proto_conversation_proto_rawDesc), len(file_chat_proto_conversation_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   3,
+			NumEnums:      3,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
