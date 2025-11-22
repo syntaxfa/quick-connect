@@ -319,10 +319,10 @@ WHERE conversation_id = $1`
 	if len(messages) > req.Limit {
 		pageResp.HasMore = true
 		messages = messages[:req.Limit]
-	}
-
-	if len(messages) > 0 {
 		pageResp.NextCursor = messages[len(messages)-1].ID
+	} else {
+		pageResp.HasMore = false
+		pageResp.NextCursor = ""
 	}
 
 	return service.ChatHistoryResponse{
