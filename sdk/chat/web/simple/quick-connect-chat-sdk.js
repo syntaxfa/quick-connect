@@ -1,6 +1,6 @@
 /**
  * Quick Connect Chat SDK
- * Version: 1.6.0 (Added Chat History Feature)
+ * Version: 1.7.0 (Added Infinite Scroll / Pagination)
  */
 
 (function(window, document) {
@@ -652,6 +652,7 @@
         attachEventListeners: function() {
             const btn = document.getElementById('qc-btn');
             const closeBtn = document.getElementById('qc-close-btn');
+            const messagesContainer = document.getElementById('qc-messages');
 
             if(btn) btn.onclick = () => this.openChat();
             if(closeBtn) closeBtn.onclick = () => this.closeChat();
@@ -669,6 +670,16 @@
                     this.sendMessage();
                 }
             };
+
+            // Added: Scroll Listener for Pagination
+            if (messagesContainer) {
+                messagesContainer.addEventListener('scroll', () => {
+                    // Check if scrolled to top, has more pages, and not currently loading
+                    if (messagesContainer.scrollTop === 0 && this.state.hasMore && !this.state.isLoadingHistory) {
+                        this.fetchChatHistory();
+                    }
+                });
+            }
         },
 
         // Authentication Logic
@@ -741,7 +752,7 @@
                     this.state.conversationId = data.id;
                     localStorage.setItem('QC_CONVERSATION_ID', data.id);
 
-                    // If chat window is already open but history not loaded (rare case), load it now
+                    // If chat window is already open but history not loaded, load it
                     if (this.state.isOpen && !this.state.historyLoaded) {
                         this.fetchChatHistory();
                     }
@@ -751,11 +762,18 @@
             }
         },
 
-        // NEW: Fetch Chat History
+        // Fetch Chat History (With Pagination)
         fetchChatHistory: async function() {
-            if (!this.state.token || !this.state.conversationId || this.state.historyLoaded || this.state.isLoadingHistory) return;
+            if (!this.state.token || !this.state.conversationId || (this.state.historyLoaded && !this.state.hasMore) || this.state.isLoadingHistory) return;
 
             this.state.isLoadingHistory = true;
+
+            // Capture current scroll height for pagination position preservation
+            const container = document.getElementById('qc-messages');
+            let previousHeight = 0;
+            if (container) {
+                previousHeight = container.scrollHeight;
+            }
 
             try {
                 const payload = {
@@ -780,17 +798,16 @@
                 const data = await response.json();
 
                 if (data && data.results) {
-                    // API returns messages Newest to Oldest. We reverse them for UI (Oldest to Newest).
+                    // API returns messages Newest to Oldest. We reverse them for UI.
                     const historyMessages = data.results.map(msg => ({
                         id: msg.id,
                         content: msg.content,
                         created_at: msg.created_at,
-                        // Check if sender is current user
                         isOwn: msg.sender_id === this.state.userId,
-                        status: 'sent' // Historical messages are always sent
+                        status: 'sent'
                     })).reverse();
 
-                    // Prepend history to existing messages (if any)
+                    // Prepend history to existing messages
                     this.state.messages = [...historyMessages, ...this.state.messages];
 
                     // Update pagination state
@@ -800,7 +817,19 @@
                     }
 
                     this.state.historyLoaded = true;
-                    this.renderMessages();
+
+                    // Render: Pass true to preserveScroll if we are loading history
+                    // If it's the very first load (previousHeight close to 0), we don't preserve, we want bottom.
+                    // If it's pagination (previousHeight > 0), we preserve.
+                    const isPagination = previousHeight > 0;
+                    this.renderMessages(isPagination);
+
+                    // Restore Scroll Position for Pagination
+                    if (isPagination && container) {
+                        const newHeight = container.scrollHeight;
+                        // Calculate offset to keep view static relative to messages
+                        container.scrollTop = newHeight - previousHeight;
+                    }
                 }
 
             } catch (error) {
@@ -857,9 +886,6 @@
                 this.updateConnectionStatus();
                 if(this.state.messages.length === 0 && this.state.historyLoaded) {
                     this.addSystemMessage('به چت پشتیبانی خوش آمدید! 👋');
-                } else if (!this.state.historyLoaded) {
-                    // Wait for history to potentially load message, if not loaded yet
-                    // Just a welcome log
                 }
             };
 
@@ -1029,7 +1055,7 @@
 
                 // Update Header immediately
                 this.updateConnectionStatus();
-                this.renderMessages();
+                this.renderMessages(true); // Preserve scroll when typing indicator appears
 
                 if (this.state.typingTimeouts[senderId]) {
                     clearTimeout(this.state.typingTimeouts[senderId]);
@@ -1039,7 +1065,7 @@
                 this.state.typingTimeouts[senderId] = setTimeout(() => {
                     this.state.typingUsers.delete(senderId);
                     this.updateConnectionStatus(); // Revert header
-                    this.renderMessages();
+                    this.renderMessages(true);
                 }, 6000);
 
             } else if (data.sub_type === 'typing_stopped') {
@@ -1051,7 +1077,7 @@
 
                 // Update Header immediately
                 this.updateConnectionStatus();
-                this.renderMessages();
+                this.renderMessages(true);
             }
         },
 
@@ -1087,7 +1113,8 @@
         },
 
         // Render Logic
-        renderMessages: function() {
+        // Modified to accept preserveScroll param
+        renderMessages: function(preserveScroll = false) {
             const container = document.getElementById('qc-messages');
             if (!container) return;
 
@@ -1149,7 +1176,10 @@
                 container.appendChild(typingEl);
             }
 
-            container.scrollTop = container.scrollHeight;
+            // Only scroll to bottom if NOT preserving scroll
+            if (!preserveScroll) {
+                container.scrollTop = container.scrollHeight;
+            }
         },
 
         // Utilities
