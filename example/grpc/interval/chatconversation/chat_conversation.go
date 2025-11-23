@@ -88,4 +88,14 @@ func ChatConversation() {
 	}
 
 	fmt.Printf("%+v\n", openConResp)
+
+	fmt.Println("-------------")
+	fmt.Println("close conversation:")
+
+	closeConResp, closeConErr := conAd.CloseConversation(ctxWithValue, &conversationpb.CloseConversationRequest{ConversationId: "01KA5SEA18W3KXMGN1PDKJYKHP"})
+	if closeConErr != nil {
+		errorhandler.HandleGRPCError(closeConErr, logger)
+	}
+
+	fmt.Printf("%+v\n", closeConResp)
 }
