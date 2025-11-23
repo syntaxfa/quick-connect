@@ -32,3 +32,8 @@ func (ca *ConversationAdapter) ChatHistory(ctx context.Context, req *conversatio
 	opts ...grpc.CallOption) (*conversationpb.ChatHistoryResponse, error) {
 	return ca.client.ChatHistory(ctx, req, opts...)
 }
+
+func (ca *ConversationAdapter) OpenConversation(ctx context.Context, req *conversationpb.OpenConversationRequest,
+	opts ...grpc.CallOption) (*conversationpb.Conversation, error) {
+	return ca.client.OpenConversation(ctx, req, opts...)
+}
