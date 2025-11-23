@@ -36,3 +36,23 @@ func (d *DB) UpdateConversationSnippet(ctx context.Context, conversationID, last
 
 	return nil
 }
+
+const queryAssignConversation = `UPDATE conversations
+SET assigned_support_id = $1,
+    status = 'open'
+WHERE id = $2;`
+
+func (d *DB) AssignConversation(ctx context.Context, conversationID, supportID types.ID) error {
+	const op = "repository.postgres.update.AssignConversation"
+
+	cmdTag, exErr := d.conn.Conn().Exec(ctx, queryAssignConversation, supportID, conversationID)
+	if exErr != nil {
+		return richerror.New(op).WithWrapError(exErr).WithKind(richerror.KindUnexpected)
+	}
+
+	if cmdTag.RowsAffected() == 0 {
+		return richerror.New(op).WithKind(richerror.KindNotFound).WithMessage("conversation not found for assign")
+	}
+
+	return nil
+}

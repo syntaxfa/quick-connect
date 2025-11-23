@@ -167,10 +167,10 @@ definitions:
         $ref: '#/definitions/types.ID'
       message_type:
         $ref: '#/definitions/service.MessageType'
-      meta_data:
-        items:
+      metadata:
+        additionalProperties:
           type: string
-        type: array
+        type: object
       read_at:
         type: string
       replied_to_message_id:
@@ -289,6 +289,33 @@ paths:
       security:
       - JWT: []
       summary: OwnConversationList
+      tags:
+      - Chat
+  /conversations/{conversationID}/open:
+    get:
+      consumes:
+      - application/json
+      description: open conversation for chatting
+      parameters:
+      - description: conversation ID
+        in: path
+        name: conversationID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: OpenConversation
       tags:
       - Chat
   /conversations/active:
