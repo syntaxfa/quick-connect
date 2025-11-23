@@ -45,4 +45,5 @@ const (
 	MsgInvalidMessageType                  = "invalid message type"
 	MsgYouNotParticipantInThisConversation = "you not participant in this conversation"
 	MsgConversationNotFound                = "this conversation does not exists"
+	MsgConversationAlreadyClosed           = "this conversation already closed"
 )

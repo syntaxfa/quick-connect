@@ -50,6 +50,8 @@ func (s Server) RegisterRoutes() {
 		s.authMid.RequireRole([]types.Role{types.RoleSupport}))
 	conGr.GET("/:conversationID/open", s.handler.OpenConversation, s.authMid.RequireAuth,
 		s.authMid.RequireRole([]types.Role{types.RoleSupport}))
+	conGr.GET("/:conversationID/close", s.handler.CloseConversation, s.authMid.RequireAuth,
+		s.authMid.RequireRole([]types.Role{types.RoleSupport}))
 
 	chats := rootGr.Group("/chats")
 	chats.POST("", s.handler.GetChatHistory, s.authMid.RequireAuth,

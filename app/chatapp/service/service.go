@@ -32,6 +32,7 @@ type Repository interface {
 	UpdateConversationSnippet(ctx context.Context, conversationID, lastMessageSenderID types.ID, snippet string) error
 	IsConversationExistByID(ctx context.Context, conversationID types.ID) (bool, error)
 	AssignConversation(ctx context.Context, conversationID, supportID types.ID) error
+	CloseConversation(ctx context.Context, conversationID types.ID) error
 
 	GetChatHistory(ctx context.Context, conversationID types.ID, req cursorbased.Request) (ChatHistoryResponse, error)
 }
