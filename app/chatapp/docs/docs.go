@@ -252,6 +252,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/conversations/{conversationID}/open": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "open conversation for chatting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "OpenConversation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "conversation ID",
+                        "name": "conversationID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/health-check": {
             "get": {
                 "description": "health check chat service",
@@ -526,9 +569,9 @@ const docTemplate = `{
                 "message_type": {
                     "$ref": "#/definitions/service.MessageType"
                 },
-                "meta_data": {
-                    "type": "array",
-                    "items": {
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
                         "type": "string"
                     }
                 },

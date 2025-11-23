@@ -78,4 +78,14 @@ func ChatConversation() {
 	}
 
 	fmt.Printf("%+v\n", chatHisResp)
+
+	fmt.Println("-------------")
+	fmt.Println("open conversation:")
+
+	openConResp, openConErr := conAd.OpenConversation(ctxWithValue, &conversationpb.OpenConversationRequest{ConversationId: "01KA5SEA18W3KXMGN1PDKJYKHP"})
+	if openConErr != nil {
+		errorhandler.HandleGRPCError(openConErr, logger)
+	}
+
+	fmt.Printf("%+v\n", openConResp)
 }

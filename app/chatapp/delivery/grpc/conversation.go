@@ -7,6 +7,7 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/protobuf/chat/golang/conversationpb"
+	"github.com/syntaxfa/quick-connect/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -40,4 +41,18 @@ func (h Handler) ConversationOwnList(ctx context.Context, req *conversationpb.Co
 	}
 
 	return convertConversationListResponseToPB(resp), nil
+}
+
+func (h Handler) OpenConversation(ctx context.Context, req *conversationpb.OpenConversationRequest) (*conversationpb.Conversation, error) {
+	claims, ucErr := grpcauth.ExtractUserClaimsFromContext(ctx)
+	if ucErr != nil {
+		return nil, status.Error(codes.Unauthenticated, ucErr.Error())
+	}
+
+	resp, sErr := h.chatSvc.OpenConversation(ctx, types.ID(req.GetConversationId()), claims.UserID)
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
+	}
+
+	return convertConversationToPB(resp), nil
 }

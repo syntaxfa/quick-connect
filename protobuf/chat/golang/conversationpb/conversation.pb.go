@@ -666,6 +666,50 @@ func (x *ChatHistoryResponse) GetHasMore() bool {
 	return false
 }
 
+type OpenConversationRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *OpenConversationRequest) Reset() {
+	*x = OpenConversationRequest{}
+	mi := &file_chat_proto_conversation_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OpenConversationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OpenConversationRequest) ProtoMessage() {}
+
+func (x *OpenConversationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_conversation_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OpenConversationRequest.ProtoReflect.Descriptor instead.
+func (*OpenConversationRequest) Descriptor() ([]byte, []int) {
+	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *OpenConversationRequest) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
 var File_chat_proto_conversation_proto protoreflect.FileDescriptor
 
 const file_chat_proto_conversation_proto_rawDesc = "" +
@@ -718,7 +762,9 @@ const file_chat_proto_conversation_proto_rawDesc = "" +
 	"\aresults\x18\x01 \x03(\v2\r.chat.MessageR\aresults\x12\x1f\n" +
 	"\vnext_cursor\x18\x02 \x01(\tR\n" +
 	"nextCursor\x12\x19\n" +
-	"\bhas_more\x18\x03 \x01(\bR\ahasMore*m\n" +
+	"\bhas_more\x18\x03 \x01(\bR\ahasMore\"B\n" +
+	"\x17OpenConversationRequest\x12'\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId*m\n" +
 	"\x06Status\x12\x16\n" +
 	"\x12STATUS_UNSPECIFIED\x10\x00\x12\x0e\n" +
 	"\n" +
@@ -735,11 +781,12 @@ const file_chat_proto_conversation_proto_rawDesc = "" +
 	"\tTYPE_TEXT\x10\x01\x12\x0e\n" +
 	"\n" +
 	"TYPE_MEDIA\x10\x02\x12\x0f\n" +
-	"\vTYPE_SYSTEM\x10\x032\x85\x02\n" +
+	"\vTYPE_SYSTEM\x10\x032\xcc\x02\n" +
 	"\x13ConversationService\x12T\n" +
 	"\x13ConversationNewList\x12\x1d.chat.ConversationListRequest\x1a\x1e.chat.ConversationListResponse\x12T\n" +
 	"\x13ConversationOwnList\x12\x1d.chat.ConversationListRequest\x1a\x1e.chat.ConversationListResponse\x12B\n" +
-	"\vChatHistory\x12\x18.chat.ChatHistoryRequest\x1a\x19.chat.ChatHistoryResponseB%Z#protobuf/chat/golang/conversationpbb\x06proto3"
+	"\vChatHistory\x12\x18.chat.ChatHistoryRequest\x1a\x19.chat.ChatHistoryResponse\x12E\n" +
+	"\x10OpenConversation\x12\x1d.chat.OpenConversationRequest\x1a\x12.chat.ConversationB%Z#protobuf/chat/golang/conversationpbb\x06proto3"
 
 var (
 	file_chat_proto_conversation_proto_rawDescOnce sync.Once
@@ -754,7 +801,7 @@ func file_chat_proto_conversation_proto_rawDescGZIP() []byte {
 }
 
 var file_chat_proto_conversation_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_chat_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_chat_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_chat_proto_conversation_proto_goTypes = []any{
 	(Status)(0),                      // 0: chat.Status
 	(SortDirection)(0),               // 1: chat.SortDirection
@@ -765,30 +812,33 @@ var file_chat_proto_conversation_proto_goTypes = []any{
 	(*ChatHistoryRequest)(nil),       // 6: chat.ChatHistoryRequest
 	(*Message)(nil),                  // 7: chat.Message
 	(*ChatHistoryResponse)(nil),      // 8: chat.ChatHistoryResponse
-	nil,                              // 9: chat.Message.MetadataEntry
-	(*timestamp.Timestamp)(nil),      // 10: google.protobuf.Timestamp
+	(*OpenConversationRequest)(nil),  // 9: chat.OpenConversationRequest
+	nil,                              // 10: chat.Message.MetadataEntry
+	(*timestamp.Timestamp)(nil),      // 11: google.protobuf.Timestamp
 }
 var file_chat_proto_conversation_proto_depIdxs = []int32{
 	0,  // 0: chat.Conversation.status:type_name -> chat.Status
-	10, // 1: chat.Conversation.created_at:type_name -> google.protobuf.Timestamp
-	10, // 2: chat.Conversation.updated_at:type_name -> google.protobuf.Timestamp
-	10, // 3: chat.Conversation.closed_at:type_name -> google.protobuf.Timestamp
+	11, // 1: chat.Conversation.created_at:type_name -> google.protobuf.Timestamp
+	11, // 2: chat.Conversation.updated_at:type_name -> google.protobuf.Timestamp
+	11, // 3: chat.Conversation.closed_at:type_name -> google.protobuf.Timestamp
 	1,  // 4: chat.ConversationListRequest.sort_direction:type_name -> chat.SortDirection
 	0,  // 5: chat.ConversationListRequest.statuses:type_name -> chat.Status
 	3,  // 6: chat.ConversationListResponse.conversations:type_name -> chat.Conversation
 	2,  // 7: chat.Message.message_type:type_name -> chat.MessageType
-	9,  // 8: chat.Message.metadata:type_name -> chat.Message.MetadataEntry
-	10, // 9: chat.Message.created_at:type_name -> google.protobuf.Timestamp
-	10, // 10: chat.Message.read_at:type_name -> google.protobuf.Timestamp
+	10, // 8: chat.Message.metadata:type_name -> chat.Message.MetadataEntry
+	11, // 9: chat.Message.created_at:type_name -> google.protobuf.Timestamp
+	11, // 10: chat.Message.read_at:type_name -> google.protobuf.Timestamp
 	7,  // 11: chat.ChatHistoryResponse.results:type_name -> chat.Message
 	4,  // 12: chat.ConversationService.ConversationNewList:input_type -> chat.ConversationListRequest
 	4,  // 13: chat.ConversationService.ConversationOwnList:input_type -> chat.ConversationListRequest
 	6,  // 14: chat.ConversationService.ChatHistory:input_type -> chat.ChatHistoryRequest
-	5,  // 15: chat.ConversationService.ConversationNewList:output_type -> chat.ConversationListResponse
-	5,  // 16: chat.ConversationService.ConversationOwnList:output_type -> chat.ConversationListResponse
-	8,  // 17: chat.ConversationService.ChatHistory:output_type -> chat.ChatHistoryResponse
-	15, // [15:18] is the sub-list for method output_type
-	12, // [12:15] is the sub-list for method input_type
+	9,  // 15: chat.ConversationService.OpenConversation:input_type -> chat.OpenConversationRequest
+	5,  // 16: chat.ConversationService.ConversationNewList:output_type -> chat.ConversationListResponse
+	5,  // 17: chat.ConversationService.ConversationOwnList:output_type -> chat.ConversationListResponse
+	8,  // 18: chat.ConversationService.ChatHistory:output_type -> chat.ChatHistoryResponse
+	3,  // 19: chat.ConversationService.OpenConversation:output_type -> chat.Conversation
+	16, // [16:20] is the sub-list for method output_type
+	12, // [12:16] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -805,7 +855,7 @@ func file_chat_proto_conversation_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_chat_proto_conversation_proto_rawDesc), len(file_chat_proto_conversation_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

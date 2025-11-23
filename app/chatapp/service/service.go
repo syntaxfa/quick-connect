@@ -30,6 +30,8 @@ type Repository interface {
 	CheckUserInConversation(ctx context.Context, userID, conversationID types.ID) (bool, error)
 	SaveMessage(ctx context.Context, message Message) (Message, error)
 	UpdateConversationSnippet(ctx context.Context, conversationID, lastMessageSenderID types.ID, snippet string) error
+	IsConversationExistByID(ctx context.Context, conversationID types.ID) (bool, error)
+	AssignConversation(ctx context.Context, conversationID, supportID types.ID) error
 
 	GetChatHistory(ctx context.Context, conversationID types.ID, req cursorbased.Request) (ChatHistoryResponse, error)
 }
