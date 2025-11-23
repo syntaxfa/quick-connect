@@ -68,6 +68,9 @@ manager-test:
 notification-test:
 	go test ./app/notificationapp/...
 
+admin-test:
+	go test ./app/adminapp/...
+
 chat-build:
 	docker build -t $(IMAGE_NAME) -f deploy/chat/deploy/Dockerfile .
 
