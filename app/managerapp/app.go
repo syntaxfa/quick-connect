@@ -33,6 +33,7 @@ type Application struct {
 	httpServer         http.Server
 	internalHTTPServer http.InternalServer
 	grpcServer         grpcdelivery.Server
+	grpcServerInternal grpcdelivery.ServerInternal
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) Application {
@@ -61,6 +62,9 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	grpcHandler := grpcdelivery.NewHandler(logger, tokenSvc, userSvc, t)
 	grpcServer := grpcdelivery.New(grpcserver.New(cfg.GRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)), grpcHandler, logger)
 
+	grpcHandlerInternal := grpcdelivery.NewHandlerInternal(logger, userSvc, t)
+	grpcServerInternal := grpcdelivery.NewServerInternal(grpcserver.New(cfg.GRPCServerInternal, logger), grpcHandlerInternal, logger)
+
 	return Application{
 		cfg:                cfg,
 		trap:               trap,
@@ -68,6 +72,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		httpServer:         httpServer,
 		grpcServer:         grpcServer,
 		internalHTTPServer: internalHTTPServer,
+		grpcServerInternal: grpcServerInternal,
 	}
 }
 
@@ -75,6 +80,7 @@ func (a Application) Start() {
 	httpServerChan := make(chan error, 1)
 	internalHTTPServerChan := make(chan error, 1)
 	grpcServerChan := make(chan error, 1)
+	grpcServerInternalChan := make(chan error, 1)
 
 	go func() {
 		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.HTTPServer.Port))
@@ -98,6 +104,12 @@ func (a Application) Start() {
 		}
 	}()
 
+	go func() {
+		if sErr := a.grpcServerInternal.Start(); sErr != nil {
+			grpcServerInternalChan <- sErr
+		}
+	}()
+
 	select {
 	case err := <-httpServerChan:
 		a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.HTTPServer.Port), slog.String("error", err.Error()))
@@ -106,6 +118,9 @@ func (a Application) Start() {
 			slog.String("error", err.Error()))
 	case err := <-grpcServerChan:
 		a.logger.Error(fmt.Sprintf("error in grpc server on %d", a.cfg.GRPCServer.Port), slog.String("error", err.Error()))
+	case err := <-grpcServerInternalChan:
+		a.logger.Error(fmt.Sprintf("error in groc server internal on %d", a.cfg.GRPCServerInternal.Port),
+			slog.String("error", err.Error()))
 	case <-a.trap:
 		a.logger.Info("received http server shutdown signal!!!")
 	}
@@ -136,6 +151,9 @@ func (a Application) Stop(ctx context.Context) bool {
 
 		shutdownWg.Add(1)
 		go a.StopGRPCServer(&shutdownWg)
+
+		shutdownWg.Add(1)
+		go a.StopGRCPServerInternal(&shutdownWg)
 
 		shutdownWg.Wait()
 		close(shutdownDone)
@@ -168,6 +186,11 @@ func (a Application) StopGRPCServer(wg *sync.WaitGroup) {
 	a.grpcServer.Stop()
 }
 
+func (a Application) StopGRCPServerInternal(wg *sync.WaitGroup) {
+	defer wg.Done()
+	a.grpcServerInternal.Stop()
+}
+
 func setupRoleManager() *rolemanager.RoleManager {
 	methodRoles := map[string][]types.Role{
 		// AuthService
@@ -183,6 +206,7 @@ func setupRoleManager() *rolemanager.RoleManager {
 		"/manager.UserService/UserList":                {types.RoleSuperUser},
 		"/manager.UserService/UserProfile":             types.AdminRoles,
 		"/manager.UserService/UserUpdateFromOwn":       types.AdminRoles,
+		"/manager.UserService/UserInfo":                types.AllUserRole,
 	}
 
 	return rolemanager.NewRoleManager(methodRoles)

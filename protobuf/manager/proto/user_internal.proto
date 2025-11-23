@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package manager;
+
+option go_package = "protobuf/manager/golang/userinternalpb";
+
+import "google/protobuf/timestamp.proto";
+
+message UserInfoRequest {
+  string user_id = 1;
+}
+
+message UserInfoResponse {
+  string id = 1;
+  string fullname = 2;
+  string username = 3;
+  string email = 4;
+  string phone_number = 5;
+  string avatar = 6;
+  google.protobuf.Timestamp last_online_at = 7;
+}
+
+service UserInternalService {
+  rpc UserInfo (UserInfoRequest) returns (UserInfoResponse);
+}

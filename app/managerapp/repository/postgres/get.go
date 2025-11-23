@@ -249,3 +249,38 @@ func (d *DB) GetUserIDFromExternalUserID(ctx context.Context, externalUserID str
 
 	return types.ID(userID), nil
 }
+
+const queryGetUserInfoByID = `SELECT id, fullname, username, email, phone_number, avatar, last_online_at
+FROM users
+WHERE id = $1
+limit 1;`
+
+func (d *DB) GetUserInfoByID(ctx context.Context, userID types.ID) (userservice.UserInfoResponse, error) {
+	const op = "repository.postgres.get.GetUserInfoBy"
+
+	var userInfo userservice.UserInfoResponse
+	var nullable nullableFields
+
+	if qErr := d.conn.Conn().QueryRow(ctx, queryGetUserInfoByID, userID).Scan(&userInfo.ID, &nullable.Fullname, &userInfo.Username,
+		&nullable.Email, &nullable.PhoneNumber, &nullable.Avatar, &userInfo.LastOnlineAt); qErr != nil {
+		return userservice.UserInfoResponse{}, richerror.New(op).WithWrapError(qErr).WithKind(richerror.KindUnexpected)
+	}
+
+	if nullable.Fullname.Valid {
+		userInfo.Fullname = nullable.Fullname.String
+	}
+
+	if nullable.Email.Valid {
+		userInfo.Email = nullable.Email.String
+	}
+
+	if nullable.PhoneNumber.Valid {
+		userInfo.PhoneNumber = nullable.PhoneNumber.String
+	}
+
+	if nullable.Avatar.Valid {
+		userInfo.Avatar = nullable.Avatar.String
+	}
+
+	return userInfo, nil
+}

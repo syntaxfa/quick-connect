@@ -14,13 +14,14 @@ import (
 )
 
 type Config struct {
-	ShutdownTimeout time.Duration     `koanf:"shutdown_timeout"`
-	HTTPServer      httpserver.Config `koanf:"http_server"`
-	Logger          logger.Config     `koanf:"logger"`
-	Websocket       websocket.Config  `koanf:"websocket"`
-	ChatService     service.Config    `koanf:"chat"`
-	Postgres        postgres.Config   `koanf:"postgres"`
-	ManagerAppGRPC  grpcclient.Config `koanf:"manager_app_grpc"`
-	GRPCServer      grpcserver.Config `koanf:"grpc_server"`
-	Redis           redis.Config      `koanf:"redis"`
+	ShutdownTimeout        time.Duration     `koanf:"shutdown_timeout"`
+	HTTPServer             httpserver.Config `koanf:"http_server"`
+	Logger                 logger.Config     `koanf:"logger"`
+	Websocket              websocket.Config  `koanf:"websocket"`
+	ChatService            service.Config    `koanf:"chat"`
+	Postgres               postgres.Config   `koanf:"postgres"`
+	ManagerAppGRPC         grpcclient.Config `koanf:"manager_app_grpc"`
+	ManagerAppInternalGRPC grpcclient.Config `koanf:"manager_app_internal_grpc"`
+	GRPCServer             grpcserver.Config `koanf:"grpc_server"`
+	Redis                  redis.Config      `koanf:"redis"`
 }

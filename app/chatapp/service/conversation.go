@@ -7,6 +7,7 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userinternalpb"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
@@ -129,4 +130,68 @@ func (s *Service) CloseConversation(ctx context.Context, conversationID, support
 	conversation.Status = ConversationStatusClosed
 
 	return conversation, nil
+}
+
+func (s *Service) GetConversationByID(ctx context.Context, conversationID, userID types.ID, userRoles []types.Role) (
+	ConversationDetailResponse, error) {
+	const op = "service.conversation.GetConversationByID"
+
+	if exists, exErr := s.repo.IsConversationExistByID(ctx, conversationID); exErr != nil {
+		return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(exErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	} else if !exists {
+		return ConversationDetailResponse{}, richerror.New(op).WithMessage(servermsg.MsgConversationNotFound).
+			WithKind(richerror.KindNotFound)
+	}
+
+	for _, role := range userRoles {
+		if role != types.RoleSupport && role != types.RoleSuperUser {
+			ok, checkErr := s.repo.CheckUserInConversation(ctx, userID, conversationID)
+			if checkErr != nil {
+				return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(checkErr).
+					WithKind(richerror.KindUnexpected), s.logger)
+			}
+
+			if !ok {
+				return ConversationDetailResponse{}, richerror.New(op).WithMessage(servermsg.MsgConversationNotFound).
+					WithKind(richerror.KindNotFound)
+			}
+		}
+	}
+
+	conversation, gErr := s.repo.GetConversationByID(ctx, conversationID)
+	if gErr != nil {
+		return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	clientInfo, gcErr := s.userInternalSvc.UserInfo(ctx, &userinternalpb.UserInfoRequest{UserId: string(conversation.ClientUserID)})
+	if gcErr != nil {
+		return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gcErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	supportInfo, gsErr := s.userInternalSvc.UserInfo(ctx, &userinternalpb.UserInfoRequest{UserId: string(conversation.AssignedSupportID)})
+	if gsErr != nil {
+		return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gsErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return ConversationDetailResponse{
+		Conversation: conversation,
+		ClientInfo: ClientInfo{
+			ID:           types.ID(clientInfo.GetId()),
+			Fullname:     clientInfo.GetFullname(),
+			PhoneNumber:  clientInfo.GetPhoneNumber(),
+			Email:        clientInfo.GetEmail(),
+			Avatar:       clientInfo.GetAvatar(),
+			LastOnlineAt: clientInfo.GetLastOnlineAt().AsTime(),
+		},
+		SupportInfo: SupportInfo{
+			ID:           types.ID(supportInfo.GetId()),
+			Fullname:     supportInfo.GetFullname(),
+			Avatar:       supportInfo.GetAvatar(),
+			LastOnlineAt: supportInfo.GetLastOnlineAt().AsTime(),
+		},
+	}, nil
 }

@@ -72,17 +72,26 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	chatRepo := postgres2.New(psqAdapter)
 	vld := service.NewValidate(t)
 
-	chatHub := service.NewHub(cfg.ChatService, logger, pubsubClient)
-
-	chatSvc := service.New(cfg.ChatService, chatRepo, chatHub, pubsubClient, logger, vld)
-	chatHandler := http.NewHandler(mainCtx, upgrader, logger, chatSvc, t)
-
 	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC)
 	if grpcErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithWrapError(grpcErr).WithKind(richerror.KindUnexpected), logger)
 
 		panic(grpcErr)
 	}
+
+	managerInternalGRPCClient, grpcInternalErr := grpcclient.New(cfg.ManagerAppInternalGRPC)
+	if grpcInternalErr != nil {
+		errlog.WithoutErr(richerror.New(op).WithWrapError(grpcInternalErr).WithKind(richerror.KindUnexpected), logger)
+
+		panic(grpcInternalErr)
+	}
+
+	userInternalAd := manager.NewUserInternalAdapter(managerInternalGRPCClient.Conn())
+
+	chatHub := service.NewHub(cfg.ChatService, logger, pubsubClient)
+
+	chatSvc := service.New(cfg.ChatService, chatRepo, chatHub, pubsubClient, logger, vld, userInternalAd)
+	chatHandler := http.NewHandler(mainCtx, upgrader, logger, chatSvc, t)
 
 	authAd := manager.NewAuthAdapter(managerGRPCClient.Conn())
 	resp, pubErr := authAd.GetPublicKey(context.Background())

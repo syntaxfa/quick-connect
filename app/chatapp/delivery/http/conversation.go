@@ -147,3 +147,28 @@ func (h Handler) CloseConversation(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, resp)
 }
+
+// ConversationDetail docs
+// @Security JWT
+// @Router /conversations/{conversationID} [GET].
+// @Summary ConversationDetail
+// @Description close conversation for chatting
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversationID path string true "conversation ID"
+// @Failure 404 {string} conversation does not exist
+// @Failure 500 {string} something went wrong.
+func (h Handler) ConversationDetail(c echo.Context) error {
+	claims, gErr := auth.GetUserClaimFormContext(c)
+	if gErr != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, gErr.Error())
+	}
+
+	resp, sErr := h.svc.GetConversationByID(c.Request().Context(), types.ID(c.Param("conversationID")), claims.UserID, claims.Roles)
+	if sErr != nil {
+		return servermsg.HTTPMsg(c, sErr, h.t)
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
