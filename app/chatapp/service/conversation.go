@@ -6,6 +6,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/types"
 )
 
@@ -61,4 +62,36 @@ func (s *Service) ListConversations(ctx context.Context, req ListConversationsRe
 		Results:  convos,
 		Paginate: paginateRes,
 	}, nil
+}
+
+func (s *Service) OpenConversation(ctx context.Context, conversationID, supportID types.ID) (Conversation, error) {
+	const op = "service.conversation.OpenConversation"
+
+	exists, isExErr := s.repo.IsConversationExistByID(ctx, conversationID)
+	if isExErr != nil {
+		return Conversation{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(isExErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	if !exists {
+		return Conversation{}, richerror.New(op).WithMessage(servermsg.MsgConversationNotFound).WithKind(richerror.KindNotFound)
+	}
+
+	conversation, gErr := s.repo.GetConversationByID(ctx, conversationID)
+	if gErr != nil {
+		return Conversation{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	if conversation.Status != ConversationStatusNew {
+		return Conversation{}, richerror.New(op).WithMessage(servermsg.MsgConversationNotFound).WithKind(richerror.KindNotFound)
+	}
+
+	if assignErr := s.repo.AssignConversation(ctx, conversationID, supportID); assignErr != nil {
+		return Conversation{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(assignErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	conversation.AssignedSupportID = supportID
+	conversation.Status = ConversationStatusOpen
+
+	return conversation, nil
 }

@@ -22,6 +22,7 @@ const (
 	ConversationService_ConversationNewList_FullMethodName = "/chat.ConversationService/ConversationNewList"
 	ConversationService_ConversationOwnList_FullMethodName = "/chat.ConversationService/ConversationOwnList"
 	ConversationService_ChatHistory_FullMethodName         = "/chat.ConversationService/ChatHistory"
+	ConversationService_OpenConversation_FullMethodName    = "/chat.ConversationService/OpenConversation"
 )
 
 // ConversationServiceClient is the client API for ConversationService service.
@@ -31,6 +32,7 @@ type ConversationServiceClient interface {
 	ConversationNewList(ctx context.Context, in *ConversationListRequest, opts ...grpc.CallOption) (*ConversationListResponse, error)
 	ConversationOwnList(ctx context.Context, in *ConversationListRequest, opts ...grpc.CallOption) (*ConversationListResponse, error)
 	ChatHistory(ctx context.Context, in *ChatHistoryRequest, opts ...grpc.CallOption) (*ChatHistoryResponse, error)
+	OpenConversation(ctx context.Context, in *OpenConversationRequest, opts ...grpc.CallOption) (*Conversation, error)
 }
 
 type conversationServiceClient struct {
@@ -71,6 +73,16 @@ func (c *conversationServiceClient) ChatHistory(ctx context.Context, in *ChatHis
 	return out, nil
 }
 
+func (c *conversationServiceClient) OpenConversation(ctx context.Context, in *OpenConversationRequest, opts ...grpc.CallOption) (*Conversation, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Conversation)
+	err := c.cc.Invoke(ctx, ConversationService_OpenConversation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ConversationServiceServer is the server API for ConversationService service.
 // All implementations must embed UnimplementedConversationServiceServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type ConversationServiceServer interface {
 	ConversationNewList(context.Context, *ConversationListRequest) (*ConversationListResponse, error)
 	ConversationOwnList(context.Context, *ConversationListRequest) (*ConversationListResponse, error)
 	ChatHistory(context.Context, *ChatHistoryRequest) (*ChatHistoryResponse, error)
+	OpenConversation(context.Context, *OpenConversationRequest) (*Conversation, error)
 	mustEmbedUnimplementedConversationServiceServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedConversationServiceServer) ConversationOwnList(context.Contex
 }
 func (UnimplementedConversationServiceServer) ChatHistory(context.Context, *ChatHistoryRequest) (*ChatHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChatHistory not implemented")
+}
+func (UnimplementedConversationServiceServer) OpenConversation(context.Context, *OpenConversationRequest) (*Conversation, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OpenConversation not implemented")
 }
 func (UnimplementedConversationServiceServer) mustEmbedUnimplementedConversationServiceServer() {}
 func (UnimplementedConversationServiceServer) testEmbeddedByValue()                             {}
@@ -172,6 +188,24 @@ func _ConversationService_ChatHistory_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ConversationService_OpenConversation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OpenConversationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServiceServer).OpenConversation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConversationService_OpenConversation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServiceServer).OpenConversation(ctx, req.(*OpenConversationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ConversationService_ServiceDesc is the grpc.ServiceDesc for ConversationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var ConversationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ChatHistory",
 			Handler:    _ConversationService_ChatHistory_Handler,
+		},
+		{
+			MethodName: "OpenConversation",
+			Handler:    _ConversationService_OpenConversation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

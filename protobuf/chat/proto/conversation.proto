@@ -79,8 +79,13 @@ message ChatHistoryResponse {
   bool has_more = 3;
 }
 
+message OpenConversationRequest {
+  string conversation_id = 1;
+}
+
 service ConversationService {
   rpc ConversationNewList (ConversationListRequest) returns (ConversationListResponse);
   rpc ConversationOwnList (ConversationListRequest) returns (ConversationListResponse);
   rpc ChatHistory (ChatHistoryRequest) returns (ChatHistoryResponse);
+  rpc OpenConversation (OpenConversationRequest) returns (Conversation);
 }

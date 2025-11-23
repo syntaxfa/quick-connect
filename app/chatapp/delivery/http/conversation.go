@@ -7,6 +7,7 @@ import (
 	"github.com/syntaxfa/quick-connect/app/chatapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/auth"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
+	"github.com/syntaxfa/quick-connect/types"
 )
 
 // GetActiveConversation docs
@@ -89,6 +90,31 @@ func (h Handler) OwnConversationList(c echo.Context) error {
 	req.AssignedSupportID = userClaims.UserID
 
 	resp, sErr := h.svc.ListConversations(c.Request().Context(), req)
+	if sErr != nil {
+		return servermsg.HTTPMsg(c, sErr, h.t)
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
+// OpenConversation docs
+// @Security JWT
+// @Router /conversations/{conversationID}/open [GET].
+// @Summary OpenConversation
+// @Description open conversation for chatting
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversationID path string true "conversation ID"
+// @Failure 404 {string} conversation does not exist
+// @Failure 500 {string} something went wrong.
+func (h Handler) OpenConversation(c echo.Context) error {
+	claims, gErr := auth.GetUserClaimFormContext(c)
+	if gErr != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, gErr.Error())
+	}
+
+	resp, sErr := h.svc.OpenConversation(c.Request().Context(), types.ID(c.Param("conversationID")), claims.UserID)
 	if sErr != nil {
 		return servermsg.HTTPMsg(c, sErr, h.t)
 	}
