@@ -56,3 +56,18 @@ func (h Handler) OpenConversation(ctx context.Context, req *conversationpb.OpenC
 
 	return convertConversationToPB(resp), nil
 }
+
+func (h Handler) CloseConversation(ctx context.Context, req *conversationpb.CloseConversationRequest) (
+	*conversationpb.Conversation, error) {
+	claims, ucErr := grpcauth.ExtractUserClaimsFromContext(ctx)
+	if ucErr != nil {
+		return nil, status.Error(codes.Unauthenticated, ucErr.Error())
+	}
+
+	resp, sErr := h.chatSvc.CloseConversation(ctx, types.ID(req.GetConversationId()), claims.UserID)
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
+	}
+
+	return convertConversationToPB(resp), nil
+}

@@ -56,3 +56,22 @@ func (d *DB) AssignConversation(ctx context.Context, conversationID, supportID t
 
 	return nil
 }
+
+const queryCloseConversation = `UPDATE conversations
+SET status = 'closed'
+WHERE id = $1;`
+
+func (d *DB) CloseConversation(ctx context.Context, conversationID types.ID) error {
+	const op = "repository.postgres.update.CloseConversation"
+
+	cmdTag, exErr := d.conn.Conn().Exec(ctx, queryCloseConversation, conversationID)
+	if exErr != nil {
+		return richerror.New(op).WithWrapError(exErr).WithKind(richerror.KindUnexpected)
+	}
+
+	if cmdTag.RowsAffected() == 0 {
+		return richerror.New(op).WithKind(richerror.KindNotFound).WithMessage("conversation not found for close")
+	}
+
+	return nil
+}
