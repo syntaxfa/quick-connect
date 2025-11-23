@@ -29,6 +29,7 @@ type Repository interface {
 	UpdateUser(ctx context.Context, userID types.ID, req UserUpdateFromSuperuserRequest) error
 	GetUserHashedPassword(ctx context.Context, userID types.ID) (string, error)
 	ChangePassword(ctx context.Context, userID types.ID, hashedPassword string) error
+	GetUserInfoByID(ctx context.Context, userID types.ID) (UserInfoResponse, error)
 }
 
 type ExternalUserRepository interface {

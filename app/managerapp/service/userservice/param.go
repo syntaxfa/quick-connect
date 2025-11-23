@@ -1,6 +1,8 @@
 package userservice
 
 import (
+	"time"
+
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/tokenservice"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/types"
@@ -51,6 +53,16 @@ type UserUpdateResponse struct {
 
 type UserProfileResponse struct {
 	User
+}
+
+type UserInfoResponse struct {
+	ID           types.ID  `json:"id"`
+	Fullname     string    `json:"fullname"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	PhoneNumber  string    `json:"phone_number"`
+	Avatar       string    `json:"avatar"`
+	LastOnlineAt time.Time `json:"last_online_at"`
 }
 
 type ListUserRequest struct {

@@ -291,6 +291,33 @@ paths:
       summary: OwnConversationList
       tags:
       - Chat
+  /conversations/{conversationID}:
+    get:
+      consumes:
+      - application/json
+      description: close conversation for chatting
+      parameters:
+      - description: conversation ID
+        in: path
+        name: conversationID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: ConversationDetail
+      tags:
+      - Chat
   /conversations/{conversationID}/close:
     get:
       consumes:

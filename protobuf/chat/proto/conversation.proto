@@ -87,10 +87,37 @@ message CloseConversationRequest {
   string conversation_id = 1;
 }
 
+message ConversationDetailRequest {
+  string conversation_id = 1;
+}
+
+message ClientInfo {
+  string id = 1;
+  string fullname = 2;
+  string phone_number = 3;
+  string email = 4;
+  string avatar = 5;
+  google.protobuf.Timestamp last_online_at = 6;
+}
+
+message SupportInfo {
+  string id = 1;
+  string fullname = 2;
+  string avatar = 3;
+  google.protobuf.Timestamp last_online_at = 4;
+}
+
+message ConversationDetailResponse {
+  Conversation Conversation = 1;
+  ClientInfo client_info = 2;
+  SupportInfo support_info = 3;
+}
+
 service ConversationService {
   rpc ConversationNewList (ConversationListRequest) returns (ConversationListResponse);
   rpc ConversationOwnList (ConversationListRequest) returns (ConversationListResponse);
   rpc ChatHistory (ChatHistoryRequest) returns (ChatHistoryResponse);
   rpc OpenConversation (OpenConversationRequest) returns (Conversation);
   rpc CloseConversation (CloseConversationRequest) returns (Conversation);
+  rpc ConversationDetail (ConversationDetailRequest) returns (ConversationDetailResponse);
 }

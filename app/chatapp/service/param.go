@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/syntaxfa/quick-connect/pkg/paginate/cursorbased"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/types"
@@ -29,4 +31,27 @@ type ChatHistoryRequest struct {
 type ChatHistoryResponse struct {
 	Results  []Message            `json:"results"`
 	Paginate cursorbased.Response `json:"paginate"`
+}
+
+type ClientInfo struct {
+	ID           types.ID  `json:"id"`
+	Fullname     string    `json:"fullname,omitempty"`
+	PhoneNumber  string    `json:"phone_number,omitempty"`
+	Email        string    `json:"email,omitempty"`
+	Avatar       string    `json:"avatar"`
+	LastOnlineAt time.Time `json:"last_online_at"`
+}
+
+type SupportInfo struct {
+	ID           types.ID  `json:"id"`
+	Fullname     string    `json:"fullname,omitempty"`
+	Avatar       string    `json:"avatar"`
+	LastOnlineAt time.Time `json:"last_online_at"`
+}
+
+type ConversationDetailResponse struct {
+	Conversation
+
+	ClientInfo  ClientInfo  `json:"client_info"`
+	SupportInfo SupportInfo `json:"support_info"`
 }

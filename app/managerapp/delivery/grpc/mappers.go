@@ -3,6 +3,7 @@ package grpc
 import (
 	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userinternalpb"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
 	"github.com/syntaxfa/quick-connect/types"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -142,5 +143,17 @@ func convertUserListResponseToPB(req userservice.ListUserResponse) *userpb.UserL
 		TotalNumber: req.Paginate.TotalNumbers,
 		TotalPage:   req.Paginate.TotalPage,
 		Users:       users,
+	}
+}
+
+func convertUserInfoToPB(resp userservice.UserInfoResponse) *userinternalpb.UserInfoResponse {
+	return &userinternalpb.UserInfoResponse{
+		Id:           string(resp.ID),
+		Fullname:     resp.Fullname,
+		Username:     resp.Username,
+		Email:        resp.Email,
+		PhoneNumber:  resp.PhoneNumber,
+		Avatar:       resp.Avatar,
+		LastOnlineAt: timestamppb.New(resp.LastOnlineAt),
 	}
 }

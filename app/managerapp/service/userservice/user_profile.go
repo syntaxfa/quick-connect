@@ -25,3 +25,17 @@ func (s Service) UserProfile(ctx context.Context, userID types.ID) (UserProfileR
 
 	return UserProfileResponse{user}, nil
 }
+
+// UserInfo retrieves User info for client & support
+// We don't check user exists.
+func (s Service) UserInfo(ctx context.Context, userID types.ID) (UserInfoResponse, error) {
+	const op = "service.profile.UserInfo"
+
+	userInfo, gErr := s.repo.GetUserInfoByID(ctx, userID)
+	if gErr != nil {
+		return UserInfoResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	return userInfo, nil
+}

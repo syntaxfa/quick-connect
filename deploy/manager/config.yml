@@ -53,3 +53,6 @@ internal_http_server:
   port: 2533
   cors:
     allow_origins:
+grpc_server_internal:
+  host: "localhost"
+  port: 2542
