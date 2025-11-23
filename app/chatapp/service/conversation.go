@@ -95,3 +95,38 @@ func (s *Service) OpenConversation(ctx context.Context, conversationID, supportI
 
 	return conversation, nil
 }
+
+func (s *Service) CloseConversation(ctx context.Context, conversationID, supportID types.ID) (Conversation, error) {
+	const op = "service.conversation.CloseConversation"
+
+	exists, isExErr := s.repo.IsConversationExistByID(ctx, conversationID)
+	if isExErr != nil {
+		return Conversation{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(isExErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	if !exists {
+		return Conversation{}, richerror.New(op).WithMessage(servermsg.MsgConversationNotFound).WithKind(richerror.KindNotFound)
+	}
+
+	conversation, gErr := s.repo.GetConversationByID(ctx, conversationID)
+	if gErr != nil {
+		return Conversation{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gErr).WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	if conversation.AssignedSupportID != supportID {
+		return Conversation{}, richerror.New(op).WithMessage(servermsg.MsgConversationNotFound).WithKind(richerror.KindNotFound)
+	}
+
+	if conversation.Status == ConversationStatusClosed {
+		return Conversation{}, richerror.New(op).WithMessage(servermsg.MsgConversationAlreadyClosed).WithKind(richerror.KindConflict)
+	}
+
+	if closeErr := s.repo.CloseConversation(ctx, conversationID); closeErr != nil {
+		return Conversation{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(closeErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
+
+	conversation.Status = ConversationStatusClosed
+
+	return conversation, nil
+}
