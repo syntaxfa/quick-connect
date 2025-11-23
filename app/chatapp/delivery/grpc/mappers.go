@@ -162,3 +162,23 @@ func convertChatHistoryResponseToPB(resp service.ChatHistoryResponse) *conversat
 		HasMore:    resp.Paginate.HasMore,
 	}
 }
+
+func convertConversationDetailResponseToPB(resp service.ConversationDetailResponse) *conversationpb.ConversationDetailResponse {
+	return &conversationpb.ConversationDetailResponse{
+		Conversation: convertConversationToPB(resp.Conversation),
+		ClientInfo: &conversationpb.ClientInfo{
+			Id:           string(resp.ClientInfo.ID),
+			Fullname:     resp.ClientInfo.Fullname,
+			PhoneNumber:  resp.ClientInfo.PhoneNumber,
+			Email:        resp.ClientInfo.Email,
+			Avatar:       resp.ClientInfo.Avatar,
+			LastOnlineAt: timestamppb.New(resp.ClientInfo.LastOnlineAt),
+		},
+		SupportInfo: &conversationpb.SupportInfo{
+			Id:           string(resp.SupportInfo.ID),
+			Fullname:     resp.SupportInfo.Fullname,
+			Avatar:       resp.SupportInfo.Avatar,
+			LastOnlineAt: timestamppb.New(resp.SupportInfo.LastOnlineAt),
+		},
+	}
+}

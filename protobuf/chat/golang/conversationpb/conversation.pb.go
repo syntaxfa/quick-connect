@@ -754,6 +754,262 @@ func (x *CloseConversationRequest) GetConversationId() string {
 	return ""
 }
 
+type ConversationDetailRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ConversationDetailRequest) Reset() {
+	*x = ConversationDetailRequest{}
+	mi := &file_chat_proto_conversation_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConversationDetailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConversationDetailRequest) ProtoMessage() {}
+
+func (x *ConversationDetailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_conversation_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConversationDetailRequest.ProtoReflect.Descriptor instead.
+func (*ConversationDetailRequest) Descriptor() ([]byte, []int) {
+	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ConversationDetailRequest) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+type ClientInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Fullname      string                 `protobuf:"bytes,2,opt,name=fullname,proto3" json:"fullname,omitempty"`
+	PhoneNumber   string                 `protobuf:"bytes,3,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
+	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
+	Avatar        string                 `protobuf:"bytes,5,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	LastOnlineAt  *timestamp.Timestamp   `protobuf:"bytes,6,opt,name=last_online_at,json=lastOnlineAt,proto3" json:"last_online_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClientInfo) Reset() {
+	*x = ClientInfo{}
+	mi := &file_chat_proto_conversation_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClientInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClientInfo) ProtoMessage() {}
+
+func (x *ClientInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_conversation_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClientInfo.ProtoReflect.Descriptor instead.
+func (*ClientInfo) Descriptor() ([]byte, []int) {
+	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ClientInfo) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ClientInfo) GetFullname() string {
+	if x != nil {
+		return x.Fullname
+	}
+	return ""
+}
+
+func (x *ClientInfo) GetPhoneNumber() string {
+	if x != nil {
+		return x.PhoneNumber
+	}
+	return ""
+}
+
+func (x *ClientInfo) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *ClientInfo) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *ClientInfo) GetLastOnlineAt() *timestamp.Timestamp {
+	if x != nil {
+		return x.LastOnlineAt
+	}
+	return nil
+}
+
+type SupportInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Fullname      string                 `protobuf:"bytes,2,opt,name=fullname,proto3" json:"fullname,omitempty"`
+	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	LastOnlineAt  *timestamp.Timestamp   `protobuf:"bytes,4,opt,name=last_online_at,json=lastOnlineAt,proto3" json:"last_online_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SupportInfo) Reset() {
+	*x = SupportInfo{}
+	mi := &file_chat_proto_conversation_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SupportInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SupportInfo) ProtoMessage() {}
+
+func (x *SupportInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_conversation_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SupportInfo.ProtoReflect.Descriptor instead.
+func (*SupportInfo) Descriptor() ([]byte, []int) {
+	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SupportInfo) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SupportInfo) GetFullname() string {
+	if x != nil {
+		return x.Fullname
+	}
+	return ""
+}
+
+func (x *SupportInfo) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *SupportInfo) GetLastOnlineAt() *timestamp.Timestamp {
+	if x != nil {
+		return x.LastOnlineAt
+	}
+	return nil
+}
+
+type ConversationDetailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Conversation  *Conversation          `protobuf:"bytes,1,opt,name=Conversation,proto3" json:"Conversation,omitempty"`
+	ClientInfo    *ClientInfo            `protobuf:"bytes,2,opt,name=client_info,json=clientInfo,proto3" json:"client_info,omitempty"`
+	SupportInfo   *SupportInfo           `protobuf:"bytes,3,opt,name=support_info,json=supportInfo,proto3" json:"support_info,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConversationDetailResponse) Reset() {
+	*x = ConversationDetailResponse{}
+	mi := &file_chat_proto_conversation_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConversationDetailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConversationDetailResponse) ProtoMessage() {}
+
+func (x *ConversationDetailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_conversation_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConversationDetailResponse.ProtoReflect.Descriptor instead.
+func (*ConversationDetailResponse) Descriptor() ([]byte, []int) {
+	return file_chat_proto_conversation_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ConversationDetailResponse) GetConversation() *Conversation {
+	if x != nil {
+		return x.Conversation
+	}
+	return nil
+}
+
+func (x *ConversationDetailResponse) GetClientInfo() *ClientInfo {
+	if x != nil {
+		return x.ClientInfo
+	}
+	return nil
+}
+
+func (x *ConversationDetailResponse) GetSupportInfo() *SupportInfo {
+	if x != nil {
+		return x.SupportInfo
+	}
+	return nil
+}
+
 var File_chat_proto_conversation_proto protoreflect.FileDescriptor
 
 const file_chat_proto_conversation_proto_rawDesc = "" +
@@ -810,7 +1066,27 @@ const file_chat_proto_conversation_proto_rawDesc = "" +
 	"\x17OpenConversationRequest\x12'\n" +
 	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\"C\n" +
 	"\x18CloseConversationRequest\x12'\n" +
-	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId*m\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\"D\n" +
+	"\x19ConversationDetailRequest\x12'\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\"\xcb\x01\n" +
+	"\n" +
+	"ClientInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
+	"\bfullname\x18\x02 \x01(\tR\bfullname\x12!\n" +
+	"\fphone_number\x18\x03 \x01(\tR\vphoneNumber\x12\x14\n" +
+	"\x05email\x18\x04 \x01(\tR\x05email\x12\x16\n" +
+	"\x06avatar\x18\x05 \x01(\tR\x06avatar\x12@\n" +
+	"\x0elast_online_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\flastOnlineAt\"\x93\x01\n" +
+	"\vSupportInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
+	"\bfullname\x18\x02 \x01(\tR\bfullname\x12\x16\n" +
+	"\x06avatar\x18\x03 \x01(\tR\x06avatar\x12@\n" +
+	"\x0elast_online_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\flastOnlineAt\"\xbd\x01\n" +
+	"\x1aConversationDetailResponse\x126\n" +
+	"\fConversation\x18\x01 \x01(\v2\x12.chat.ConversationR\fConversation\x121\n" +
+	"\vclient_info\x18\x02 \x01(\v2\x10.chat.ClientInfoR\n" +
+	"clientInfo\x124\n" +
+	"\fsupport_info\x18\x03 \x01(\v2\x11.chat.SupportInfoR\vsupportInfo*m\n" +
 	"\x06Status\x12\x16\n" +
 	"\x12STATUS_UNSPECIFIED\x10\x00\x12\x0e\n" +
 	"\n" +
@@ -827,13 +1103,14 @@ const file_chat_proto_conversation_proto_rawDesc = "" +
 	"\tTYPE_TEXT\x10\x01\x12\x0e\n" +
 	"\n" +
 	"TYPE_MEDIA\x10\x02\x12\x0f\n" +
-	"\vTYPE_SYSTEM\x10\x032\x95\x03\n" +
+	"\vTYPE_SYSTEM\x10\x032\xee\x03\n" +
 	"\x13ConversationService\x12T\n" +
 	"\x13ConversationNewList\x12\x1d.chat.ConversationListRequest\x1a\x1e.chat.ConversationListResponse\x12T\n" +
 	"\x13ConversationOwnList\x12\x1d.chat.ConversationListRequest\x1a\x1e.chat.ConversationListResponse\x12B\n" +
 	"\vChatHistory\x12\x18.chat.ChatHistoryRequest\x1a\x19.chat.ChatHistoryResponse\x12E\n" +
 	"\x10OpenConversation\x12\x1d.chat.OpenConversationRequest\x1a\x12.chat.Conversation\x12G\n" +
-	"\x11CloseConversation\x12\x1e.chat.CloseConversationRequest\x1a\x12.chat.ConversationB%Z#protobuf/chat/golang/conversationpbb\x06proto3"
+	"\x11CloseConversation\x12\x1e.chat.CloseConversationRequest\x1a\x12.chat.Conversation\x12W\n" +
+	"\x12ConversationDetail\x12\x1f.chat.ConversationDetailRequest\x1a .chat.ConversationDetailResponseB%Z#protobuf/chat/golang/conversationpbb\x06proto3"
 
 var (
 	file_chat_proto_conversation_proto_rawDescOnce sync.Once
@@ -848,50 +1125,61 @@ func file_chat_proto_conversation_proto_rawDescGZIP() []byte {
 }
 
 var file_chat_proto_conversation_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_chat_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_chat_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_chat_proto_conversation_proto_goTypes = []any{
-	(Status)(0),                      // 0: chat.Status
-	(SortDirection)(0),               // 1: chat.SortDirection
-	(MessageType)(0),                 // 2: chat.MessageType
-	(*Conversation)(nil),             // 3: chat.Conversation
-	(*ConversationListRequest)(nil),  // 4: chat.ConversationListRequest
-	(*ConversationListResponse)(nil), // 5: chat.ConversationListResponse
-	(*ChatHistoryRequest)(nil),       // 6: chat.ChatHistoryRequest
-	(*Message)(nil),                  // 7: chat.Message
-	(*ChatHistoryResponse)(nil),      // 8: chat.ChatHistoryResponse
-	(*OpenConversationRequest)(nil),  // 9: chat.OpenConversationRequest
-	(*CloseConversationRequest)(nil), // 10: chat.CloseConversationRequest
-	nil,                              // 11: chat.Message.MetadataEntry
-	(*timestamp.Timestamp)(nil),      // 12: google.protobuf.Timestamp
+	(Status)(0),                        // 0: chat.Status
+	(SortDirection)(0),                 // 1: chat.SortDirection
+	(MessageType)(0),                   // 2: chat.MessageType
+	(*Conversation)(nil),               // 3: chat.Conversation
+	(*ConversationListRequest)(nil),    // 4: chat.ConversationListRequest
+	(*ConversationListResponse)(nil),   // 5: chat.ConversationListResponse
+	(*ChatHistoryRequest)(nil),         // 6: chat.ChatHistoryRequest
+	(*Message)(nil),                    // 7: chat.Message
+	(*ChatHistoryResponse)(nil),        // 8: chat.ChatHistoryResponse
+	(*OpenConversationRequest)(nil),    // 9: chat.OpenConversationRequest
+	(*CloseConversationRequest)(nil),   // 10: chat.CloseConversationRequest
+	(*ConversationDetailRequest)(nil),  // 11: chat.ConversationDetailRequest
+	(*ClientInfo)(nil),                 // 12: chat.ClientInfo
+	(*SupportInfo)(nil),                // 13: chat.SupportInfo
+	(*ConversationDetailResponse)(nil), // 14: chat.ConversationDetailResponse
+	nil,                                // 15: chat.Message.MetadataEntry
+	(*timestamp.Timestamp)(nil),        // 16: google.protobuf.Timestamp
 }
 var file_chat_proto_conversation_proto_depIdxs = []int32{
 	0,  // 0: chat.Conversation.status:type_name -> chat.Status
-	12, // 1: chat.Conversation.created_at:type_name -> google.protobuf.Timestamp
-	12, // 2: chat.Conversation.updated_at:type_name -> google.protobuf.Timestamp
-	12, // 3: chat.Conversation.closed_at:type_name -> google.protobuf.Timestamp
+	16, // 1: chat.Conversation.created_at:type_name -> google.protobuf.Timestamp
+	16, // 2: chat.Conversation.updated_at:type_name -> google.protobuf.Timestamp
+	16, // 3: chat.Conversation.closed_at:type_name -> google.protobuf.Timestamp
 	1,  // 4: chat.ConversationListRequest.sort_direction:type_name -> chat.SortDirection
 	0,  // 5: chat.ConversationListRequest.statuses:type_name -> chat.Status
 	3,  // 6: chat.ConversationListResponse.conversations:type_name -> chat.Conversation
 	2,  // 7: chat.Message.message_type:type_name -> chat.MessageType
-	11, // 8: chat.Message.metadata:type_name -> chat.Message.MetadataEntry
-	12, // 9: chat.Message.created_at:type_name -> google.protobuf.Timestamp
-	12, // 10: chat.Message.read_at:type_name -> google.protobuf.Timestamp
+	15, // 8: chat.Message.metadata:type_name -> chat.Message.MetadataEntry
+	16, // 9: chat.Message.created_at:type_name -> google.protobuf.Timestamp
+	16, // 10: chat.Message.read_at:type_name -> google.protobuf.Timestamp
 	7,  // 11: chat.ChatHistoryResponse.results:type_name -> chat.Message
-	4,  // 12: chat.ConversationService.ConversationNewList:input_type -> chat.ConversationListRequest
-	4,  // 13: chat.ConversationService.ConversationOwnList:input_type -> chat.ConversationListRequest
-	6,  // 14: chat.ConversationService.ChatHistory:input_type -> chat.ChatHistoryRequest
-	9,  // 15: chat.ConversationService.OpenConversation:input_type -> chat.OpenConversationRequest
-	10, // 16: chat.ConversationService.CloseConversation:input_type -> chat.CloseConversationRequest
-	5,  // 17: chat.ConversationService.ConversationNewList:output_type -> chat.ConversationListResponse
-	5,  // 18: chat.ConversationService.ConversationOwnList:output_type -> chat.ConversationListResponse
-	8,  // 19: chat.ConversationService.ChatHistory:output_type -> chat.ChatHistoryResponse
-	3,  // 20: chat.ConversationService.OpenConversation:output_type -> chat.Conversation
-	3,  // 21: chat.ConversationService.CloseConversation:output_type -> chat.Conversation
-	17, // [17:22] is the sub-list for method output_type
-	12, // [12:17] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	16, // 12: chat.ClientInfo.last_online_at:type_name -> google.protobuf.Timestamp
+	16, // 13: chat.SupportInfo.last_online_at:type_name -> google.protobuf.Timestamp
+	3,  // 14: chat.ConversationDetailResponse.Conversation:type_name -> chat.Conversation
+	12, // 15: chat.ConversationDetailResponse.client_info:type_name -> chat.ClientInfo
+	13, // 16: chat.ConversationDetailResponse.support_info:type_name -> chat.SupportInfo
+	4,  // 17: chat.ConversationService.ConversationNewList:input_type -> chat.ConversationListRequest
+	4,  // 18: chat.ConversationService.ConversationOwnList:input_type -> chat.ConversationListRequest
+	6,  // 19: chat.ConversationService.ChatHistory:input_type -> chat.ChatHistoryRequest
+	9,  // 20: chat.ConversationService.OpenConversation:input_type -> chat.OpenConversationRequest
+	10, // 21: chat.ConversationService.CloseConversation:input_type -> chat.CloseConversationRequest
+	11, // 22: chat.ConversationService.ConversationDetail:input_type -> chat.ConversationDetailRequest
+	5,  // 23: chat.ConversationService.ConversationNewList:output_type -> chat.ConversationListResponse
+	5,  // 24: chat.ConversationService.ConversationOwnList:output_type -> chat.ConversationListResponse
+	8,  // 25: chat.ConversationService.ChatHistory:output_type -> chat.ChatHistoryResponse
+	3,  // 26: chat.ConversationService.OpenConversation:output_type -> chat.Conversation
+	3,  // 27: chat.ConversationService.CloseConversation:output_type -> chat.Conversation
+	14, // 28: chat.ConversationService.ConversationDetail:output_type -> chat.ConversationDetailResponse
+	23, // [23:29] is the sub-list for method output_type
+	17, // [17:23] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_chat_proto_conversation_proto_init() }
@@ -905,7 +1193,7 @@ func file_chat_proto_conversation_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_chat_proto_conversation_proto_rawDesc), len(file_chat_proto_conversation_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   9,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

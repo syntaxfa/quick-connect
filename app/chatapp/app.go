@@ -272,6 +272,7 @@ func setupRoleManager() *rolemanager.RoleManager {
 		"/chat.ConversationService/ChatHistory":         {types.RoleSupport, types.RoleSuperUser, types.RoleClient, types.RoleGuest},
 		"/chat.ConversationService/OpenConversation":    {types.RoleSupport},
 		"/chat.ConversationService/CloseConversation":   {types.RoleSupport},
+		"/chat.ConversationService/ConversationDetail":  {types.RoleSupport, types.RoleSuperUser, types.RoleClient, types.RoleGuest},
 	}
 
 	return rolemanager.NewRoleManager(methodRoles)
