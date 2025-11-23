@@ -42,3 +42,8 @@ func (ca *ConversationAdapter) CloseConversation(ctx context.Context, req *conve
 	opts ...grpc.CallOption) (*conversationpb.Conversation, error) {
 	return ca.client.CloseConversation(ctx, req, opts...)
 }
+
+func (ca *ConversationAdapter) ConversationDetail(ctx context.Context, req *conversationpb.ConversationDetailRequest,
+	opts ...grpc.CallOption) (*conversationpb.ConversationDetailResponse, error) {
+	return ca.client.ConversationDetail(ctx, req, opts...)
+}

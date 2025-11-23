@@ -98,4 +98,14 @@ func ChatConversation() {
 	}
 
 	fmt.Printf("%+v\n", closeConResp)
+
+	fmt.Println("--------------")
+	fmt.Println("conversation detail:")
+
+	conDetail, conDetailErr := conAd.ConversationDetail(ctxWithValue, &conversationpb.ConversationDetailRequest{ConversationId: "01KA5SEA18W3KXMGN1PDKJYKHP"})
+	if conDetailErr != nil {
+		errorhandler.HandleGRPCError(conDetailErr, logger)
+	}
+
+	fmt.Printf("%+v\n", conDetail)
 }

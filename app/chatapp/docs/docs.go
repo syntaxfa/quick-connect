@@ -252,6 +252,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/conversations/{conversationID}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "close conversation for chatting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "ConversationDetail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "conversation ID",
+                        "name": "conversationID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/conversations/{conversationID}/close": {
             "get": {
                 "security": [

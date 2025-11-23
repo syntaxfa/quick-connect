@@ -25,4 +25,5 @@ type Config struct {
 	Delivery           http.Config         `koanf:"delivery"`
 	InternalHTTPServer httpserver.Config   `koanf:"internal_http_server"`
 	APIKey             string              `koanf:"api_key"`
+	GRPCServerInternal grpcserver.Config   `koanf:"grpc_server_internal"`
 }

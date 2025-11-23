@@ -71,3 +71,18 @@ func (h Handler) CloseConversation(ctx context.Context, req *conversationpb.Clos
 
 	return convertConversationToPB(resp), nil
 }
+
+func (h Handler) ConversationDetail(ctx context.Context, req *conversationpb.ConversationDetailRequest) (
+	*conversationpb.ConversationDetailResponse, error) {
+	claims, ucErr := grpcauth.ExtractUserClaimsFromContext(ctx)
+	if ucErr != nil {
+		return nil, status.Error(codes.Unauthenticated, ucErr.Error())
+	}
+
+	resp, sErr := h.chatSvc.GetConversationByID(ctx, types.ID(req.GetConversationId()), claims.UserID, claims.Roles)
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, h.t, h.logger)
+	}
+
+	return convertConversationDetailResponseToPB(resp), nil
+}
