@@ -115,6 +115,271 @@
       filters.style.display = 'none';
     }
   }
+
+  /**
+   * Support Chat Manager
+   * Manages WebSocket connection and interaction with the chat modal
+   */
+  const SupportChat = {
+    ws: null,
+    token: "{{.WebSocketToken}}", // Get token from server
+    url: "{{.ChatWsURL}}",       // Get URL from server
+    activeConversationId: null,
+    reconnectInterval: 3000,
+    heartbeatInterval: null,
+
+    init: function() {
+      if (!this.token) {
+        console.error("WebSocket Token is missing.");
+        return;
+      }
+      this.connect();
+
+      // Listen for chat modal opening (triggered by HTMX)
+      document.body.addEventListener('htmx:afterSwap', (evt) => {
+        if (evt.target.id === 'modal-container' || evt.target.tagName === 'BODY') {
+          const modal = document.querySelector('.chat-modal');
+          if (modal) {
+            this.initModalListeners(modal);
+          }
+        }
+      });
+    },
+
+    connect: function() {
+      if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) return;
+
+      console.log("Connecting to Chat WS:", this.url);
+
+      // According to pkg/auth/middleware.go, the token must be in Sec-WebSocket-Protocol
+      try {
+        this.ws = new WebSocket(this.url, [this.token]);
+      } catch (e) {
+        console.error("WS Create Error:", e);
+        return;
+      }
+
+      this.ws.onopen = () => {
+        console.log("✅ Chat WebSocket Connected");
+        this.showStatus("Connected", "success");
+        this.startHeartbeat();
+      };
+
+      this.ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          this.handleIncomingMessage(msg);
+        } catch (e) {
+          console.error("WS Parse Error:", e);
+        }
+      };
+
+      this.ws.onclose = () => {
+        console.warn("Chat WebSocket Disconnected");
+        this.showStatus("Disconnected. Reconnecting...", "error");
+        this.stopHeartbeat();
+        setTimeout(() => this.connect(), this.reconnectInterval);
+      };
+
+      this.ws.onerror = (err) => {
+        console.error("WebSocket Error:", err);
+      };
+    },
+
+    // Set up listeners when the chat modal opens
+    initModalListeners: function(modal) {
+      // Extract conversation ID from buttons or modal elements
+      // Assuming we have a hidden input or data attribute in the modal, or reading from button URLs
+      // Simple way: Look at the Close or Start button which has the ID
+      const closeBtn = modal.querySelector('button[hx-post*="/close"]');
+      const startBtn = modal.querySelector('button[hx-post*="/start"]');
+
+      let convId = null;
+      if (closeBtn) {
+        convId = closeBtn.getAttribute('hx-post').split('/')[3]; // /conversation/{ID}/close
+      } else if (startBtn) {
+        convId = startBtn.getAttribute('hx-post').split('/')[3];
+      }
+
+      if (convId) {
+        this.activeConversationId = convId;
+        this.scrollToBottom();
+
+        const input = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('chat-send-btn');
+
+        if (input && sendBtn) {
+          input.disabled = false; // Enable input if the chat belongs to us
+          input.focus();
+
+          // Handle typing
+          input.oninput = () => this.sendTyping(convId);
+
+          // Handle Enter key
+          input.onkeydown = (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              this.sendMessage(convId, input.value);
+              input.value = '';
+            }
+          };
+
+          // Handle send button click
+          sendBtn.onclick = () => {
+            this.sendMessage(convId, input.value);
+            input.value = '';
+          };
+        }
+      }
+    },
+
+    sendMessage: function(conversationId, content) {
+      if (!content.trim() || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
+      const tempId = `local_${Date.now()}`;
+
+      // Message structure according to app/chatapp/service/entity.go
+      const payload = {
+        type: 'text',
+        content: content,
+        conversation_id: conversationId,
+        client_message_id: tempId
+      };
+
+      this.ws.send(JSON.stringify(payload));
+
+      // Optimistically add to UI
+      this.appendMessageToUI({
+        content: content,
+        sender_id: "{{.User.ID}}", // Current User ID (Support Agent)
+        created_at: new Date().toISOString(),
+        id: tempId
+      }, true); // true = our own message
+    },
+
+    handleIncomingMessage: function(msg) {
+      // If message is text
+      if (msg.type === 'text') {
+        // If related to the currently open conversation
+        if (msg.payload.conversation_id === this.activeConversationId) {
+
+          // Check that it's not our own message (since we already added it)
+          // Unless we want to update the status (tick)
+          const currentUserId = "{{.User.ID}}";
+          const isOwn = msg.payload.sender_id === currentUserId;
+
+          if (!isOwn) {
+            this.appendMessageToUI(msg.payload, false);
+          }
+        } else {
+          // If chat is not open, we can show a notification or update the list
+          console.log("New message in another conversation:", msg.payload.conversation_id);
+          // TODO: Update unread badge in list using HTMX or DOM manipulation
+        }
+      }
+      // Handle typing
+      else if (msg.type === 'system') {
+        this.handleSystemMessage(msg);
+      }
+    },
+
+    handleSystemMessage: function(msg) {
+      if (msg.payload.conversation_id !== this.activeConversationId) return;
+
+      const typingIndicator = document.getElementById('typing-indicator');
+      if (!typingIndicator) return;
+
+      if (msg.sub_type === 'typing_started') {
+        typingIndicator.style.display = 'flex';
+        this.scrollToBottom();
+      } else if (msg.sub_type === 'typing_stopped') {
+        typingIndicator.style.display = 'none';
+      }
+    },
+
+    appendMessageToUI: function(msg, isOwn) {
+      const container = document.getElementById('chat-messages-container');
+      if (!container) return;
+
+      const div = document.createElement('div');
+      // Classes must match your CSS file
+      div.className = `message-bubble ${isOwn ? 'mine' : 'theirs'}`;
+      div.style.cssText = isOwn
+              ? "align-self: flex-end; background: #06b6d4; color: white; border-bottom-right-radius: 2px; max-width: 70%; padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 0.5rem;"
+              : "align-self: flex-start; background: rgba(255, 255, 255, 0.1); color: #e2e8f0; border-bottom-left-radius: 2px; max-width: 70%; padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 0.5rem;";
+
+      div.innerHTML = `
+            ${this.escapeHtml(msg.content)}
+            <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">
+                ${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+            </div>
+        `;
+
+      // Since flex-direction is column-reverse, should we use prepend to make it appear at the bottom?
+      // No, I saw in previous codes it is column-reverse.
+      // If it is column-reverse, the first element in the code is the lowest element in the view.
+      // So the new message (which should be at the bottom) must be prepended (added to the start of the container).
+      container.prepend(div);
+    },
+
+    sendTyping: function(convId) {
+      // Implement Debounce for typing
+      // ... (Similar to SDK)
+    },
+
+    startHeartbeat: function() {
+      this.stopHeartbeat();
+      this.heartbeatInterval = setInterval(() => {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          // Send ping to keep connection open (if needed)
+          // Go Gorilla servers usually handle Ping/Pong themselves
+        }
+      }, 30000);
+    },
+
+    stopHeartbeat: function() {
+      if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
+    },
+
+    scrollToBottom: function() {
+      const container = document.getElementById('chat-messages-container');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+        // For column-reverse it might need to be 0 depending on implementation
+      }
+    },
+
+    showStatus: function(msg, type) {
+      const el = document.getElementById('ws-status');
+      if(el) {
+        el.innerHTML = `<span style="background: ${type === 'success' ? 'green' : 'red'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${msg}</span>`;
+        setTimeout(() => el.innerHTML = '', 3000);
+      }
+    },
+
+    escapeHtml: function(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  };
+
+  // Initial setup
+  document.addEventListener('DOMContentLoaded', () => {
+    SupportChat.init();
+  });
+
+  // Tab functions (from before)
+  function switchSupportTab(selectedTab) {
+    document.querySelectorAll('.support-tab').forEach(tab => tab.classList.remove('active'));
+    selectedTab.classList.add('active');
+    const filters = document.getElementById('my-conversations-filters');
+    if (selectedTab.id === 'my-conversations-tab-btn') {
+      filters.style.display = 'flex';
+    } else {
+      filters.style.display = 'none';
+    }
+  }
 </script>
 
 {{end}}

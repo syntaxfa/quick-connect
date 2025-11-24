@@ -18,12 +18,13 @@
                     <span class="conv-status-badge status-{{.Conversation.Status}}" style="font-size: 0.75rem;">
                         {{.Conversation.Status}}
                     </span>
+                    <span id="typing-indicator" style="display: none; font-size: 0.7rem; color: #94a3b8; margin-left: 8px;">is typing...</span>
                 </div>
             </div>
             <button class="modal-close-btn" onclick="removeModal()">×</button>
         </div>
 
-        <div class="modal-body chat-messages" id="chat-messages-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 1rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.6);">
+        <div class="modal-body chat-messages" id="chat-messages-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 0.5rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.6);">
 
             {{range .Messages}}
             <div class="message-bubble" style="
@@ -47,13 +48,10 @@
                 {{.Content}}
             </div>
             {{else}}
-            <div style="text-align: center; color: #94a3b8; margin-top: auto; margin-bottom: auto;">
-                No messages yet.
-            </div>
             {{end}}
         </div>
 
-        <div class="modal-footer" style="background: rgba(15, 23, 42, 0.9);">
+        <div class="modal-footer" style="background: rgba(15, 23, 42, 0.9); padding: 1rem;">
 
             {{if .IsUnassigned}}
             <div style="width: 100%; text-align: center;">
@@ -73,13 +71,20 @@
             </div>
 
             {{else if .IsMyChat}}
-            <div style="display: flex; gap: 0.5rem; width: 100%;">
+            <div style="display: flex; gap: 0.5rem; width: 100%; align-items: center;">
                 <input type="text"
+                       id="chat-input"
                        placeholder="Type a message..."
-                       style="flex: 1; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;"
-                       disabled title="Sending not implemented yet">
+                       autocomplete="off"
+                       style="flex: 1; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; outline: none;"
+                >
+
+                <button id="chat-send-btn" style="background: none; border: none; color: #06b6d4; cursor: pointer; padding: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
 
                 <button class="btn-danger"
+                        style="padding: 0.5rem 1rem; font-size: 0.8rem;"
                         hx-post="/support/conversation/{{.Conversation.ID}}/close"
                         hx-target="#modal-backdrop"
                         hx-swap="outerHTML"
