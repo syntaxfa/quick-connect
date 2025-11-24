@@ -44,7 +44,7 @@
         hx-target="#support-list-container"
         hx-swap="innerHTML"
         hx-trigger="submit, change from:#conv-sort-select, change from:.status-filter-checkbox, click from:#my-conversations-tab-btn" >
-    >
+
     <select class="sort-select" name="sort_direction" id="conv-sort-select">
       <option value="2" selected>Newest First (DESC)</option>
       <option value="1">Oldest First (ASC)</option>
@@ -97,17 +97,403 @@
     </div>
   </div>
 
+  <div id="ws-status" style="position: fixed; bottom: 10px; left: 10px; z-index: 9999;"></div>
+
 </div>
 
 <script>
-  function switchSupportTab(selectedTab) {
-    // 1. Switch active class
-    document.querySelectorAll('.support-tab').forEach(tab => {
-      tab.classList.remove('active');
-    });
-    selectedTab.classList.add('active');
+  /**
+   * Support Chat Manager
+   * Updated to match Client SDK logic (Heartbeat, Typing Debounce, etc.)
+   */
+  window.SupportChat = {
+    ws: null,
+    token: "{{.WebSocketToken}}",
+    url: "{{.ChatWsURL}}",
+    activeConversationId: null,
+    reconnectInterval: 3000,
 
-    // 2. Show/hide filters based on the clicked tab's ID
+    // Heartbeat Logic
+    heartbeatInterval: null,
+
+    // Typing Logic
+    lastTypingSent: 0,
+    typingTimeout: null, // For clearing the UI "is typing..." logic
+
+    // History State
+    nextCursor: null,
+    hasMore: false,
+    isLoadingHistory: false,
+
+    init: function() {
+      if (!this.token) {
+        console.error("WebSocket Token is missing.");
+        return;
+      }
+
+      if (this.ws) {
+        this.ws.close();
+      }
+
+      this.connect();
+
+      document.body.addEventListener('htmx:afterSwap', (evt) => {
+        const targetId = evt.target.id;
+        const targetTag = evt.target.tagName;
+
+        if (targetId === 'modal-container' || targetId === 'modal-backdrop' || targetTag === 'BODY') {
+          const modal = document.querySelector('.chat-modal');
+          if (modal) {
+            this.initModalListeners(modal);
+          }
+        }
+      });
+    },
+
+    connect: function() {
+      if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) return;
+
+      console.log("Connecting to Chat WS:", this.url);
+
+      try {
+        this.ws = new WebSocket(this.url, [this.token]);
+      } catch (e) {
+        console.error("WS Create Error:", e);
+        return;
+      }
+
+      this.ws.onopen = () => {
+        console.log("✅ Chat WebSocket Connected");
+        this.showStatus("Connected", "success");
+        // Start sending heartbeat immediately upon connection
+        this.startHeartbeat();
+      };
+
+      this.ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          this.handleIncomingMessage(msg);
+        } catch (e) {
+          console.error("WS Parse Error:", e);
+        }
+      };
+
+      this.ws.onclose = () => {
+        console.warn("Chat WebSocket Disconnected");
+        this.showStatus("Disconnected. Reconnecting...", "error");
+        this.stopHeartbeat();
+        setTimeout(() => this.connect(), this.reconnectInterval);
+      };
+
+      this.ws.onerror = (err) => {
+        console.error("WebSocket Error:", err);
+      };
+    },
+
+    initModalListeners: function(modal) {
+      const closeBtn = modal.querySelector('button[hx-post*="/close"]');
+      const startBtn = modal.querySelector('button[hx-post*="/start"]');
+      let convId = null;
+
+      // Extract Conversation ID
+      if (closeBtn) {
+        convId = closeBtn.getAttribute('hx-post').split('/')[3];
+      } else if (startBtn) {
+        convId = startBtn.getAttribute('hx-post').split('/')[3];
+      }
+
+      const container = document.getElementById('chat-messages-container');
+      if (container) {
+        container.style.overflowAnchor = 'none';
+        const newCursor = container.getAttribute('data-next-cursor');
+        if (newCursor) this.nextCursor = newCursor;
+        this.hasMore = container.getAttribute('data-has-more') === 'true';
+        this.isLoadingHistory = false;
+
+        // Convert timestamps
+        modal.querySelectorAll('.msg-time-server').forEach(el => {
+          const seconds = parseInt(el.getAttribute('data-ts'));
+          if (seconds) {
+            try {
+              const date = new Date(seconds * 1000);
+              el.textContent = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+              el.classList.remove('msg-time-server');
+            } catch(e) {}
+          }
+        });
+
+        // Scroll Logic
+        container.onscroll = () => {
+          const distanceFromBottom = Math.abs(container.scrollTop);
+          const maxScroll = container.scrollHeight - container.clientHeight;
+          if (distanceFromBottom >= (maxScroll - 50) && this.hasMore && !this.isLoadingHistory) {
+            this.fetchHistory(convId);
+          }
+        };
+      }
+
+      if (convId) {
+        this.activeConversationId = convId;
+        // Trigger immediate heartbeat update for this conversation
+        this.startHeartbeat();
+
+        const input = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('chat-send-btn');
+
+        if (input && sendBtn) {
+          input.disabled = false;
+          if (document.activeElement !== input) {
+            input.focus();
+          }
+
+          // Updated: Throttled Typing Handler
+          input.oninput = () => this.handleTypingInput(convId);
+
+          input.onkeydown = (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              this.sendMessage(convId, input.value);
+              input.value = '';
+            }
+          };
+
+          sendBtn.onclick = () => {
+            this.sendMessage(convId, input.value);
+            input.value = '';
+          };
+        }
+      }
+    },
+
+    // --- New: Heartbeat Logic (Every 50s) ---
+    startHeartbeat: function() {
+      this.stopHeartbeat(); // Clear existing
+
+      const sendPing = () => {
+        // Only send if connected and we have an active conversation open (or generally online)
+        // Adjust logic if you want to be online globally regardless of open modal
+        if (this.ws && this.ws.readyState === WebSocket.OPEN && this.activeConversationId) {
+          this.ws.send(JSON.stringify({
+            type: 'system',
+            sub_type: 'online',
+            conversation_id: this.activeConversationId
+          }));
+        }
+      };
+
+      // Send immediately
+      sendPing();
+
+      // Then every 50 seconds
+      this.heartbeatInterval = setInterval(sendPing, 50000);
+    },
+
+    stopHeartbeat: function() {
+      if (this.heartbeatInterval) {
+        clearInterval(this.heartbeatInterval);
+        this.heartbeatInterval = null;
+      }
+    },
+
+    // --- New: Typing Logic (Sending) ---
+    handleTypingInput: function(convId) {
+      const now = Date.now();
+      // Throttle: Send "typing_started" only once every 5 seconds
+      if (now - this.lastTypingSent > 5000) {
+        this.sendSystemMessage(convId, 'typing_started');
+        this.lastTypingSent = now;
+      }
+    },
+
+    sendTypingStopped: function(convId) {
+      this.sendSystemMessage(convId, 'typing_stopped');
+      this.lastTypingSent = 0;
+    },
+
+    sendSystemMessage: function(convId, subType) {
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+      this.ws.send(JSON.stringify({
+        type: 'system',
+        sub_type: subType,
+        conversation_id: convId
+      }));
+    },
+    // ------------------------------------
+
+    fetchHistory: function(conversationId) {
+      if (this.isLoadingHistory || !this.hasMore || !this.nextCursor) return;
+      this.isLoadingHistory = true;
+
+      const container = document.getElementById('chat-messages-container');
+      const previousScrollHeight = container.scrollHeight;
+      const previousScrollTop = container.scrollTop;
+
+      fetch(`/support/conversation/${conversationId}/history?cursor=${this.nextCursor}`)
+              .then(response => response.json())
+              .then(data => {
+                if (data.messages && data.messages.length > 0) {
+                  this.nextCursor = data.next_cursor;
+                  this.hasMore = data.has_more;
+
+                  data.messages.forEach(msg => {
+                    const currentUserId = "{{.User.ID}}";
+                    const isOwn = msg.sender_id === currentUserId;
+                    this.appendMessageToUI({
+                      content: msg.content,
+                      sender_id: msg.sender_id,
+                      created_at: msg.created_at,
+                      id: msg.id
+                    }, isOwn, true);
+                  });
+
+                  const heightDifference = container.scrollHeight - previousScrollHeight;
+                  if (previousScrollTop <= 0) {
+                    container.scrollTop = previousScrollTop;
+                  } else {
+                    container.scrollTop = previousScrollTop + heightDifference;
+                  }
+                } else {
+                  this.hasMore = false;
+                }
+              })
+              .catch(err => console.error("Fetch History Error:", err))
+              .finally(() => {
+                setTimeout(() => { this.isLoadingHistory = false; }, 100);
+              });
+    },
+
+    sendMessage: function(conversationId, content) {
+      if (!content.trim() || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
+      const tempId = `local_${Date.now()}`;
+      const payload = {
+        type: 'text',
+        content: content,
+        conversation_id: conversationId,
+        client_message_id: tempId
+      };
+
+      this.ws.send(JSON.stringify(payload));
+
+      this.appendMessageToUI({
+        content: content,
+        sender_id: "{{.User.ID}}",
+        created_at: new Date().toISOString(),
+        id: tempId
+      }, true, false);
+
+      // Stop typing indicator when message is sent
+      this.sendTypingStopped(conversationId);
+    },
+
+    handleIncomingMessage: function(msg) {
+      if (msg.type === 'text') {
+        if (msg.payload.conversation_id === this.activeConversationId) {
+          const currentUserId = "{{.User.ID}}";
+          const isOwn = msg.payload.sender_id === currentUserId;
+
+          // If it's the other person, stop their typing indicator immediately
+          if (!isOwn) {
+            this.handleSystemMessage({
+              type: 'system',
+              sub_type: 'typing_stopped',
+              payload: { conversation_id: this.activeConversationId }
+            });
+            this.appendMessageToUI(msg.payload, false, false);
+          }
+        }
+      } else if (msg.type === 'system') {
+        this.handleSystemMessage(msg);
+      }
+    },
+
+    // Updated: System Message Handling with Auto-Hide
+    handleSystemMessage: function(msg) {
+      if (msg.payload.conversation_id !== this.activeConversationId) return;
+
+      const typingIndicator = document.getElementById('typing-indicator');
+      const statusBadge = document.querySelector('.conv-status-badge'); // For Online/Offline updates if needed
+
+      if (!typingIndicator) return;
+
+      if (msg.sub_type === 'typing_started') {
+        typingIndicator.style.display = 'inline-block';
+        typingIndicator.textContent = 'is typing...';
+
+        // Clear existing timeout
+        if (this.typingTimeout) clearTimeout(this.typingTimeout);
+
+        // Auto-hide after 6 seconds (fallback in case stop packet is lost)
+        this.typingTimeout = setTimeout(() => {
+          typingIndicator.style.display = 'none';
+        }, 6000);
+
+      } else if (msg.sub_type === 'typing_stopped') {
+        typingIndicator.style.display = 'none';
+        if (this.typingTimeout) clearTimeout(this.typingTimeout);
+
+      } else if (msg.sub_type === 'online') {
+        // You can update UI here to show "Client Online"
+        // console.log("Client is sending heartbeat");
+      }
+    },
+
+    appendMessageToUI: function(msg, isOwn, isHistory) {
+      const container = document.getElementById('chat-messages-container');
+      if (!container) return;
+
+      const div = document.createElement('div');
+      div.className = `message-bubble ${isOwn ? 'mine' : 'theirs'}`;
+      div.style.cssText = isOwn
+              ? "align-self: flex-end; background: #06b6d4; color: white; border-bottom-right-radius: 2px; max-width: 70%; padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 0.5rem;"
+              : "align-self: flex-start; background: rgba(255, 255, 255, 0.1); color: #e2e8f0; border-bottom-left-radius: 2px; max-width: 70%; padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 0.5rem;";
+
+      let timeStr = "";
+      try {
+        timeStr = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      } catch(e) {}
+
+      div.innerHTML = `
+            ${this.escapeHtml(msg.content)}
+            <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${timeStr}</div>
+        `;
+
+      if (isHistory) {
+        container.appendChild(div);
+      } else {
+        container.prepend(div);
+        if (Math.abs(container.scrollTop) < 50) {
+          container.scrollTop = 0;
+        }
+      }
+    },
+
+    showStatus: function(msg, type) {
+      const el = document.getElementById('ws-status');
+      if(el) {
+        el.innerHTML = `<span style="background: ${type === 'success' ? 'green' : 'red'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${msg}</span>`;
+        setTimeout(() => el.innerHTML = '', 3000);
+      }
+    },
+
+    escapeHtml: function(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  };
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    window.SupportChat.init();
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      window.SupportChat.init();
+    });
+  }
+
+  function switchSupportTab(selectedTab) {
+    document.querySelectorAll('.support-tab').forEach(tab => tab.classList.remove('active'));
+    selectedTab.classList.add('active');
     const filters = document.getElementById('my-conversations-filters');
     if (selectedTab.id === 'my-conversations-tab-btn') {
       filters.style.display = 'flex';

@@ -17,26 +17,29 @@ func (h Handler) ShowSupportService(c echo.Context) error {
 	ctx := grpcContext(c)
 	user, _ := getUserFromContext(c)
 
-	// Make a light request just to get the total count for the "New" stat card
 	listReq := &conversationpb.ConversationListRequest{
 		CurrentPage: 1,
-		PageSize:    1, // We only need the total count.
+		PageSize:    1,
 	}
-
 	listResp, err := h.conversationAd.ConversationNewList(ctx, listReq)
 	totalNew := uint64(0)
 	if err != nil {
-		// Don't fail the whole page, just log it and render with 0.
 		h.logger.Error("Failed to get new conversation count for stats", "error", err)
 	} else {
 		totalNew = listResp.GetTotalNumber()
 	}
 
+	accessToken, _ := getAccessTokenFromCookie(c, h.logger)
+
+	chatWsURL := "ws://localhost:2530/chats/supports"
+
 	data := map[string]interface{}{
 		"TotalNewConversations": totalNew,
 		"TemplateName":          "support_page",
 		"User":                  user,
-		"AllStatuses":           GetAllConversationStatuses(), // For the filter dropdown.
+		"AllStatuses":           GetAllConversationStatuses(),
+		"WebSocketToken":        accessToken,
+		"ChatWsURL":             chatWsURL,
 	}
 
 	if isHTMX(c) {
