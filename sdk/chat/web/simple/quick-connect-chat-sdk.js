@@ -1,6 +1,6 @@
 /**
  * Quick Connect Chat SDK
- * Version: 1.7.0 (Added Infinite Scroll / Pagination)
+ * Version: 1.8.6 (Feature: Client Heartbeat Sending)
  */
 
 (function(window, document) {
@@ -35,7 +35,13 @@
             historyLoaded: false,
             nextCursor: null,
             hasMore: false,
-            isLoadingHistory: false
+            isLoadingHistory: false,
+            // Agent State
+            agentStatusText: 'آنلاین',
+            agentIsOnline: true,
+            onlineTimeout: null,
+            // Client Heartbeat
+            heartbeatInterval: null // New: For sending client heartbeat
         },
 
         // Initialize SDK
@@ -132,7 +138,7 @@
           border-radius: 50%;
           font-size: 12px;
           font-weight: bold;
-          display: flex; /* Managed by JS logic now */
+          display: flex;
           align-items: center;
           justify-content: center;
           animation: qc-bounce 1s infinite;
@@ -197,17 +203,26 @@
           justify-content: center;
           position: relative;
           box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          overflow: hidden;
+        }
+
+        #qc-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
         }
 
         #qc-status-dot {
           position: absolute;
-          bottom: 0;
-          right: 0;
+          bottom: 2px;
+          right: 2px;
           width: 13px;
           height: 13px;
           background: #10b981;
           border: 2px solid white;
           border-radius: 50%;
+          z-index: 2;
         }
 
         #qc-status-dot.offline { background: #6b7280; }
@@ -568,13 +583,14 @@
           <div id="qc-header">
             <div id="qc-header-info">
               <div id="qc-avatar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2">
+                <img id="qc-avatar-img" src="" alt="Support Avatar" style="display: none;">
+                <svg id="qc-avatar-svg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
                 <span id="qc-status-dot"></span>
               </div>
               <div id="qc-header-text">
-                <h3>پشتیبانی آنلاین</h3>
+                <h3 id="qc-header-title">پشتیبانی آنلاین</h3>
                 <p id="qc-status-text">در حال اتصال...</p>
               </div>
             </div>
@@ -752,6 +768,70 @@
                     this.state.conversationId = data.id;
                     localStorage.setItem('QC_CONVERSATION_ID', data.id);
 
+                    // ============================================
+                    // UPDATE HEADER INFO (NAME / AVATAR / STATUS)
+                    // ============================================
+                    const headerTitle = document.getElementById('qc-header-title');
+                    const avatarImg = document.getElementById('qc-avatar-img');
+                    const avatarSvg = document.getElementById('qc-avatar-svg');
+
+                    const supportInfo = data.support_info || {};
+
+                    // 1. Check Name
+                    if (data.assigned_support_id && supportInfo.fullname) {
+                        headerTitle.textContent = supportInfo.fullname;
+                    } else {
+                        headerTitle.textContent = 'پشتیبانی آنلاین';
+                    }
+
+                    // 2. Check Avatar
+                    if (supportInfo.avatar && supportInfo.avatar.trim() !== "") {
+                        avatarImg.src = supportInfo.avatar;
+                        avatarImg.style.display = 'block';
+                        avatarSvg.style.display = 'none';
+                    } else {
+                        avatarImg.style.display = 'none';
+                        avatarSvg.style.display = 'block';
+                    }
+
+                    // 3. Store Status in State
+                    if (supportInfo.last_online_at) {
+                        try {
+                            const lastSeenDate = new Date(supportInfo.last_online_at);
+                            if (isNaN(lastSeenDate.getTime())) throw new Error('Invalid Date');
+
+                            const now = new Date();
+                            const diffInMinutes = (now - lastSeenDate) / 1000 / 60;
+
+                            // If seen within last 5 minutes, consider them ONLINE
+                            if (diffInMinutes < 5 && diffInMinutes >= 0) {
+                                this.state.agentStatusText = 'آنلاین';
+                                this.state.agentIsOnline = true;
+                            } else {
+                                // Format: شنبه ۲۹ مهر ساعت ۱۱:۳۰
+                                const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+                                const dateStr = lastSeenDate.toLocaleDateString('fa-IR', dateOptions);
+
+                                const timeOptions = { hour: '2-digit', minute: '2-digit' };
+                                const timeStr = lastSeenDate.toLocaleTimeString('fa-IR', timeOptions);
+
+                                this.state.agentStatusText = `${dateStr} ساعت ${timeStr}`;
+                                this.state.agentIsOnline = false;
+                            }
+                        } catch (e) {
+                            this.state.agentStatusText = 'آنلاین';
+                            this.state.agentIsOnline = true;
+                        }
+                    } else {
+                        this.state.agentStatusText = 'آنلاین';
+                        this.state.agentIsOnline = true;
+                    }
+
+                    // Force UI Update with calculated values
+                    this.updateConnectionStatus();
+                    // ============================================
+
+
                     // If chat window is already open but history not loaded, load it
                     if (this.state.isOpen && !this.state.historyLoaded) {
                         this.fetchChatHistory();
@@ -884,6 +964,11 @@
             this.state.ws.onopen = () => {
                 this.state.isConnected = true;
                 this.updateConnectionStatus();
+                // ============================================
+                // ADDED: Start sending heartbeat when connected
+                // ============================================
+                this.startHeartbeat();
+
                 if(this.state.messages.length === 0 && this.state.historyLoaded) {
                     this.addSystemMessage('به چت پشتیبانی خوش آمدید! 👋');
                 }
@@ -892,6 +977,10 @@
             this.state.ws.onclose = () => {
                 this.state.isConnected = false;
                 this.updateConnectionStatus();
+                // ============================================
+                // ADDED: Stop heartbeat when disconnected
+                // ============================================
+                this.stopHeartbeat();
                 setTimeout(() => this.connectWebSocket(), this.state.reconnectInterval);
             };
 
@@ -909,26 +998,64 @@
             };
         },
 
+        // ============================================
+        // NEW: Client Heartbeat Methods
+        // ============================================
+        startHeartbeat: function() {
+            // Clear any existing interval just in case
+            this.stopHeartbeat();
+
+            // Function to send heartbeat
+            const sendPing = () => {
+                if (this.state.ws && this.state.ws.readyState === WebSocket.OPEN && this.state.conversationId) {
+                    this.state.ws.send(JSON.stringify({
+                        type: 'system',
+                        sub_type: 'online',
+                        conversation_id: this.state.conversationId
+                    }));
+                }
+            };
+
+            // Send immediately once on start
+            sendPing();
+
+            // Then send every 50 seconds
+            this.state.heartbeatInterval = setInterval(sendPing, 50000);
+        },
+
+        stopHeartbeat: function() {
+            if (this.state.heartbeatInterval) {
+                clearInterval(this.state.heartbeatInterval);
+                this.state.heartbeatInterval = null;
+            }
+        },
+
         updateConnectionStatus: function() {
             const statusText = document.getElementById('qc-status-text');
             const statusDot = document.getElementById('qc-status-dot');
 
             if(!statusText || !statusDot) return;
 
-            // Check connectivity first
+            // Check connectivity first (This refers to Client connection, not Agent)
             if (!this.state.isConnected) {
                 statusText.textContent = 'آفلاین';
                 statusDot.classList.add('offline');
                 return;
             }
 
-            // If connected, check typing status (Prioritize Typing over "Online")
-            statusDot.classList.remove('offline');
-
+            // If client is connected, now check Typing > Agent Status
             if (this.state.typingUsers.size > 0) {
                 statusText.textContent = 'در حال نوشتن...';
+                statusDot.classList.remove('offline');
             } else {
-                statusText.textContent = 'آنلاین';
+                // Use the saved state from API
+                statusText.textContent = this.state.agentStatusText || 'آنلاین';
+
+                if (this.state.agentIsOnline) {
+                    statusDot.classList.remove('offline');
+                } else {
+                    statusDot.classList.add('offline');
+                }
             }
         },
 
@@ -1078,6 +1205,25 @@
                 // Update Header immediately
                 this.updateConnectionStatus();
                 this.renderMessages(true);
+
+                // ============================================
+                // NEW: Handle Real-time Online Heartbeat
+                // ============================================
+            } else if (data.sub_type === 'online') {
+                // 1. Clear existing timeout (debounce)
+                if (this.state.onlineTimeout) clearTimeout(this.state.onlineTimeout);
+
+                // 2. Set State to Online and Update UI
+                this.state.agentIsOnline = true;
+                this.state.agentStatusText = 'آنلاین';
+                this.updateConnectionStatus();
+
+                // 3. Set timer for 60 seconds
+                this.state.onlineTimeout = setTimeout(() => {
+                    // After 1 minute, refresh data from server to get the official "Last Seen" time
+                    // This ensures we revert to the correct "Offline since X" message
+                    this.fetchActiveConversation();
+                }, 60000);
             }
         },
 
@@ -1199,6 +1345,9 @@
             this.state.isOpen = true;
             this.state.unreadCount = 0; // Reset count
             this.updateBadgeUI(); // Update UI
+
+            // ADDED: Force refresh active conversation logic (for last seen updates)
+            this.fetchActiveConversation();
 
             // Try to fetch history if not loaded yet and conversation ID is available
             if (!this.state.historyLoaded && this.state.conversationId) {
