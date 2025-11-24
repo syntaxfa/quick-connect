@@ -193,8 +193,6 @@
                 }
                 #qc-close-btn:hover { background: rgba(255,255,255,0.1); color: white; }
 
-                /* --- SCROLLBAR STYLING (UPDATED FOR INPUT) --- */
-                /* اضافه کردن #qc-input به سلکتورها */
                 #qc-messages, #qc-emoji-picker, #qc-input {
                     scrollbar-width: thin;
                     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
@@ -278,14 +276,27 @@
                 }
 
                 #qc-emoji-picker {
-                    height: 0; overflow: hidden;
+                    max-height: 0;
+                    opacity: 0;
+                    overflow: hidden;
+                    margin-bottom: 0;
+                    padding: 0;
+                    border: 0 solid var(--qc-border);
+
                     background: #1e293b;
                     border-radius: 16px;
-                    margin-bottom: 8px;
-                    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 1px solid var(--qc-border);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                #qc-emoji-picker.show { height: 180px; padding: 8px; overflow-y: auto; }
+
+                #qc-emoji-picker.show {
+                    max-height: 200px;
+                    opacity: 1;
+                    margin-bottom: 8px;
+                    padding: 8px;
+                    border-width: 1px;
+                    overflow-y: auto;
+                }
+
                 #qc-emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
                 .qc-emoji-btn {
                     background: transparent; border: none; font-size: 22px;
