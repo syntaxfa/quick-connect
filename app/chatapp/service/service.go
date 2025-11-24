@@ -191,6 +191,8 @@ func (s *Service) handleSystemMessage(ctx context.Context, msg ClientMessage) {
 		wsMsg = NewSystemMessage(msg.ConversationID, msg.SenderID, "typing_started")
 	case "typing_stopped":
 		wsMsg = NewSystemMessage(msg.ConversationID, msg.SenderID, "typing_stopped")
+	case "online":
+		wsMsg = NewSystemMessage(msg.ConversationID, msg.SenderID, "online")
 	default:
 		s.logger.WarnContext(ctx, "unknown system message sub_type", slog.String("op", op), slog.String("sub_type", msg.SubType))
 		return
