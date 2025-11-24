@@ -44,7 +44,7 @@
         hx-target="#support-list-container"
         hx-swap="innerHTML"
         hx-trigger="submit, change from:#conv-sort-select, change from:.status-filter-checkbox, click from:#my-conversations-tab-btn" >
-    >
+
     <select class="sort-select" name="sort_direction" id="conv-sort-select">
       <option value="2" selected>Newest First (DESC)</option>
       <option value="1">Oldest First (ASC)</option>
@@ -97,47 +97,45 @@
     </div>
   </div>
 
+  <div id="ws-status" style="position: fixed; bottom: 10px; left: 10px; z-index: 9999;"></div>
+
 </div>
 
 <script>
-  function switchSupportTab(selectedTab) {
-    // 1. Switch active class
-    document.querySelectorAll('.support-tab').forEach(tab => {
-      tab.classList.remove('active');
-    });
-    selectedTab.classList.add('active');
-
-    // 2. Show/hide filters based on the clicked tab's ID
-    const filters = document.getElementById('my-conversations-filters');
-    if (selectedTab.id === 'my-conversations-tab-btn') {
-      filters.style.display = 'flex';
-    } else {
-      filters.style.display = 'none';
-    }
-  }
-
   /**
    * Support Chat Manager
-   * Manages WebSocket connection and interaction with the chat modal
+   * Manages WebSocket connection, Chat Interaction, and Infinite Scroll History.
    */
-  const SupportChat = {
+  window.SupportChat = {
     ws: null,
-    token: "{{.WebSocketToken}}", // Get token from server
-    url: "{{.ChatWsURL}}",       // Get URL from server
+    token: "{{.WebSocketToken}}",
+    url: "{{.ChatWsURL}}",
     activeConversationId: null,
     reconnectInterval: 3000,
     heartbeatInterval: null,
+
+    // History State
+    nextCursor: null,
+    hasMore: false,
+    isLoadingHistory: false,
 
     init: function() {
       if (!this.token) {
         console.error("WebSocket Token is missing.");
         return;
       }
+
+      if (this.ws) {
+        this.ws.close();
+      }
+
       this.connect();
 
-      // Listen for chat modal opening (triggered by HTMX)
       document.body.addEventListener('htmx:afterSwap', (evt) => {
-        if (evt.target.id === 'modal-container' || evt.target.tagName === 'BODY') {
+        const targetId = evt.target.id;
+        const targetTag = evt.target.tagName;
+
+        if (targetId === 'modal-container' || targetId === 'modal-backdrop' || targetTag === 'BODY') {
           const modal = document.querySelector('.chat-modal');
           if (modal) {
             this.initModalListeners(modal);
@@ -151,7 +149,6 @@
 
       console.log("Connecting to Chat WS:", this.url);
 
-      // According to pkg/auth/middleware.go, the token must be in Sec-WebSocket-Protocol
       try {
         this.ws = new WebSocket(this.url, [this.token]);
       } catch (e) {
@@ -186,36 +183,65 @@
       };
     },
 
-    // Set up listeners when the chat modal opens
     initModalListeners: function(modal) {
-      // Extract conversation ID from buttons or modal elements
-      // Assuming we have a hidden input or data attribute in the modal, or reading from button URLs
-      // Simple way: Look at the Close or Start button which has the ID
       const closeBtn = modal.querySelector('button[hx-post*="/close"]');
       const startBtn = modal.querySelector('button[hx-post*="/start"]');
-
       let convId = null;
       if (closeBtn) {
-        convId = closeBtn.getAttribute('hx-post').split('/')[3]; // /conversation/{ID}/close
+        convId = closeBtn.getAttribute('hx-post').split('/')[3];
       } else if (startBtn) {
         convId = startBtn.getAttribute('hx-post').split('/')[3];
       }
 
+      const container = document.getElementById('chat-messages-container');
+      if (container) {
+        // Prevent browser scroll anchoring interference
+        container.style.overflowAnchor = 'none';
+
+        const newCursor = container.getAttribute('data-next-cursor');
+        if (newCursor) this.nextCursor = newCursor;
+
+        this.hasMore = container.getAttribute('data-has-more') === 'true';
+        this.isLoadingHistory = false;
+
+        modal.querySelectorAll('.msg-time-server').forEach(el => {
+          const seconds = parseInt(el.getAttribute('data-ts'));
+          if (seconds) {
+            try {
+              const date = new Date(seconds * 1000);
+              el.textContent = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+              el.classList.remove('msg-time-server');
+            } catch(e) {}
+          }
+        });
+
+        // === Scroll Listener for History ===
+        container.onscroll = () => {
+          // In column-reverse: 0 is Bottom.
+          // We need to fetch when we are FAR from 0 (at the Top).
+          const distanceFromBottom = Math.abs(container.scrollTop);
+          const maxScroll = container.scrollHeight - container.clientHeight;
+
+          // Buffer of 50px to trigger before hitting the hard edge
+          if (distanceFromBottom >= (maxScroll - 50) && this.hasMore && !this.isLoadingHistory) {
+            this.fetchHistory(convId);
+          }
+        };
+      }
+
       if (convId) {
         this.activeConversationId = convId;
-        this.scrollToBottom();
 
         const input = document.getElementById('chat-input');
         const sendBtn = document.getElementById('chat-send-btn');
 
         if (input && sendBtn) {
-          input.disabled = false; // Enable input if the chat belongs to us
-          input.focus();
+          input.disabled = false;
+          if (document.activeElement !== input) {
+            input.focus();
+          }
 
-          // Handle typing
           input.oninput = () => this.sendTyping(convId);
-
-          // Handle Enter key
           input.onkeydown = (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -223,8 +249,6 @@
               input.value = '';
             }
           };
-
-          // Handle send button click
           sendBtn.onclick = () => {
             this.sendMessage(convId, input.value);
             input.value = '';
@@ -233,12 +257,66 @@
       }
     },
 
+    fetchHistory: function(conversationId) {
+      if (this.isLoadingHistory || !this.hasMore || !this.nextCursor) return;
+
+      this.isLoadingHistory = true;
+
+      const container = document.getElementById('chat-messages-container');
+      // Capture scroll position BEFORE adding new items
+      const previousScrollHeight = container.scrollHeight;
+      const previousScrollTop = container.scrollTop;
+
+      fetch(`/support/conversation/${conversationId}/history?cursor=${this.nextCursor}`)
+              .then(response => response.json())
+              .then(data => {
+                if (data.messages && data.messages.length > 0) {
+                  this.nextCursor = data.next_cursor;
+                  this.hasMore = data.has_more;
+
+                  data.messages.forEach(msg => {
+                    const currentUserId = "{{.User.ID}}";
+                    const isOwn = msg.sender_id === currentUserId;
+                    this.appendMessageToUI({
+                      content: msg.content,
+                      sender_id: msg.sender_id,
+                      created_at: msg.created_at,
+                      id: msg.id
+                    }, isOwn, true);
+                  });
+
+                  // === Scroll Restoration ===
+                  const heightDifference = container.scrollHeight - previousScrollHeight;
+
+                  if (previousScrollTop <= 0) {
+                    // Chrome/Edge/Safari (Negative Scroll)
+                    // In column-reverse, the bottom is 0. Adding items to the visual top (DOM end)
+                    // does not change the distance of current items from the bottom.
+                    // We must maintain the previous scrollTop value to stay in place.
+                    container.scrollTop = previousScrollTop;
+                  } else {
+                    // Firefox (Positive Scroll)
+                    // 0 is Top. Adding items pushes content down, so we must add height difference.
+                    container.scrollTop = previousScrollTop + heightDifference;
+                  }
+
+                } else {
+                  this.hasMore = false;
+                }
+              })
+              .catch(err => console.error("Fetch History Error:", err))
+              .finally(() => {
+                // Short timeout to prevent rapid scroll firing
+                setTimeout(() => {
+                  this.isLoadingHistory = false;
+                }, 100);
+              });
+    },
+
     sendMessage: function(conversationId, content) {
       if (!content.trim() || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
       const tempId = `local_${Date.now()}`;
-
-      // Message structure according to app/chatapp/service/entity.go
       const payload = {
         type: 'text',
         content: content,
@@ -248,92 +326,81 @@
 
       this.ws.send(JSON.stringify(payload));
 
-      // Optimistically add to UI
       this.appendMessageToUI({
         content: content,
-        sender_id: "{{.User.ID}}", // Current User ID (Support Agent)
+        sender_id: "{{.User.ID}}",
         created_at: new Date().toISOString(),
         id: tempId
-      }, true); // true = our own message
+      }, true, false);
     },
 
     handleIncomingMessage: function(msg) {
-      // If message is text
       if (msg.type === 'text') {
-        // If related to the currently open conversation
         if (msg.payload.conversation_id === this.activeConversationId) {
-
-          // Check that it's not our own message (since we already added it)
-          // Unless we want to update the status (tick)
           const currentUserId = "{{.User.ID}}";
           const isOwn = msg.payload.sender_id === currentUserId;
-
           if (!isOwn) {
-            this.appendMessageToUI(msg.payload, false);
+            this.appendMessageToUI(msg.payload, false, false);
           }
-        } else {
-          // If chat is not open, we can show a notification or update the list
-          console.log("New message in another conversation:", msg.payload.conversation_id);
-          // TODO: Update unread badge in list using HTMX or DOM manipulation
         }
-      }
-      // Handle typing
-      else if (msg.type === 'system') {
+      } else if (msg.type === 'system') {
         this.handleSystemMessage(msg);
       }
     },
 
     handleSystemMessage: function(msg) {
       if (msg.payload.conversation_id !== this.activeConversationId) return;
-
       const typingIndicator = document.getElementById('typing-indicator');
       if (!typingIndicator) return;
 
       if (msg.sub_type === 'typing_started') {
-        typingIndicator.style.display = 'flex';
-        this.scrollToBottom();
+        typingIndicator.style.display = 'inline-block';
       } else if (msg.sub_type === 'typing_stopped') {
         typingIndicator.style.display = 'none';
       }
     },
 
-    appendMessageToUI: function(msg, isOwn) {
+    appendMessageToUI: function(msg, isOwn, isHistory) {
       const container = document.getElementById('chat-messages-container');
       if (!container) return;
 
       const div = document.createElement('div');
-      // Classes must match your CSS file
       div.className = `message-bubble ${isOwn ? 'mine' : 'theirs'}`;
       div.style.cssText = isOwn
               ? "align-self: flex-end; background: #06b6d4; color: white; border-bottom-right-radius: 2px; max-width: 70%; padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 0.5rem;"
               : "align-self: flex-start; background: rgba(255, 255, 255, 0.1); color: #e2e8f0; border-bottom-left-radius: 2px; max-width: 70%; padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 0.5rem;";
 
+      let timeStr = "";
+      try {
+        timeStr = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      } catch(e) {}
+
       div.innerHTML = `
             ${this.escapeHtml(msg.content)}
-            <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">
-                ${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-            </div>
+            <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${timeStr}</div>
         `;
 
-      // Since flex-direction is column-reverse, should we use prepend to make it appear at the bottom?
-      // No, I saw in previous codes it is column-reverse.
-      // If it is column-reverse, the first element in the code is the lowest element in the view.
-      // So the new message (which should be at the bottom) must be prepended (added to the start of the container).
-      container.prepend(div);
+      if (isHistory) {
+        // History: Append to end (Visual Top in column-reverse)
+        container.appendChild(div);
+      } else {
+        // New Message: Prepend to start (Visual Bottom in column-reverse)
+        container.prepend(div);
+        // Force scroll to bottom (0) if user was near bottom
+        if (Math.abs(container.scrollTop) < 50) {
+          container.scrollTop = 0;
+        }
+      }
     },
 
     sendTyping: function(convId) {
-      // Implement Debounce for typing
-      // ... (Similar to SDK)
+      // Placeholder
     },
 
     startHeartbeat: function() {
       this.stopHeartbeat();
       this.heartbeatInterval = setInterval(() => {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-          // Send ping to keep connection open (if needed)
-          // Go Gorilla servers usually handle Ping/Pong themselves
-        }
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {}
       }, 30000);
     },
 
@@ -344,8 +411,7 @@
     scrollToBottom: function() {
       const container = document.getElementById('chat-messages-container');
       if (container) {
-        container.scrollTop = container.scrollHeight;
-        // For column-reverse it might need to be 0 depending on implementation
+        container.scrollTop = 0;
       }
     },
 
@@ -364,12 +430,14 @@
     }
   };
 
-  // Initial setup
-  document.addEventListener('DOMContentLoaded', () => {
-    SupportChat.init();
-  });
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    window.SupportChat.init();
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      window.SupportChat.init();
+    });
+  }
 
-  // Tab functions (from before)
   function switchSupportTab(selectedTab) {
     document.querySelectorAll('.support-tab').forEach(tab => tab.classList.remove('active'));
     selectedTab.classList.add('active');

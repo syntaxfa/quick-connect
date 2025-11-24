@@ -24,7 +24,11 @@
             <button class="modal-close-btn" onclick="removeModal()">×</button>
         </div>
 
-        <div class="modal-body chat-messages" id="chat-messages-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 0.5rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.6);">
+        <div class="modal-body chat-messages"
+             id="chat-messages-container"
+             data-next-cursor="{{.NextCursor}}"
+             data-has-more="{{if .HasMore}}true{{else}}false{{end}}"
+             style="flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 0.5rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.6);">
 
             {{range .Messages}}
             <div class="message-bubble" style="
@@ -46,6 +50,10 @@
                 {{end}}
             ">
                 {{.Content}}
+                <div class="msg-time-server"
+                     data-ts="{{.GetCreatedAt.Seconds}}"
+                     style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">
+                </div>
             </div>
             {{else}}
             {{end}}

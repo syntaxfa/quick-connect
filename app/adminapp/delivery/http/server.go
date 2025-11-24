@@ -91,6 +91,7 @@ func (s Server) registerRoutes() {
 	supportGr.GET("/conversation/:id", s.handler.GetConversationModal)
 	supportGr.POST("/conversation/:id/start", s.handler.JoinConversation)
 	supportGr.POST("/conversation/:id/close", s.handler.ResolveConversation)
+	supportGr.GET("/conversation/:id/history", s.handler.GetChatHistory)
 }
 
 func (s Server) registerSwagger() {
