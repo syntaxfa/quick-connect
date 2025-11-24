@@ -16,7 +16,7 @@ import (
 // @Tags Chat
 // @Accept json
 // @Produce json
-// @Success 200 {object} service.Conversation
+// @Success 200 {object} service.ConversationDetailResponse
 // @Failure 500 {string} something went wrong
 // @Security JWT
 // @Router /conversations/active [GET].

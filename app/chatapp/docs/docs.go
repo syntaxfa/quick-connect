@@ -183,7 +183,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/service.Conversation"
+                            "$ref": "#/definitions/service.ConversationDetailResponse"
                         }
                     },
                     "500": {
@@ -568,6 +568,29 @@ const docTemplate = `{
                 }
             }
         },
+        "service.ClientInfo": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "last_online_at": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
         "service.Conversation": {
             "type": "object",
             "properties": {
@@ -594,6 +617,44 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/service.ConversationStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ConversationDetailResponse": {
+            "type": "object",
+            "properties": {
+                "assigned_support_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "client_info": {
+                    "$ref": "#/definitions/service.ClientInfo"
+                },
+                "client_user_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "closed_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "last_message_sender_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "last_message_snippet": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/service.ConversationStatus"
+                },
+                "support_info": {
+                    "$ref": "#/definitions/service.SupportInfo"
                 },
                 "updated_at": {
                     "type": "string"
@@ -690,6 +751,23 @@ const docTemplate = `{
                 "MessageTypeMedia",
                 "MessageTypeSystem"
             ]
+        },
+        "service.SupportInfo": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "last_online_at": {
+                    "type": "string"
+                }
+            }
         },
         "types.ID": {
             "type": "string",
