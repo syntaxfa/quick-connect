@@ -11,33 +11,46 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-func (s *Service) GetUserActiveConversation(ctx context.Context, userID types.ID) (Conversation, error) {
+func (s *Service) GetUserActiveConversation(ctx context.Context, userID types.ID) (ConversationDetailResponse, error) {
 	const op = "service.conversation.GetOpenConversation"
 
 	exists, existErr := s.repo.IsUserHaveActiveConversation(ctx, userID)
 	if existErr != nil {
-		return Conversation{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(existErr).
+		return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(existErr).
 			WithKind(richerror.KindUnexpected), s.logger)
 	}
+
+	var conversation Conversation
 
 	if !exists {
 		id := ulid.Make().String()
 
-		conversation, createErr := s.repo.CreateActiveConversation(ctx, types.ID(id), userID, ConversationStatusNew)
+		var createErr error
+		conversation, createErr = s.repo.CreateActiveConversation(ctx, types.ID(id), userID, ConversationStatusNew)
 		if createErr != nil {
-			return Conversation{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(createErr).
+			return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(createErr).
 				WithKind(richerror.KindUnexpected), s.logger)
 		}
-
-		return conversation, nil
+	} else {
+		var getErr error
+		conversation, getErr = s.repo.GetUserActiveConversation(ctx, userID)
+		if getErr != nil {
+			return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(getErr).
+				WithKind(richerror.KindUnexpected), s.logger)
+		}
 	}
 
-	conversation, getErr := s.repo.GetUserActiveConversation(ctx, userID)
-	if getErr != nil {
-		return Conversation{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(getErr).WithKind(richerror.KindUnexpected), s.logger)
+	clientInfo, supportInfo, infoErr := s.getClientAndSupportInfo(ctx, conversation.ClientUserID, conversation.AssignedSupportID)
+	if infoErr != nil {
+		return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(infoErr).
+			WithKind(richerror.KindUnexpected), s.logger)
 	}
 
-	return conversation, nil
+	return ConversationDetailResponse{
+		Conversation: conversation,
+		ClientInfo:   clientInfo,
+		SupportInfo:  supportInfo,
+	}, nil
 }
 
 // ListConversations handles the business logic for listing conversations.
@@ -165,33 +178,64 @@ func (s *Service) GetConversationByID(ctx context.Context, conversationID, userI
 			WithKind(richerror.KindUnexpected), s.logger)
 	}
 
-	clientInfo, gcErr := s.userInternalSvc.UserInfo(ctx, &userinternalpb.UserInfoRequest{UserId: string(conversation.ClientUserID)})
-	if gcErr != nil {
-		return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gcErr).
-			WithKind(richerror.KindUnexpected), s.logger)
-	}
-
-	supportInfo, gsErr := s.userInternalSvc.UserInfo(ctx, &userinternalpb.UserInfoRequest{UserId: string(conversation.AssignedSupportID)})
-	if gsErr != nil {
-		return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gsErr).
+	clientInfo, supportInfo, infoErr := s.getClientAndSupportInfo(ctx, conversation.ClientUserID, conversation.AssignedSupportID)
+	if infoErr != nil {
+		return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(infoErr).
 			WithKind(richerror.KindUnexpected), s.logger)
 	}
 
 	return ConversationDetailResponse{
 		Conversation: conversation,
-		ClientInfo: ClientInfo{
-			ID:           types.ID(clientInfo.GetId()),
-			Fullname:     clientInfo.GetFullname(),
-			PhoneNumber:  clientInfo.GetPhoneNumber(),
-			Email:        clientInfo.GetEmail(),
-			Avatar:       clientInfo.GetAvatar(),
-			LastOnlineAt: clientInfo.GetLastOnlineAt().AsTime(),
-		},
-		SupportInfo: SupportInfo{
-			ID:           types.ID(supportInfo.GetId()),
-			Fullname:     supportInfo.GetFullname(),
-			Avatar:       supportInfo.GetAvatar(),
-			LastOnlineAt: supportInfo.GetLastOnlineAt().AsTime(),
-		},
+		ClientInfo:   clientInfo,
+		SupportInfo:  supportInfo,
 	}, nil
+}
+
+func (s *Service) getClientAndSupportInfo(ctx context.Context, clientID, supportID types.ID) (ClientInfo, SupportInfo, error) {
+	const op = "service.conversation.getClientAndSupportInfo"
+
+	var clientInfoPB *userinternalpb.UserInfoResponse
+	if clientID != "" {
+		var gcErr error
+		clientInfoPB, gcErr = s.userInternalSvc.UserInfo(ctx, &userinternalpb.UserInfoRequest{UserId: string(clientID)})
+		if gcErr != nil {
+			return ClientInfo{}, SupportInfo{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gcErr).
+				WithKind(richerror.KindUnexpected), s.logger)
+		}
+	}
+
+	var supportInfoPB *userinternalpb.UserInfoResponse
+	if supportID != "" {
+		var gsErr error
+		supportInfoPB, gsErr = s.userInternalSvc.UserInfo(ctx, &userinternalpb.UserInfoRequest{UserId: string(supportID)})
+		if gsErr != nil {
+			return ClientInfo{}, SupportInfo{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gsErr).
+				WithKind(richerror.KindUnexpected), s.logger)
+		}
+	}
+
+	var clientInfo ClientInfo
+	var supportInfo SupportInfo
+
+	if clientInfoPB != nil {
+		clientInfo = ClientInfo{
+			ID:           types.ID(clientInfoPB.GetId()),
+			Fullname:     clientInfoPB.GetFullname(),
+			PhoneNumber:  clientInfoPB.GetPhoneNumber(),
+			Email:        clientInfoPB.GetEmail(),
+			Avatar:       clientInfoPB.GetAvatar(),
+			LastOnlineAt: clientInfoPB.GetLastOnlineAt().AsTime(),
+		}
+	}
+
+	if supportInfoPB != nil {
+		supportInfo = SupportInfo{
+			ID:           types.ID(supportInfoPB.GetId()),
+			Fullname:     supportInfoPB.GetFullname(),
+			Avatar:       supportInfoPB.GetAvatar(),
+			LastOnlineAt: supportInfoPB.GetLastOnlineAt().AsTime(),
+		}
+	}
+
+	return clientInfo, supportInfo, nil
 }
