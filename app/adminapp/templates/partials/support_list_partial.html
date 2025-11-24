@@ -1,7 +1,12 @@
 {{define "support_list_partial"}}
 <div class="conversation-list" style="animation: fadeInUp 0.4s ease;">
     {{range .Conversations}}
-    <div class="conversation-item" id="conv-{{.ID}}">
+    <div class="conversation-item"
+         id="conv-{{.ID}}"
+         style="cursor: pointer;"
+         hx-get="/support/conversation/{{.ID}}"
+         hx-target="body"
+         hx-swap="beforeend">
 
         <div class="conv-avatar" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6);">
             <span>{{.ClientUserID | initials}}</span>
@@ -36,5 +41,4 @@
     </div>
     {{end}}
 </div>
-
 {{end}}

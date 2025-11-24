@@ -1,0 +1,111 @@
+{{define "support_chat_modal"}}
+<div id="modal-backdrop" class="modal-backdrop" onclick="closeModal(event)">
+    <div class="modal-content chat-modal" style="max-width: 800px; height: 80vh; display: flex; flex-direction: column;">
+
+        <div class="modal-header" style="background: rgba(15, 23, 42, 0.95);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div class="conv-avatar" style="width: 40px; height: 40px; font-size: 1rem; background: linear-gradient(135deg, #06b6d4, #8b5cf6);">
+                    {{if .ClientInfo.Fullname}}
+                    <span>{{.ClientInfo.Fullname | initials}}</span>
+                    {{else}}
+                    <span>C</span>
+                    {{end}}
+                </div>
+                <div>
+                    <h3 class="modal-title" style="font-size: 1.1rem; color: white;">
+                        {{if .ClientInfo.Fullname}}{{.ClientInfo.Fullname}}{{else}}Client {{.Conversation.ClientUserID}}{{end}}
+                    </h3>
+                    <span class="conv-status-badge status-{{.Conversation.Status}}" style="font-size: 0.75rem;">
+                        {{.Conversation.Status}}
+                    </span>
+                </div>
+            </div>
+            <button class="modal-close-btn" onclick="removeModal()">×</button>
+        </div>
+
+        <div class="modal-body chat-messages" id="chat-messages-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 1rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.6);">
+
+            {{range .Messages}}
+            <div class="message-bubble" style="
+                max-width: 70%;
+                padding: 0.75rem 1rem;
+                border-radius: 12px;
+                line-height: 1.5;
+                font-size: 0.95rem;
+                {{if eq .SenderId $.CurrentUser.ID}}
+                    align-self: flex-end;
+                    background: #06b6d4;
+                    color: white;
+                    border-bottom-right-radius: 2px;
+                {{else}}
+                    align-self: flex-start;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: #e2e8f0;
+                    border-bottom-left-radius: 2px;
+                {{end}}
+            ">
+                {{.Content}}
+            </div>
+            {{else}}
+            <div style="text-align: center; color: #94a3b8; margin-top: auto; margin-bottom: auto;">
+                No messages yet.
+            </div>
+            {{end}}
+        </div>
+
+        <div class="modal-footer" style="background: rgba(15, 23, 42, 0.9);">
+
+            {{if .IsUnassigned}}
+            <div style="width: 100%; text-align: center;">
+                <p style="margin-bottom: 1rem; color: #94a3b8;">This conversation is waiting for support.</p>
+                <button class="btn-primary"
+                        style="padding: 0.75rem 1.5rem; border-radius: 8px; background: #06b6d4; color: white; border: none; cursor: pointer; font-weight: 600;"
+                        hx-post="/support/conversation/{{.Conversation.ID}}/start"
+                        hx-target="#modal-backdrop"
+                        hx-swap="outerHTML">
+                    Start Conversation
+                </button>
+            </div>
+
+            {{else if eq .Conversation.Status "closed"}}
+            <div style="width: 100%; text-align: center; color: #94a3b8;">
+                This conversation is closed.
+            </div>
+
+            {{else if .IsMyChat}}
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <input type="text"
+                       placeholder="Type a message..."
+                       style="flex: 1; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;"
+                       disabled title="Sending not implemented yet">
+
+                <button class="btn-danger"
+                        hx-post="/support/conversation/{{.Conversation.ID}}/close"
+                        hx-target="#modal-backdrop"
+                        hx-swap="outerHTML"
+                        hx-confirm="Are you sure you want to close this ticket?">
+                    Close
+                </button>
+            </div>
+            {{else}}
+            <div style="width: 100%; text-align: center; color: #ef4444;">
+                Assigned to another agent.
+            </div>
+            {{end}}
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function closeModal(e) {
+        if (e.target.id === 'modal-backdrop') {
+            removeModal();
+        }
+    }
+    function removeModal() {
+        const modal = document.getElementById('modal-backdrop');
+        if (modal) modal.remove();
+    }
+</script>
+{{end}}
