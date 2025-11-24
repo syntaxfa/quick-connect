@@ -104,7 +104,7 @@
 <script>
   /**
    * Support Chat Manager
-   * Manages WebSocket connection, Chat Interaction, and Infinite Scroll History.
+   * Updated to match Client SDK logic (Heartbeat, Typing Debounce, etc.)
    */
   window.SupportChat = {
     ws: null,
@@ -112,7 +112,13 @@
     url: "{{.ChatWsURL}}",
     activeConversationId: null,
     reconnectInterval: 3000,
+
+    // Heartbeat Logic
     heartbeatInterval: null,
+
+    // Typing Logic
+    lastTypingSent: 0,
+    typingTimeout: null, // For clearing the UI "is typing..." logic
 
     // History State
     nextCursor: null,
@@ -159,6 +165,7 @@
       this.ws.onopen = () => {
         console.log("✅ Chat WebSocket Connected");
         this.showStatus("Connected", "success");
+        // Start sending heartbeat immediately upon connection
         this.startHeartbeat();
       };
 
@@ -187,6 +194,8 @@
       const closeBtn = modal.querySelector('button[hx-post*="/close"]');
       const startBtn = modal.querySelector('button[hx-post*="/start"]');
       let convId = null;
+
+      // Extract Conversation ID
       if (closeBtn) {
         convId = closeBtn.getAttribute('hx-post').split('/')[3];
       } else if (startBtn) {
@@ -195,15 +204,13 @@
 
       const container = document.getElementById('chat-messages-container');
       if (container) {
-        // Prevent browser scroll anchoring interference
         container.style.overflowAnchor = 'none';
-
         const newCursor = container.getAttribute('data-next-cursor');
         if (newCursor) this.nextCursor = newCursor;
-
         this.hasMore = container.getAttribute('data-has-more') === 'true';
         this.isLoadingHistory = false;
 
+        // Convert timestamps
         modal.querySelectorAll('.msg-time-server').forEach(el => {
           const seconds = parseInt(el.getAttribute('data-ts'));
           if (seconds) {
@@ -215,14 +222,10 @@
           }
         });
 
-        // === Scroll Listener for History ===
+        // Scroll Logic
         container.onscroll = () => {
-          // In column-reverse: 0 is Bottom.
-          // We need to fetch when we are FAR from 0 (at the Top).
           const distanceFromBottom = Math.abs(container.scrollTop);
           const maxScroll = container.scrollHeight - container.clientHeight;
-
-          // Buffer of 50px to trigger before hitting the hard edge
           if (distanceFromBottom >= (maxScroll - 50) && this.hasMore && !this.isLoadingHistory) {
             this.fetchHistory(convId);
           }
@@ -231,6 +234,8 @@
 
       if (convId) {
         this.activeConversationId = convId;
+        // Trigger immediate heartbeat update for this conversation
+        this.startHeartbeat();
 
         const input = document.getElementById('chat-input');
         const sendBtn = document.getElementById('chat-send-btn');
@@ -241,7 +246,9 @@
             input.focus();
           }
 
-          input.oninput = () => this.sendTyping(convId);
+          // Updated: Throttled Typing Handler
+          input.oninput = () => this.handleTypingInput(convId);
+
           input.onkeydown = (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -249,6 +256,7 @@
               input.value = '';
             }
           };
+
           sendBtn.onclick = () => {
             this.sendMessage(convId, input.value);
             input.value = '';
@@ -257,13 +265,66 @@
       }
     },
 
+    // --- New: Heartbeat Logic (Every 50s) ---
+    startHeartbeat: function() {
+      this.stopHeartbeat(); // Clear existing
+
+      const sendPing = () => {
+        // Only send if connected and we have an active conversation open (or generally online)
+        // Adjust logic if you want to be online globally regardless of open modal
+        if (this.ws && this.ws.readyState === WebSocket.OPEN && this.activeConversationId) {
+          this.ws.send(JSON.stringify({
+            type: 'system',
+            sub_type: 'online',
+            conversation_id: this.activeConversationId
+          }));
+        }
+      };
+
+      // Send immediately
+      sendPing();
+
+      // Then every 50 seconds
+      this.heartbeatInterval = setInterval(sendPing, 50000);
+    },
+
+    stopHeartbeat: function() {
+      if (this.heartbeatInterval) {
+        clearInterval(this.heartbeatInterval);
+        this.heartbeatInterval = null;
+      }
+    },
+
+    // --- New: Typing Logic (Sending) ---
+    handleTypingInput: function(convId) {
+      const now = Date.now();
+      // Throttle: Send "typing_started" only once every 5 seconds
+      if (now - this.lastTypingSent > 5000) {
+        this.sendSystemMessage(convId, 'typing_started');
+        this.lastTypingSent = now;
+      }
+    },
+
+    sendTypingStopped: function(convId) {
+      this.sendSystemMessage(convId, 'typing_stopped');
+      this.lastTypingSent = 0;
+    },
+
+    sendSystemMessage: function(convId, subType) {
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+      this.ws.send(JSON.stringify({
+        type: 'system',
+        sub_type: subType,
+        conversation_id: convId
+      }));
+    },
+    // ------------------------------------
+
     fetchHistory: function(conversationId) {
       if (this.isLoadingHistory || !this.hasMore || !this.nextCursor) return;
-
       this.isLoadingHistory = true;
 
       const container = document.getElementById('chat-messages-container');
-      // Capture scroll position BEFORE adding new items
       const previousScrollHeight = container.scrollHeight;
       const previousScrollTop = container.scrollTop;
 
@@ -285,31 +346,19 @@
                     }, isOwn, true);
                   });
 
-                  // === Scroll Restoration ===
                   const heightDifference = container.scrollHeight - previousScrollHeight;
-
                   if (previousScrollTop <= 0) {
-                    // Chrome/Edge/Safari (Negative Scroll)
-                    // In column-reverse, the bottom is 0. Adding items to the visual top (DOM end)
-                    // does not change the distance of current items from the bottom.
-                    // We must maintain the previous scrollTop value to stay in place.
                     container.scrollTop = previousScrollTop;
                   } else {
-                    // Firefox (Positive Scroll)
-                    // 0 is Top. Adding items pushes content down, so we must add height difference.
                     container.scrollTop = previousScrollTop + heightDifference;
                   }
-
                 } else {
                   this.hasMore = false;
                 }
               })
               .catch(err => console.error("Fetch History Error:", err))
               .finally(() => {
-                // Short timeout to prevent rapid scroll firing
-                setTimeout(() => {
-                  this.isLoadingHistory = false;
-                }, 100);
+                setTimeout(() => { this.isLoadingHistory = false; }, 100);
               });
     },
 
@@ -332,6 +381,9 @@
         created_at: new Date().toISOString(),
         id: tempId
       }, true, false);
+
+      // Stop typing indicator when message is sent
+      this.sendTypingStopped(conversationId);
     },
 
     handleIncomingMessage: function(msg) {
@@ -339,7 +391,14 @@
         if (msg.payload.conversation_id === this.activeConversationId) {
           const currentUserId = "{{.User.ID}}";
           const isOwn = msg.payload.sender_id === currentUserId;
+
+          // If it's the other person, stop their typing indicator immediately
           if (!isOwn) {
+            this.handleSystemMessage({
+              type: 'system',
+              sub_type: 'typing_stopped',
+              payload: { conversation_id: this.activeConversationId }
+            });
             this.appendMessageToUI(msg.payload, false, false);
           }
         }
@@ -348,15 +407,34 @@
       }
     },
 
+    // Updated: System Message Handling with Auto-Hide
     handleSystemMessage: function(msg) {
       if (msg.payload.conversation_id !== this.activeConversationId) return;
+
       const typingIndicator = document.getElementById('typing-indicator');
+      const statusBadge = document.querySelector('.conv-status-badge'); // For Online/Offline updates if needed
+
       if (!typingIndicator) return;
 
       if (msg.sub_type === 'typing_started') {
         typingIndicator.style.display = 'inline-block';
+        typingIndicator.textContent = 'is typing...';
+
+        // Clear existing timeout
+        if (this.typingTimeout) clearTimeout(this.typingTimeout);
+
+        // Auto-hide after 6 seconds (fallback in case stop packet is lost)
+        this.typingTimeout = setTimeout(() => {
+          typingIndicator.style.display = 'none';
+        }, 6000);
+
       } else if (msg.sub_type === 'typing_stopped') {
         typingIndicator.style.display = 'none';
+        if (this.typingTimeout) clearTimeout(this.typingTimeout);
+
+      } else if (msg.sub_type === 'online') {
+        // You can update UI here to show "Client Online"
+        // console.log("Client is sending heartbeat");
       }
     },
 
@@ -381,37 +459,12 @@
         `;
 
       if (isHistory) {
-        // History: Append to end (Visual Top in column-reverse)
         container.appendChild(div);
       } else {
-        // New Message: Prepend to start (Visual Bottom in column-reverse)
         container.prepend(div);
-        // Force scroll to bottom (0) if user was near bottom
         if (Math.abs(container.scrollTop) < 50) {
           container.scrollTop = 0;
         }
-      }
-    },
-
-    sendTyping: function(convId) {
-      // Placeholder
-    },
-
-    startHeartbeat: function() {
-      this.stopHeartbeat();
-      this.heartbeatInterval = setInterval(() => {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {}
-      }, 30000);
-    },
-
-    stopHeartbeat: function() {
-      if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-    },
-
-    scrollToBottom: function() {
-      const container = document.getElementById('chat-messages-container');
-      if (container) {
-        container.scrollTop = 0;
       }
     },
 

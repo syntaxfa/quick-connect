@@ -116,7 +116,15 @@
             removeModal();
         }
     }
+
     function removeModal() {
+        // 1. Stop Heartbeat when closing the chat window
+        if (window.SupportChat) {
+            window.SupportChat.activeConversationId = null;
+            window.SupportChat.stopHeartbeat();
+        }
+
+        // 2. Remove Element
         const modal = document.getElementById('modal-backdrop');
         if (modal) modal.remove();
     }
