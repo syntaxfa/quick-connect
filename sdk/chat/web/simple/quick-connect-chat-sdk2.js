@@ -223,48 +223,100 @@
                     background-color: rgba(255, 255, 255, 0.3);
                 }
 
-                /* Corner fix for input area if both scrolls appear */
                 #qc-input::-webkit-scrollbar-corner { background: transparent; }
-
 
                 /* --- Messages --- */
                 #qc-messages {
-                    flex: 1; overflow-y: auto; padding: 16px;
-                    display: flex; flex-direction: column; gap: 10px;
+                    flex: 1;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    padding: 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
                     background-image: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
                     scroll-behavior: smooth;
                 }
 
-                .qc-msg { display: flex; width: 100%; animation: qc-fadeUp 0.3s ease; }
-                .qc-msg.own { justify-content: flex-end; }
+                .qc-msg {
+                    display: flex;
+                    width: 100%;
+                    animation: qc-fadeUp 0.3s ease;
+                    align-items: flex-start;
+                }
+
+                .qc-msg.own {
+                    justify-content: flex-end;
+                }
+
+                .qc-msg.other {
+                    justify-content: flex-start;
+                }
 
                 .qc-msg-bubble {
-                    max-width: 85%;
-                    padding: 12px 18px;
-                    border-radius: 20px;
                     position: relative;
+                    max-width: 70%;
+                    padding: 10px 12px;
+                    border-radius: 16px;
                     font-size: 14px;
-                    line-height: 1.6;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    line-height: 1.5;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+
+                    /* Text wrapping */
                     word-wrap: break-word;
                     overflow-wrap: break-word;
+                    word-break: break-word;
+                    white-space: pre-wrap;
+                    overflow: hidden;
+
+                    /* Flexbox for internal layout */
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
                 }
+
                 .qc-msg.own .qc-msg-bubble {
-                    background: var(--qc-own-msg); color: white;
+                    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                    color: #ffffff;
                     border-bottom-right-radius: 4px;
                 }
+
                 .qc-msg.other .qc-msg-bubble {
-                    background: #1e293b; color: var(--qc-text-main);
-                    border-bottom-left-radius: 4px; border: 1px solid var(--qc-border);
+                    background: #1e293b;
+                    color: #f1f5f9;
+                    border-bottom-left-radius: 4px;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
                 }
-                .qc-msg.system { justify-content: center; margin: 10px 0; }
+
+                .qc-msg.system {
+                    justify-content: center;
+                    margin: 8px 0;
+                }
+
                 .qc-msg.system .qc-msg-bubble {
-                    background: rgba(0,0,0,0.3); color: var(--qc-text-muted);
-                    font-size: 11px; padding: 4px 12px; border-radius: 100px;
+                    background: rgba(0,0,0,0.3);
+                    color: #94a3b8;
+                    font-size: 11px;
+                    padding: 5px 12px;
+                    border-radius: 12px;
+                    max-width: 80%;
+                    white-space: normal;
                 }
+
+                .qc-msg-content {
+                    flex: 1;
+                }
+
                 .qc-msg-footer {
-                    display: flex; justify-content: flex-end; align-items: center;
-                    gap: 4px; margin-top: 4px; opacity: 0.7; font-size: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    gap: 4px;
+                    font-size: 10px;
+                    opacity: 0.7;
+                    margin-top: 2px;
+                    white-space: nowrap;
+                    flex-shrink: 0;
                 }
 
                 /* --- Input Area (Floating) --- */
@@ -282,7 +334,6 @@
                     margin-bottom: 0;
                     padding: 0;
                     border: 0 solid var(--qc-border);
-
                     background: #1e293b;
                     border-radius: 16px;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -309,25 +360,39 @@
                     background: #1e293b;
                     border: 1px solid var(--qc-border);
                     border-radius: 20px;
-                    padding: 8px;
-                    display: flex; align-items: flex-end;
+                    padding: 8px 10px;
+                    display: flex;
+                    align-items: flex-end;
                     gap: 8px;
                     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
                     transition: border-color 0.2s;
                 }
                 #qc-input-container:focus-within { border-color: var(--qc-primary); }
 
-                #qc-input-wrapper { flex: 1; padding-bottom: 2px; }
+                #qc-input-wrapper {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    min-height: 36px;
+                }
 
                 #qc-input {
-                    width: 100%; background: transparent; border: none;
-                    color: white; font-family: inherit; font-size: 14px;
+                    width: 100%;
+                    background: transparent;
+                    border: none;
+                    color: white;
+                    font-family: inherit;
+                    font-size: 14px;
                     line-height: 20px;
+                    min-height: 20px;
                     max-height: 120px;
-                    resize: none; padding: 6px 0;
+                    resize: none;
+                    padding: 8px 0;
                     display: block;
-                    /* مطمئن می‌شویم اسکرول بار فضای کافی دارد */
                     overflow-y: auto;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
                 }
                 #qc-input::placeholder { color: #64748b; }
 
@@ -350,26 +415,74 @@
                 #qc-send-btn:active { transform: scale(0.95); }
 
                 /* --- Typing Indicator --- */
-                .qc-typing { display: flex; gap: 4px; padding: 12px 16px; background: #1e293b; border-radius: 18px; border-bottom-left-radius: 4px; width: fit-content; border: 1px solid var(--qc-border); }
-                .qc-typing-dot { width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; animation: qc-bounce 1.4s infinite ease-in-out both; }
+                .qc-typing {
+                    display: flex;
+                    gap: 4px;
+                    padding: 12px 16px;
+                    background: #1e293b;
+                    border-radius: 18px;
+                    border-bottom-left-radius: 4px;
+                    width: fit-content;
+                    border: 1px solid var(--qc-border);
+                }
+                .qc-typing-dot {
+                    width: 6px;
+                    height: 6px;
+                    background: #94a3b8;
+                    border-radius: 50%;
+                    animation: qc-bounce 1.4s infinite ease-in-out both;
+                }
                 .qc-typing-dot:nth-child(1) { animation-delay: -0.32s; }
                 .qc-typing-dot:nth-child(2) { animation-delay: -0.16s; }
 
                 /* --- Profile Banner --- */
                 #qc-profile-banner {
-                    background: rgba(249, 115, 22, 0.1); border-bottom: 1px solid rgba(249, 115, 22, 0.2);
-                    padding: 12px 16px; display: none;
+                    background: rgba(249, 115, 22, 0.1);
+                    border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+                    padding: 12px 16px;
+                    display: none;
                 }
                 #qc-profile-banner.show { display: block; animation: qc-fadeUp 0.3s; }
-                #qc-profile-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #fdba74; font-weight: bold; }
-                #qc-profile-form input {
-                    width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
-                    padding: 8px 12px; border-radius: 8px; color: white; margin-bottom: 6px; font-size: 13px;
+                #qc-profile-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 8px;
+                    font-size: 13px;
+                    color: #fdba74;
+                    font-weight: bold;
                 }
-                #qc-profile-submit { width: 100%; background: #f97316; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+                #qc-profile-form input {
+                    width: 100%;
+                    background: rgba(0,0,0,0.3);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    color: white;
+                    margin-bottom: 6px;
+                    font-size: 13px;
+                    font-family: inherit;
+                }
+                #qc-profile-submit {
+                    width: 100%;
+                    background: #f97316;
+                    color: white;
+                    border: none;
+                    padding: 8px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    font-family: inherit;
+                }
 
-                @keyframes qc-fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-                @keyframes qc-bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+                @keyframes qc-fadeUp {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                @keyframes qc-bounce {
+                    0%, 80%, 100% { transform: scale(0); }
+                    40% { transform: scale(1); }
+                }
 
                 @media (max-width: 480px) {
                     #qc-widget {
@@ -702,7 +815,7 @@
             this.renderMessages();
 
             input.value = '';
-            input.style.height = 'auto'; // Reset height
+            input.style.height = 'auto';
             this.sendTypingStopped();
         },
 
@@ -763,7 +876,7 @@
             }
             const input = document.getElementById('qc-input');
             input.style.height = 'auto';
-            input.style.height = Math.min(input.scrollHeight, 120) + 'px'; // Telegram grow effect
+            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
         },
 
         sendTypingStarted: function() {
@@ -790,9 +903,10 @@
                     const tick = m.isOwn ? (m.status === 'pending' ? '🕒' : '✓') : '';
                     el.innerHTML = `
                         <div class="qc-msg-bubble">
-                            ${this.escapeHtml(m.content)}
+                            <div class="qc-msg-content">${this.escapeHtml(m.content)}</div>
                             <div class="qc-msg-footer">
-                                <span>${time}</span> <span>${tick}</span>
+                                <span>${time}</span>
+                                ${tick ? `<span>${tick}</span>` : ''}
                             </div>
                         </div>`;
                 }
@@ -831,7 +945,7 @@
             const input = document.getElementById('qc-input');
             input.value += emoji;
             input.focus();
-            this.toggleEmojiPicker(); // Auto close
+            this.toggleEmojiPicker();
         },
         showProfileBanner: function() { document.getElementById('qc-profile-banner')?.classList.add('show'); },
         hideProfileBanner: function() { document.getElementById('qc-profile-banner')?.classList.remove('show'); },
