@@ -1,6 +1,6 @@
 /**
- * Quick Connect Chat SDK - PREMIUM DARK UI (Fixed Bubbles)
- * Version: 2.3.0
+ * Quick Connect Chat SDK - PREMIUM DARK UI
+ * Version: 2.4.0 (Mobile Fixes + Message Preview + Clean UI)
  */
 
 (function(window, document) {
@@ -41,7 +41,9 @@
             agentIsOnline: true,
             agentAvatar: null,
             onlineTimeout: null,
-            heartbeatInterval: null
+            heartbeatInterval: null,
+            // Preview State
+            previewTimeout: null
         },
 
         init: function(options) {
@@ -69,9 +71,7 @@
                     return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
                 }).join(''));
                 return JSON.parse(jsonPayload);
-            } catch (e) {
-                return null;
-            }
+            } catch (e) { return null; }
         },
 
         injectStyles: function() {
@@ -80,28 +80,23 @@
             fontLink.rel = 'stylesheet';
             document.head.appendChild(fontLink);
 
+            const isRight = this.config.position.includes('right');
+
             const style = document.createElement('style');
             style.textContent = `
                 :root {
                     --qc-font: 'Vazirmatn', sans-serif;
                     --qc-primary: #6366f1;
                     --qc-primary-dark: #4f46e5;
-
-                    /* --- Dark Theme Palette --- */
-                    --qc-bg-body: #0f172a;       /* Dark Slate Background */
-                    --qc-bg-header: #1e293b;     /* Slightly Lighter Slate */
-                    --qc-bg-input: #1e293b;
+                    --qc-bg-body: #0f172a;
+                    --qc-bg-header: #1e293b;
                     --qc-border: rgba(255, 255, 255, 0.1);
-
                     --qc-text-main: #f8fafc;
                     --qc-text-muted: #94a3b8;
-
-                    /* Message Colors */
-                    --qc-msg-own-bg: #6366f1;    /* Primary Color */
+                    --qc-msg-own-bg: #6366f1;
                     --qc-msg-own-text: #ffffff;
-                    --qc-msg-other-bg: #1e293b;  /* Dark Bubble */
+                    --qc-msg-other-bg: #1e293b;
                     --qc-msg-other-text: #f1f5f9;
-
                     --qc-shadow: 0 10px 40px rgba(0,0,0,0.4);
                 }
 
@@ -109,16 +104,14 @@
 
                 #qc-widget {
                     position: fixed;
-                    ${this.config.position.includes('right') ? 'right' : 'left'}: 24px;
+                    ${isRight ? 'right' : 'left'}: 24px;
                     bottom: 24px;
                     z-index: 999999;
                     font-family: var(--qc-font);
                     direction: rtl;
-                    pointer-events: none;
-                    width: auto;
-                    height: auto;
+                    pointer-events: none; /* Let clicks pass through wrapper */
+                    width: 0; height: 0;
                 }
-                #qc-widget > * { pointer-events: auto; }
 
                 /* --- Launcher Button --- */
                 #qc-btn {
@@ -130,10 +123,11 @@
                     cursor: pointer;
                     display: flex; align-items: center; justify-content: center;
                     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-                    z-index: 100;
-                    position: absolute;
-                    bottom: 0;
-                    ${this.config.position.includes('right') ? 'right' : 'left'}: 0;
+                    position: fixed;
+                    bottom: 24px;
+                    ${isRight ? 'right' : 'left'}: 24px;
+                    z-index: 1000000;
+                    pointer-events: auto;
                 }
                 #qc-btn:hover { transform: scale(1.1) rotate(-5deg); border-radius: 50%; }
                 #qc-btn.hidden { transform: scale(0) rotate(90deg); opacity: 0; pointer-events: none; }
@@ -148,6 +142,63 @@
                     padding: 0 4px;
                 }
 
+                /* --- Message Preview Bubble (New Feature) --- */
+                #qc-preview-container {
+                    position: fixed;
+                    bottom: 30px;
+                    ${isRight ? 'right' : 'left'}: 90px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    z-index: 999999;
+                    pointer-events: none;
+                    opacity: 0;
+                    transform: translateX(${isRight ? '20px' : '-20px'});
+                    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+                    visibility: hidden;
+                }
+                #qc-preview-container.show {
+                    opacity: 1;
+                    transform: translateX(0);
+                    visibility: visible;
+                    pointer-events: auto;
+                }
+
+                #qc-preview-bubble {
+                    background: white;
+                    color: #334155;
+                    padding: 10px 16px;
+                    border-radius: 12px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+                    max-width: 200px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    position: relative;
+                }
+                /* Arrow for bubble */
+                #qc-preview-bubble::after {
+                    content: ''; position: absolute;
+                    top: 50%; ${isRight ? 'right' : 'left'}: -6px;
+                    margin-top: -6px;
+                    border-width: 6px; border-style: solid;
+                    border-color: transparent transparent transparent white;
+                    ${isRight ? 'transform: rotate(180deg);' : ''}
+                }
+
+                #qc-preview-avatar {
+                    width: 45px; height: 45px;
+                    border-radius: 50%;
+                    background: #e2e8f0;
+                    overflow: hidden;
+                    border: 2px solid white;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    flex-shrink: 0;
+                }
+                #qc-preview-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
                 /* --- Main Window --- */
                 #qc-window {
                     width: 380px; height: 650px;
@@ -155,21 +206,24 @@
                     background: var(--qc-bg-body);
                     border-radius: 20px;
                     box-shadow: var(--qc-shadow);
-                    position: absolute;
-                    bottom: 80px;
-                    ${this.config.position.includes('right') ? 'right' : 'left'}: 0;
+                    position: fixed;
+                    bottom: 95px; /* Above launcher */
+                    ${isRight ? 'right' : 'left'}: 24px;
                     display: flex; flex-direction: column;
                     overflow: hidden;
                     opacity: 0;
-                    transform-origin: bottom ${this.config.position.includes('right') ? 'right' : 'left'};
+                    transform-origin: bottom ${isRight ? 'right' : 'left'};
                     transform: scale(0.9) translateY(20px);
                     transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
                     visibility: hidden;
                     border: 1px solid var(--qc-border);
+                    pointer-events: none; /* Prevent blocking when closed */
+                    z-index: 1000000;
                 }
                 #qc-window.open {
                     opacity: 1; transform: scale(1) translateY(0);
                     visibility: visible;
+                    pointer-events: auto;
                 }
 
                 /* --- Header --- */
@@ -178,8 +232,7 @@
                     background: var(--qc-bg-header);
                     border-bottom: 1px solid var(--qc-border);
                     display: flex; align-items: center; justify-content: space-between;
-                    z-index: 10;
-                    height: 70px; flex-shrink: 0;
+                    z-index: 10; height: 70px; flex-shrink: 0;
                 }
                 #qc-header-info { display: flex; align-items: center; gap: 12px; }
                 #qc-avatar {
@@ -201,7 +254,6 @@
                     background: transparent; border: none; color: var(--qc-text-muted);
                     cursor: pointer; padding: 8px; border-radius: 8px; transition: 0.2s;
                 }
-                #qc-close-btn:hover { background: rgba(255,255,255,0.1); color: white; }
 
                 /* --- Messages Container --- */
                 #qc-messages {
@@ -209,22 +261,20 @@
                     overflow-y: auto;
                     overflow-x: hidden;
                     padding: 16px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px; /* Space between messages */
+                    display: flex; flex-direction: column; gap: 8px;
                     background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
                     scroll-behavior: smooth;
                 }
-
-                /* --- Scrollbar --- */
                 #qc-messages::-webkit-scrollbar { width: 5px; }
-                #qc-messages::-webkit-scrollbar-track { background: transparent; }
                 #qc-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
 
-                /* --- Date Separator --- */
+                /* --- Date Separator (FIXED) --- */
                 .qc-date-separator {
                     display: flex; justify-content: center;
-                    margin: 20px 0 10px 0; position: sticky; top: 0; z-index: 5;
+                    margin: 15px 0;
+                    position: relative; /* Changed from sticky to relative to prevent overlap */
+                    z-index: 1;
+                    width: 100%;
                 }
                 .qc-date-pill {
                     background: rgba(0, 0, 0, 0.4);
@@ -232,100 +282,44 @@
                     font-size: 11px; padding: 4px 12px;
                     border-radius: 12px; font-weight: 500;
                     border: 1px solid rgba(255,255,255,0.05);
-                    backdrop-filter: blur(4px);
                 }
 
-                /* --- Message Bubbles (The Fix) --- */
-                .qc-msg {
-                    display: flex;
-                    width: 100%;
-                    margin-bottom: 2px;
-                    animation: qc-fadeIn 0.25s ease-out;
-                }
-
+                /* --- Message Bubbles --- */
+                .qc-msg { display: flex; width: 100%; margin-bottom: 2px; animation: qc-fadeIn 0.25s ease-out; }
                 .qc-msg.own { justify-content: flex-end; }
                 .qc-msg.other { justify-content: flex-start; align-items: flex-end; }
-
-                .qc-msg-avatar {
-                    width: 30px; height: 30px;
-                    margin-left: 8px; margin-bottom: 2px;
-                    border-radius: 50%; overflow: hidden;
-                    flex-shrink: 0; background: #334155;
-                    border: 1px solid var(--qc-border);
-                }
-                .qc-msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
                 .qc-msg-bubble {
-                    position: relative;
-                    max-width: 78%; /* Prevent full width */
-                    width: fit-content; /* Crucial for bubble size */
-                    min-width: 60px;
-                    padding: 8px 12px;
-                    font-size: 14px;
-                    line-height: 1.6;
-                    word-wrap: break-word;
-                    white-space: pre-wrap;
+                    position: relative; max-width: 78%; width: fit-content; min-width: 60px;
+                    padding: 8px 12px; font-size: 14px; line-height: 1.6;
+                    word-wrap: break-word; white-space: pre-wrap;
                     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                    display: flex;
-                    flex-direction: column; /* Stack text and time */
+                    display: flex; flex-direction: column;
                 }
-
-                /* Own Message Style */
                 .qc-msg.own .qc-msg-bubble {
                     background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-                    color: white;
-                    border-radius: 16px 16px 2px 16px; /* TopL, TopR, BotR(Sharp), BotL */
+                    color: white; border-radius: 16px 16px 2px 16px;
                 }
-
-                /* Other Message Style */
                 .qc-msg.other .qc-msg-bubble {
                     background: var(--qc-msg-other-bg);
                     color: var(--qc-msg-other-text);
-                    border: 1px solid var(--qc-border);
-                    border-radius: 16px 16px 16px 2px; /* TopL, TopR, BotR, BotL(Sharp) */
+                    border: 1px solid var(--qc-border); border-radius: 16px 16px 16px 2px;
                 }
-
-                /* System Message Style */
                 .qc-msg.system { justify-content: center; margin: 12px 0; }
                 .qc-msg.system .qc-msg-bubble {
-                    background: rgba(255,255,255,0.05);
-                    color: #94a3b8;
-                    font-size: 12px;
-                    padding: 4px 12px;
-                    border-radius: 10px;
-                    max-width: 90%;
-                    text-align: center;
-                    border: none;
-                    width: auto;
+                    background: rgba(255,255,255,0.05); color: #94a3b8;
+                    font-size: 12px; padding: 4px 12px; border-radius: 10px;
+                    max-width: 90%; text-align: center; border: none; width: auto;
                 }
-
-                .qc-msg-text {
-                    margin-bottom: 2px;
-                }
-
                 .qc-msg-meta {
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-end; /* Align time to right */
-                    gap: 4px;
-                    font-size: 10px;
-                    opacity: 0.7;
-                    margin-top: 2px;
-                    user-select: none;
-                    height: 14px;
+                    display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+                    font-size: 10px; opacity: 0.7; margin-top: 2px; user-select: none; height: 14px;
                 }
-
-                .qc-msg.own .qc-msg-meta { color: rgba(255,255,255,0.9); }
-                .qc-msg.other .qc-msg-meta { color: #94a3b8; }
 
                 /* --- Input Area --- */
                 #qc-input-area {
-                    padding: 12px;
-                    background: var(--qc-bg-header);
-                    border-top: 1px solid var(--qc-border);
-                    flex-shrink: 0;
+                    padding: 12px; background: var(--qc-bg-header);
+                    border-top: 1px solid var(--qc-border); flex-shrink: 0;
                 }
-
                 #qc-emoji-picker {
                     max-height: 0; opacity: 0; overflow: hidden;
                     transition: all 0.2s ease; background: #334155;
@@ -337,8 +331,8 @@
                 }
                 #qc-emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
                 .qc-emoji-btn {
-                    font-size: 22px; padding: 4px; cursor: pointer;
-                    background: none; border: none; border-radius: 6px; transition: transform 0.1s;
+                    font-size: 22px; padding: 4px; cursor: pointer; background: none; border: none;
+                    border-radius: 6px; transition: transform 0.1s;
                 }
                 .qc-emoji-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.1); }
 
@@ -350,30 +344,30 @@
                     transition: border-color 0.2s;
                 }
                 #qc-input-container:focus-within { border-color: var(--qc-primary); }
-
                 #qc-input-wrapper { flex: 1; display: flex; align-items: center; min-height: 24px; }
+
                 #qc-input {
                     width: 100%; background: transparent; border: none;
                     color: white; font-family: inherit; font-size: 14px;
                     resize: none; padding: 2px 0; max-height: 100px;
                     line-height: 20px;
+                    /* Hide Scrollbar but allow scroll */
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                 }
+                #qc-input::-webkit-scrollbar { display: none; }
                 #qc-input::placeholder { color: #64748b; }
 
                 .qc-icon-btn {
                     width: 34px; height: 34px; border-radius: 50%; border: none;
-                    background: transparent; color: #94a3b8;
-                    display: flex; align-items: center; justify-content: center;
-                    cursor: pointer; transition: 0.2s; flex-shrink: 0;
+                    background: transparent; color: #94a3b8; display: flex;
+                    align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0;
                 }
                 .qc-icon-btn:hover { color: var(--qc-primary); background: rgba(255,255,255,0.05); }
-
                 #qc-send-btn {
-                    color: white; background: var(--qc-primary);
-                    width: 36px; height: 36px; border-radius: 12px;
-                    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+                    color: white; background: var(--qc-primary); width: 36px; height: 36px;
+                    border-radius: 12px; box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
                 }
-                #qc-send-btn:hover { transform: scale(1.05); background: var(--qc-primary-dark); }
 
                 /* --- Typing Indicator --- */
                 .qc-typing { display: flex; gap: 4px; padding: 4px 0; }
@@ -386,31 +380,36 @@
 
                 /* --- Profile Banner --- */
                 #qc-profile-banner {
-                    background: rgba(249, 115, 22, 0.1);
-                    border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+                    background: rgba(249, 115, 22, 0.1); border-bottom: 1px solid rgba(249, 115, 22, 0.2);
                     padding: 12px 16px; display: none;
                 }
                 #qc-profile-banner.show { display: block; animation: qc-fadeIn 0.3s; }
                 #qc-profile-form input {
-                    width: 100%; background: rgba(0,0,0,0.3);
-                    border: 1px solid rgba(255,255,255,0.1);
-                    padding: 8px 12px; border-radius: 8px; color: white;
-                    margin-bottom: 6px; font-size: 13px;
+                    width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+                    padding: 8px 12px; border-radius: 8px; color: white; margin-bottom: 6px; font-size: 13px;
                 }
                 #qc-profile-submit {
-                    width: 100%; background: #f97316; color: white;
-                    border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-weight: bold;
+                    width: 100%; background: #f97316; color: white; border: none; padding: 8px;
+                    border-radius: 8px; cursor: pointer; font-weight: bold;
                 }
 
                 @keyframes qc-fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes qc-bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
+                /* --- Mobile Fullscreen Fix --- */
                 @media (max-width: 480px) {
-                    #qc-widget { right: 0; left: 0; bottom: 0; width: 100%; }
-                    #qc-btn { position: fixed; right: 24px; bottom: 24px; }
                     #qc-window {
-                        width: 100%; height: 100%; border-radius: 0; border: none;
-                        bottom: 0; right: 0; max-height: 100vh;
+                        position: fixed;
+                        top: 0; left: 0; right: 0; bottom: 0;
+                        width: 100%; height: 100%;
+                        max-height: 100vh;
+                        border-radius: 0;
+                        border: none;
+                        transform: none !important; /* Disable scale effect on mobile */
+                    }
+                    #qc-widget {
+                        /* Reset widget container constraints on mobile */
+                        width: auto; height: auto;
                     }
                 }
             `;
@@ -421,6 +420,19 @@
             const container = document.createElement('div');
             container.id = 'qc-widget';
             container.innerHTML = `
+                <div id="qc-preview-container">
+                    <div id="qc-preview-avatar">
+                        <img id="qc-preview-img" src="" style="display:none">
+                        <div id="qc-preview-default" style="width:100%;height:100%;background:#cbd5e1;display:flex;align-items:center;justify-content:center;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="qc-preview-bubble"></div>
+                </div>
+
                 <button id="qc-btn">
                     <span id="qc-badge" style="display: none">0</span>
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -512,6 +524,7 @@
             document.getElementById('qc-send-btn').onclick = () => this.sendMessage();
             document.getElementById('qc-profile-close').onclick = () => this.hideProfileBanner();
             document.getElementById('qc-profile-submit').onclick = () => this.updateProfile();
+            document.getElementById('qc-preview-container').onclick = () => this.openChat(); // Allow clicking preview to open
 
             const input = document.getElementById('qc-input');
             input.oninput = () => this.handleTyping();
@@ -578,15 +591,21 @@
                     const title = document.getElementById('qc-header-title');
                     const img = document.getElementById('qc-avatar-img');
                     const svg = document.getElementById('qc-avatar-svg');
+                    // Preview Elements
+                    const prevImg = document.getElementById('qc-preview-img');
+                    const prevDef = document.getElementById('qc-preview-default');
+
                     const info = data.support_info || {};
 
                     title.textContent = (data.assigned_support_id && info.fullname) ? info.fullname : 'پشتیبانی آنلاین';
 
                     if (info.avatar) {
                         img.src = info.avatar; img.style.display = 'block'; svg.style.display = 'none';
+                        prevImg.src = info.avatar; prevImg.style.display = 'block'; prevDef.style.display = 'none';
                         this.state.agentAvatar = info.avatar;
                     } else {
                         img.style.display = 'none'; svg.style.display = 'block';
+                        prevImg.style.display = 'none'; prevDef.style.display = 'flex';
                         this.state.agentAvatar = null;
                     }
 
@@ -703,6 +722,25 @@
             }
         },
 
+        // --- NEW: Preview Bubble Logic ---
+        showPreviewMessage: function(text) {
+            const container = document.getElementById('qc-preview-container');
+            const bubble = document.getElementById('qc-preview-bubble');
+            if (!container || !bubble) return;
+
+            let previewText = text.substring(0, 20);
+            if (text.length > 20) previewText += '...';
+
+            bubble.textContent = previewText;
+            container.classList.add('show');
+
+            // Auto hide after 5 seconds
+            clearTimeout(this.state.previewTimeout);
+            this.state.previewTimeout = setTimeout(() => {
+                container.classList.remove('show');
+            }, 5000);
+        },
+
         sendMessage: function() {
             const input = document.getElementById('qc-input');
             const content = input.value.trim();
@@ -737,7 +775,11 @@
                 }
                 if (msg.payload.sender_id === this.state.userId) return;
 
-                if (!this.state.isOpen) { this.state.unreadCount++; this.updateBadgeUI(); }
+                if (!this.state.isOpen) {
+                    this.state.unreadCount++;
+                    this.updateBadgeUI();
+                    this.showPreviewMessage(msg.payload.content || 'پیام جدید'); // Trigger Preview
+                }
                 if (msg.payload.conversation_id && !this.state.conversationId) this.state.conversationId = msg.payload.conversation_id;
 
                 this.state.messages.push({ ...msg.payload, isOwn: false });
@@ -793,7 +835,6 @@
             this.state.lastTypingSent = 0;
         },
 
-        // --- Date Formatter Helper ---
         formatDateSeparator: function(dateString) {
             const date = new Date(dateString);
             const today = new Date();
@@ -812,12 +853,9 @@
             let lastDateKey = null;
 
             this.state.messages.forEach(m => {
-                // --- Date Separator Logic ---
                 if (m.created_at) {
                     const dateObj = new Date(m.created_at);
-                    // Create a simple key string YYYY-MM-DD for comparison
                     const dateKey = dateObj.toLocaleDateString('en-CA');
-
                     if (dateKey !== lastDateKey) {
                         const dateSep = document.createElement('div');
                         dateSep.className = 'qc-date-separator';
@@ -835,7 +873,6 @@
                     el.className = `qc-msg ${m.isOwn ? 'own' : 'other'}`;
                     const time = new Date(m.created_at).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
 
-                    // Tick Icon
                     let tick = '';
                     if (m.isOwn) {
                         if (m.status === 'pending') {
@@ -845,23 +882,8 @@
                         }
                     }
 
-                    // Agent Avatar in Chat
-                    let avatarHtml = '';
-                    if (!m.isOwn) {
-                        const avatarSrc = this.state.agentAvatar;
-                        avatarHtml = `
-                            <div class="qc-msg-avatar">
-                                ${avatarSrc
-                            ? `<img src="${avatarSrc}">`
-                            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                       </div>`
-                        }
-                            </div>`;
-                    }
-
+                    // Avatar removed from inside chat as requested in previous step
                     el.innerHTML = `
-                        ${avatarHtml}
                         <div class="qc-msg-bubble">
                             <div class="qc-msg-text">${this.escapeHtml(m.content)}</div>
                             <div class="qc-msg-meta">
@@ -875,14 +897,7 @@
 
             if (this.state.typingUsers.size > 0) {
                 const t = document.createElement('div'); t.className = 'qc-msg other';
-                const avatarSrc = this.state.agentAvatar;
                 t.innerHTML = `
-                    <div class="qc-msg-avatar">
-                         ${avatarSrc
-                    ? `<img src="${avatarSrc}">`
-                    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">...</div>`
-                }
-                    </div>
                     <div class="qc-msg-bubble" style="padding:8px 14px; min-width: 50px;">
                         <div class="qc-typing">
                             <div class="qc-typing-dot"></div>
@@ -905,6 +920,7 @@
             this.fetchActiveConversation();
             document.getElementById('qc-btn').classList.add('hidden');
             document.getElementById('qc-window').classList.add('open');
+            document.getElementById('qc-preview-container').classList.remove('show'); // Hide preview if open
             setTimeout(() => document.getElementById('qc-input').focus(), 300);
         },
         closeChat: function() {
