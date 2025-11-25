@@ -1,6 +1,6 @@
 /**
  * Quick Connect Chat SDK - PREMIUM DARK UI
- * Version: 2.4.0 (Mobile Fixes + Message Preview + Clean UI)
+ * Version: 2.4.1 (Fix: Double Message Sent + Mobile Fullscreen + Preview)
  */
 
 (function(window, document) {
@@ -43,7 +43,9 @@
             onlineTimeout: null,
             heartbeatInterval: null,
             // Preview State
-            previewTimeout: null
+            previewTimeout: null,
+            // Sending State (Fix for Double Send)
+            isSending: false
         },
 
         init: function(options) {
@@ -109,11 +111,10 @@
                     z-index: 999999;
                     font-family: var(--qc-font);
                     direction: rtl;
-                    pointer-events: none; /* Let clicks pass through wrapper */
+                    pointer-events: none;
                     width: 0; height: 0;
                 }
 
-                /* --- Launcher Button --- */
                 #qc-btn {
                     width: 60px; height: 60px;
                     border-radius: 24px;
@@ -142,64 +143,41 @@
                     padding: 0 4px;
                 }
 
-                /* --- Message Preview Bubble (New Feature) --- */
+                /* --- Preview Bubble --- */
                 #qc-preview-container {
                     position: fixed;
                     bottom: 30px;
                     ${isRight ? 'right' : 'left'}: 90px;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    z-index: 999999;
-                    pointer-events: none;
+                    display: flex; align-items: center; gap: 10px;
+                    z-index: 999999; pointer-events: none;
                     opacity: 0;
                     transform: translateX(${isRight ? '20px' : '-20px'});
                     transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
                     visibility: hidden;
                 }
                 #qc-preview-container.show {
-                    opacity: 1;
-                    transform: translateX(0);
-                    visibility: visible;
-                    pointer-events: auto;
+                    opacity: 1; transform: translateX(0); visibility: visible; pointer-events: auto;
                 }
-
                 #qc-preview-bubble {
-                    background: white;
-                    color: #334155;
-                    padding: 10px 16px;
-                    border-radius: 12px;
-                    font-size: 13px;
-                    font-weight: 500;
+                    background: white; color: #334155; padding: 10px 16px;
+                    border-radius: 12px; font-size: 13px; font-weight: 500;
                     box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-                    max-width: 200px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    position: relative;
+                    max-width: 200px; white-space: nowrap; overflow: hidden;
+                    text-overflow: ellipsis; position: relative;
                 }
-                /* Arrow for bubble */
                 #qc-preview-bubble::after {
-                    content: ''; position: absolute;
-                    top: 50%; ${isRight ? 'right' : 'left'}: -6px;
-                    margin-top: -6px;
-                    border-width: 6px; border-style: solid;
+                    content: ''; position: absolute; top: 50%; ${isRight ? 'right' : 'left'}: -6px;
+                    margin-top: -6px; border-width: 6px; border-style: solid;
                     border-color: transparent transparent transparent white;
                     ${isRight ? 'transform: rotate(180deg);' : ''}
                 }
-
                 #qc-preview-avatar {
-                    width: 45px; height: 45px;
-                    border-radius: 50%;
-                    background: #e2e8f0;
-                    overflow: hidden;
-                    border: 2px solid white;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0;
+                    overflow: hidden; border: 2px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                     flex-shrink: 0;
                 }
                 #qc-preview-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-                /* --- Main Window --- */
                 #qc-window {
                     width: 380px; height: 650px;
                     max-height: calc(100vh - 100px);
@@ -207,39 +185,30 @@
                     border-radius: 20px;
                     box-shadow: var(--qc-shadow);
                     position: fixed;
-                    bottom: 95px; /* Above launcher */
+                    bottom: 95px;
                     ${isRight ? 'right' : 'left'}: 24px;
-                    display: flex; flex-direction: column;
-                    overflow: hidden;
-                    opacity: 0;
-                    transform-origin: bottom ${isRight ? 'right' : 'left'};
+                    display: flex; flex-direction: column; overflow: hidden;
+                    opacity: 0; transform-origin: bottom ${isRight ? 'right' : 'left'};
                     transform: scale(0.9) translateY(20px);
                     transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-                    visibility: hidden;
-                    border: 1px solid var(--qc-border);
-                    pointer-events: none; /* Prevent blocking when closed */
-                    z-index: 1000000;
+                    visibility: hidden; border: 1px solid var(--qc-border);
+                    pointer-events: none; z-index: 1000000;
                 }
                 #qc-window.open {
                     opacity: 1; transform: scale(1) translateY(0);
-                    visibility: visible;
-                    pointer-events: auto;
+                    visibility: visible; pointer-events: auto;
                 }
 
-                /* --- Header --- */
                 #qc-header {
-                    padding: 16px 20px;
-                    background: var(--qc-bg-header);
+                    padding: 16px 20px; background: var(--qc-bg-header);
                     border-bottom: 1px solid var(--qc-border);
                     display: flex; align-items: center; justify-content: space-between;
                     z-index: 10; height: 70px; flex-shrink: 0;
                 }
                 #qc-header-info { display: flex; align-items: center; gap: 12px; }
                 #qc-avatar {
-                    width: 40px; height: 40px;
-                    background: rgba(255,255,255,0.1); border-radius: 14px;
-                    display: flex; align-items: center; justify-content: center;
-                    position: relative;
+                    width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 14px;
+                    display: flex; align-items: center; justify-content: center; position: relative;
                 }
                 #qc-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
                 #qc-status-dot {
@@ -255,12 +224,8 @@
                     cursor: pointer; padding: 8px; border-radius: 8px; transition: 0.2s;
                 }
 
-                /* --- Messages Container --- */
                 #qc-messages {
-                    flex: 1;
-                    overflow-y: auto;
-                    overflow-x: hidden;
-                    padding: 16px;
+                    flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px;
                     display: flex; flex-direction: column; gap: 8px;
                     background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
                     scroll-behavior: smooth;
@@ -268,23 +233,16 @@
                 #qc-messages::-webkit-scrollbar { width: 5px; }
                 #qc-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
 
-                /* --- Date Separator (FIXED) --- */
                 .qc-date-separator {
-                    display: flex; justify-content: center;
-                    margin: 15px 0;
-                    position: relative; /* Changed from sticky to relative to prevent overlap */
-                    z-index: 1;
-                    width: 100%;
+                    display: flex; justify-content: center; margin: 15px 0;
+                    position: relative; z-index: 1; width: 100%;
                 }
                 .qc-date-pill {
-                    background: rgba(0, 0, 0, 0.4);
-                    color: #94a3b8;
-                    font-size: 11px; padding: 4px 12px;
-                    border-radius: 12px; font-weight: 500;
-                    border: 1px solid rgba(255,255,255,0.05);
+                    background: rgba(0, 0, 0, 0.4); color: #94a3b8;
+                    font-size: 11px; padding: 4px 12px; border-radius: 12px;
+                    font-weight: 500; border: 1px solid rgba(255,255,255,0.05);
                 }
 
-                /* --- Message Bubbles --- */
                 .qc-msg { display: flex; width: 100%; margin-bottom: 2px; animation: qc-fadeIn 0.25s ease-out; }
                 .qc-msg.own { justify-content: flex-end; }
                 .qc-msg.other { justify-content: flex-start; align-items: flex-end; }
@@ -300,8 +258,7 @@
                     color: white; border-radius: 16px 16px 2px 16px;
                 }
                 .qc-msg.other .qc-msg-bubble {
-                    background: var(--qc-msg-other-bg);
-                    color: var(--qc-msg-other-text);
+                    background: var(--qc-msg-other-bg); color: var(--qc-msg-other-text);
                     border: 1px solid var(--qc-border); border-radius: 16px 16px 16px 2px;
                 }
                 .qc-msg.system { justify-content: center; margin: 12px 0; }
@@ -315,7 +272,6 @@
                     font-size: 10px; opacity: 0.7; margin-top: 2px; user-select: none; height: 14px;
                 }
 
-                /* --- Input Area --- */
                 #qc-input-area {
                     padding: 12px; background: var(--qc-bg-header);
                     border-top: 1px solid var(--qc-border); flex-shrink: 0;
@@ -345,15 +301,12 @@
                 }
                 #qc-input-container:focus-within { border-color: var(--qc-primary); }
                 #qc-input-wrapper { flex: 1; display: flex; align-items: center; min-height: 24px; }
-
                 #qc-input {
                     width: 100%; background: transparent; border: none;
                     color: white; font-family: inherit; font-size: 14px;
                     resize: none; padding: 2px 0; max-height: 100px;
                     line-height: 20px;
-                    /* Hide Scrollbar but allow scroll */
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
+                    -ms-overflow-style: none; scrollbar-width: none;
                 }
                 #qc-input::-webkit-scrollbar { display: none; }
                 #qc-input::placeholder { color: #64748b; }
@@ -369,7 +322,6 @@
                     border-radius: 12px; box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
                 }
 
-                /* --- Typing Indicator --- */
                 .qc-typing { display: flex; gap: 4px; padding: 4px 0; }
                 .qc-typing-dot {
                     width: 6px; height: 6px; background: #94a3b8; border-radius: 50%;
@@ -378,7 +330,6 @@
                 .qc-typing-dot:nth-child(1) { animation-delay: -0.32s; }
                 .qc-typing-dot:nth-child(2) { animation-delay: -0.16s; }
 
-                /* --- Profile Banner --- */
                 #qc-profile-banner {
                     background: rgba(249, 115, 22, 0.1); border-bottom: 1px solid rgba(249, 115, 22, 0.2);
                     padding: 12px 16px; display: none;
@@ -396,21 +347,13 @@
                 @keyframes qc-fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes qc-bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-                /* --- Mobile Fullscreen Fix --- */
                 @media (max-width: 480px) {
                     #qc-window {
-                        position: fixed;
-                        top: 0; left: 0; right: 0; bottom: 0;
-                        width: 100%; height: 100%;
-                        max-height: 100vh;
-                        border-radius: 0;
-                        border: none;
-                        transform: none !important; /* Disable scale effect on mobile */
+                        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                        width: 100%; height: 100%; max-height: 100vh;
+                        border-radius: 0; border: none; transform: none !important;
                     }
-                    #qc-widget {
-                        /* Reset widget container constraints on mobile */
-                        width: auto; height: auto;
-                    }
+                    #qc-widget { width: auto; height: auto; }
                 }
             `;
             document.head.appendChild(style);
@@ -521,15 +464,20 @@
             document.getElementById('qc-btn').onclick = () => this.openChat();
             document.getElementById('qc-close-btn').onclick = () => this.closeChat();
             document.getElementById('qc-emoji-toggle').onclick = () => this.toggleEmojiPicker();
-            document.getElementById('qc-send-btn').onclick = () => this.sendMessage();
+            // FIX: Debounced click handler
+            document.getElementById('qc-send-btn').onclick = (e) => {
+                e.preventDefault();
+                this.sendMessage();
+            };
             document.getElementById('qc-profile-close').onclick = () => this.hideProfileBanner();
             document.getElementById('qc-profile-submit').onclick = () => this.updateProfile();
-            document.getElementById('qc-preview-container').onclick = () => this.openChat(); // Allow clicking preview to open
+            document.getElementById('qc-preview-container').onclick = () => this.openChat();
 
             const input = document.getElementById('qc-input');
             input.oninput = () => this.handleTyping();
             input.onkeydown = (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                // FIX: Check if user is composting (typing via IME/Suggestion)
+                if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
                     e.preventDefault();
                     this.sendMessage();
                 }
@@ -591,10 +539,8 @@
                     const title = document.getElementById('qc-header-title');
                     const img = document.getElementById('qc-avatar-img');
                     const svg = document.getElementById('qc-avatar-svg');
-                    // Preview Elements
                     const prevImg = document.getElementById('qc-preview-img');
                     const prevDef = document.getElementById('qc-preview-default');
-
                     const info = data.support_info || {};
 
                     title.textContent = (data.assigned_support_id && info.fullname) ? info.fullname : 'پشتیبانی آنلاین';
@@ -672,7 +618,8 @@
         },
 
         connectWebSocket: function() {
-            if (this.state.ws && this.state.ws.readyState === WebSocket.OPEN) return;
+            // FIX: Stronger check to prevent duplicate sockets
+            if (this.state.ws && (this.state.ws.readyState === WebSocket.OPEN || this.state.ws.readyState === WebSocket.CONNECTING)) return;
             try { this.state.ws = new WebSocket(this.config.chatUrl, [this.state.token]); } catch(e){ return; }
 
             this.state.ws.onopen = () => {
@@ -683,6 +630,7 @@
             };
             this.state.ws.onclose = () => {
                 this.state.isConnected = false; this.updateConnectionStatus(); this.stopHeartbeat();
+                this.state.ws = null; // Clear reference
                 setTimeout(() => this.connectWebSocket(), 3000);
             };
             this.state.ws.onmessage = (e) => this.handleIncomingMessage(JSON.parse(e.data));
@@ -722,7 +670,6 @@
             }
         },
 
-        // --- NEW: Preview Bubble Logic ---
         showPreviewMessage: function(text) {
             const container = document.getElementById('qc-preview-container');
             const bubble = document.getElementById('qc-preview-bubble');
@@ -733,8 +680,6 @@
 
             bubble.textContent = previewText;
             container.classList.add('show');
-
-            // Auto hide after 5 seconds
             clearTimeout(this.state.previewTimeout);
             this.state.previewTimeout = setTimeout(() => {
                 container.classList.remove('show');
@@ -742,9 +687,14 @@
         },
 
         sendMessage: function() {
+            // FIX: Prevent double sending
+            if (this.state.isSending) return;
+
             const input = document.getElementById('qc-input');
             const content = input.value.trim();
             if (!content || !this.state.ws) return;
+
+            this.state.isSending = true; // Lock
 
             const tempId = `loc_${Date.now()}`;
             this.state.ws.send(JSON.stringify({
@@ -761,6 +711,9 @@
             input.value = '';
             input.style.height = 'auto';
             this.sendTypingStopped();
+
+            // Release Lock after a short delay
+            setTimeout(() => { this.state.isSending = false; }, 500);
         },
 
         handleIncomingMessage: function(msg) {
@@ -778,7 +731,7 @@
                 if (!this.state.isOpen) {
                     this.state.unreadCount++;
                     this.updateBadgeUI();
-                    this.showPreviewMessage(msg.payload.content || 'پیام جدید'); // Trigger Preview
+                    this.showPreviewMessage(msg.payload.content || 'پیام جدید');
                 }
                 if (msg.payload.conversation_id && !this.state.conversationId) this.state.conversationId = msg.payload.conversation_id;
 
@@ -882,7 +835,6 @@
                         }
                     }
 
-                    // Avatar removed from inside chat as requested in previous step
                     el.innerHTML = `
                         <div class="qc-msg-bubble">
                             <div class="qc-msg-text">${this.escapeHtml(m.content)}</div>
@@ -920,7 +872,7 @@
             this.fetchActiveConversation();
             document.getElementById('qc-btn').classList.add('hidden');
             document.getElementById('qc-window').classList.add('open');
-            document.getElementById('qc-preview-container').classList.remove('show'); // Hide preview if open
+            document.getElementById('qc-preview-container').classList.remove('show');
             setTimeout(() => document.getElementById('qc-input').focus(), 300);
         },
         closeChat: function() {
