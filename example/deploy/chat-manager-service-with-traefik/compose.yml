@@ -28,7 +28,7 @@ services:
       - app_net
 
   chat:
-    image: syntaxfa/quickconnect-chat:0.0.1
+    image: syntaxfa/quickconnect-chat:1.0.0
     container_name: chat
     restart: on-failure
     networks:
