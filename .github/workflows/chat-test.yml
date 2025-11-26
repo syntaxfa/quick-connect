@@ -1,4 +1,4 @@
-name: CI Chat Service
+name: Chat CI Service
 
 on:
   pull_request:

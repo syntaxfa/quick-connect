@@ -1,4 +1,4 @@
-name: CI Manager service
+name: Manager CI service
 
 on:
   pull_request:

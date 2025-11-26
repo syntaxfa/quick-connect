@@ -1,4 +1,4 @@
-name: Chat Build And Deploy On Docker
+name: Manager Build And Deploy On Docker
 
 on:
   push:
