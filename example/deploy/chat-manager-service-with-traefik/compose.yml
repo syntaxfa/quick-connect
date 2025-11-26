@@ -49,7 +49,7 @@ services:
       - traefik.http.services.quick-chat.loadbalancer.server.port=2525
 
   manager:
-    image: syntaxfa/quickconnect-manager:0.0.1
+    image: syntaxfa/quickconnect-manager:1.0.0
     container_name: manager
     restart: on-failure
     networks:
