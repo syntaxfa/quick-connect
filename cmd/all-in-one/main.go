@@ -32,6 +32,7 @@ func main() {
 		Short: "manager service commands",
 	}
 	managerRoot.AddCommand(managerCommand.Migrate{}.Command(serviceCfg.ManagerCfg.Postgres, serviceLog.ManagerLog))
+	managerRoot.AddCommand(managerCommand.CreateUser{}.Command(serviceCfg.ManagerCfg, serviceLog.ManagerLog, nil))
 
 	chatRoot := &cobra.Command{
 		Use:   "chat",
