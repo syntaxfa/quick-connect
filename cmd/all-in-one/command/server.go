@@ -1,36 +1,17 @@
 package command
 
 import (
-	"log/slog"
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/syntaxfa/quick-connect/app/adminapp"
-	"github.com/syntaxfa/quick-connect/app/chatapp"
-	"github.com/syntaxfa/quick-connect/app/managerapp"
-	"github.com/syntaxfa/quick-connect/app/notificationapp"
 )
 
-type Config struct {
-	ManagerCfg      managerapp.Config
-	ChatCfg         chatapp.Config
-	NotificationCfg notificationapp.Config
-	AdminCfg        adminapp.Config
-}
-
-type Logger struct {
-	ManagerLog      *slog.Logger
-	ChatLog         *slog.Logger
-	NotificationLog *slog.Logger
-	AdminLog        *slog.Logger
-}
-
 type Server struct {
-	cfg    Config
+	cfg    ServiceConfig
 	logger Logger
 }
 
-func (s Server) Command(cfg Config, logger Logger, trap <-chan os.Signal) *cobra.Command {
+func (s Server) Command(cfg ServiceConfig, logger Logger, trap <-chan os.Signal) *cobra.Command {
 	s.cfg = cfg
 	s.logger = logger
 

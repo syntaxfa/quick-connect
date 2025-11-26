@@ -13,11 +13,60 @@ import (
 	"github.com/syntaxfa/quick-connect/app/managerapp"
 	"github.com/syntaxfa/quick-connect/app/notificationapp"
 	"github.com/syntaxfa/quick-connect/cmd/all-in-one/command"
+	chatCommand "github.com/syntaxfa/quick-connect/cmd/chat/command"
+	managerCommand "github.com/syntaxfa/quick-connect/cmd/manager/command"
+	notificationCommand "github.com/syntaxfa/quick-connect/cmd/notification/command"
 	"github.com/syntaxfa/quick-connect/config"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 )
 
 func main() {
+	serviceCfg := setServiceConfigs()
+
+	// Loggers.
+	serviceLog := setLoggers(serviceCfg)
+
+	// commands.
+	managerRoot := &cobra.Command{
+		Use:   "manager",
+		Short: "manager service commands",
+	}
+	managerRoot.AddCommand(managerCommand.Migrate{}.Command(serviceCfg.ManagerCfg.Postgres, serviceLog.ManagerLog))
+
+	chatRoot := &cobra.Command{
+		Use:   "chat",
+		Short: "chat service commands",
+	}
+	chatRoot.AddCommand(chatCommand.Migrate{}.Command(serviceCfg.ChatCfg.Postgres, serviceLog.ChatLog))
+
+	notificationRoot := &cobra.Command{
+		Use:   "notification",
+		Short: "notification service commands",
+	}
+	notificationRoot.AddCommand(notificationCommand.Migrate{}.Command(serviceCfg.NotificationCfg.Postgres, serviceLog.NotificationLog))
+
+	root := &cobra.Command{
+		Use:     "quick-connect",
+		Short:   "quick connect all in one",
+		Version: "1.0.0",
+	}
+
+	trap := make(chan os.Signal, 1)
+	signal.Notify(trap, syscall.SIGINT, syscall.SIGTERM)
+
+	root.AddCommand(
+		managerRoot,
+		chatRoot,
+		notificationRoot,
+		command.Server{}.Command(serviceCfg, serviceLog, trap),
+	)
+
+	if exErr := root.Execute(); exErr != nil {
+		panic(fmt.Sprintf("failed to execute root command, error: %s", exErr.Error()))
+	}
+}
+
+func setServiceConfigs() command.ServiceConfig {
 	var managerCfg managerapp.Config
 	var chatCfg chatapp.Config
 	var notificationCfg notificationapp.Config
@@ -65,40 +114,19 @@ func main() {
 	}
 	config.Load(adminOptions, &adminCfg, nil)
 
-	cfg := command.Config{
+	return command.ServiceConfig{
 		ManagerCfg:      managerCfg,
 		ChatCfg:         chatCfg,
 		NotificationCfg: notificationCfg,
 		AdminCfg:        adminCfg,
 	}
+}
 
-	// Loggers.
-	managerLog := logger.New(managerCfg.Logger, nil, "admin")
-	chatLog := logger.New(chatCfg.Logger, nil, "chat")
-	notificationLog := logger.New(notificationCfg.Logger, nil, "notification")
-	adminLog := logger.New(adminCfg.Logger, nil, "admin")
-
-	log := command.Logger{
-		ManagerLog:      managerLog,
-		ChatLog:         chatLog,
-		NotificationLog: notificationLog,
-		AdminLog:        adminLog,
-	}
-
-	root := &cobra.Command{
-		Use:     "quick-connect",
-		Short:   "quick connect all in one",
-		Version: "1.0.0",
-	}
-
-	trap := make(chan os.Signal, 1)
-	signal.Notify(trap, syscall.SIGINT, syscall.SIGTERM)
-
-	root.AddCommand(
-		command.Server{}.Command(cfg, log, trap),
-	)
-
-	if exErr := root.Execute(); exErr != nil {
-		panic(fmt.Sprintf("failed to execute root command, error: %s", exErr.Error()))
+func setLoggers(serviceCfg command.ServiceConfig) command.Logger {
+	return command.Logger{
+		ManagerLog:      logger.New(serviceCfg.ManagerCfg.Logger, nil, "admin"),
+		ChatLog:         logger.New(serviceCfg.ChatCfg.Logger, nil, "chat"),
+		NotificationLog: logger.New(serviceCfg.NotificationCfg.Logger, nil, "notification"),
+		AdminLog:        logger.New(serviceCfg.AdminCfg.Logger, nil, "admin"),
 	}
 }
