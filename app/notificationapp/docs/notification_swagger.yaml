@@ -171,29 +171,8 @@ definitions:
         $ref: '#/definitions/paginate.ResponseBase'
       results:
         items:
-          $ref: '#/definitions/service.ListNotificationResult'
+          $ref: '#/definitions/service.NotificationMessage'
         type: array
-    type: object
-  service.ListNotificationResult:
-    properties:
-      body:
-        type: string
-      created_at:
-        type: string
-      data:
-        additionalProperties:
-          type: string
-        type: object
-      id:
-        type: string
-      is_read:
-        type: boolean
-      title:
-        type: string
-      type:
-        $ref: '#/definitions/service.NotificationType'
-      user_id:
-        type: string
     type: object
   service.ListTemplateRequest:
     properties:
@@ -216,7 +195,7 @@ definitions:
       created_at:
         type: string
       id:
-        type: string
+        $ref: '#/definitions/types.ID'
       template_name:
         type: string
       updated_at:
@@ -243,7 +222,7 @@ definitions:
           type: string
         type: object
       id:
-        type: string
+        $ref: '#/definitions/types.ID'
       is_in_app:
         type: boolean
       is_read:
@@ -255,7 +234,28 @@ definitions:
       type:
         $ref: '#/definitions/service.NotificationType'
       user_id:
+        $ref: '#/definitions/types.ID'
+    type: object
+  service.NotificationMessage:
+    properties:
+      body:
         type: string
+      data:
+        additionalProperties:
+          type: string
+        type: object
+      id:
+        $ref: '#/definitions/types.ID'
+      is_read:
+        type: boolean
+      timestamp:
+        type: integer
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/service.NotificationType'
+      user_id:
+        $ref: '#/definitions/types.ID'
     type: object
   service.NotificationType:
     enum:
@@ -338,7 +338,7 @@ definitions:
       created_at:
         type: string
       id:
-        type: string
+        $ref: '#/definitions/types.ID'
       name:
         type: string
       updated_at:
@@ -365,7 +365,7 @@ definitions:
   service.UserSetting:
     properties:
       id:
-        type: string
+        $ref: '#/definitions/types.ID'
       ignore_channels:
         items:
           $ref: '#/definitions/service.IgnoreChannel'
@@ -373,8 +373,14 @@ definitions:
       lang:
         type: string
       user_id:
-        type: string
+        $ref: '#/definitions/types.ID'
     type: object
+  types.ID:
+    enum:
+    - 01J00000000000000000000BOT
+    type: string
+    x-enum-varnames:
+    - BotUserID
 info:
   contact: {}
 paths:

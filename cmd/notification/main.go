@@ -38,7 +38,7 @@ func main() {
 	}
 	config.Load(options, &cfg, nil)
 
-	log := logger.New(cfg.Logger, nil, true, "notification")
+	log := logger.New(cfg.Logger, nil, "notification")
 
 	root := &cobra.Command{
 		Use:   "notification",

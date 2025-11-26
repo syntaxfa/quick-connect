@@ -55,9 +55,9 @@ func (s AdminServer) registerRoutes() {
 }
 
 func (s AdminServer) registerSwagger() {
-	docs.SwaggerInfo.Title = "Notification Admin API"
-	docs.SwaggerInfo.Description = "Notification admin restfull API documentation"
-	docs.SwaggerInfo.Version = "1.0.0"
+	docs.SwaggerInfonotification.Title = "Notification Admin API"
+	docs.SwaggerInfonotification.Description = "Notification admin restfull API documentation"
+	docs.SwaggerInfonotification.Version = "1.0.0"
 
-	s.httpServer.Router.GET("/swagger/*any", echoSwagger.WrapHandler)
+	s.httpServer.Router.GET("/swagger/*any", echoSwagger.EchoWrapHandler(echoSwagger.InstanceName("notification")))
 }

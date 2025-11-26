@@ -10,6 +10,7 @@ logger:
   file_max_age_in_days: 30
   max_backup: 0
   compress: false
+  write_in_console: true
 websocket:
   read_buffer_size: 1024
   write_buffer_size: 1024

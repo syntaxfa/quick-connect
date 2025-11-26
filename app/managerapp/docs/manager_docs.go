@@ -3,7 +3,7 @@ package docs
 
 import "github.com/swaggo/swag"
 
-const docTemplate = `{
+const docTemplatemanager = `{
     "schemes": {{ marshal .Schemes }},
     "swagger": "2.0",
     "info": {
@@ -1389,20 +1389,20 @@ const docTemplate = `{
     }
 }`
 
-// SwaggerInfo holds exported Swagger Info so clients can modify it
-var SwaggerInfo = &swag.Spec{
+// SwaggerInfomanager holds exported Swagger Info so clients can modify it
+var SwaggerInfomanager = &swag.Spec{
 	Version:          "",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{"http", "https"},
 	Title:            "",
 	Description:      "",
-	InfoInstanceName: "swagger",
-	SwaggerTemplate:  docTemplate,
+	InfoInstanceName: "manager",
+	SwaggerTemplate:  docTemplatemanager,
 	LeftDelim:        "{{",
 	RightDelim:       "}}",
 }
 
 func init() {
-	swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
+	swag.Register(SwaggerInfomanager.InstanceName(), SwaggerInfomanager)
 }

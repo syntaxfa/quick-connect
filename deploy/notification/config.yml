@@ -14,10 +14,11 @@ logger:
   file_max_age_in_days: 30
   max_backup: 0
   compress: false
+  write_in_console: true
 postgres:
   host: "localhost"
-  port: 11580
-  db_name: defaultdb
+  port: 11579
+  db_name: notification_db
   password: "8SHDSgdihmMH9EQsXfRZzLHes3F3kgxa"
   username: LoPgYJqYGZ53
   ssl_mode: disable

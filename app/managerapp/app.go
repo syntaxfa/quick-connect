@@ -36,7 +36,8 @@ type Application struct {
 	grpcServerInternal grpcdelivery.ServerInternal
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) (
+	Application, tokenservice.Service, userservice.Service) {
 	t, tErr := translation.New(translation.DefaultLanguages...)
 	if tErr != nil {
 		panic(tErr)
@@ -73,7 +74,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		grpcServer:         grpcServer,
 		internalHTTPServer: internalHTTPServer,
 		grpcServerInternal: grpcServerInternal,
-	}
+	}, tokenSvc, userSvc
 }
 
 func (a Application) Start() {

@@ -51,7 +51,8 @@ type Application struct {
 	mainCancel        context.CancelFunc // Function to cancel main context
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) (
+	Application, *service.Service) {
 	const op = "Setup"
 
 	mainCtx, mainCancel := context.WithCancel(context.Background())
@@ -122,7 +123,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		chatHub:           chatHub,
 		mainCtx:           mainCtx,
 		mainCancel:        mainCancel,
-	}
+	}, chatSvc
 }
 
 func (a Application) Start() {

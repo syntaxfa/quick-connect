@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+
 	"github.com/syntaxfa/quick-connect/adapter/observability/metricotela"
 	"github.com/syntaxfa/quick-connect/adapter/observability/otelcore"
 	"github.com/syntaxfa/quick-connect/adapter/observability/traceotela"
 	"github.com/syntaxfa/quick-connect/config"
 	"github.com/syntaxfa/quick-connect/example/observability/internal/microservice2"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"syscall"
 )
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
 		panic(sErr)
 	}
 
-	log := logger.New(cfg.Logger, nil, true, "microservice2")
+	log := logger.New(cfg.Logger, nil, "microservice2")
 
 	traceCtx, tErr := traceotela.InitTracer(ctx, cfg.Observability.Trace, resource)
 	if tErr != nil {

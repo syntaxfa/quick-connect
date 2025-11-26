@@ -64,9 +64,9 @@ func (s Server) RegisterRoutes() {
 }
 
 func (s Server) registerSwagger() {
-	docs.SwaggerInfo.Title = "CHAT API"
-	docs.SwaggerInfo.Description = "Chat restfull API documentation"
-	docs.SwaggerInfo.Version = "1.0.0"
+	docs.SwaggerInfochat.Title = "CHAT API"
+	docs.SwaggerInfochat.Description = "Chat restfull API documentation"
+	docs.SwaggerInfochat.Version = "1.0.0"
 
-	s.httpServer.Router.GET("/swagger/*any", echoSwagger.WrapHandler)
+	s.httpServer.Router.GET("/swagger/*any", echoSwagger.EchoWrapHandler(echoSwagger.InstanceName("chat")))
 }
