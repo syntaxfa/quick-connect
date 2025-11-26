@@ -80,6 +80,9 @@ manager-build:
 notification-build:
 	docker build -t $(IMAGE_NAME) -f deploy/notification/deploy/Dockerfile .
 
+admin-build:
+	docker build -t $(IMAGE_NAME) -f deploy/admin/deploy/Dockerfile .
+
 generate-example-proto:
 	@protoc \
 		--proto_path=protobuf "protobuf/example/proto/example.proto" \
