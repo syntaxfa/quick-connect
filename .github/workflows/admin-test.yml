@@ -1,4 +1,4 @@
-name: CI Admin Service
+name: Admin CI Service
 
 on:
   pull_request:

@@ -1,4 +1,4 @@
-name: CI Notification Service
+name: Notification CI Service
 
 on:
   pull_request:
