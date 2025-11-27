@@ -29,8 +29,10 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/rolemanager"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
 	"github.com/syntaxfa/quick-connect/types"
 	"google.golang.org/grpc"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 const (
@@ -39,20 +41,25 @@ const (
 )
 
 type Application struct {
-	cfg               Config
-	trap              <-chan os.Signal
-	chatHandler       http.Handler
-	logger            *slog.Logger
-	httpServer        http.Server
-	managerGRPCClient *grpcclient.Client
-	grpcServer        grpcdelivery.Server
-	chatHub           *service.Hub       // To control the hub lifecycle
-	mainCtx           context.Context    // Main context for background services
-	mainCancel        context.CancelFunc // Function to cancel main context
+	cfg                       Config
+	trap                      <-chan os.Signal
+	chatHandler               http.Handler
+	logger                    *slog.Logger
+	httpServer                http.Server
+	managerGRPCClient         *grpcclient.Client
+	managerInternalGRPCClient *grpcclient.Client
+	grpcServer                grpcdelivery.Server
+	chatHub                   *service.Hub       // To control the hub lifecycle
+	mainCtx                   context.Context    // Main context for background services
+	mainCancel                context.CancelFunc // Function to cancel main context
+}
+
+type PublicKeyService interface {
+	GetPublicKey(ctx context.Context, req *empty.Empty, opts ...grpc.CallOption) (*authpb.GetPublicKeyResponse, error)
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter,
-	userInternalLocalAd service.UserInternalService) (
+	userInternalLocalAd service.UserInternalService, publicKeyInternalAd PublicKeyService) (
 	Application, *service.Service) {
 	const op = "Setup"
 
@@ -74,25 +81,38 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	chatRepo := postgres2.New(psqAdapter)
 	vld := service.NewValidate(t)
 
-	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC)
-	if grpcErr != nil {
-		errlog.WithoutErr(richerror.New(op).WithWrapError(grpcErr).WithKind(richerror.KindUnexpected), logger)
+	var publicKeyAd PublicKeyService
+	var managerGRPCClient *grpcclient.Client
 
-		panic(grpcErr)
-	}
+	if publicKeyInternalAd != nil {
+		publicKeyAd = publicKeyInternalAd
+	} else {
+		var grpcErr error
+		managerGRPCClient, grpcErr = grpcclient.New(cfg.ManagerAppGRPC)
+		if grpcErr != nil {
+			errlog.WithoutErr(richerror.New(op).WithWrapError(grpcErr).WithKind(richerror.KindUnexpected), logger)
 
-	managerInternalGRPCClient, grpcInternalErr := grpcclient.New(cfg.ManagerAppInternalGRPC)
-	if grpcInternalErr != nil {
-		errlog.WithoutErr(richerror.New(op).WithWrapError(grpcInternalErr).WithKind(richerror.KindUnexpected), logger)
+			panic(grpcErr)
+		}
 
-		panic(grpcInternalErr)
+		publicKeyAd = manager.NewAuthAdapter(managerGRPCClient.Conn())
 	}
 
 	var userInternalAd service.UserInternalService
-	if userInternalLocalAd == nil {
-		userInternalAd = manager.NewUserInternalAdapter(managerInternalGRPCClient.Conn())
-	} else {
+	var managerInternalGRPCClient *grpcclient.Client
+
+	if userInternalLocalAd != nil {
 		userInternalAd = userInternalLocalAd
+	} else {
+		var grpcInternalErr error
+		managerInternalGRPCClient, grpcInternalErr = grpcclient.New(cfg.ManagerAppInternalGRPC)
+		if grpcInternalErr != nil {
+			errlog.WithoutErr(richerror.New(op).WithWrapError(grpcInternalErr).WithKind(richerror.KindUnexpected), logger)
+
+			panic(grpcInternalErr)
+		}
+
+		userInternalAd = manager.NewUserInternalAdapter(managerInternalGRPCClient.Conn())
 	}
 
 	chatHub := service.NewHub(cfg.ChatService, logger, pubsubClient)
@@ -100,8 +120,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	chatSvc := service.New(cfg.ChatService, chatRepo, chatHub, pubsubClient, logger, vld, userInternalAd)
 	chatHandler := http.NewHandler(mainCtx, upgrader, logger, chatSvc, t)
 
-	authAd := manager.NewAuthAdapter(managerGRPCClient.Conn())
-	resp, pubErr := authAd.GetPublicKey(context.Background())
+	resp, pubErr := publicKeyAd.GetPublicKey(context.Background(), nil)
 	if pubErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithWrapError(pubErr).WithKind(richerror.KindUnexpected), logger)
 
@@ -119,16 +138,17 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	grpcServer := grpcdelivery.New(grpcserver.New(cfg.GRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)), grpcHandler, logger)
 
 	return Application{
-		cfg:               cfg,
-		chatHandler:       chatHandler,
-		logger:            logger,
-		httpServer:        httpServer,
-		trap:              trap,
-		managerGRPCClient: managerGRPCClient,
-		grpcServer:        grpcServer,
-		chatHub:           chatHub,
-		mainCtx:           mainCtx,
-		mainCancel:        mainCancel,
+		cfg:                       cfg,
+		chatHandler:               chatHandler,
+		logger:                    logger,
+		httpServer:                httpServer,
+		trap:                      trap,
+		managerGRPCClient:         managerGRPCClient,
+		managerInternalGRPCClient: managerInternalGRPCClient,
+		grpcServer:                grpcServer,
+		chatHub:                   chatHub,
+		mainCtx:                   mainCtx,
+		mainCancel:                mainCancel,
 	}, chatSvc
 }
 
@@ -187,7 +207,10 @@ func (a Application) Stop(ctx context.Context) bool {
 		go a.StopHTTPServer(ctx, &shutdownWg)
 
 		shutdownWg.Add(1)
-		go a.StopGRPCClient(ctx, &shutdownWg)
+		go a.StopManagerGRPCClient(ctx, &shutdownWg)
+
+		shutdownWg.Add(1)
+		go a.StopManagerInternalGRPCClient(ctx, &shutdownWg)
 
 		shutdownWg.Add(1)
 		go a.StopGRPCServer(&shutdownWg)
@@ -211,10 +234,27 @@ func (a Application) StopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	}
 }
 
-func (a Application) StopGRPCClient(ctx context.Context, wg *sync.WaitGroup) {
+func (a Application) StopManagerGRPCClient(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	if a.managerGRPCClient == nil {
+		return
+	}
+
 	if cErr := a.managerGRPCClient.Close(); cErr != nil {
-		a.logger.ErrorContext(ctx, "http server gracefully shutdown failed", slog.String("error", cErr.Error()))
+		a.logger.ErrorContext(ctx, "grpc manager client gracefully shutdown failed", slog.String("error", cErr.Error()))
+	}
+}
+
+func (a Application) StopManagerInternalGRPCClient(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	if a.managerInternalGRPCClient == nil {
+		return
+	}
+
+	if cErr := a.managerInternalGRPCClient.Close(); cErr != nil {
+		a.logger.ErrorContext(ctx, "manager grpc internal client gracefully shutdown failed", slog.String("error", cErr.Error()))
 	}
 }
 

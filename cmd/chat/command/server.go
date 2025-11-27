@@ -47,7 +47,7 @@ func (s Server) run(trap <-chan os.Signal) {
 		s.logger.Info("redis connection closed")
 	}()
 
-	app, _ := chatapp.Setup(s.cfg, s.logger, trap, psqAdapter, re, nil)
+	app, _ := chatapp.Setup(s.cfg, s.logger, trap, psqAdapter, re, nil, nil)
 
 	app.Start()
 }

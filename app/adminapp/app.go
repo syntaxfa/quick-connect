@@ -60,7 +60,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
 
 	handler := http.NewHandler(logger, t, authAdapter, userAdapter, conversationAd)
 
-	getPuResp, gpuErr := authAdapter.GetPublicKey(context.Background())
+	getPuResp, gpuErr := authAdapter.GetPublicKey(context.Background(), nil)
 	if gpuErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithWrapError(gpuErr).WithKind(richerror.KindUnexpected), logger)
 

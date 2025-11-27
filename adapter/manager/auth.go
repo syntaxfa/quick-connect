@@ -23,8 +23,8 @@ func NewAuthAdapter(conn grpc.ClientConnInterface) *AuthAdapter {
 }
 
 // GetPublicKey retrieves the token public key from the AuthService.
-func (ad *AuthAdapter) GetPublicKey(ctx context.Context, opts ...grpc.CallOption) (*authpb.GetPublicKeyResponse, error) {
-	return ad.client.GetPublicKey(ctx, &empty.Empty{}, opts...)
+func (ad *AuthAdapter) GetPublicKey(ctx context.Context, req *empty.Empty, opts ...grpc.CallOption) (*authpb.GetPublicKeyResponse, error) {
+	return ad.client.GetPublicKey(ctx, req, opts...)
 }
 
 // Login calls the Login RPC on the AuthService.

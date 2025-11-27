@@ -44,7 +44,7 @@ func (s Server) run(trap <-chan os.Signal) {
 
 	var wg sync.WaitGroup
 
-	managerApp, _, userSvc := managerapp.Setup(s.cfg.ManagerCfg, s.logger.ManagerLog, trapSvc.managerTrap, postgresAd.managerPsqAd,
+	managerApp, tokenSvc, userSvc := managerapp.Setup(s.cfg.ManagerCfg, s.logger.ManagerLog, trapSvc.managerTrap, postgresAd.managerPsqAd,
 		reFactory.newConnection(s.cfg.ManagerCfg.Redis))
 
 	wg.Add(1)
@@ -56,8 +56,9 @@ func (s Server) run(trap <-chan os.Signal) {
 	}()
 
 	userInternalLocalAd := manager.NewUserInternalLocalAdapter(&userSvc)
+	publicKeyLocalAd := manager.NewAuthLocalAdapter(&userSvc, &tokenSvc)
 	chatApp, _ := chatapp.Setup(s.cfg.ChatCfg, s.logger.ChatLog, trapSvc.chatTrap, postgresAd.chatPsqAd,
-		reFactory.newConnection(s.cfg.ChatCfg.Redis), userInternalLocalAd)
+		reFactory.newConnection(s.cfg.ChatCfg.Redis), userInternalLocalAd, publicKeyLocalAd)
 
 	wg.Add(1)
 	go func() {
