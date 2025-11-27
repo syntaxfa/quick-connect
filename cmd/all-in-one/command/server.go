@@ -11,6 +11,7 @@ import (
 	"github.com/syntaxfa/quick-connect/app/chatapp"
 	"github.com/syntaxfa/quick-connect/app/managerapp"
 	"github.com/syntaxfa/quick-connect/app/notificationapp"
+	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
 
 type Server struct {
@@ -34,6 +35,11 @@ func (s Server) Command(cfg ServiceConfig, logger Logger, trap <-chan os.Signal)
 }
 
 func (s Server) run(trap <-chan os.Signal) {
+	t, tErr := translation.New(translation.DefaultLanguages...)
+	if tErr != nil {
+		panic(tErr)
+	}
+
 	trapSvc := setupTrapService()
 
 	reFactory := newRedisFactory(s.logger.ManagerLog)
@@ -56,9 +62,10 @@ func (s Server) run(trap <-chan os.Signal) {
 	}()
 
 	userInternalLocalAd := manager.NewUserInternalLocalAdapter(&userSvc)
-	publicKeyLocalAd := manager.NewAuthLocalAdapter(&userSvc, &tokenSvc)
+	userLocalAd := manager.NewUserLocalAdapter(&userSvc, t, s.logger.ManagerLog)
+	authLocalAdapter := manager.NewAuthLocalAdapter(&userSvc, &tokenSvc, t, s.logger.ManagerLog)
 	chatApp, _ := chatapp.Setup(s.cfg.ChatCfg, s.logger.ChatLog, trapSvc.chatTrap, postgresAd.chatPsqAd,
-		reFactory.newConnection(s.cfg.ChatCfg.Redis), userInternalLocalAd, publicKeyLocalAd)
+		reFactory.newConnection(s.cfg.ChatCfg.Redis), userInternalLocalAd, authLocalAdapter)
 
 	wg.Add(1)
 	go func() {
@@ -79,7 +86,8 @@ func (s Server) run(trap <-chan os.Signal) {
 		s.logger.NotificationLog.Info("Notification App Stopped")
 	}()
 
-	adminApp := adminapp.Setup(s.cfg.AdminCfg, s.logger.AdminLog, trapSvc.adminTrap)
+	adminApp := adminapp.Setup(s.cfg.AdminCfg, s.logger.AdminLog, trapSvc.adminTrap, t, authLocalAdapter,
+		userLocalAd, nil)
 
 	wg.Add(1)
 	go func() {

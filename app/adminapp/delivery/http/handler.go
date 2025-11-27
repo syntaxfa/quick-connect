@@ -9,8 +9,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/syntaxfa/quick-connect/adapter/chat"
-	"github.com/syntaxfa/quick-connect/adapter/manager"
+	"github.com/syntaxfa/quick-connect/app/adminapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 	"github.com/syntaxfa/quick-connect/protobuf/shared/golang/errdetailspb"
@@ -18,21 +17,21 @@ import (
 )
 
 type Handler struct {
-	logger         *slog.Logger
-	t              *translation.Translate
-	authAd         *manager.AuthAdapter
-	userAd         *manager.UserAdapter
-	conversationAd *chat.ConversationAdapter
+	logger          *slog.Logger
+	t               *translation.Translate
+	authSvc         service.AuthService
+	userSvc         service.UserService
+	conversationSvc service.ConversationService
 }
 
-func NewHandler(logger *slog.Logger, t *translation.Translate, authAd *manager.AuthAdapter, userAd *manager.UserAdapter,
-	conversationAd *chat.ConversationAdapter) Handler {
+func NewHandler(logger *slog.Logger, t *translation.Translate, authSvc service.AuthService, userSvc service.UserService,
+	conversationSvc service.ConversationService) Handler {
 	return Handler{
-		t:              t,
-		logger:         logger,
-		authAd:         authAd,
-		userAd:         userAd,
-		conversationAd: conversationAd,
+		t:               t,
+		logger:          logger,
+		authSvc:         authSvc,
+		userSvc:         userSvc,
+		conversationSvc: conversationSvc,
 	}
 }
 

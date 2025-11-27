@@ -10,6 +10,7 @@ import (
 	"github.com/syntaxfa/quick-connect/adapter/chat"
 	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/app/adminapp/delivery/http"
+	"github.com/syntaxfa/quick-connect/app/adminapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
@@ -29,25 +30,29 @@ type Application struct {
 	chatGRPCClient    *grpcclient.Client
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translation.Translate, authLocalAdapter service.AuthService,
+	userLocalAdapter service.UserService, _ service.ConversationService) Application {
 	const op = "Setup"
 
-	t, tErr := translation.New(translation.DefaultLanguages...)
-	if tErr != nil {
-		logger.Error("failed create new instance of translation", slog.String("error", tErr.Error()))
+	var authAdapter service.AuthService
+	var userAdapter service.UserService
+	var managerGRPCClient *grpcclient.Client
 
-		panic(tErr)
+	if authLocalAdapter != nil || userLocalAdapter != nil {
+		authAdapter = authLocalAdapter
+		userAdapter = userLocalAdapter
+	} else {
+		var grpcErr error
+		managerGRPCClient, grpcErr = grpcclient.New(cfg.ManagerAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
+		if grpcErr != nil {
+			logger.Error("failed to create manager gRPC client", slog.String("error", grpcErr.Error()))
+
+			panic(grpcErr)
+		}
+
+		authAdapter = manager.NewAuthAdapter(managerGRPCClient.Conn())
+		userAdapter = manager.NewUserAdapter(managerGRPCClient.Conn())
 	}
-
-	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
-	if grpcErr != nil {
-		logger.Error("failed to create manager gRPC client", slog.String("error", grpcErr.Error()))
-
-		panic(grpcErr)
-	}
-
-	authAdapter := manager.NewAuthAdapter(managerGRPCClient.Conn())
-	userAdapter := manager.NewUserAdapter(managerGRPCClient.Conn())
 
 	chatGRPCClient, chatErr := grpcclient.New(cfg.ChatAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
 	if chatErr != nil {

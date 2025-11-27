@@ -4,7 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/labstack/echo/v4"
-	"github.com/syntaxfa/quick-connect/adapter/manager"
+	"github.com/syntaxfa/quick-connect/app/adminapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
@@ -12,7 +12,7 @@ import (
 	"github.com/syntaxfa/quick-connect/types"
 )
 
-func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, authAd *manager.AuthAdapter, loginPath string,
+func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, authSvc service.AuthService, loginPath string,
 	logger *slog.Logger) func(nex echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -36,7 +36,7 @@ func setTokenToRequestContextMiddleware(jwtValidator *jwtvalidator.Validator, au
 				}
 			}
 
-			return refreshToken(c, jwtValidator, authAd, next, logger)
+			return refreshToken(c, jwtValidator, authSvc, next, logger)
 		}
 	}
 }
@@ -57,7 +57,7 @@ func getUserFromContext(c echo.Context) (User, bool) {
 	return user, ok
 }
 
-func refreshToken(c echo.Context, jwtValidator *jwtvalidator.Validator, authAd *manager.AuthAdapter, next echo.HandlerFunc,
+func refreshToken(c echo.Context, jwtValidator *jwtvalidator.Validator, authSvc service.AuthService, next echo.HandlerFunc,
 	logger *slog.Logger) error {
 	const op = "delivery.middleware.setTokenToRequestContext.refreshToken"
 
@@ -68,7 +68,7 @@ func refreshToken(c echo.Context, jwtValidator *jwtvalidator.Validator, authAd *
 		return redirectToLogin(c)
 	}
 
-	token, tErr := authAd.TokenRefresh(c.Request().Context(), &authpb.TokenRefreshRequest{RefreshToken: refreshToken})
+	token, tErr := authSvc.TokenRefresh(c.Request().Context(), &authpb.TokenRefreshRequest{RefreshToken: refreshToken})
 	if tErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected).
 			WithMessage("refresh token is not valid"), logger)
