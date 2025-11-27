@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
-	"github.com/syntaxfa/quick-connect/adapter/postgres"
+	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/app/adminapp"
 	"github.com/syntaxfa/quick-connect/app/chatapp"
 	"github.com/syntaxfa/quick-connect/app/managerapp"
@@ -39,30 +39,12 @@ func (s Server) run(trap <-chan os.Signal) {
 	reFactory := newRedisFactory(s.logger.ManagerLog)
 	defer reFactory.closeAll()
 
-	managerPsqAdapter := postgres.New(s.cfg.ManagerCfg.Postgres, s.logger.ManagerLog)
-	defer func() {
-		managerPsqAdapter.Close()
-
-		s.logger.ManagerLog.Info("manager postgres connection closed")
-	}()
-
-	chatPsqAdapter := postgres.New(s.cfg.ChatCfg.Postgres, s.logger.ChatLog)
-	defer func() {
-		chatPsqAdapter.Close()
-
-		s.logger.ChatLog.Info("chat postgres connection closed")
-	}()
-
-	notificationPsqAdapter := postgres.New(s.cfg.NotificationCfg.Postgres, s.logger.NotificationLog)
-	defer func() {
-		notificationPsqAdapter.Close()
-
-		s.logger.NotificationLog.Info("notification postgres connection closed")
-	}()
+	postgresAd := newPostgresAdapter(s.cfg, s.logger)
+	defer postgresAd.closeAll()
 
 	var wg sync.WaitGroup
 
-	managerApp, _, _ := managerapp.Setup(s.cfg.ManagerCfg, s.logger.ManagerLog, trapSvc.managerTrap, managerPsqAdapter,
+	managerApp, _, userSvc := managerapp.Setup(s.cfg.ManagerCfg, s.logger.ManagerLog, trapSvc.managerTrap, postgresAd.managerPsqAd,
 		reFactory.newConnection(s.cfg.ManagerCfg.Redis))
 
 	wg.Add(1)
@@ -73,8 +55,9 @@ func (s Server) run(trap <-chan os.Signal) {
 		s.logger.ManagerLog.Info("Manager App Stopped")
 	}()
 
-	chatApp, _ := chatapp.Setup(s.cfg.ChatCfg, s.logger.ChatLog, trapSvc.chatTrap, chatPsqAdapter,
-		reFactory.newConnection(s.cfg.ChatCfg.Redis))
+	userInternalLocalAd := manager.NewUserInternalLocalAdapter(&userSvc)
+	chatApp, _ := chatapp.Setup(s.cfg.ChatCfg, s.logger.ChatLog, trapSvc.chatTrap, postgresAd.chatPsqAd,
+		reFactory.newConnection(s.cfg.ChatCfg.Redis), userInternalLocalAd)
 
 	wg.Add(1)
 	go func() {
@@ -85,7 +68,7 @@ func (s Server) run(trap <-chan os.Signal) {
 	}()
 
 	notificationApp, _ := notificationapp.Setup(s.cfg.NotificationCfg, s.logger.NotificationLog, trapSvc.notificationTrap,
-		reFactory.newConnection(s.cfg.NotificationCfg.Redis), notificationPsqAdapter)
+		reFactory.newConnection(s.cfg.NotificationCfg.Redis), postgresAd.notificationPsqAd)
 
 	wg.Add(1)
 	go func() {

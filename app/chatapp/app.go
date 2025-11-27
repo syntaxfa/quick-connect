@@ -51,7 +51,8 @@ type Application struct {
 	mainCancel        context.CancelFunc // Function to cancel main context
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) (
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter,
+	userInternalLocalAd service.UserInternalService) (
 	Application, *service.Service) {
 	const op = "Setup"
 
@@ -87,7 +88,12 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		panic(grpcInternalErr)
 	}
 
-	userInternalAd := manager.NewUserInternalAdapter(managerInternalGRPCClient.Conn())
+	var userInternalAd service.UserInternalService
+	if userInternalLocalAd == nil {
+		userInternalAd = manager.NewUserInternalAdapter(managerInternalGRPCClient.Conn())
+	} else {
+		userInternalAd = userInternalLocalAd
+	}
 
 	chatHub := service.NewHub(cfg.ChatService, logger, pubsubClient)
 
