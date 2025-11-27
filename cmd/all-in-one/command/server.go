@@ -1,14 +1,12 @@
 package command
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"sync"
 
 	"github.com/spf13/cobra"
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
-	"github.com/syntaxfa/quick-connect/adapter/redis"
 	"github.com/syntaxfa/quick-connect/app/adminapp"
 	"github.com/syntaxfa/quick-connect/app/chatapp"
 	"github.com/syntaxfa/quick-connect/app/managerapp"
@@ -36,10 +34,7 @@ func (s Server) Command(cfg ServiceConfig, logger Logger, trap <-chan os.Signal)
 }
 
 func (s Server) run(trap <-chan os.Signal) {
-	managerTrap := make(chan os.Signal, 1)
-	chatTrap := make(chan os.Signal, 1)
-	notificationTrap := make(chan os.Signal, 1)
-	adminTrap := make(chan os.Signal, 1)
+	trapSvc := setupTrapService()
 
 	reFactory := newRedisFactory(s.logger.ManagerLog)
 	defer reFactory.closeAll()
@@ -67,8 +62,8 @@ func (s Server) run(trap <-chan os.Signal) {
 
 	var wg sync.WaitGroup
 
-	managerApp, _, _ := managerapp.Setup(s.cfg.ManagerCfg, s.logger.ManagerLog, managerTrap, managerPsqAdapter,
-		reFactory.newConnection(s.cfg.ManagerCfg.Redis, s.logger.ManagerLog))
+	managerApp, _, _ := managerapp.Setup(s.cfg.ManagerCfg, s.logger.ManagerLog, trapSvc.managerTrap, managerPsqAdapter,
+		reFactory.newConnection(s.cfg.ManagerCfg.Redis))
 
 	wg.Add(1)
 	go func() {
@@ -78,32 +73,32 @@ func (s Server) run(trap <-chan os.Signal) {
 		s.logger.ManagerLog.Info("Manager App Stopped")
 	}()
 
-	chatApp, _ := chatapp.Setup(s.cfg.ChatCfg, s.logger.ChatLog, chatTrap, chatPsqAdapter,
-		reFactory.newConnection(s.cfg.ChatCfg.Redis, s.logger.ChatLog))
+	chatApp, _ := chatapp.Setup(s.cfg.ChatCfg, s.logger.ChatLog, trapSvc.chatTrap, chatPsqAdapter,
+		reFactory.newConnection(s.cfg.ChatCfg.Redis))
 
 	wg.Add(1)
-	func() {
+	go func() {
 		defer wg.Done()
 		s.logger.ChatLog.Info("Starting Chat App...")
 		chatApp.Start()
 		s.logger.ChatLog.Info("Chat App Stopped")
 	}()
 
-	notificationApp, _ := notificationapp.Setup(s.cfg.NotificationCfg, s.logger.NotificationLog, notificationTrap,
-		reFactory.newConnection(s.cfg.NotificationCfg.Redis, s.logger.NotificationLog), notificationPsqAdapter)
+	notificationApp, _ := notificationapp.Setup(s.cfg.NotificationCfg, s.logger.NotificationLog, trapSvc.notificationTrap,
+		reFactory.newConnection(s.cfg.NotificationCfg.Redis), notificationPsqAdapter)
 
 	wg.Add(1)
-	func() {
+	go func() {
 		defer wg.Done()
 		s.logger.NotificationLog.Info("Starting Notification App...")
 		notificationApp.Start()
 		s.logger.NotificationLog.Info("Notification App Stopped")
 	}()
 
-	adminApp := adminapp.Setup(s.cfg.AdminCfg, s.logger.AdminLog, adminTrap)
+	adminApp := adminapp.Setup(s.cfg.AdminCfg, s.logger.AdminLog, trapSvc.adminTrap)
 
 	wg.Add(1)
-	func() {
+	go func() {
 		defer wg.Done()
 		s.logger.AdminLog.Info("Starting admin App...")
 		adminApp.Start()
@@ -113,53 +108,9 @@ func (s Server) run(trap <-chan os.Signal) {
 	sig := <-trap
 	s.logger.ManagerLog.Info("Received shutdown signal", slog.String("signal", sig.String()))
 
-	managerTrap <- sig
-	chatTrap <- sig
-	notificationTrap <- sig
-	adminTrap <- sig
+	trapSvc.sendSignal(sig)
 
 	s.logger.ManagerLog.Info("Waiting for services to shut down...")
 	wg.Wait()
 	s.logger.ManagerLog.Info("All services stopped. Exiting.")
-}
-
-type redisFactory struct {
-	conns        map[string]*redis.Adapter
-	mu           sync.Mutex
-	globalLogger *slog.Logger
-}
-
-func newRedisFactory(globalLogger *slog.Logger) *redisFactory {
-	return &redisFactory{
-		conns:        make(map[string]*redis.Adapter),
-		globalLogger: globalLogger,
-	}
-}
-
-// newConnection if connection exists, returns.
-func (r *redisFactory) newConnection(cfg redis.Config, logger *slog.Logger) *redis.Adapter {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	conn, ok := r.conns[fmt.Sprintf("%d@%s:%d/%s", cfg.DB, cfg.Host, cfg.Port, cfg.Password)]
-	if !ok {
-		conn = redis.New(cfg, logger)
-
-		logger.Info("create redis connection")
-	} else {
-		logger.Info("using same redis connection")
-	}
-
-	return conn
-}
-
-func (r *redisFactory) closeAll() {
-	for key, conn := range r.conns {
-		if cErr := conn.Close(); cErr != nil {
-			r.globalLogger.Error("redis connection closed failed", slog.String("error", cErr.Error()),
-				slog.String("connection", key))
-		}
-	}
-
-	r.globalLogger.Info("redis connections gracefully shutdown")
 }

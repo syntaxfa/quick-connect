@@ -3,6 +3,7 @@ package command
 import (
 	"log/slog"
 
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/adminapp"
 	"github.com/syntaxfa/quick-connect/app/chatapp"
 	"github.com/syntaxfa/quick-connect/app/managerapp"
@@ -21,4 +22,10 @@ type Logger struct {
 	ChatLog         *slog.Logger
 	NotificationLog *slog.Logger
 	AdminLog        *slog.Logger
+}
+
+type PsqAdapter struct {
+	ManagerPsqAdapter      *postgres.Database
+	ChatPsqAdapter         *postgres.Database
+	NotificationPsqAdapter *postgres.Database
 }
