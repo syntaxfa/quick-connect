@@ -1,3 +1,4 @@
+---
 shutdown_timeout: 120s
 client_http_server:
   port: 2534

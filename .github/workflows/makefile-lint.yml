@@ -2,11 +2,8 @@
 name: Makefile Lint
 
 on:
-  push:
-    paths:
-      - 'Makefile'
   pull_request:
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened, synchronize, ready_for_review]
     paths:
       - 'Makefile'
 
