@@ -6,13 +6,13 @@ IMAGE_NAME ?= quick-connect
 PROTO_DIR ?= protobuf
 OUT_DIR ?= .
 
-# Protobuf tools detection
+# Protobuf tools detection.
 PROTOC_GEN_GO ?= $(shell which protoc-gen-go)
-# FIX: Pointing to the actual grpc plugin, not protoc itself
+# FIX: Pointing to the actual grpc plugin, not protoc itself.
 PROTOC_GEN_GO_GRPC ?= $(shell which protoc-gen-go-grpc)
 PROTO_FILES := $(shell find $(PROTO_DIR) -name '*.proto')
 
-# Define all non-file targets as PHONY to avoid conflicts with files of the same name
+# Define all non-file targets as PHONY to avoid conflicts with files of the same name.
 .PHONY: lint generate-proto update-proto-tools \
 	chat-swag-init manager-swag-init notification-swag-init example-micro1-swag-init \
 	test-general chat-test manager-test notification-test admin-test all-in-one-test \
@@ -86,7 +86,7 @@ all-in-one-test:
 	go test ./app/notificationapp/...
 	go test ./app/adminapp/...
 
-# Builds (Ensure IMAGE_NAME is set or passed as argument)
+# Builds (Ensure IMAGE_NAME is set or passed as argument).
 chat-build:
 	docker build -t $(IMAGE_NAME):chat -f deploy/chat/deploy/Dockerfile .
 
