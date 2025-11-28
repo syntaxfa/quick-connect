@@ -18,3 +18,4 @@ ignore: |
   *_swagger.yaml
   **/docs/swagger.yaml
   **/docs/*_swagger.yaml
+  .golangci.yml
