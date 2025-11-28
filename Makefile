@@ -71,6 +71,12 @@ notification-test:
 admin-test:
 	go test ./app/adminapp/...
 
+all-in-one-test:
+	go test ./app/managerapp/...
+	go test ./app/chatapp/...
+	go test ./app/notificationapp/...
+	go test ./app/adminapp/...
+
 chat-build:
 	docker build -t $(IMAGE_NAME) -f deploy/chat/deploy/Dockerfile .
 
@@ -82,6 +88,9 @@ notification-build:
 
 admin-build:
 	docker build -t $(IMAGE_NAME) -f deploy/admin/deploy/Dockerfile .
+
+all-in-one-build:
+	docker build -t $(IMAGE_NAME) -f deploy/all-in-one/deploy/Dockerfile .
 
 generate-example-proto:
 	@protoc \
