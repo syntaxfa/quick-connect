@@ -1,3 +1,4 @@
+---
 networks:
   web_net:
     name: web_net
