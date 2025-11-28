@@ -1,0 +1,22 @@
+name: Makefile Lint
+
+on:
+  push:
+    paths:
+      - 'Makefile'
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    paths:
+      - 'Makefile'
+
+jobs:
+  lint-makefile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run checkmake
+        uses: grand-mere/checkmake-action@v2
+        with:
+          makefile: 'Makefile'
