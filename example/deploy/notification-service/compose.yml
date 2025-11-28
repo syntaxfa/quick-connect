@@ -1,3 +1,4 @@
+---
 networks:
   web_net:
     name: web_net
@@ -68,7 +69,7 @@ services:
     env_file: .env
     ports:
       - ${NOTIFICATION_CLIENT_HTTP_SERVER__PORT}:${NOTIFICATION_CLIENT_HTTP_SERVER__PORT}
-      - ${NOTIFICATION_ADMIN_HTTP_SERVER__PORT}:${NOTIFICATION_ADMIN_HTTP_SERVER__PORT} # in production, recommended using gateway authentication
+      - ${NOTIFICATION_ADMIN_HTTP_SERVER__PORT}:${NOTIFICATION_ADMIN_HTTP_SERVER__PORT}  # in production, recommended using gateway authentication
     depends_on:
-     postgres:
-       condition: service_healthy
+      postgres:
+        condition: service_healthy

@@ -1,0 +1,20 @@
+---
+extends: default
+
+rules:
+  line-length: disable
+  key-duplicates: enable
+  truthy: disable
+  indentation:
+    spaces: 2
+    indent-sequences: whatever
+
+ignore: |
+  vendor/
+  .git/
+  bin/
+  # Ignore Swag generated files
+  swagger.yaml
+  *_swagger.yaml
+  **/docs/swagger.yaml
+  **/docs/*_swagger.yaml

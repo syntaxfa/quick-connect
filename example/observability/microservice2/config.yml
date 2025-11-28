@@ -1,3 +1,4 @@
+---
 http_server:
   port: 12303
 shutdown_timeout: 120s
@@ -18,7 +19,7 @@ observability:
     mode: remote
     http_collection_endpoint: localhost:4318
     grpc_collection_endpoint: localhost:4317
-    batch_timeout: 5s # for test default its can 5 minutes!
+    batch_timeout: 5s  # for test default its can 5 minutes!
     batch_size: 1024
     ssl_mode: false
     sampling_ratio: 1
