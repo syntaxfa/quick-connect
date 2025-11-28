@@ -13,6 +13,8 @@ RUN CGO_ENABLED=0 go build -o $APP_NAME cmd/notification/main.go
 # run stage
 FROM alpine:3.22.2 AS runtime
 
+WORKDIR /app
+
 COPY --from=builder /notification/notification ./
 COPY --from=builder /notification/deploy/notification/config.yml ./deploy/notification/config.yml
 COPY --from=builder /notification/app/notificationapp/repository/migrations/*.sql ./app/notificationapp/repository/migrations/
