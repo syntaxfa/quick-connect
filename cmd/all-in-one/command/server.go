@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
+	"github.com/syntaxfa/quick-connect/adapter/chat"
 	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/app/adminapp"
 	"github.com/syntaxfa/quick-connect/app/chatapp"
@@ -64,7 +65,7 @@ func (s Server) run(trap <-chan os.Signal) {
 	userInternalLocalAd := manager.NewUserInternalLocalAdapter(&userSvc)
 	userLocalAd := manager.NewUserLocalAdapter(&userSvc, t, s.logger.ManagerLog, managerapp.SetupRoleManager(), managerJWTValidator)
 	authLocalAdapter := manager.NewAuthLocalAdapter(&userSvc, &tokenSvc, t, s.logger.ManagerLog)
-	chatApp, _ := chatapp.Setup(s.cfg.ChatCfg, s.logger.ChatLog, trapSvc.chatTrap, postgresAd.chatPsqAd,
+	chatApp, chatSvc, chatJWTValidator := chatapp.Setup(s.cfg.ChatCfg, s.logger.ChatLog, trapSvc.chatTrap, postgresAd.chatPsqAd,
 		reFactory.newConnection(s.cfg.ChatCfg.Redis), userInternalLocalAd, authLocalAdapter)
 
 	wg.Add(1)
@@ -86,8 +87,9 @@ func (s Server) run(trap <-chan os.Signal) {
 		s.logger.NotificationLog.Info("Notification App Stopped")
 	}()
 
+	conversationLocalAd := chat.NewConversationLocalAdapter(chatSvc, t, s.logger.ChatLog, chatapp.SetupRoleManager(), chatJWTValidator)
 	adminApp := adminapp.Setup(s.cfg.AdminCfg, s.logger.AdminLog, trapSvc.adminTrap, t, authLocalAdapter,
-		userLocalAd, nil)
+		userLocalAd, conversationLocalAd)
 
 	wg.Add(1)
 	go func() {

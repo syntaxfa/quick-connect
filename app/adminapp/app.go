@@ -31,7 +31,7 @@ type Application struct {
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translation.Translate, authLocalAdapter service.AuthService,
-	userLocalAdapter service.UserService, _ service.ConversationService) Application {
+	userLocalAdapter service.UserService, conversationLocalAdapter service.ConversationService) Application {
 	const op = "Setup"
 
 	var authAdapter service.AuthService
@@ -54,16 +54,23 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translatio
 		userAdapter = manager.NewUserAdapter(managerGRPCClient.Conn())
 	}
 
-	chatGRPCClient, chatErr := grpcclient.New(cfg.ChatAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
-	if chatErr != nil {
-		logger.Error("failed to create manager gRPC client", slog.String("error", chatErr.Error()))
+	var conversationAdapter service.ConversationService
+	var chatGRPCClient *grpcclient.Client
+	if conversationLocalAdapter != nil {
+		conversationAdapter = conversationLocalAdapter
+	} else {
+		var chatErr error
+		chatGRPCClient, chatErr = grpcclient.New(cfg.ChatAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
+		if chatErr != nil {
+			logger.Error("failed to create manager gRPC client", slog.String("error", chatErr.Error()))
 
-		panic(chatErr)
+			panic(chatErr)
+		}
+
+		conversationAdapter = chat.NewConversationAdapter(chatGRPCClient.Conn())
 	}
 
-	conversationAd := chat.NewConversationAdapter(chatGRPCClient.Conn())
-
-	handler := http.NewHandler(logger, t, authAdapter, userAdapter, conversationAd)
+	handler := http.NewHandler(logger, t, authAdapter, userAdapter, conversationAdapter)
 
 	getPuResp, gpuErr := authAdapter.GetPublicKey(context.Background(), nil)
 	if gpuErr != nil {
@@ -121,7 +128,10 @@ func (a Application) Stop(ctx context.Context) bool {
 		go a.stopHTTPServer(ctx, &shutdownWg)
 
 		shutdownWg.Add(1)
-		go a.closeManagerGRPCClient(&shutdownWg)
+		go a.stopManagerGRPCClient(&shutdownWg)
+
+		shutdownWg.Add(1)
+		go a.stopChatGRPCClient(&shutdownWg)
 
 		shutdownWg.Wait()
 		close(shutdownDone)
@@ -142,9 +152,24 @@ func (a Application) stopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	}
 }
 
-func (a Application) closeManagerGRPCClient(wg *sync.WaitGroup) {
+func (a Application) stopManagerGRPCClient(wg *sync.WaitGroup) {
 	defer wg.Done()
+	if a.managerGRPCClient == nil {
+		return
+	}
+
 	if cErr := a.managerGRPCClient.Close(); cErr != nil {
 		a.logger.Error("failed to close manager gRPC client", slog.String("error", cErr.Error()))
+	}
+}
+
+func (a Application) stopChatGRPCClient(wg *sync.WaitGroup) {
+	defer wg.Done()
+	if a.chatGRPCClient == nil {
+		return
+	}
+
+	if cErr := a.chatGRPCClient.Close(); cErr != nil {
+		a.logger.Error("failed to close chat gRPC client", slog.String("error", cErr.Error()))
 	}
 }

@@ -60,7 +60,7 @@ type PublicKeyService interface {
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter,
 	userInternalLocalAd service.UserInternalService, publicKeyInternalAd PublicKeyService) (
-	Application, *service.Service) {
+	Application, *service.Service, *jwtvalidator.Validator) {
 	const op = "Setup"
 
 	mainCtx, mainCancel := context.WithCancel(context.Background())
@@ -132,7 +132,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), chatHandler, authMid)
 
-	roleManager := setupRoleManager()
+	roleManager := SetupRoleManager()
 	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, roleManager)
 	grpcHandler := grpcdelivery.NewHandler(chatSvc, t, logger)
 	grpcServer := grpcdelivery.New(grpcserver.New(cfg.GRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)), grpcHandler, logger)
@@ -149,7 +149,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		chatHub:                   chatHub,
 		mainCtx:                   mainCtx,
 		mainCancel:                mainCancel,
-	}, chatSvc
+	}, chatSvc, jwtValidator
 }
 
 func (a Application) Start() {
@@ -312,7 +312,7 @@ func checkOrigin(allowedOrigins []string, logger *slog.Logger) func(r *http2.Req
 	}
 }
 
-func setupRoleManager() *rolemanager.RoleManager {
+func SetupRoleManager() *rolemanager.RoleManager {
 	methodRoles := map[string][]types.Role{
 		"/chat.ConversationService/ConversationNewList": {types.RoleSupport},
 		"/chat.ConversationService/ConversationOwnList": {types.RoleSupport},
