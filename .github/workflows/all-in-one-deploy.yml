@@ -1,0 +1,45 @@
+name: All In One Build And Deploy On Docker
+
+on:
+  push:
+    tags:
+      - 'all-in-one/v*'
+
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    environment: quick_connect
+    steps:
+      - name: Check Triggering Tag
+        if: startsWith(github.ref, 'refs/tags/all-in-one/v')
+        run: echo "Tag ${GITHUB_REF#refs/tags/}"
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ./go.mod
+
+      - name: Run general test
+        run: make test-general
+
+      - name: Run All in One Test
+        run: make all-in-one-test
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: build
+        run: make all-in-one-build IMAGE_NAME=syntaxfa/quickconnect-all-in-one:${GITHUB_REF#refs/tags/all-in-one/v}
+
+      - name: push image to docker hub
+        run: docker push syntaxfa/quickconnect-chat:${GITHUB_REF#refs/tags/all-in-one/v}
