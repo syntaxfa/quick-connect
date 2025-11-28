@@ -42,4 +42,4 @@ jobs:
         run: make all-in-one-build IMAGE_NAME=syntaxfa/quickconnect-all-in-one:${GITHUB_REF#refs/tags/all-in-one/v}
 
       - name: push image to docker hub
-        run: docker push syntaxfa/quickconnect-chat:${GITHUB_REF#refs/tags/all-in-one/v}
+        run: docker push syntaxfa/quickconnect-all-in-one:${GITHUB_REF#refs/tags/all-in-one/v}
