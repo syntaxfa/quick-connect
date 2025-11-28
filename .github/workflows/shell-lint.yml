@@ -1,0 +1,31 @@
+---
+name: Shell Lint
+
+on:
+  pull_request:
+    paths:
+      - '**.sh'
+      - '**.bash'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  shellcheck:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: ShellCheck with Reviewdog
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          fail_on_error: true
+          path: "."
+          pattern: |
+            *.sh
+            *.bash
