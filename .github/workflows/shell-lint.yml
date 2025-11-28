@@ -1,27 +1,31 @@
 ---
-name: Action Lint
+name: Shell Lint
 
 on:
   pull_request:
     paths:
-      - '.github/workflows/*.yml'
-      - '.github/workflows/*.yaml'
+      - '**.sh'
+      - '**.bash'
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-  actionlint:
-    name: Lint GitHub Actions
+  shellcheck:
+    name: Lint Shell Scripts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Actionlint with Reviewdog
-        uses: reviewdog/action-actionlint@v1
+      - name: ShellCheck with Reviewdog
+        uses: reviewdog/action-shellcheck@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
-          fail_level: error
+          fail_on_error: true
+          path: "."
+          pattern: |
+            *.sh
+            *.bash
