@@ -1,0 +1,22 @@
+---
+name: Docker Lint
+
+on:
+  pull_request:
+    paths:
+      - '**/Dockerfile*'
+
+jobs:
+  hadolint:
+    name: Lint Dockerfiles
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          recursive: true
+          format: tty
+          config: .hadolint.yml
