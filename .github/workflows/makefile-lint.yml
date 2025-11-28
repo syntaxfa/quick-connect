@@ -17,6 +17,6 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run checkmake
-        uses: grand-mere/checkmake-action@v2
+        uses: Uno-Takashi/checkmake-action@main
         with:
           makefile: 'Makefile'
