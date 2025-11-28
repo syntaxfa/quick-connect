@@ -1,7 +1,7 @@
 ROOT := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 
 # Default valid values
-GOLANGCI_LINT_VERSION ?= v1.55.2
+GOLANGCI_LINT_VERSION ?= v2.5.0
 IMAGE_NAME ?= quick-connect
 PROTO_DIR ?= protobuf
 OUT_DIR ?= .
