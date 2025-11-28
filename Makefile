@@ -1,6 +1,23 @@
-ROOT=$(realpath $(dir $(lastword $(MAKEFILE_LIST))))
+ROOT := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 
-GOLANGCI_LINT_VERSION ?= v2.5.0
+# Default valid values
+GOLANGCI_LINT_VERSION ?= v1.55.2
+IMAGE_NAME ?= quick-connect
+PROTO_DIR ?= protobuf
+OUT_DIR ?= .
+
+# Protobuf tools detection
+PROTOC_GEN_GO ?= $(shell which protoc-gen-go)
+# FIX: Pointing to the actual grpc plugin, not protoc itself
+PROTOC_GEN_GO_GRPC ?= $(shell which protoc-gen-go-grpc)
+PROTO_FILES := $(shell find $(PROTO_DIR) -name '*.proto')
+
+# Define all non-file targets as PHONY to avoid conflicts with files of the same name
+.PHONY: lint generate-proto update-proto-tools \
+	chat-swag-init manager-swag-init notification-swag-init example-micro1-swag-init \
+	test-general chat-test manager-test notification-test admin-test all-in-one-test \
+	chat-build manager-build notification-build admin-build all-in-one-build \
+	generate-example-proto
 
 lint:
 	@which golangci-lint > /dev/null 2>&1 || \
@@ -9,27 +26,18 @@ lint:
 		sh -s -- -b $(shell go env GOPATH)/bin $(GOLANGCI_LINT_VERSION))
 	golangci-lint run --config=$(ROOT)/.golangci.yml $(ROOT)/...
 
-PROTO_DIR ?= protobuf
-OUT_DIR ?= .
-
-PROTOC_GEN_GO ?= $(shell which protoc-gen-go)
-PROTOC_GEN_GO_GRPC ?= $(shell which protoc)
-
-PROTO_FILES := $(shell find $(PROTO_DIR) -name '*.proto')
-
 generate-proto:
 	@if [ ! -x "$(PROTOC_GEN_GO)" ] || [ ! -x "$(PROTOC_GEN_GO_GRPC)" ]; then \
 		echo "Error: protoc-gen-go and protoc-gen-go-grpc must be installed and in your PATH."; \
 		exit 1; \
 	fi
-
 	@mkdir -p $(OUT_DIR)
 	@for file in $(PROTO_FILES); do \
 		protoc \
 			--go_out=$(OUT_DIR) \
 			--go-grpc_out=$(OUT_DIR) \
 			--go_opt=paths=import \
-          	--go-grpc_opt=paths=import \
+			--go-grpc_opt=paths=import \
 			--proto_path=$(PROTO_DIR) \
 			$$file; \
 	done
@@ -40,6 +48,7 @@ update-proto-tools:
 	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 	@echo "Go protoc plugins updated successfully."
 
+# Swagger Generators
 chat-swag-init:
 	swag init -g cmd/chat/main.go -o app/chatapp/docs/ --tags=Websocket,Chat --instanceName chat
 
@@ -52,10 +61,10 @@ notification-swag-init:
 example-micro1-swag-init:
 	swag init -g example/observability/microservice1/main.go -o example/observability/internal/microservice1/docs --tags=Micro1
 
+# Tests
 test-general:
 	go test ./pkg/...
 	go test ./adapter/...
-	#go test ./cli/...
 	go test ./config/...
 	go test ./outbox/...
 
@@ -77,23 +86,24 @@ all-in-one-test:
 	go test ./app/notificationapp/...
 	go test ./app/adminapp/...
 
+# Builds (Ensure IMAGE_NAME is set or passed as argument)
 chat-build:
-	docker build -t $(IMAGE_NAME) -f deploy/chat/deploy/Dockerfile .
+	docker build -t $(IMAGE_NAME):chat -f deploy/chat/deploy/Dockerfile .
 
 manager-build:
-	docker build -t $(IMAGE_NAME) -f deploy/manager/deploy/Dockerfile .
+	docker build -t $(IMAGE_NAME):manager -f deploy/manager/deploy/Dockerfile .
 
 notification-build:
-	docker build -t $(IMAGE_NAME) -f deploy/notification/deploy/Dockerfile .
+	docker build -t $(IMAGE_NAME):notification -f deploy/notification/deploy/Dockerfile .
 
 admin-build:
-	docker build -t $(IMAGE_NAME) -f deploy/admin/deploy/Dockerfile .
+	docker build -t $(IMAGE_NAME):admin -f deploy/admin/deploy/Dockerfile .
 
 all-in-one-build:
-	docker build -t $(IMAGE_NAME) -f deploy/all-in-one/deploy/Dockerfile .
+	docker build -t $(IMAGE_NAME):aio -f deploy/all-in-one/deploy/Dockerfile .
 
 generate-example-proto:
 	@protoc \
 		--proto_path=protobuf "protobuf/example/proto/example.proto" \
 		--go_out=. \
-  		--go-grpc_out=.
+		--go-grpc_out=.
