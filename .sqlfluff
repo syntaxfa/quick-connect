@@ -1,0 +1,17 @@
+[sqlfluff]
+dialect = postgres
+ignore = .git, .github, vendor
+
+exclude_rules = L009
+
+max_line_length = 120
+
+[sqlfluff:indentation]
+tab_space_size = 4
+indent_unit = space
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.functions]
+capitalisation_policy = upper
