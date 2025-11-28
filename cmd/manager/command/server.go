@@ -38,7 +38,7 @@ func (s Server) run(trap chan os.Signal) {
 	psqAdapter := postgres.New(s.cfg.Postgres, s.logger)
 	reAdapter := redis.New(s.cfg.Redis, s.logger)
 
-	app, _, _ := managerapp.Setup(s.cfg, s.logger, trap, psqAdapter, reAdapter)
+	app, _, _, _ := managerapp.Setup(s.cfg, s.logger, trap, psqAdapter, reAdapter)
 	app.Start()
 
 	psqAdapter.Close()
