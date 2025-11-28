@@ -13,11 +13,23 @@ PROTOC_GEN_GO_GRPC ?= $(shell which protoc-gen-go-grpc)
 PROTO_FILES := $(shell find $(PROTO_DIR) -name '*.proto')
 
 # Define all non-file targets as PHONY to avoid conflicts with files of the same name.
-.PHONY: lint generate-proto update-proto-tools \
+# Added: all, test, clean
+.PHONY: all test clean lint generate-proto update-proto-tools \
 	chat-swag-init manager-swag-init notification-swag-init example-micro1-swag-init \
 	test-general chat-test manager-test notification-test admin-test all-in-one-test \
 	chat-build manager-build notification-build admin-build all-in-one-build \
 	generate-example-proto
+
+# 1. Standard 'all' target: Runs linting and all tests by default
+all: lint test
+
+# 2. Standard 'test' target: Aggregates all your sub-tests
+test: test-general chat-test manager-test notification-test admin-test
+
+# 3. Standard 'clean' target: Cleans Go cache (or remove binaries if you had any)
+clean:
+	go clean
+	@echo "Cleaned up."
 
 lint:
 	@which golangci-lint > /dev/null 2>&1 || \
@@ -61,7 +73,7 @@ notification-swag-init:
 example-micro1-swag-init:
 	swag init -g example/observability/microservice1/main.go -o example/observability/internal/microservice1/docs --tags=Micro1
 
-# Tests
+# Specific Tests
 test-general:
 	go test ./pkg/...
 	go test ./adapter/...
