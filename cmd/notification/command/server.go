@@ -40,7 +40,7 @@ func (s Server) run() {
 	re := redis.New(s.cfg.Redis, s.logger)
 	pg := postgres.New(s.cfg.Postgres, s.logger)
 
-	app := notificationapp.Setup(s.cfg, s.logger, s.trap, re, pg)
+	app, _ := notificationapp.Setup(s.cfg, s.logger, s.trap, re, pg)
 
 	app.Start()
 

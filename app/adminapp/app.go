@@ -10,6 +10,7 @@ import (
 	"github.com/syntaxfa/quick-connect/adapter/chat"
 	"github.com/syntaxfa/quick-connect/adapter/manager"
 	"github.com/syntaxfa/quick-connect/app/adminapp/delivery/http"
+	"github.com/syntaxfa/quick-connect/app/adminapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
@@ -29,38 +30,49 @@ type Application struct {
 	chatGRPCClient    *grpcclient.Client
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translation.Translate, authLocalAdapter service.AuthService,
+	userLocalAdapter service.UserService, conversationLocalAdapter service.ConversationService) Application {
 	const op = "Setup"
 
-	t, tErr := translation.New(translation.DefaultLanguages...)
-	if tErr != nil {
-		logger.Error("failed create new instance of translation", slog.String("error", tErr.Error()))
+	var authAdapter service.AuthService
+	var userAdapter service.UserService
+	var managerGRPCClient *grpcclient.Client
 
-		panic(tErr)
+	if authLocalAdapter != nil || userLocalAdapter != nil {
+		authAdapter = authLocalAdapter
+		userAdapter = userLocalAdapter
+	} else {
+		var grpcErr error
+		managerGRPCClient, grpcErr = grpcclient.New(cfg.ManagerAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
+		if grpcErr != nil {
+			logger.Error("failed to create manager gRPC client", slog.String("error", grpcErr.Error()))
+
+			panic(grpcErr)
+		}
+
+		authAdapter = manager.NewAuthAdapter(managerGRPCClient.Conn())
+		userAdapter = manager.NewUserAdapter(managerGRPCClient.Conn())
 	}
 
-	managerGRPCClient, grpcErr := grpcclient.New(cfg.ManagerAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
-	if grpcErr != nil {
-		logger.Error("failed to create manager gRPC client", slog.String("error", grpcErr.Error()))
+	var conversationAdapter service.ConversationService
+	var chatGRPCClient *grpcclient.Client
+	if conversationLocalAdapter != nil {
+		conversationAdapter = conversationLocalAdapter
+	} else {
+		var chatErr error
+		chatGRPCClient, chatErr = grpcclient.New(cfg.ChatAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
+		if chatErr != nil {
+			logger.Error("failed to create manager gRPC client", slog.String("error", chatErr.Error()))
 
-		panic(grpcErr)
+			panic(chatErr)
+		}
+
+		conversationAdapter = chat.NewConversationAdapter(chatGRPCClient.Conn())
 	}
 
-	authAdapter := manager.NewAuthAdapter(managerGRPCClient.Conn())
-	userAdapter := manager.NewUserAdapter(managerGRPCClient.Conn())
+	handler := http.NewHandler(logger, t, authAdapter, userAdapter, conversationAdapter)
 
-	chatGRPCClient, chatErr := grpcclient.New(cfg.ChatAppGRPC, grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
-	if chatErr != nil {
-		logger.Error("failed to create manager gRPC client", slog.String("error", chatErr.Error()))
-
-		panic(chatErr)
-	}
-
-	conversationAd := chat.NewConversationAdapter(chatGRPCClient.Conn())
-
-	handler := http.NewHandler(logger, t, authAdapter, userAdapter, conversationAd)
-
-	getPuResp, gpuErr := authAdapter.GetPublicKey(context.Background())
+	getPuResp, gpuErr := authAdapter.GetPublicKey(context.Background(), nil)
 	if gpuErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithWrapError(gpuErr).WithKind(richerror.KindUnexpected), logger)
 
@@ -116,7 +128,10 @@ func (a Application) Stop(ctx context.Context) bool {
 		go a.stopHTTPServer(ctx, &shutdownWg)
 
 		shutdownWg.Add(1)
-		go a.closeManagerGRPCClient(&shutdownWg)
+		go a.stopManagerGRPCClient(&shutdownWg)
+
+		shutdownWg.Add(1)
+		go a.stopChatGRPCClient(&shutdownWg)
 
 		shutdownWg.Wait()
 		close(shutdownDone)
@@ -137,9 +152,24 @@ func (a Application) stopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	}
 }
 
-func (a Application) closeManagerGRPCClient(wg *sync.WaitGroup) {
+func (a Application) stopManagerGRPCClient(wg *sync.WaitGroup) {
 	defer wg.Done()
+	if a.managerGRPCClient == nil {
+		return
+	}
+
 	if cErr := a.managerGRPCClient.Close(); cErr != nil {
 		a.logger.Error("failed to close manager gRPC client", slog.String("error", cErr.Error()))
+	}
+}
+
+func (a Application) stopChatGRPCClient(wg *sync.WaitGroup) {
+	defer wg.Done()
+	if a.chatGRPCClient == nil {
+		return
+	}
+
+	if cErr := a.chatGRPCClient.Close(); cErr != nil {
+		a.logger.Error("failed to close chat gRPC client", slog.String("error", cErr.Error()))
 	}
 }

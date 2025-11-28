@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/syntaxfa/quick-connect/app/adminapp"
+	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
 
 type Server struct {
@@ -29,7 +30,13 @@ func (s Server) Command(cfg adminapp.Config, logger *slog.Logger, trap <-chan os
 }
 
 func (s Server) run(trap <-chan os.Signal) {
-	app := adminapp.Setup(s.cfg, s.logger, trap)
+	t, tErr := translation.New(translation.DefaultLanguages...)
+	if tErr != nil {
+		s.logger.Error("can't initial translation", slog.String("error", tErr.Error()))
+		panic(tErr)
+	}
+
+	app := adminapp.Setup(s.cfg, s.logger, trap, t, nil, nil, nil)
 
 	app.Start()
 }

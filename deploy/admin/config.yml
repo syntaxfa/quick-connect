@@ -10,6 +10,7 @@ logger:
   file_max_age_in_days: 30
   max_backup: 0
   compress: false
+  write_in_console: true
 template_path: "app/adminapp/templates"
 manager_app_grpc:
   host: "localhost"

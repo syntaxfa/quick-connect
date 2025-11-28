@@ -35,7 +35,8 @@ type Application struct {
 	adminHTTPServer  http.AdminServer
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, re *redis.Adapter, pg *postgres.Database) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, re *redis.Adapter, pg *postgres.Database) (
+	Application, service.Service) {
 	t, tErr := translation.New(translation.DefaultLanguages...)
 	if tErr != nil {
 		panic(tErr)
@@ -65,7 +66,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, re *redis.Ada
 		logger:           logger,
 		clientHTTPServer: clientHTTPServer,
 		adminHTTPServer:  adminHTTPServer,
-	}
+	}, notificationSvc
 }
 
 func (a Application) Start() {

@@ -16,7 +16,7 @@ func main() {
 		FileMaxAgeInDays: 10,
 		MaxBackup:        0,
 		Compress:         false,
-	}, nil, true, "example")
+	}, nil, "example")
 
 	server := httpserver.New(httpserver.Config{
 		Port: 5050,

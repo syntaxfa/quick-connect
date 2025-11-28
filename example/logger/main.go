@@ -10,7 +10,7 @@ func main() {
 		FileMaxAgeInDays: 30,
 		MaxBackup:        0,
 		Compress:         false,
-	}, nil, true, "example")
+	}, nil, "example")
 
 	log.Info("Hello world!")
 }

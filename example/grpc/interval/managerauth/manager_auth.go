@@ -53,7 +53,7 @@ func ManagerAuth() {
 	}
 
 	authAdapter := manager.NewAuthAdapter(grpcClient.Conn())
-	pkResp, pkErr := authAdapter.GetPublicKey(context.Background())
+	pkResp, pkErr := authAdapter.GetPublicKey(context.Background(), nil)
 	if pkErr != nil {
 		errorhandler.HandleGRPCError(pkErr, slog.Default())
 	}

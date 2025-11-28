@@ -33,7 +33,7 @@ func (h Handler) GetConversationModal(c echo.Context) error {
 	detailReq := &conversationpb.ConversationDetailRequest{
 		ConversationId: convID,
 	}
-	detailResp, err := h.conversationAd.ConversationDetail(ctx, detailReq)
+	detailResp, err := h.conversationSvc.ConversationDetail(ctx, detailReq)
 	if err != nil {
 		return h.renderGRPCError(c, "GetConversationDetail", err)
 	}
@@ -43,7 +43,7 @@ func (h Handler) GetConversationModal(c echo.Context) error {
 		ConversationId: convID,
 		Limit:          messageLimitNumber,
 	}
-	historyResp, err := h.conversationAd.ChatHistory(ctx, historyReq)
+	historyResp, err := h.conversationSvc.ChatHistory(ctx, historyReq)
 	if err != nil {
 		h.logger.Error("Failed to fetch chat history", "error", err)
 	}
@@ -81,7 +81,7 @@ func (h Handler) JoinConversation(c echo.Context) error {
 		ConversationId: convID,
 	}
 
-	_, err := h.conversationAd.OpenConversation(ctx, req)
+	_, err := h.conversationSvc.OpenConversation(ctx, req)
 	if err != nil {
 		return h.renderGRPCError(c, "JoinConversation", err)
 	}
@@ -99,7 +99,7 @@ func (h Handler) ResolveConversation(c echo.Context) error {
 		ConversationId: convID,
 	}
 
-	_, err := h.conversationAd.CloseConversation(ctx, req)
+	_, err := h.conversationSvc.CloseConversation(ctx, req)
 	if err != nil {
 		return h.renderGRPCError(c, "ResolveConversation", err)
 	}
@@ -120,7 +120,7 @@ func (h Handler) GetChatHistory(c echo.Context) error {
 		Limit:          int32(messageLimitNumber),
 	}
 
-	resp, err := h.conversationAd.ChatHistory(ctx, req)
+	resp, err := h.conversationSvc.ChatHistory(ctx, req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

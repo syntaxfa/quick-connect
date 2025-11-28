@@ -3,6 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"runtime"
+	"syscall"
+
 	"github.com/syntaxfa/quick-connect/adapter/observability/metricotela"
 	"github.com/syntaxfa/quick-connect/adapter/observability/otelcore"
 	"github.com/syntaxfa/quick-connect/adapter/observability/traceotela"
@@ -10,11 +16,6 @@ import (
 	"github.com/syntaxfa/quick-connect/example/observability/internal/microservice1"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 	"go.opentelemetry.io/otel/metric"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"runtime"
-	"syscall"
 )
 
 func getMemoryUsage() uint64 {
@@ -61,7 +62,7 @@ func main() {
 	trap := make(chan os.Signal, 1)
 	signal.Notify(trap, syscall.SIGINT, syscall.SIGTERM)
 
-	log := logger.New(cfg.Logger, nil, true, "microservice1")
+	log := logger.New(cfg.Logger, nil, "microservice1")
 
 	if mErr := metricotela.InitMetric(ctx, cfg.Observability.Metric, resource, log); mErr != nil {
 		log.Error(mErr.Error())

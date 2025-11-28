@@ -72,9 +72,9 @@ func (s Server) registerRoutes() {
 }
 
 func (s Server) registerSwagger() {
-	docs.SwaggerInfo.Title = "Manager API"
-	docs.SwaggerInfo.Description = "Manager restfull API documentation"
-	docs.SwaggerInfo.Version = "1.0.0"
+	docs.SwaggerInfomanager.Title = "Manager API"
+	docs.SwaggerInfomanager.Description = "Manager restfull API documentation"
+	docs.SwaggerInfomanager.Version = "1.0.0"
 
-	s.httpserver.Router.GET("/swagger/*any", echoSwagger.WrapHandler)
+	s.httpserver.Router.GET("/swagger/*any", echoSwagger.EchoWrapHandler(echoSwagger.InstanceName("manager")))
 }
