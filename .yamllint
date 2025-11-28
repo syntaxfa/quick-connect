@@ -13,3 +13,8 @@ ignore: |
   vendor/
   .git/
   bin/
+  # Ignore Swag generated files
+  swagger.yaml
+  *_swagger.yaml
+  **/docs/swagger.yaml
+  **/docs/*_swagger.yaml
