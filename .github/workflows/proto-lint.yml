@@ -1,0 +1,26 @@
+---
+name: Proto Lint & Check
+
+on:
+  pull_request:
+    paths:
+      - 'protobuf/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  buf:
+    name: Buf CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run Buf Action
+        uses: bufbuild/buf-action@v1
+        with:
+          input: 'protobuf'
+          lint: true
+          breaking: true

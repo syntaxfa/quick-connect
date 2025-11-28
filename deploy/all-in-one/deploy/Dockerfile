@@ -4,7 +4,7 @@ ENV APP_NAME=all-in-one
 
 WORKDIR /$APP_NAME
 
-# copy app files
+# copy app files.
 COPY . .
 
 # build application
