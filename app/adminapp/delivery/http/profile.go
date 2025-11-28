@@ -13,7 +13,7 @@ import (
 func (h Handler) ShowProfilePage(c echo.Context) error {
 	ctx := grpcContext(c)
 
-	userPb, aErr := h.userAd.UserProfile(ctx, &empty.Empty{})
+	userPb, aErr := h.userSvc.UserProfile(ctx, &empty.Empty{})
 	if aErr != nil {
 		return h.renderGRPCError(c, "ShowProfilePage", aErr)
 	}
@@ -33,7 +33,7 @@ func (h Handler) ShowProfilePage(c echo.Context) error {
 func (h Handler) ShowProfileView(c echo.Context) error {
 	ctx := grpcContext(c)
 
-	userPb, aErr := h.userAd.UserProfile(ctx, &empty.Empty{})
+	userPb, aErr := h.userSvc.UserProfile(ctx, &empty.Empty{})
 	if aErr != nil {
 		return h.renderGRPCError(c, "ShowProfileView", aErr)
 	}
@@ -50,7 +50,7 @@ func (h Handler) ShowProfileView(c echo.Context) error {
 func (h Handler) ShowProfileEditForm(c echo.Context) error {
 	ctx := grpcContext(c)
 
-	userPb, aErr := h.userAd.UserProfile(ctx, &empty.Empty{})
+	userPb, aErr := h.userSvc.UserProfile(ctx, &empty.Empty{})
 	if aErr != nil {
 		return h.renderGRPCError(c, "ShowProfileEditForm", aErr)
 	}
@@ -72,7 +72,7 @@ func (h Handler) UpdateProfile(c echo.Context) error {
 	email := c.FormValue("email")
 	phoneNumber := c.FormValue("phone_number")
 
-	_, aErr := h.userAd.UserUpdateFromOwn(ctx, &userpb.UserUpdateFromOwnRequest{
+	_, aErr := h.userSvc.UserUpdateFromOwn(ctx, &userpb.UserUpdateFromOwnRequest{
 		Username:    username,
 		Fullname:    fullname,
 		Email:       email,

@@ -39,7 +39,7 @@ func main() {
 	}
 	config.Load(options, &cfg, nil)
 
-	log := logger.New(cfg.Logger, nil, true, "manager")
+	log := logger.New(cfg.Logger, nil, "manager")
 
 	root := &cobra.Command{
 		Use:   "manager",

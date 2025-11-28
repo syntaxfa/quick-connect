@@ -1,0 +1,28 @@
+name: "quick-connect-all-in-one"
+
+volumes:
+  postgres_data:
+
+networks:
+  app_net:
+    external: true
+  web_net:
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: manager_postgres
+    hostname: manager_postgres
+    command: -p ${MANAGER_POSTGRES__PORT}
+    restart: always
+    environment:
+      - POSTGRES_DB=${MANAGER_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${MANAGER_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${MANAGER_POSTGRES__PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    ports:
+      - ${MANAGER_POSTGRES__PORT}:${MANAGER_POSTGRES__PORT}
+    networks:
+      - app_net

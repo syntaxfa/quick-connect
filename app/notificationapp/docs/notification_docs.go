@@ -3,7 +3,7 @@ package docs
 
 import "github.com/swaggo/swag"
 
-const docTemplate = `{
+const docTemplatenotification = `{
     "schemes": {{ marshal .Schemes }},
     "swagger": "2.0",
     "info": {
@@ -863,40 +863,8 @@ const docTemplate = `{
                 "results": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/service.ListNotificationResult"
+                        "$ref": "#/definitions/service.NotificationMessage"
                     }
-                }
-            }
-        },
-        "service.ListNotificationResult": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "data": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "id": {
-                    "type": "string"
-                },
-                "is_read": {
-                    "type": "boolean"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/service.NotificationType"
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },
@@ -932,7 +900,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "template_name": {
                     "type": "string"
@@ -973,7 +941,7 @@ const docTemplate = `{
                     }
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "is_in_app": {
                     "type": "boolean"
@@ -991,7 +959,39 @@ const docTemplate = `{
                     "$ref": "#/definitions/service.NotificationType"
                 },
                 "user_id": {
+                    "$ref": "#/definitions/types.ID"
+                }
+            }
+        },
+        "service.NotificationMessage": {
+            "type": "object",
+            "properties": {
+                "body": {
                     "type": "string"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "is_read": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/service.NotificationType"
+                },
+                "user_id": {
+                    "$ref": "#/definitions/types.ID"
                 }
             }
         },
@@ -1096,7 +1096,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "name": {
                     "type": "string"
@@ -1138,7 +1138,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "ignore_channels": {
                     "type": "array",
@@ -1150,9 +1150,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 }
             }
+        },
+        "types.ID": {
+            "type": "string",
+            "enum": [
+                "01J00000000000000000000BOT"
+            ],
+            "x-enum-varnames": [
+                "BotUserID"
+            ]
         }
     },
     "securityDefinitions": {
@@ -1165,20 +1174,20 @@ const docTemplate = `{
     }
 }`
 
-// SwaggerInfo holds exported Swagger Info so clients can modify it.
-var SwaggerInfo = &swag.Spec{
+// SwaggerInfonotification holds exported Swagger Info so clients can modify it
+var SwaggerInfonotification = &swag.Spec{
 	Version:          "",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{"http", "https"},
 	Title:            "",
 	Description:      "",
-	InfoInstanceName: "swagger",
-	SwaggerTemplate:  docTemplate,
+	InfoInstanceName: "notification",
+	SwaggerTemplate:  docTemplatenotification,
 	LeftDelim:        "{{",
 	RightDelim:       "}}",
 }
 
 func init() {
-	swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
+	swag.Register(SwaggerInfonotification.InstanceName(), SwaggerInfonotification)
 }

@@ -39,7 +39,7 @@ func main() {
 	}
 	config.Load(options, &cfg, nil)
 
-	log := logger.New(cfg.Logger, nil, true, "chat")
+	log := logger.New(cfg.Logger, nil, "chat")
 
 	root := &cobra.Command{
 		Use:     "chat",

@@ -21,7 +21,7 @@ func (h Handler) ShowSupportService(c echo.Context) error {
 		CurrentPage: 1,
 		PageSize:    1,
 	}
-	listResp, err := h.conversationAd.ConversationNewList(ctx, listReq)
+	listResp, err := h.conversationSvc.ConversationNewList(ctx, listReq)
 	totalNew := uint64(0)
 	if err != nil {
 		h.logger.Error("Failed to get new conversation count for stats", "error", err)
@@ -66,7 +66,7 @@ func (h Handler) ListNewConversationsPartial(c echo.Context) error {
 		SortDirection: conversationpb.SortDirection_SORT_DIRECTION_DESC,
 	}
 
-	listResp, err := h.conversationAd.ConversationNewList(ctx, listReq)
+	listResp, err := h.conversationSvc.ConversationNewList(ctx, listReq)
 	if err != nil {
 		return h.renderGRPCError(c, "ListNewConversationsPartial", err)
 	}
@@ -128,7 +128,7 @@ func (h Handler) ListMyConversationsPartial(c echo.Context) error {
 		// AssignedSupportID is handled by the gRPC server (ConversationOwnList).
 	}
 
-	listResp, err := h.conversationAd.ConversationOwnList(ctx, listReq)
+	listResp, err := h.conversationSvc.ConversationOwnList(ctx, listReq)
 	if err != nil {
 		return h.renderGRPCError(c, "ListMyConversationsPartial", err)
 	}

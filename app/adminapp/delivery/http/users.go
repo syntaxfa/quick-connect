@@ -48,7 +48,7 @@ func (h Handler) ShowUsersPage(c echo.Context) error {
 		PageSize:    1, // We only need the total count
 	}
 
-	listResp, err := h.userAd.UserList(ctx, listReq)
+	listResp, err := h.userSvc.UserList(ctx, listReq)
 	totalUsers := uint64(0)
 	if err != nil {
 		// Don't fail the whole page, just log it and render with 0
@@ -99,7 +99,7 @@ func (h Handler) ListUsersPartial(c echo.Context) error {
 		Roles:         roles,
 	}
 
-	listResp, err := h.userAd.UserList(ctx, listReq)
+	listResp, err := h.userSvc.UserList(ctx, listReq)
 	if err != nil {
 		return h.renderGRPCError(c, "ListUsersPartial", err)
 	}
@@ -141,7 +141,7 @@ func (h Handler) DeleteUser(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "User ID is required")
 	}
 
-	_, err := h.userAd.UserDelete(ctx, &userpb.UserDeleteRequest{UserId: userID})
+	_, err := h.userSvc.UserDelete(ctx, &userpb.UserDeleteRequest{UserId: userID})
 	if err != nil {
 		return h.renderGRPCError(c, "DeleteUser", err)
 	}
@@ -209,7 +209,7 @@ func (h Handler) buildPaginationData(resp *userpb.UserListResponse, query string
 func (h Handler) DetailUser(c echo.Context) error {
 	ctx := grpcContext(c)
 
-	userPb, aErr := h.userAd.UserDetail(ctx, &userpb.UserDetailRequest{UserId: c.Param("id")})
+	userPb, aErr := h.userSvc.UserDetail(ctx, &userpb.UserDetailRequest{UserId: c.Param("id")})
 	if aErr != nil {
 		return h.renderGRPCError(c, "DetailUser", aErr)
 	}
@@ -225,7 +225,7 @@ func (h Handler) DetailUser(c echo.Context) error {
 func (h Handler) ShowEditUserModal(c echo.Context) error {
 	ctx := grpcContext(c)
 
-	userPb, aErr := h.userAd.UserDetail(ctx, &userpb.UserDetailRequest{UserId: c.Param("id")})
+	userPb, aErr := h.userSvc.UserDetail(ctx, &userpb.UserDetailRequest{UserId: c.Param("id")})
 	if aErr != nil {
 		return h.renderGRPCError(c, "ShowEditUserModal", aErr)
 	}
@@ -260,7 +260,7 @@ func (h Handler) UpdateUser(c echo.Context) error {
 		Roles:       roles,
 	}
 
-	_, aErr := h.userAd.UserUpdateFromSuperuser(ctx, req)
+	_, aErr := h.userSvc.UserUpdateFromSuperuser(ctx, req)
 	if aErr != nil {
 		return h.renderGRPCError(c, "UpdateUser", aErr)
 	}
@@ -294,7 +294,7 @@ func (h Handler) CreateUser(c echo.Context) error {
 		Roles:       ParseRolesFromForm(c.Request().Form["roles"]),
 	}
 
-	_, aErr := h.userAd.CreateUser(ctx, req)
+	_, aErr := h.userSvc.CreateUser(ctx, req)
 	if aErr != nil {
 		return h.renderGRPCError(c, "CreateUser", aErr)
 	}
@@ -325,7 +325,7 @@ func (h Handler) ChangePassword(c echo.Context) error {
 		NewPassword: newPassword,
 	}
 
-	_, aErr := h.userAd.UserChangePassword(ctx, req)
+	_, aErr := h.userSvc.UserChangePassword(ctx, req)
 	if aErr != nil {
 		return h.renderGRPCError(c, "ChangePassword", aErr)
 	}

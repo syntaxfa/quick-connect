@@ -17,9 +17,10 @@ type Config struct {
 	FileMaxAgeInDays int    `koanf:"file_max_age_in_days"`
 	MaxBackup        int    `koanf:"max_backup"`
 	Compress         bool   `koanf:"compress"`
+	WriteInConsole   bool   `koanf:"write_in_console"`
 }
 
-func New(cfg Config, opt *slog.HandlerOptions, writeInConsole bool, serviceName string) *slog.Logger {
+func New(cfg Config, opt *slog.HandlerOptions, serviceName string) *slog.Logger {
 	if cfg.FilePath == "" {
 		panic("filepath can be blank")
 	}
@@ -39,7 +40,7 @@ func New(cfg Config, opt *slog.HandlerOptions, writeInConsole bool, serviceName 
 	}
 
 	writers := []io.Writer{fileWriter}
-	if writeInConsole {
+	if cfg.WriteInConsole {
 		writers = append(writers, os.Stdout)
 	}
 

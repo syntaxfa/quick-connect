@@ -36,7 +36,8 @@ type Application struct {
 	grpcServerInternal grpcdelivery.ServerInternal
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) Application {
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter) (
+	Application, tokenservice.Service, userservice.Service, *jwtvalidator.Validator) {
 	t, tErr := translation.New(translation.DefaultLanguages...)
 	if tErr != nil {
 		panic(tErr)
@@ -57,7 +58,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	internalHandler := http.NewInternalHandler(userSvc, t)
 	internalHTTPServer := http.NewInternalServer(httpserver.New(cfg.InternalHTTPServer, logger), internalHandler, logger, cfg.APIKey)
 
-	roleManager := setupRoleManager()
+	roleManager := SetupRoleManager()
 	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, roleManager)
 	grpcHandler := grpcdelivery.NewHandler(logger, tokenSvc, userSvc, t)
 	grpcServer := grpcdelivery.New(grpcserver.New(cfg.GRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)), grpcHandler, logger)
@@ -73,7 +74,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		grpcServer:         grpcServer,
 		internalHTTPServer: internalHTTPServer,
 		grpcServerInternal: grpcServerInternal,
-	}
+	}, tokenSvc, userSvc, jwtValidator
 }
 
 func (a Application) Start() {
@@ -191,7 +192,7 @@ func (a Application) StopGRCPServerInternal(wg *sync.WaitGroup) {
 	a.grpcServerInternal.Stop()
 }
 
-func setupRoleManager() *rolemanager.RoleManager {
+func SetupRoleManager() *rolemanager.RoleManager {
 	methodRoles := map[string][]types.Role{
 		// AuthService
 		"/manager.AuthService/GetPublicKey": {},
@@ -207,6 +208,7 @@ func setupRoleManager() *rolemanager.RoleManager {
 		"/manager.UserService/UserProfile":             types.AdminRoles,
 		"/manager.UserService/UserUpdateFromOwn":       types.AdminRoles,
 		"/manager.UserService/UserInfo":                types.AllUserRole,
+		"/manager.UserService/UserChangePassword":      types.AdminRoles,
 	}
 
 	return rolemanager.NewRoleManager(methodRoles)

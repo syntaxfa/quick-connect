@@ -32,7 +32,7 @@ func (h Handler) Login(c echo.Context) error {
 		return h.renderErrorPartial(c, http.StatusBadRequest, h.t.TranslateMessage(servermsg.MsgUsernameAndPasswordAreRequired))
 	}
 
-	loginResp, err := h.authAd.Login(ctx, loginReq)
+	loginResp, err := h.authSvc.Login(ctx, loginReq)
 
 	if err != nil {
 		return h.renderGRPCError(c, "gRPC login call failed", err)

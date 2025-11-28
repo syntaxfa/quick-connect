@@ -856,40 +856,8 @@
                 "results": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/service.ListNotificationResult"
+                        "$ref": "#/definitions/service.NotificationMessage"
                     }
-                }
-            }
-        },
-        "service.ListNotificationResult": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "data": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "id": {
-                    "type": "string"
-                },
-                "is_read": {
-                    "type": "boolean"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/service.NotificationType"
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },
@@ -925,7 +893,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "template_name": {
                     "type": "string"
@@ -966,7 +934,7 @@
                     }
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "is_in_app": {
                     "type": "boolean"
@@ -984,7 +952,39 @@
                     "$ref": "#/definitions/service.NotificationType"
                 },
                 "user_id": {
+                    "$ref": "#/definitions/types.ID"
+                }
+            }
+        },
+        "service.NotificationMessage": {
+            "type": "object",
+            "properties": {
+                "body": {
                     "type": "string"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "is_read": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/service.NotificationType"
+                },
+                "user_id": {
+                    "$ref": "#/definitions/types.ID"
                 }
             }
         },
@@ -1089,7 +1089,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "name": {
                     "type": "string"
@@ -1131,7 +1131,7 @@
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 },
                 "ignore_channels": {
                     "type": "array",
@@ -1143,9 +1143,18 @@
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.ID"
                 }
             }
+        },
+        "types.ID": {
+            "type": "string",
+            "enum": [
+                "01J00000000000000000000BOT"
+            ],
+            "x-enum-varnames": [
+                "BotUserID"
+            ]
         }
     },
     "securityDefinitions": {

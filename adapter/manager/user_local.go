@@ -1,0 +1,156 @@
+package manager
+
+import (
+	"context"
+	"log/slog"
+
+	"github.com/syntaxfa/quick-connect/app/managerapp/service/userservice"
+	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
+	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
+	"github.com/syntaxfa/quick-connect/pkg/rolemanager"
+	"github.com/syntaxfa/quick-connect/pkg/servermsg"
+	"github.com/syntaxfa/quick-connect/pkg/translation"
+	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userpb"
+	"github.com/syntaxfa/quick-connect/types"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+)
+
+type UserLocalAdapter struct {
+	userSvc      *userservice.Service
+	t            *translation.Translate
+	logger       *slog.Logger
+	roleManager  *rolemanager.RoleManager
+	jwtValidator *jwtvalidator.Validator
+}
+
+func NewUserLocalAdapter(userSvc *userservice.Service, t *translation.Translate, logger *slog.Logger, roleManager *rolemanager.RoleManager,
+	jwtValidator *jwtvalidator.Validator) *UserLocalAdapter {
+	return &UserLocalAdapter{
+		userSvc:      userSvc,
+		t:            t,
+		logger:       logger,
+		roleManager:  roleManager,
+		jwtValidator: jwtValidator,
+	}
+}
+
+func (udl *UserLocalAdapter) UserProfile(ctx context.Context, _ *empty.Empty, _ ...grpc.CallOption) (*userpb.User, error) {
+	claims, pErr := grpcauth.Protect(ctx, udl.roleManager, udl.jwtValidator, "/manager.UserService/UserProfile")
+	if pErr != nil {
+		return nil, status.Error(codes.Unauthenticated, pErr.Error())
+	}
+
+	resp, sErr := udl.userSvc.UserProfile(ctx, claims.UserID)
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, udl.t, udl.logger)
+	}
+
+	return convertUserToPB(resp.User), nil
+}
+
+func (udl *UserLocalAdapter) UserUpdateFromOwn(ctx context.Context, req *userpb.UserUpdateFromOwnRequest,
+	_ ...grpc.CallOption) (*userpb.User, error) {
+	claims, pErr := grpcauth.Protect(ctx, udl.roleManager, udl.jwtValidator, "/manager.UserService/UserUpdateFromOwn")
+	if pErr != nil {
+		return nil, status.Error(codes.Unauthenticated, pErr.Error())
+	}
+
+	resp, sErr := udl.userSvc.UserUpdateFromOwn(ctx, claims.UserID, convertUserUpdateFromOwnToEntity(req))
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, udl.t, udl.logger)
+	}
+
+	return convertUserToPB(resp.User), nil
+}
+
+func (udl *UserLocalAdapter) UserList(ctx context.Context, req *userpb.UserListRequest,
+	_ ...grpc.CallOption) (*userpb.UserListResponse, error) {
+	_, pErr := grpcauth.Protect(ctx, udl.roleManager, udl.jwtValidator, "/manager.UserService/UserList")
+	if pErr != nil {
+		return nil, status.Error(codes.Unauthenticated, pErr.Error())
+	}
+
+	resp, sErr := udl.userSvc.UserList(ctx, convertUserListRequestToEntity(req))
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, udl.t, udl.logger)
+	}
+
+	return convertUserListResponseToPB(resp), nil
+}
+
+func (udl *UserLocalAdapter) UserDelete(ctx context.Context, req *userpb.UserDeleteRequest, _ ...grpc.CallOption) (*empty.Empty, error) {
+	_, pErr := grpcauth.Protect(ctx, udl.roleManager, udl.jwtValidator, "/manager.UserService/UserDelete")
+	if pErr != nil {
+		return nil, status.Error(codes.Unauthenticated, pErr.Error())
+	}
+
+	if sErr := udl.userSvc.UserDelete(ctx, types.ID(req.GetUserId())); sErr != nil {
+		return &empty.Empty{}, servermsg.GRPCMsg(sErr, udl.t, udl.logger)
+	}
+
+	return &empty.Empty{}, nil
+}
+
+func (udl *UserLocalAdapter) UserDetail(ctx context.Context, req *userpb.UserDetailRequest, _ ...grpc.CallOption) (*userpb.User, error) {
+	_, pErr := grpcauth.Protect(ctx, udl.roleManager, udl.jwtValidator, "/manager.UserService/UserDetail")
+	if pErr != nil {
+		return nil, status.Error(codes.Unauthenticated, pErr.Error())
+	}
+
+	resp, sErr := udl.userSvc.UserProfile(ctx, types.ID(req.GetUserId()))
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, udl.t, udl.logger)
+	}
+
+	return convertUserToPB(resp.User), nil
+}
+
+func (udl *UserLocalAdapter) UserUpdateFromSuperuser(ctx context.Context, req *userpb.UserUpdateFromSuperUserRequest,
+	_ ...grpc.CallOption) (*userpb.User, error) {
+	_, pErr := grpcauth.Protect(ctx, udl.roleManager, udl.jwtValidator, "/manager.UserService/UserUpdateFromSuperuser")
+	if pErr != nil {
+		return nil, status.Error(codes.Unauthenticated, pErr.Error())
+	}
+
+	resp, sErr := udl.userSvc.UserUpdateFromSuperuser(ctx, types.ID(req.GetUserId()), convertUserUpdateFromSuperuserToEntity(req))
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, udl.t, udl.logger)
+	}
+
+	return convertUserToPB(resp.User), nil
+}
+
+func (udl *UserLocalAdapter) CreateUser(ctx context.Context, req *userpb.CreateUserRequest, _ ...grpc.CallOption) (*userpb.User, error) {
+	_, pErr := grpcauth.Protect(ctx, udl.roleManager, udl.jwtValidator, "/manager.UserService/CreateUser")
+	if pErr != nil {
+		return nil, status.Error(codes.Unauthenticated, pErr.Error())
+	}
+
+	resp, sErr := udl.userSvc.CreateUser(ctx, convertCreateUserRequestToEntity(req))
+
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, udl.t, udl.logger)
+	}
+
+	return convertUserToPB(resp.User), nil
+}
+
+func (udl *UserLocalAdapter) UserChangePassword(ctx context.Context, req *userpb.UserChangePasswordRequest,
+	_ ...grpc.CallOption) (*empty.Empty, error) {
+	claims, pErr := grpcauth.Protect(ctx, udl.roleManager, udl.jwtValidator, "/manager.UserService/UserChangePassword")
+	if pErr != nil {
+		return nil, status.Error(codes.Unauthenticated, pErr.Error())
+	}
+
+	if sErr := udl.userSvc.ChangePassword(ctx, claims.UserID, userservice.ChangePasswordRequest{
+		OldPassword: req.GetOldPassword(),
+		NewPassword: req.GetNewPassword(),
+	}); sErr != nil {
+		return &empty.Empty{}, servermsg.GRPCMsg(sErr, udl.t, udl.logger)
+	}
+
+	return &empty.Empty{}, nil
+}
