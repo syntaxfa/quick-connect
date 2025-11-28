@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: SQLFluff with Reviewdog
-        uses: yu-iskw/action-sqlfluff@v4
+        uses: yu-iskw/action-sqlfluff@v5
         id: lint-sql
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
