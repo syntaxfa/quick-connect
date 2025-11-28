@@ -1,0 +1,32 @@
+---
+name: SQL Lint (Reviewdog)
+
+on:
+  pull_request:
+    paths:
+      - '**.sql'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  sqlfluff-lint:
+    name: Lint SQL Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: SQLFluff with Reviewdog
+        uses: yu-iskw/action-sqlfluff@v4
+        id: lint-sql
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          sqlfluff_version: "3.3.0"
+          sqlfluff_command: "lint"
+          config: "${{ github.workspace }}/.sqlfluff"
+          paths: "."
+          fail_on_error: "true"
+          level: "error"

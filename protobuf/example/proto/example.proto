@@ -12,6 +12,7 @@ message GetCommentResponse {
   string body = 2;
 }
 
+
 service CommentService {
   rpc GetComment (GetCommentByIDRequest) returns (GetCommentResponse);
 }
