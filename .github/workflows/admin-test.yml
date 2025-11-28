@@ -28,6 +28,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
+          # comment
           go-version-file: go.mod
 
       - name: test
