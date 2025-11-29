@@ -51,17 +51,17 @@ services:
       retries: 10
 
   #  init:
-  #    image: syntaxfa/quickconnect-all-in-one:1.0.1
+  #    image: syntaxfa/quickconnect-all-in-one:1.0.2
   #    container_name: init
   #    command: "./"
 
   quick_connect:
-    image: syntaxfa/quickconnect-all-in-one:1.0.1
+    image: syntaxfa/quickconnect-all-in-one:1.0.2
     container_name: quick_connect
     hostname: quick_connect
     restart: always
     ports:
-      - 2536:2536
+      - ${ADMIN_HTTP_SERVER__PORT}:${ADMIN_HTTP_SERVER__PORT}
     networks:
       - app_net
       - web_net
