@@ -26,5 +26,7 @@ COPY --from=builder /all-in-one/app/managerapp/repository/migrations/*.sql ./app
 COPY --from=builder /all-in-one/app/chatapp/repository/migrations/*.sql ./app/chatapp/repository/migrations/
 COPY --from=builder /all-in-one/app/notificationapp/repository/migrations/*.sql ./app/notificationapp/repository/migrations/
 COPY --from=builder /all-in-one/pkg/translation ./pkg/translation
+COPY --from=builder /all-in-one/app/adminapp/templates/* ./app/adminapp/templates/
+COPY --from=builder /all-in-one/app/adminapp/static/* ./app/adminapp/static/
 
 CMD ["./all-in-one", "start"]
