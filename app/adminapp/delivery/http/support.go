@@ -31,15 +31,13 @@ func (h Handler) ShowSupportService(c echo.Context) error {
 
 	accessToken, _ := getAccessTokenFromCookie(c, h.logger)
 
-	chatWsURL := "ws://localhost:2530/chats/supports"
-
 	data := map[string]interface{}{
 		"TotalNewConversations": totalNew,
 		"TemplateName":          "support_page",
 		"User":                  user,
 		"AllStatuses":           GetAllConversationStatuses(),
 		"WebSocketToken":        accessToken,
-		"ChatWsURL":             chatWsURL,
+		"ChatWsURL":             h.chatWSURL,
 	}
 
 	if isHTMX(c) {
