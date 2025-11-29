@@ -51,7 +51,7 @@ services:
       retries: 10
 
   init:
-    image: syntaxfa/quickconnect-all-in-one:1.0.3
+    image: syntaxfa/quickconnect-all-in-one:1.0.0
     container_name: init
     command: >
       /bin/sh -c "
@@ -107,12 +107,13 @@ services:
       - MANAGER_REDIS__PASSWORD=${ALL_IN_ONE_REDIS__PASSWORD}
 
   quick_connect:
-    image: syntaxfa/quickconnect-all-in-one:1.0.3
+    image: syntaxfa/quickconnect-all-in-one:1.0.0
     container_name: quick_connect
     hostname: quick_connect
     restart: always
     ports:
       - ${ADMIN_HTTP_SERVER__PORT}:${ADMIN_HTTP_SERVER__PORT}
+      - ${CHAT_HTTP_SERVER__PORT}:${CHAT_HTTP_SERVER__PORT}
     networks:
       - app_net
       - web_net
@@ -219,4 +220,4 @@ services:
       - ADMIN_CHAT_APP_GRPC__SSL_MODE=${ADMIN_CHAT_APP_GRPC__SSL_MODE}
       - ADMIN_CHAT_APP_GRPC__USER_OTEL=${ADMIN_CHAT_APP_GRPC__USER_OTEL}
       # wg support
-      - ADMIN_CHAT_WS_URL="ws://localhost:${CHAT_HTTP_SERVER__PORT}/chats/supports"
+      - ADMIN_CHAT_WS_URL=ws://localhost:${CHAT_HTTP_SERVER__PORT}/chats/supports
