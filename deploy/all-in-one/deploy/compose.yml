@@ -50,13 +50,64 @@ services:
       timeout: 5s
       retries: 10
 
-  #  init:
-  #    image: syntaxfa/quickconnect-all-in-one:1.0.2
-  #    container_name: init
-  #    command: "./"
+  init:
+    image: syntaxfa/quickconnect-all-in-one:1.0.3
+    container_name: init
+    command: >
+      /bin/sh -c "
+      ./all-in-one manager migrate up &&
+      ./all-in-one chat migrate up &&
+      ./all-in-one notification migrate up &&
+      ./all-in-one manager create-user --username=${SUPERUSER_USERNAME} --password=${SUPERUSER_PASSWORD} --fullname=${SUPERUSER_FULLNAME} --email=${SUPERUSER_EMAIL} --phone_number=${SUPERUSER_PHONE_NUMBER} --role=${SUPERUSER_ROLE}
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app_net
+    environment:
+      # manger configuration
+      # postgres
+      - MANAGER_POSTGRES__HOST=${MANAGER_POSTGRES__HOST}
+      - MANAGER_POSTGRES__PORT=${MANAGER_POSTGRES__PORT}
+      - MANAGER_POSTGRES__DB_NAME=${MANAGER_POSTGRES__DB_NAME}
+      - MANAGER_POSTGRES__PASSWORD=${MANAGER_POSTGRES__PASSWORD}
+      - MANAGER_POSTGRES__USERNAME=${MANAGER_POSTGRES__USERNAME}
+      - MANAGER_POSTGRES__SSL_MODE=${MANAGER_POSTGRES__SSL_MODE}
+      - MANAGER_POSTGRES__MAX_IDLE_CONNS=${MANAGER_POSTGRES__MAX_IDLE_CONNS}
+      - MANAGER_POSTGRES__MAX_OPEN_CONNS=${MANAGER_POSTGRES__MAX_OPEN_CONNS}
+      - MANAGER_POSTGRES__CONN_MAX_LIFETIME=${MANAGER_POSTGRES__CONN_MAX_LIFETIME}
+      # chat configuration
+      # postgres
+      - CHAT_POSTGRES__HOST=${CHAT_POSTGRES__HOST}
+      - CHAT_POSTGRES__PORT=${CHAT_POSTGRES__PORT}
+      - CHAT_POSTGRES__DB_NAME=${CHAT_POSTGRES__DB_NAME}
+      - CHAT_POSTGRES__PASSWORD=${CHAT_POSTGRES__PASSWORD}
+      - CHAT_POSTGRES__USERNAME=${CHAT_POSTGRES__USERNAME}
+      - CHAT_POSTGRES__SSL_MODE=${CHAT_POSTGRES__SSL_MODE}
+      - CHAT_POSTGRES__MAX_IDLE_CONNS=${CHAT_POSTGRES__MAX_IDLE_CONNS}
+      - CHAT_POSTGRES__MAX_OPEN_CONNS=${CHAT_POSTGRES__MAX_OPEN_CONNS}
+      - CHAT_POSTGRES__CONN_MAX_LIFETIME=${CHAT_POSTGRES__CONN_MAX_LIFETIME}
+      # notification configuration
+      # postgres
+      - NOTIFICATION_POSTGRES__HOST=${NOTIFICATION_POSTGRES__HOST}
+      - NOTIFICATION_POSTGRES__PORT=${NOTIFICATION_POSTGRES__PORT}
+      - NOTIFICATION_POSTGRES__DB_NAME=${NOTIFICATION_POSTGRES__DB_NAME}
+      - NOTIFICATION_POSTGRES__PASSWORD=${NOTIFICATION_POSTGRES__PASSWORD}
+      - NOTIFICATION_POSTGRES__USERNAME=${NOTIFICATION_POSTGRES__USERNAME}
+      - NOTIFICATION_POSTGRES__SSL_MODE=${NOTIFICATION_POSTGRES__SSL_MODE}
+      - NOTIFICATION_POSTGRES__MAX_IDLE_CONNS=${NOTIFICATION_POSTGRES__MAX_IDLE_CONNS}
+      - NOTIFICATION_POSTGRES__MAX_OPEN_CONNS=${NOTIFICATION_POSTGRES__MAX_OPEN_CONNS}
+      - NOTIFICATION_POSTGRES__CONN_MAX_LIFETIME=${NOTIFICATION_POSTGRES__CONN_MAX_LIFETIME}
+      # redis
+      - MANAGER_REDIS__HOST=${ALL_IN_ONE_REDIS__HOST}
+      - MANAGER_REDIS__PORT=${ALL_IN_ONE_REDIS__PORT}
+      - MANAGER_REDIS__PASSWORD=${ALL_IN_ONE_REDIS__PASSWORD}
 
   quick_connect:
-    image: syntaxfa/quickconnect-all-in-one:1.0.2
+    image: syntaxfa/quickconnect-all-in-one:1.0.3
     container_name: quick_connect
     hostname: quick_connect
     restart: always
@@ -167,3 +218,5 @@ services:
       - ADMIN_CHAT_APP_GRPC__PORT=${ADMIN_CHAT_APP_GRPC__PORT}
       - ADMIN_CHAT_APP_GRPC__SSL_MODE=${ADMIN_CHAT_APP_GRPC__SSL_MODE}
       - ADMIN_CHAT_APP_GRPC__USER_OTEL=${ADMIN_CHAT_APP_GRPC__USER_OTEL}
+      # wg support
+      - ADMIN_CHAT_WS_URL="ws://localhost:${CHAT_HTTP_SERVER__PORT}/chats/supports"

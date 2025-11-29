@@ -15,4 +15,5 @@ type Config struct {
 	TemplatePath    string            `koanf:"template_path"`
 	ManagerAppGRPC  grpcclient.Config `koanf:"manager_app_grpc"`
 	ChatAppGRPC     grpcclient.Config `koanf:"chat_app_grpc"`
+	ChatWsURL       string            `koanf:"chat_ws_url"`
 }

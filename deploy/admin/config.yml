@@ -23,3 +23,4 @@ chat_app_grpc:
   port: 2551
   ssl_mode: false
   use_otel: false
+chat_ws_url: "ws://localhost:2530/chats/supports"
