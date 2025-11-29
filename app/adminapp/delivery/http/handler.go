@@ -22,16 +22,18 @@ type Handler struct {
 	authSvc         service.AuthService
 	userSvc         service.UserService
 	conversationSvc service.ConversationService
+	chatWSURL       string
 }
 
 func NewHandler(logger *slog.Logger, t *translation.Translate, authSvc service.AuthService, userSvc service.UserService,
-	conversationSvc service.ConversationService) Handler {
+	conversationSvc service.ConversationService, chatWSURL string) Handler {
 	return Handler{
 		t:               t,
 		logger:          logger,
 		authSvc:         authSvc,
 		userSvc:         userSvc,
 		conversationSvc: conversationSvc,
+		chatWSURL:       chatWSURL,
 	}
 }
 

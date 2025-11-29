@@ -70,7 +70,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translatio
 		conversationAdapter = chat.NewConversationAdapter(chatGRPCClient.Conn())
 	}
 
-	handler := http.NewHandler(logger, t, authAdapter, userAdapter, conversationAdapter)
+	handler := http.NewHandler(logger, t, authAdapter, userAdapter, conversationAdapter, cfg.ChatWsURL)
 
 	getPuResp, gpuErr := authAdapter.GetPublicKey(context.Background(), nil)
 	if gpuErr != nil {
