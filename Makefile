@@ -99,20 +99,23 @@ all-in-one-test:
 	go test ./app/adminapp/...
 
 # Builds (Ensure IMAGE_NAME is set or passed as argument).
+
+build_tag = $(if $(filter quick-connect,$(IMAGE_NAME)),$(IMAGE_NAME):$(1),$(IMAGE_NAME))
+
 chat-build:
-	docker build -t $(IMAGE_NAME):chat -f deploy/chat/deploy/Dockerfile .
+	docker build -t $(call build_tag,chat) -f deploy/chat/deploy/Dockerfile .
 
 manager-build:
-	docker build -t $(IMAGE_NAME):manager -f deploy/manager/deploy/Dockerfile .
+	docker build -t $(call build_tag,manager) -f deploy/manager/deploy/Dockerfile .
 
 notification-build:
-	docker build -t $(IMAGE_NAME):notification -f deploy/notification/deploy/Dockerfile .
+	docker build -t $(call build_tag,notification) -f deploy/notification/deploy/Dockerfile .
 
 admin-build:
-	docker build -t $(IMAGE_NAME):admin -f deploy/admin/deploy/Dockerfile .
+	docker build -t $(call build_tag,admin) -f deploy/admin/deploy/Dockerfile .
 
 all-in-one-build:
-	docker build -t $(IMAGE_NAME):aio -f deploy/all-in-one/deploy/Dockerfile .
+	docker build -t $(call build_tag,aio) -f deploy/all-in-one/deploy/Dockerfile .
 
 generate-example-proto:
 	@protoc \
