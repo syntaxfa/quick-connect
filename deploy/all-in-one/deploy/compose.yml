@@ -6,7 +6,7 @@ volumes:
 
 networks:
   app_net:
-    external: true
+    internal: true
   web_net:
 
 services:
