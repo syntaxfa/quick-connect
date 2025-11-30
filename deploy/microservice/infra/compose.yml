@@ -1,0 +1,64 @@
+---
+name: "quick-connect-infra"
+
+volumes:
+  manager_postgres_data:
+  chat_postgres_data:
+
+services:
+  redis:
+    image: redis:8.4.0
+    container_name: redis
+    hostname: ${ALL_IN_ONE_REDIS__HOST}
+    restart: always
+    command: redis-server --requirepass ${ALL_IN_ONE_REDIS__PASSWORD} --port ${ALL_IN_ONE_REDIS__PORT}
+    environment:
+      REDIS_PASSWORD: ${ALL_IN_ONE_REDIS__PASSWORD}
+      REDIS_PORT: ${ALL_IN_ONE_REDIS__PORT}
+    networks:
+      - app_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "localhost", "-p", "${ALL_IN_ONE_REDIS__PORT:?error}", "-a", "${ALL_IN_ONE_REDIS__PASSWORD:?error}", "PING"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  manager_postgres:
+    image: postgres:18
+    container_name: manager_postgres
+    hostname: ${MANAGER_POSTGRES__HOST}
+    command: -p ${MANAGER_POSTGRES__PORT}
+    restart: always
+    environment:
+      - POSTGRES_DB=${MANAGER_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${MANAGER_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${MANAGER_POSTGRES__PASSWORD}
+    volumes:
+      - manager_postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_net
+    healthcheck:
+      test: [CMD-SHELL, "sh -c 'pg_isready -U ${MANAGER_POSTGRES__USERNAME} -d ${MANAGER_POSTGRES__DB_NAME} -p ${MANAGER_POSTGRES__PORT}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  chat_postgres:
+    image: postgres:18
+    container_name: chat_postgres
+    hostname: ${CHAT_POSTGRES__HOST}
+    command: -p ${CHAT_POSTGRES__PORT}
+    restart: always
+    environment:
+      - POSTGRES_DB=${CHAT_POSTGRES__DB_NAME}
+      - POSTGRES_USER=${CHAT_POSTGRES__USERNAME}
+      - POSTGRES_PASSWORD=${CHAT_POSTGRES__PASSWORD}
+    volumes:
+      - chat_postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_net
+    healthcheck:
+      test: [CMD-SHELL, "sh -c 'pg_isready -U ${CHAT_POSTGRES__USERNAME} -d ${CHAT_POSTGRES__DB_NAME} -p ${CHAT_POSTGRES__PORT}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

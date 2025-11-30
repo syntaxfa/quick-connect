@@ -3,8 +3,8 @@ version: v1
 lint:
   use:
     - DEFAULT
-  # except:
-    # - ENUM_VALUE_UPPER_SNAKE_CASE
+  except:
+    - ENUM_VALUE_UPPER_SNAKE_CASE
 breaking:
   use:
     - FILE
