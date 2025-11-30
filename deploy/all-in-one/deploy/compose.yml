@@ -75,6 +75,7 @@ services:
     hostname: quick_connect
     restart: always
     ports:
+      - ${MANAGER_HTTP_SERVER__PORT}:${MANAGER_HTTP_SERVER__PORT}
       - ${ADMIN_HTTP_SERVER__PORT}:${ADMIN_HTTP_SERVER__PORT}
       - ${CHAT_HTTP_SERVER__PORT}:${CHAT_HTTP_SERVER__PORT}
     networks:
