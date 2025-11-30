@@ -1,0 +1,36 @@
+---
+services:
+  manager_init:
+    image: syntaxfa/quickconnect-manager:1.0.0
+    container_name: manager_init
+    command: >
+      /bin/sh -c "
+      ./manager migrate up &&
+      ./manager create-user --username=${SUPERUSER_USERNAME} --password=${SUPERUSER_PASSWORD} --fullname=${SUPERUSER_FULLNAME} --email=${SUPERUSER_EMAIL} --phone_number=${SUPERUSER_PHONE_NUMBER} --role=${SUPERUSER_ROLE} --role=support
+      "
+    networks:
+      - app_net
+    env_file: ../.env
+    depends_on:
+      manager_postgres:
+        condition: service_healthy
+
+  qc_manager:
+    image: syntaxfa/quickconnect-manager:1.0.0
+    container_name: qc_manager
+    hostname: ${MANAGER_HOSTNAME}
+    restart: always
+    networks:
+      - app_net
+    env_file: ../.env
+    depends_on:
+      manager_postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${MANAGER_HTTP_SERVER__PORT}/health-check || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 4s

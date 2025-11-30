@@ -1,0 +1,29 @@
+services:
+  qc_admin:
+    image: syntaxfa/quickconnect-admin:1.0.0
+    container_name: qc_admin
+    hostname: ${ADMIN_HOSTNAME}
+    restart: always
+    ports:
+      - ${ADMIN_HTTP_SERVER__PORT}:${ADMIN_HTTP_SERVER__PORT}
+    networks:
+      - app_net
+    depends_on:
+      qc_manager:
+        condition: service_healthy
+      qc_chat:
+        condition: service_healthy
+    env_file: ../.env
+    environment:
+      # manager grpc
+      - ADMIN_MANAGER_APP_GRPC__HOST=${MANAGER_HOSTNAME}
+      - ADMIN_MANAGER_APP_GRPC__PORT=${MANAGER_GRPC_SERVER__PORT}
+      - ADMIN_MANAGER_APP_GRPC__SSL_MODE=${MANAGER_GRPC_SERVER__SSL_MODE}
+      - ADMIN_MANAGER_APP_GRPC__USER_OTEL=${MANAGER_GRPC_SERVER__USER_OTEL}
+      # chat grpc
+      - ADMIN_CHAT_APP_GRPC__HOST=${CHAT_HOSTNAME}
+      - ADMIN_CHAT_APP_GRPC__PORT=${CHAT_GRPC_SERVER__PORT}
+      - ADMIN_CHAT_APP_GRPC__SSL_MODE=${CHAT_GRPC_SERVER__SSL_MODE}
+      - ADMIN_CHAT_APP_GRPC__USER_OTEL=${CHAT_GRPC_SERVER__USER_OTEL}
+      # ws
+      - ADMIN_CHAT_WS_URL=ws://localhost:${CHAT_HTTP_SERVER__PORT}/chats/supports
