@@ -18,5 +18,7 @@ WORKDIR /app
 COPY --from=builder /admin/admin ./
 COPY --from=builder /admin/deploy/admin/config.yml ./deploy/admin/config.yml
 COPY --from=builder /admin/pkg/translation ./pkg/translation
+COPY --from=builder /admin/app/adminapp/templates/ ./app/adminapp/templates/
+COPY --from=builder /admin/app/adminapp/static/ ./app/adminapp/static/
 
 CMD ["./admin", "start"]
