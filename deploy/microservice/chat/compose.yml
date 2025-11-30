@@ -1,0 +1,47 @@
+---
+services:
+  chat_init:
+    image: syntaxfa/quickconnect-chat:1.0.0
+    container_name: chat_init
+    command: "./chat migrate up"
+    networks:
+      - app_net
+    env_file: ../.env
+    depends_on:
+      chat_postgres:
+        condition: service_healthy
+
+  qc_chat:
+    image: syntaxfa/quickconnect-chat:1.0.0
+    container_name: qc_chat
+    hostname: ${CHAT_HOSTNAME}
+    restart: always
+    networks:
+      - app_net
+    depends_on:
+      chat_postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qc_manager:
+        condition: service_healthy
+    ports:
+      - ${CHAT_HTTP_SERVER__PORT}:${CHAT_HTTP_SERVER__PORT}
+    env_file: ../.env
+    environment:
+      # manager grpc
+      - CHAT_MANAGER_APP_GRPC__HOST=${MANAGER_HOSTNAME}
+      - CHAT_MANAGER_APP_GRPC__PORT=${MANAGER_GRPC_SERVER__PORT}
+      - CHAT_MANAGER_APP_GRPC__SSL_MODE=${MANAGER_GRPC_SERVER__SSL_MODE}
+      - CHAT_MANAGER_APP_GRPC__USER_OTEL=${MANAGER_GRPC_SERVER__USER_OTEL}
+      # manager internal grpc
+      - CHAT_MANAGER_APP_INTERNAL_GRPC__HOST=${MANAGER_HOSTNAME}
+      - CHAT_MANAGER_APP_INTERNAL_GRPC__PORT=${MANAGER_GRPC_SERVER_INTERNAL__PORT}
+      - CHAT_MANAGER_APP_INTERNAL_GRPC__SSL_MODE=${MANAGER_GRPC_SERVER_INTERNAL__SSL_MODE}
+      - CHAT_MANAGER_APP_INTERNAL_GRPC__USE_OTEL=${MANAGER_GRPC_SERVER_INTERNAL__USE_OTEL}
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${CHAT_HTTP_SERVER__PORT}/health-check || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 4s

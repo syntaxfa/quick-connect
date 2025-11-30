@@ -1,0 +1,13 @@
+---
+name: "quick-connect-microservice"
+
+include:
+  - infra/compose.yml
+  - manager/compose.yml
+  - chat/compose.yml
+  - admin/compose.yml
+
+networks:
+  app_net:
+    name: app_net
+    driver: bridge
