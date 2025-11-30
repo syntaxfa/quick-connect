@@ -22,6 +22,8 @@ services:
     restart: always
     networks:
       - app_net
+    ports:
+      - ${MANAGER_HTTP_SERVER__PORT}:${MANAGER_HTTP_SERVER__PORT}
     env_file: ../.env
     depends_on:
       manager_postgres:
