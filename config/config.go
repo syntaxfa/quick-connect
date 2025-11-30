@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
@@ -58,8 +59,18 @@ func Load(options Option, config, defaultConfig interface{}) {
 		panic(fmt.Sprintf("error when loading environment variables: %s", err.Error()))
 	}
 
+	unmarshalCfg := koanf.UnmarshalConf{
+		DecoderConfig: &mapstructure.DecoderConfig{
+			DecodeHook: mapstructure.ComposeDecodeHookFunc(
+				mapstructure.StringToSliceHookFunc(",")),
+			Metadata:         nil,
+			Result:           &config,
+			WeaklyTypedInput: true,
+		},
+	}
+
 	// Unmarshal into provided config structure (passing address).
-	if err := k.Unmarshal("", &config); err != nil {
+	if err := k.UnmarshalWithConf("", &config, unmarshalCfg); err != nil {
 		panic(fmt.Sprintf("error unmarshalling config: %s", err.Error()))
 	}
 }
