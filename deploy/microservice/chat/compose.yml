@@ -1,3 +1,4 @@
+---
 services:
   chat_init:
     image: syntaxfa/quickconnect-chat:1.0.0

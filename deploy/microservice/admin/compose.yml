@@ -1,3 +1,4 @@
+---
 services:
   qc_admin:
     image: syntaxfa/quickconnect-admin:1.0.0
