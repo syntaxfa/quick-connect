@@ -1,18 +1,187 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>صفحه تست SDK چت</title>
-</head>
-<body class="bg-gray-100">
-<div class="p-8">
-    <h1 class="text-2xl font-bold text-center mb-4">صفحه تست SDK چت</h1>
-    <p class="text-gray-700 text-center">
-        ویجت چت باید با استفاده از SDK بارگذاری شود.
-    </p>
-</div>
+    <title>Quick Connect SDK | English Test Environment</title>
 
-<script src="../quick-connect-chat-main.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: {
+                    sans: ['Inter', 'sans-serif'],
+                },
+                extend: {
+                    colors: {
+                        qc: {
+                            bg: '#0f172a',
+                            surface: '#1e293b',
+                            primary: '#6366f1',
+                            accent: '#4f46e5'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #020617;
+            background-image:
+                    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                    radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3);
+        }
+
+        .feature-icon {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+
+<nav class="fixed w-full z-50 top-0 start-0 border-b border-white/10 bg-[#0f172a]/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-6 py-4">
+        <a href="https://github.com/syntaxfa/quick-connect" target="_blank" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/30">
+                Q
+            </div>
+            <span class="self-center text-xl font-bold whitespace-nowrap tracking-tight">Quick Connect <span class="text-indigo-400">SDK</span></span>
+        </a>
+        <div class="flex items-center gap-4">
+                <span class="px-3 py-1 text-xs font-medium text-emerald-400 bg-emerald-400/10 rounded-full border border-emerald-400/20 animate-pulse-slow">
+                    ● System Operational
+                </span>
+            <span class="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-default">v2.4.1</span>
+        </div>
+    </div>
+</nav>
+
+<section class="pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div class="inline-block mb-4 px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-sm font-medium animate-float">
+            🚀 New: English Support & Enhanced UI
+        </div>
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
+            Embedded Real-time <br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Chat Experience</span>
+        </h1>
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            A lightweight, framework-agnostic JavaScript SDK designed for instant customer support.
+            Test the English widget integration directly on this page.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button onclick="window.QuickConnect.openChat()" class="px-8 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/20 transition-all hover:scale-105 active:scale-95">
+                Open Chat Widget
+            </button>
+
+            <a href="https://github.com/syntaxfa/quick-connect/blob/main/sdk/chat/web/simple/quick-connect-chat-sdk-en.js"
+               target="_blank"
+               class="px-8 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium border border-slate-700 transition-all text-center">
+                View Source Code
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 px-6 max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold mb-4">SDK Capabilities</h2>
+        <p class="text-slate-400">Deep dive into the features included in <code class="bg-slate-800 px-2 py-1 rounded text-indigo-300 text-sm">quick-connect-chat-main-en.js</code></p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            </div>
+            <h3 class="text-xl font-bold mb-3 text-white">⚡ WebSocket Real-time</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                Uses native <code>WebSocket</code> for bi-directional communication with auto-reconnect strategy (3s interval) and heartbeat mechanism to keep the connection alive.
+            </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl">
+            <h3 class="text-xl font-bold mb-3 text-white">🔐 Auth & State</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                Built-in <strong>Guest Registration</strong> and JWT parsing. Persists user session (`QC_TOKEN`) and conversation ID via LocalStorage for seamless page reloads.
+            </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl">
+            <h3 class="text-xl font-bold mb-3 text-white">🎨 Premium Dark UI</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                Fully encapsulated CSS (Shadow DOM-like behavior). Features gradients, glassmorphism, animations (`qc-fadeIn`), and the <strong>Inter</strong> font family.
+            </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl">
+            <h3 class="text-xl font-bold mb-3 text-white">💬 Interactive Elements</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                Includes a built-in <strong>Emoji Picker</strong> grid, Typing Indicators (visual bouncing dots), and Message Preview Bubbles when the widget is minimized.
+            </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl">
+            <h3 class="text-xl font-bold mb-3 text-white">📜 Smart History</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                Automatic chat history fetching with <strong>Cursor-based Pagination</strong>. Loads previous messages when the user scrolls to the top of the chat window.
+            </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl">
+            <h3 class="text-xl font-bold mb-3 text-white">✅ Reliability</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                Double-send prevention locking, optimistic UI updates (pending state vs sent state checkmarks), and agent online/offline status detection.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<footer class="border-t border-white/10 mt-12 bg-[#0f172a]">
+    <div class="max-w-7xl mx-auto py-8 px-6 text-center text-slate-500 text-sm">
+        <p>&copy; 2025 Quick Connect SDK. All logic handled via `quick-connect-chat-main-en.js`.</p>
+    </div>
+</footer>
+
+<script src="../quick-connect-chat-main-en.js"></script>
+
 </body>
 </html>
