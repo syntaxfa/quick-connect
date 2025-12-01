@@ -62,6 +62,7 @@ func Load(options Option, config, defaultConfig interface{}) {
 	unmarshalCfg := koanf.UnmarshalConf{
 		DecoderConfig: &mapstructure.DecoderConfig{
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
+				mapstructure.StringToTimeDurationHookFunc(),
 				mapstructure.StringToSliceHookFunc(",")),
 			Metadata:         nil,
 			Result:           &config,
