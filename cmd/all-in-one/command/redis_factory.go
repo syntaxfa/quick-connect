@@ -25,10 +25,12 @@ func newRedisFactory(globalLogger *slog.Logger) *redisFactory {
 func (r *redisFactory) newConnection(cfg redis.Config) *redis.Adapter {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	key := fmt.Sprintf("%d@%s:%d/%s", cfg.DB, cfg.Host, cfg.Port, cfg.Password)
 
-	conn, ok := r.conns[fmt.Sprintf("%d@%s:%d/%s", cfg.DB, cfg.Host, cfg.Port, cfg.Password)]
+	conn, ok := r.conns[key]
 	if !ok {
 		conn = redis.New(cfg, r.globalLogger)
+		r.conns[key] = conn
 
 		r.globalLogger.Info("create redis connection")
 	} else {
