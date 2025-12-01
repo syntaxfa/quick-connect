@@ -1,7 +1,7 @@
 ---
 services:
   chat_init:
-    image: syntaxfa/quickconnect-chat:1.0.0
+    image: syntaxfa/quickconnect-chat:1.0.1
     container_name: chat_init
     command: "./chat migrate up"
     networks:
@@ -12,7 +12,7 @@ services:
         condition: service_healthy
 
   qc_chat:
-    image: syntaxfa/quickconnect-chat:1.0.0
+    image: syntaxfa/quickconnect-chat:1.0.1
     container_name: qc_chat
     hostname: ${CHAT_HOSTNAME}
     restart: always

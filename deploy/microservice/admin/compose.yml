@@ -1,7 +1,7 @@
 ---
 services:
   qc_admin:
-    image: syntaxfa/quickconnect-admin:1.0.0
+    image: syntaxfa/quickconnect-admin:1.0.1
     container_name: qc_admin
     hostname: ${ADMIN_HOSTNAME}
     restart: always
