@@ -51,7 +51,7 @@ services:
       retries: 10
 
   init:
-    image: syntaxfa/quickconnect-all-in-one:1.0.0
+    image: syntaxfa/quickconnect-all-in-one:1.0.1
     container_name: init
     command: >
       /bin/sh -c "
@@ -70,7 +70,7 @@ services:
     env_file: .env
 
   quick_connect:
-    image: syntaxfa/quickconnect-all-in-one:1.0.0
+    image: syntaxfa/quickconnect-all-in-one:1.0.1
     container_name: quick_connect
     hostname: quick_connect
     restart: always
