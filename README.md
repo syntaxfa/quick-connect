@@ -294,3 +294,5 @@ To get started:
 > **Need Help?** If you have questions or need coordination before starting a large feature, feel free to reach out to the maintainer on Telegram: **[@Ayeef](https://t.me/Ayeef)**.
 
 ## 📄 License
+
+This project is licensed under the **GNU Affero General Public License v3.0**. See the [LICENSE](LICENSE) file for details.
