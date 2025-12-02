@@ -94,6 +94,32 @@ We have ambitious plans for Quick Connect! Here is a glimpse of what's coming ne
 - [ ] **Kubernetes Helm Charts:** Production-ready Helm charts for easy K8s deployment.
 
 ## 🏗️ Architecture
+
+Quick Connect is architected as a **Modular Monolith**, giving you the ultimate flexibility in deployment. You are not forced into complex microservices if you don't need them.
+
+### 🔄 Dual Deployment Modes
+One of the unique features of Quick Connect is its **"Code-Level Monolith"** design. You can run the platform in two modes using the exact same codebase:
+
+1.  **Microservices Mode (Scale):** Each component (Chat, Manager, Notification) runs as an independent container. Services communicate over the network via **gRPC**. Ideal for high-traffic, distributed environments (Kubernetes).
+2.  **Monolith Mode (Speed & Simplicity):** All services run within a **single binary** (All-in-One). In this mode, inter-service communication bypasses the network completely and occurs via **direct function calls** (in-memory).
+  * **Zero Network Latency:** No gRPC overhead between internal services.
+  * **Easy Ops:** Deploy just one container/binary.
+
+### 🧩 Service Modules
+
+| Module | Responsibility | Key Tech Stack |
+| :--- | :--- | :--- |
+| **Manager** | The core identity provider handling **Authentication (JWT)**, User Management, and RBAC. | PostgreSQL |
+| **Chat** | Manages real-time conversations, message persistence, and **WebSocket** connections. | Redis, PostgreSQL |
+| **Notification** | A centralized engine for dispatching emails, SMS, and push notifications using the **Outbox Pattern**. | Redis Streams, Workers |
+| **File Handler** | Handles secure media uploads (Local/S3). | S3 API |
+| **Admin** | A server-side rendered dashboard for system management. | **HTMX**, Go Templates |
+
+### 📐 Design Patterns & Best Practices
+* **Hexagonal Architecture (Ports & Adapters):** Keeps the business logic isolated from external concerns (DB, API).
+* **Outbox Pattern:** Ensures eventual consistency for notifications and events.
+* **Abstracted Communication:** The code automatically switches between **gRPC** (remote) and **Function Calls** (local) based on the deployment configuration.
+
 ## 🛠️ Tech Stack
 ## 🚀 Get Started
 ## 📚 Documentation
