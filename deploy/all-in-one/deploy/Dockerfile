@@ -1,4 +1,4 @@
-FROM golang:1.25.4 AS builder
+FROM golang:1.25.5 AS builder
 
 ENV APP_NAME=all-in-one
 
