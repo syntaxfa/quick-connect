@@ -1,216 +1,150 @@
-```markdown
-# Project Structure: Quick Connect
+# Project Structure
 
-This document defines the **Quick Connect** project structure, which is designed for clarity, scalability, and maintainability. This structure is non-negotiable and provides a clear organization for all components of the system. Below is the directory structure and a description of its purpose.
+This document outlines the confirmed structure of the **Quick Connect** project, designed for clarity, scalability, and high maintainability, based on the provided codebase and the architectural guidelines.
 
----
+-----
 
 ## Directory Structure
 
 ```
-├── adapter
-
-├── app
-
-├── cli
-
-├── cmd
-
-├── config
-
-├── deploy
-
-├── docs
-
-├── event
-
-├── example
-
-├── go.mod
-
-├── logger
-
-├── logs
-
-├── Makefile
-
-├── outbox
-
-├── pkg
-
-├── protobuf
-
-├── README.md
-
-└── types
+.
+├── adapter           # External Interfaces and Clients (Redis, gRPC Clients, DB, Observability)
+├── app               # Core Microservices (Admin, Chat, Manager, Notification, File Handler)
+├── cli               # Client Command-Line Interface tools
+├── cmd               # Entry Points (main.go) and service execution commands
+├── config            # Shared configuration loading logic and types
+├── deploy            # Deployment files (Dockerfiles, Docker Compose)
+├── docs              # Project documentation, HLD, and developer guides
+├── event             # Event Contracts (Reserved for future asynchronous communication)
+├── example           # Runnable examples for core technologies
+├── frontend          # Separate User Interface projects (Admin Panels and Website)
+├── logs              # Storage location for service logs
+├── outbox            # Implementation of the Transactional Outbox pattern
+├── pkg               # Shared and reusable packages/utilities
+├── protobuf          # Protocol Buffer files and generated gRPC code
+├── sdk               # Client-side Software Development Kits (SDKs)
+└── types             # Shared foundational data types
 ```
 
----
+-----
 
-### **Directory Descriptions**
+## Directory Descriptions
 
-#### **1. `adapter`**
-- **Purpose:** Contains external adapters such as Redis, RabbitMQ, and other third-party integrations. Each adapter is isolated within its own subdirectory (e.g., `adapter/redis`, `adapter/rabbitmq`).
-- **Note:** Repository logic for services is not included here and is defined within individual services in the `app` directory.
+### 1\. `adapter` (External Interfaces & Clients)
 
----
+**Purpose:** Contains clients and interfaces that manage communication with **external infrastructure** (e.g., databases, caching systems) and **other microservices** via gRPC. This layer isolates network and client concerns from the core business logic, serving as the **Driven/Secondary Adapters** in a Hexagonal architecture.
+**Observed Structure:**
 
-#### **2. `app`**
-- **Purpose:** Contains the code for each microservice. Each service is placed in its own directory named based on the service, such as `userapp`. The package name is written in camelCase.
-- **Structure Example:**
-  ```
-app/
+* `adapter/manager`, `adapter/chat`: gRPC clients for inter-service communication with the Manager and Chat services. These directories also contain corresponding `*_local.go` files that implement the same interface for use in Monolith mode.
+* `adapter/postgres`, `adapter/redis`: Clients for PostgreSQL and Redis (caching).
+* `adapter/pubsub`: Pub/Sub implementation (currently Redis Pub/Sub).
+* `adapter/observability`: OpenTelemetry instrumentation setup for tracing and metrics.
 
-├── userapp
+-----
 
-├── orderapp
+### 2\. `app` (Core Microservices)
 
-└── paymentapp
-  ```
+**Purpose:** Contains the core code for each microservice. Each subdirectory represents an independent, deployable service, strictly organized into layers following the **Hexagonal Architecture** pattern:
 
----
+* `delivery`: Protocol implementation layer (**Primary/Driving Adapters**) handling inbound requests (HTTP, gRPC, WebSocket).
+* `service`: Core business/domain logic and defines the **Ports (Interfaces)**.
+* `repository`: Data access layer (**Secondary/Driven Adapter**) for the local database, including database `migrations`.
 
-#### **3. `cli`**
-- **Purpose:** Contains CLI tools. Examples include cli client.
+-----
 
----
+### 3\. `cmd` (Service Entry Points)
 
-#### **4. `cmd`**
-- **Purpose:** Contains the entry points (`main.go`) for each microservice. Each microservice has its own directory named after the service (e.g., `cmd/user`).
-- **Structure Example:**
-  ```
-cmd/
+**Purpose:** Holds the main entry points (`main.go`) for running each microservice server and utility CLI commands.
+**Observed Structure:**
 
-├── user
+* `cmd/{service}/main.go`: The main server executor.
+* `cmd/{service}/command`: Contains auxiliary commands like `migrate` and `create_user`.
+* `cmd/all-in-one`: A consolidated entry point for quickly launching all core services in a single binary/container for development or small-scale deployment.
 
-│   └── main.go
+-----
 
-├── order
+### 4\. `deploy` (Deployment)
 
-│   └── main.go
+**Purpose:** Contains all files related to building, packaging, and deploying the services. This includes infrastructure-as-code definitions.
+**Key Components:** **Dockerfiles**, **Docker Compose** files (`compose.yml` for various environments/setups, including microservices orchestration), and environment-specific configuration files (`config.yml`).
 
-└── payment
+-----
 
-│   └── main.go
-  ```
+### 5\. `frontend` (Separate User Interface Projects)
 
----
+**Purpose:** Contains the source code for larger, dedicated User Interface projects and web clients that are developed separately from the main Go backend.
+**Observed Structure:** Includes dedicated admin panels (`chat-admin-panel`, `notification-admin-panel`) and the main website project (`quick-connect-website`).
 
-#### **5. `config`**
-- **Purpose:** Contains configuration loading utilities and shared configuration files. This directory is responsible for general configuration logic that can be used by all services.
+-----
 
----
+### 6\. `sdk` (Software Development Kits)
 
-#### **6. `deploy`**
-- **Purpose:** Contains deployment files for each microservice. Each service has its own subdirectory, and different environments (e.g., `development`, `production`, `stage`) are defined within each service directory.
-- **Structure Example:**
-  ```
-deploy/
+**Purpose:** Provides client-side libraries for developers to integrate Quick Connect services (e.g., chat widget, file uploads) into their own applications.
+**Observed Structure:** Includes the Chat SDK (for Web/JS) and placeholder directories for `file` and `notification` SDKs.
 
-├── user
+-----
 
-│   ├── development
+### 7\. `pkg` (Shared Packages)
 
-│   ├── production
+**Purpose:** Low-level, general-purpose packages and utilities reused across multiple services. This code is strictly agnostic to the specific business logic of any single application.
+**Key Examples:** Networking (`httpserver`, `grpcserver`), Error Handling (`richerror`), Security (`jwtvalidator`, `ratelimit`), and utility functions (`logger`, `paginate`, `translation`).
 
-│   └── stage
+-----
 
-├── order
+### 8\. `protobuf` (Protocol Buffers)
 
-└── payment
-  ```
+**Purpose:** Stores the Protocol Buffer definition files (`.proto`) and the generated Go bindings used for gRPC communication.
+**Observed Structure:** Files are organized by service (`chat`, `manager`) and contain the source (`proto`) and generated Go code (`golang`).
 
----
+-----
 
-#### **7. `docs`**
-- **Purpose:** Stores all project documentation, including API specifications (e.g., OpenAPI/Swagger), setup guides, and developer documentation.
+### 9\. `outbox` (Transactional Outbox Pattern)
 
----
+**Purpose:** Implements the core components of the **Transactional Outbox Pattern** to ensure reliable, asynchronous event publishing. This mechanism relies on saving events within the database transaction before publishing them.
 
-#### **8. `event`**
-- **Purpose:** Defines event contracts and abstractions used in the system. This directory contains versioned event contracts to ensure backward compatibility.
-- **Structure Example:**
-  ```
-event/
+-----
 
-├── v1/
+## 10\. Core Architectural Design: Hexagonal & Dual Deployment
 
-│   ├── user_created_event.go
+The project strictly adheres to **Hexagonal Architecture (Ports & Adapters)** principles to ensure high decoupling and testability. This architecture is key to enabling the unique "Code-Level Monolith" or "Dual Deployment" capability:
 
-│   └── order_placed_event.go
-  ```
+### A. Hexagonal Architecture Implementation
 
----
+1.  **Ports (Interfaces):** Defined within the `app/{service}/service` packages. These are the contracts that the business logic requires, independent of who calls them or how data is stored.
+2.  **Adapters:** Implement the Ports.
+    * **Primary/Driving Adapters:** Located in `app/{service}/delivery` (handling incoming traffic like HTTP, gRPC).
+    * **Secondary/Driven Adapters:** Located in `app/{service}/repository` (Database access) and `adapter/` (External service clients).
 
-#### **9. `example`**
-- **Purpose:** Contains example code or usage demonstrations for different parts of the project.
+### B. The Dual Deployment Mechanism
 
----
+The project uses the same codebase to run in two modes by switching how the Secondary Adapters connect to other services:
 
-#### **10. `logger`**
-- **Purpose:** Contains the logging utility used across the project. The logger is responsible for structured logging and is compatible with log aggregation tools like ELK or Loki.
+| Deployment Mode | Inter-Service Adapter Used | Connection Type |
+| :--- | :--- | :--- |
+| **Microservices Mode** | Dedicated gRPC Clients (e.g., `adapter/manager/auth.go`) | Network Communication (Remote) |
+| **Monolith (All-in-One) Mode** | Local Adapters (e.g., `adapter/manager/auth_local.go`) | Direct Function Call (In-Memory) |
 
----
+This structural choice ensures the Core Business Logic remains oblivious to the deployment mode, making the system inherently flexible and scalable.
 
-#### **11. `logs`**
-- **Purpose:** Stores log files for each service in a dedicated subdirectory (e.g., `logs/user`).
-- **Note:** In the future, logs will be stored in `/var/log/{app_name}/logs.json` following standard practices.
+-----
 
----
+## 11\. Other Directories
 
-#### **12. `outbox`**
-- **Purpose:** Implements the Outbox pattern for event-driven communication. This directory contains a shared implementation that can be used across all services.
+| Directory | Description |
+| :--- | :--- |
+| **`config`** | Centralized logic for reading, loading, and validating configuration settings. |
+| **`docs`** | Stores technical documentation, High-Level Design (HLD) diagrams, and developer guides. |
+| **`event`** | **(Reserved)** The designated location for defining versioned event contracts (Go structs) for future asynchronous communication. Currently empty, awaiting implementation. |
+| **`example`** | Contains runnable, isolated examples demonstrating core technology usage (e.g., gRPC client calls, Observability setup, Pub/Sub flow). |
+| **`logs`** | Runtime storage location for structured service log files (e.g., `logs.json`). |
+| **`types`** | Defines fundamental and highly shared data types (e.g., custom ID types, Context keys, UserInfo structs) used universally across services. |
 
----
+-----
 
-#### **13. `pkg`**
-- **Purpose:** Contains shared packages that are used across multiple services. Only reusable and service-agnostic code is placed in this directory.
-- **Structure Example:**
-  ```
-pkg/
+### 12\. Root Files and Automation
 
-├── logger
-
-├── middleware
-
-└── utils
-  ```
-
----
-
-#### **14. `protobuf`**
-- **Purpose:** Stores `.proto` files for gRPC or Protocol Buffers. These files are versioned to ensure compatibility across services.
-- **Structure Example:**
-  ```
-protobuf/
-
-├── v1/
-
-│   ├── user.proto
-
-│   └── order.proto
-  ```
-
----
-
-#### **15. `types`**
-- **Purpose:** Defines shared types such as generic structs or type aliases (e.g., `type ID uint64`). Only types that are shared across multiple services are defined here.
-
----
-
-#### **16. `Makefile`**
-- **Purpose:** Automates common tasks such as building, testing, and deploying the project. The `Makefile` includes commands for:
-  - `make build`: Build the project.
-  - `make test`: Run tests.
-  - `make deploy`: Deploy the application.
-
----
-
-### **Key Notes**
-- **Versioning:** Event contracts and protobuf files are always versioned to maintain backward compatibility.
-- **Logging Location:** While logs are currently stored in the `logs` directory, they will eventually be moved to `/var/log/{app_name}/logs.json` for better log management and integration with external tools.
-- **Service Isolation:** Each service in the `app` directory is self-contained and can be scaled independently.
-- **Configuration:** Centralized configuration is defined in the `config` directory, with the ability to override it for specific services or environments.
-
-This structure enforces consistency, scalability, and maintainability across all aspects of the project.
-```
+| File | Purpose |
+| :--- | :--- |
+| **`Makefile`** | Automation of common developer tasks: `build`, `test`, generating Protobuf code, and deployment tasks. |
+| **`go.mod`, `go.sum`** | Go module and dependency management. |
+| **`renovate.json5`** | Configuration file for Renovate, used for automated dependency updates. |

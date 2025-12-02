@@ -6,6 +6,16 @@ Please carefully follow these guidelines to ensure a smooth contribution process
 
 ---
 
+## 🛠 Prerequisites
+
+Before starting, ensure you have the following installed:
+- **Go**: Version `1.25` or higher.
+- **Docker & Docker Compose**: For running the infrastructure.
+- **Pre-commit**: For managing git hooks (`pip install pre-commit`).
+- **Make**: To run project commands.
+
+---
+
 ## 🛠 Workflow for Contributing
 
 1. **Find or Propose an Issue:**
@@ -14,7 +24,6 @@ Please carefully follow these guidelines to ensure a smooth contribution process
     - Issues must include:
         - Clear title and description.
         - Proper labeling (`feature`, `bug`, `enhancement`, etc.).
-        - Approval label or comment from a maintainer.
 
 2. **Branch Creation:**
     - Always branch from the `main` branch.
@@ -27,14 +36,22 @@ Please carefully follow these guidelines to ensure a smooth contribution process
           `fix/fix-order-validation`
           `docs/update-api-docs`
 
-3. **Pre-Commit Checks:**
-    - Install and configure the provided **pre-commit hooks** and **linters**.
-    - Contributions that fail formatting, linting, or validation checks **will be rejected**.
+3. **Local Setup & Pre-Commit:**
+    - Clone the repository.
+    - Install dependencies:
+      ```bash
+      go mod download
+      ```
+    - **Important:** Install pre-commit hooks to ensure your code passes checks before pushing:
+      ```bash
+      pre-commit install
+      ```
+    - Contributions that fail formatting (`golangci-lint`), linting, or validation checks **will be rejected** by CI.
 
 4. **Code Changes:**
-    - Follow the project's architecture and directory structure precisely.
+    - Follow the project's **Hexagonal Architecture** and directory structure (`app/`, `adapter/`, `pkg/`).
+    - If you modify `.proto` files, ensure you regenerate the Go code (check `Makefile` or use `buf`).
     - Write clean, maintainable, and well-tested code.
-    - Update relevant documentation and tests if necessary.
 
 ---
 
@@ -53,10 +70,9 @@ We strictly follow the [Conventional Commits](https://www.conventionalcommits.or
 - `build`: Changes to build system or dependencies
 - `ci`: Changes to CI configuration
 - `chore`: Miscellaneous chores
-- `revert`: Revert a previous commit
 
 **Example:**
-`feat(userapp): add JWT authentication`
+`feat(manager): implement jwt token validation`
 
 ---
 
@@ -69,36 +85,40 @@ We strictly follow the [Conventional Commits](https://www.conventionalcommits.or
     - A clear explanation of the changes made.
     - List of any breaking changes if applicable.
 
-- Requirements before submitting:
-    - All pre-commit hooks must pass.
-    - All tests must pass.
-    - Code must be properly formatted.
+- **Checklist before submitting:**
+    - [ ] ran `make lint` and fixed all issues.
+    - [ ] ran `make test-general` and all tests passed.
+    - [ ] pre-commit hooks passed locally.
+
+---
+
+## 📚 Useful Commands (Makefile)
+
+We use `make` to automate common tasks. Here are the most useful commands:
+
+| Command | Description |
+| :--- | :--- |
+| `make help` | Show all available make commands. |
+| `make build` | Build the project binaries. |
+| `make test-general` | Run unit tests for core packages. |
+| `make lint` | Run `golangci-lint` to check code style. |
+| `make docker-up` | Start infrastructure (Postgres, Redis) via Docker. |
+| `make proto-lint` | Lint Protocol Buffer files. |
 
 ---
 
 ## ✅ Review Standards
 
 - Code must be clear, consistent, and easy to understand.
-- Follow SOLID principles where applicable.
+- Follow **SOLID principles** where applicable.
 - No dead code, debug prints, or commented-out sections should be left.
 - Be responsive and cooperative during code reviews.
-- Reviews might require multiple iterations — be patient and professional.
 
 ---
 
 ## 📜 Code of Conduct
 
 We are committed to providing a welcoming and respectful environment for all contributors.
-Please:
-- Be respectful and considerate.
-- Provide constructive feedback.
-- Maintain a positive and supportive tone.
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 Toxic behavior, disrespect, or harassment will not be tolerated.
-
----
-
-## 📚 Useful Commands
-
-In your local environment, I highly recommend enabling pre-commit.
-Additionally, make sure to thoroughly test your project before submitting a pull request.
