@@ -66,6 +66,33 @@ Quick Connect comes packed with everything you need to build a modern engagement
     * **No heavy SPA frameworks:** Extremely fast page loads and low resource usage.
 
 ## 🚧 Roadmap & Upcoming Features
+
+We have ambitious plans for Quick Connect! Here is a glimpse of what's coming next:
+
+### 📱 Client SDKs
+- [ ] **Mobile SDKs:** Native libraries for **Android (Kotlin)** and **iOS (Swift)** to easily integrate chat into mobile apps.
+- [ ] **Flutter Plugin:** A dedicated package for cross-platform mobile development.
+- [ ] **React Native Component:** Plug-and-play component for RN apps.
+
+### 🤖 AI & Automation
+- [ ] **AI-First Support (RAG):** Upload your documents and FAQs. The system vectorizes your data to let AI answer incoming messages first, aiming to resolve **~90% of queries** instantly.
+- [ ] **Smart Handover:** AI acts as the first line of defense. If the confidence score is low, the conversation is seamlessly transferred to a human agent with full context.
+- [ ] **Sentiment Analysis:** Automatically analyze user mood (e.g., Angry, Neutral) to prioritize urgent tickets for human review.
+
+### 📞 Communication & Media
+- [ ] **Voice Messages:** Ability to record and send voice notes.
+- [ ] **Video/Audio Calls:** Peer-to-peer calls using **WebRTC**.
+- [ ] **File Preview:** Better preview for PDF and Office documents directly in chat.
+
+### 🔌 Integrations
+- [ ] **Telegram & WhatsApp Bridge:** Manage messages from Telegram Bot and WhatsApp Business directly in the Quick Connect dashboard.
+- [ ] **Slack Integration:** Forward notifications to your team's Slack channel.
+- [ ] **CRM Sync:** Sync user data with external CRMs like HubSpot or Salesforce.
+
+### 📊 Analytics & Ops
+- [ ] **Advanced Reporting:** Charts for agent response time, resolution rate, and busy hours.
+- [ ] **Kubernetes Helm Charts:** Production-ready Helm charts for easy K8s deployment.
+
 ## 🏗️ Architecture
 ## 🛠️ Tech Stack
 ## 🚀 Get Started
