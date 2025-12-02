@@ -271,8 +271,16 @@ go run cmd/manager/main.go server
 
 You can repeat this process for `cmd/chat/main.go`, `cmd/notification/main.go`, etc.
 
-````
-
 ## 📚 Documentation
+
+Explore the detailed documentation to understand how to integrate, customize, and extend Quick Connect:
+
+* **[Project Structure](./docs/structure.md):** A deep dive into the directory layout, hexagonal architecture, and module organization.
+* **[Client SDKs](./sdk/README.md):** Official JavaScript and React SDKs to easily integrate the chat widget into your frontend applications.
+* **API Reference (OpenAPI/Swagger):**
+    * The API definitions are located within each service's directory (e.g., `app/chat/docs/chat_swagger.yaml`).
+    * You can import these files into Postman or Swagger UI to inspect endpoints and schemas.
+* **[Deployment Examples](./example/deploy):** Advanced configurations for different environments, including Kubernetes or separate VM setups.
+
 ## 🤝 Contributing
 ## 📄 License
