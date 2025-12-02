@@ -43,6 +43,28 @@ Experience the speed and features yourself on our live demo:
 </div>
 
 ## ✨ Key Features
+
+Quick Connect comes packed with everything you need to build a modern engagement platform:
+
+* **💬 Real-time Support Chat**
+  Lightning-fast messaging powered by **WebSockets** and **Redis**. It ensures zero-latency communication between users and support agents.
+
+* **📸 Interactive Stories (Trending Feature)**
+  Boost user engagement by adding "Stories" to your app (similar to Instagram/Snapchat). Share ephemeral updates, news, or promotions directly with your users.
+
+* **🔔 Smart & Multi-channel Notifications**
+  A robust notification engine that supports **Email, SMS, and Push**.
+    * **Smart Routing:** Automatically detects if a user is online (sends via WebSocket) or offline (fallbacks to Email/SMS).
+    * **Multi-language:** Built-in i18n support for global applications.
+
+* **📂 Flexible File Handler**
+  A dedicated microservice for managing media uploads.
+    * **Storage Agnostic:** Supports both **Local File System** and **S3-compatible** object storage (AWS S3, MinIO, etc.).
+
+* **🎛️ Lightweight Admin Dashboard**
+  Manage agents, users, and settings with a modern dashboard built using **Go Templates + HTMX**.
+    * **No heavy SPA frameworks:** Extremely fast page loads and low resource usage.
+
 ## 🚧 Roadmap & Upcoming Features
 ## 🏗️ Architecture
 ## 🛠️ Tech Stack
