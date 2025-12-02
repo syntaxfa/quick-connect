@@ -1,257 +1,155 @@
-# Quick Connect SDK & WebSocket API Documentation
+# 📚 Quick Connect Chat SDK & API Reference (V2.4.1)
 
-## 1. Introduction
+This document provides the definitive guide for integrating the Quick Connect chat widget, covering the client SDK architecture, required HTTP API calls, state management, and the full WebSocket protocol.
 
-This document serves as the comprehensive guide for the **Quick Connect Client SDK**. It covers the client-side architecture, authentication flows, storage requirements, and the full WebSocket API reference needed to implement a real-time chat system with **Optimistic UI** capabilities.
+## 1\. Storage & State Management
 
-The SDK handles authentication transparently, supporting both **Guest Users** (anonymous) and **Identified Clients** (users already logged into the host application).
+The SDK maintains persistent state using the browser's `localStorage`. This allows it to reconnect and maintain the user's context, even after a page refresh.
 
----
-
-## 2. Storage & State Management
-
-The SDK must maintain persistent state across browser sessions and application restarts. It should utilize long-term storage (e.g., `localStorage` for Web, `AsyncStorage` for Mobile).
-
-### Required Storage Keys
-
-1.  **`QC_TOKEN`**: The JWT authentication token used for API calls and WebSocket connections.
-2.  **`QC_USER_STATE`**: Indicates the type of the current user.
-    * Values: `'guest'` | `'client'`
-3.  **`QC_CONVERSATION_ID`**: Stores the ID of the active conversation to ensure proper message routing.
-
----
-
-## 3. Initialization Logic
-
-When the SDK initializes, it must execute the following decision tree. A critical step is fetching the active conversation context **before** establishing the WebSocket connection.
-
-### Logic Diagram
-
-```mermaid
-graph TD
-    A[SDK Initialize] --> B{Check Storage for QC_TOKEN}
-    B -- Token Exists --> C[Validate/Use Existing Token]
-
-    B -- No Token --> E{Host App Provided User Info?}
-
-    E -- Yes (Scenario A) --> F[Client Auth Flow]
-    F --> G[Set QC_TOKEN & USER_STATE='client']
-
-    E -- No (Scenario B) --> H[Guest Auth Flow]
-    H --> I[Set QC_TOKEN & USER_STATE='guest']
-
-    C --> J[Fetch Active Conversation API]
-    G --> J
-    I --> J
-
-    J --> K[Connect WebSocket]
-````
+| Storage Key | Purpose | Example Value |
+| :--- | :--- | :--- |
+| **`QC_TOKEN`** | The JWT token for authentication in all API/WebSocket calls. | `eyJhbGciOiJIUzI1NiI...` |
+| **`QC_USER_STATE`** | Tracks user type. | `'guest'` or `'client'` |
+| **`QC_CONVERSATION_ID`** | The unique ID of the current active conversation. **Must be retrieved via the `/conversations/active` API.** | `01KABWW5V95WFFDERJZCTDE2QQ` |
 
 -----
 
-## 4\. Authentication Scenarios
+## 2\. Initialization & Authentication Flow
 
-### Scenario A: Identified Client (Host App Integration)
+The SDK initiates a defined flow to ensure the client is authenticated and has an active conversation context before connecting to the real-time server.
 
-Used when the user is already logged into the main application (e.g., an Online Shop).
+### Authentication Scenarios
 
-1.  **Host App Action:** Detects a logged-in user.
-2.  **Backend-to-Backend Call:** The host backend calls the Quick Connect Manager API.
-    * **Endpoint:** `POST /auth/identify-client?APIKey={SECURE_KEY}`
-    * **Body:** User details.
-    * **Response:** Returns a `token` (QC\_TOKEN).
-3.  **SDK Action:** The host frontend passes this token to the SDK (e.g., `QuickConnectSDK.login(token)`).
-4.  **State Update:** Save `QC_TOKEN` and set state to `'client'`.
+| Scenario | Description | SDK Action | API Endpoint |
+| :--- | :--- | :--- | :--- |
+| **Guest User (Anonymous)** | No existing `QC_TOKEN` is found in storage. | The SDK automatically calls the Manager service to register a new guest user. | `POST {MANAGER_URL}/users/guest/register` |
+| **Identified Client** | The host application injects a pre-authenticated token, or an existing valid token is found. | The SDK uses the token directly. (Manual integration via a host app endpoint not shown in SDK, but is supported). | N/A |
 
-### Scenario B: Guest User (Anonymous)
+### Pre-Connection Step: Fetching Conversation Context
 
-Used when a visitor opens the site but is not logged in.
-
-1.  **SDK Action:** Detects no existing token.
-2.  **API Call:** Calls the public Guest Register endpoint.
-    * **Endpoint:** `POST {MANAGER_URL}/users/guest/register`
-    * **Body:**
-      ```json
-      {
-        "fullname": "Guest User"
-      }
-      ```
-3.  **Response:** Server returns the `qc_token`.
-4.  **State Update:** Save `qc_token` as `QC_TOKEN` and set state to `'guest'`.
-
------
-
-## 5\. Pre-Connection Logic (Critical)
-
-Before connecting to the WebSocket, the SDK **MUST** fetch the active conversation context. This ensures that `conversation_id` is available for the first message sent by the user.
-
-### Fetch Active Conversation
+After securing a `QC_TOKEN`, the SDK **must** fetch the active conversation ID. This ID is mandatory for all WebSocket messages.
 
 * **Endpoint:** `GET {CHAT_API_URL}/conversations/active`
 * **Headers:** `Authorization: Bearer <QC_TOKEN>`
-* **Response:**
-  ```json
-  {
-    "id": "01K...", // Store this value as QC_CONVERSATION_ID
-    "status": "new",
-    "created_at": "..."
-  }
-  ```
+* **Action:** Stores the returned `id` in `QC_CONVERSATION_ID`.
 
 -----
 
-## 6\. WebSocket Connection
+## 3\. HTTP API Endpoints
+
+The SDK uses HTTP endpoints for authentication and fetching message history.
+
+### Manager Service (Authentication & Profile)
+
+| Method | Endpoint | Auth Required | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/users/guest/register` | No | Registers a new anonymous guest user. Returns `qc_token`. |
+| **PUT** | `/users/guest/update` | **Yes** (JWT) | Updates the guest's profile (Name, Email). |
+
+### Chat Service (Context & History)
+
+| Method | Endpoint | Auth Required | Description |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/conversations/active` | **Yes** (JWT) | Retrieves the current conversation ID and agent info. |
+| **POST** | `/chats` | **Yes** (JWT) | **Fetches paginated chat history** using the Cursor-Based pagination strategy. |
+
+#### Chat History Request Body (`POST /chats`)
+
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `conversation_id` | `string` | Yes | The ID of the conversation to fetch history for. |
+| `pagination.cursor` | `string` | No | The cursor value of the oldest message received (or null for the first page). |
+| `pagination.limit` | `integer` | No | Max number of messages to return (SDK uses **20**). |
+
+-----
+
+## 4\. WebSocket Connection & Protocol
 
 ### Connection Details
 
-* **URL:** `ws://{CHAT_URL}/chats/clients`
+* **Client Endpoint:** `ws://{CHAT_URL}/chats/clients`
 
-### Browser Constraints & Authentication
+### Authentication via Protocol Header
 
-Standard browser `WebSocket` API **does not support** custom headers (like `Authorization`). To bypass this limitation securely:
-
-1.  **Solution:** Send the token in the **`Sec-WebSocket-Protocol`** header.
-2.  **Client Implementation:**
-    ```javascript
-    const protocols = [token]; // Token must be the first element
-    const socket = new WebSocket(wsUrl, protocols);
-    ```
-3.  **Server Validation:** The server extracts the token from the protocol header, validates it, and echoes it back in the response handshake to confirm the connection.
-
-### Connection Events
-
-* **onOpen:** Connection established. Set UI to "Online".
-* **onMessage:** Parse JSON message. Trigger **Reconciliation Logic** (see Section 9).
-* **onClose:** Implement Reconnection Strategy (Exponential backoff: 1s, 2s, 5s...).
-* **onError:** Handle connection errors.
+Since standard browser WebSockets do not support custom headers, the JWT is sent securely within the `Sec-WebSocket-Protocol` header (as seen in the SDK code: `new WebSocket(wsUrl, [token])`).
 
 -----
 
-## 7\. API Endpoint Reference
+### 5\. Message Structures (Sending $\leftrightarrow$ Receiving)
 
-### Manager Service (Authentication)
+All WebSocket traffic uses the generic JSON structure documented below.
 
-| Method | Endpoint | Auth Required | Description |
-| :--- | :--- | :--- | :--- |
-| **POST** | `/users/guest/register` | No | Registers a new guest. Returns `qc_token`. |
-| **PUT** | `/users/guest/update` | **Yes** (JWT) | Updates the guest's profile information. |
+#### 5.1. Sending Text Messages (Client $\rightarrow$ Server)
 
-### Chat Service (Real-time)
-
-| Method | Endpoint | Auth Required | Description |
-| :--- | :--- | :--- | :--- |
-| **GET** | `/conversations/active` | **Yes** (JWT) | **Required step.** Returns current conversation context/ID. |
-| **GET** | `/chats/clients` | **Yes** (Protocol) | WebSocket endpoint for clients. |
-
------
-
-## 8\. Message Structures
-
-All WebSocket messages are formatted as **JSON**.
-
-### 8.1. Sending Messages (Client $\rightarrow$ Server)
-
-The client **MUST** generate a unique `client_message_id` for every text message to enable optimistic UI updates.
-
-```json
-{
-  "type": "text",               // Required: "text" | "system"
-  "conversation_id": "string",   // Required: From /conversations/active API
-  "content": "Hello Support",    // Required for text
-  "client_message_id": "temp_123" // Required: Unique ID generated by client
-}
-```
-
-### 8.2. Receiving Messages (Server $\rightarrow$ Client)
-
-The server broadcasts the message back to **all** participants (including the sender). The payload contains the full database object.
+The client **must** include a `client_message_id` for **Optimistic UI reconciliation**.
 
 ```json
 {
   "type": "text",
-  "timestamp": "2025-11-18T10:30:00Z",
-  "payload": {
-    "id": "01K...",               // Real Database ID
-    "conversation_id": "01K...",
-    "sender_id": "01K...",
-    "content": "Hello Support",
-    "client_message_id": "temp_123" // Echoed back for reconciliation
-  }
+  "conversation_id": "01KAAWW5V95WFFDERJZCTDE2QQ",
+  "content": "My message content.",
+  "client_message_id": "temp_xyz_1678881234567" // Unique ID generated by client
+}
+```
+
+#### 5.2. Receiving Messages (Server $\rightarrow$ Client)
+
+The server broadcasts the confirmed message (or system event) to all participants.
+
+```json
+{
+  "type": "string",           // "text" | "system"
+  "sub_type": "string",       // e.g., "typing_started" (empty for text messages)
+  "timestamp": "string",      // ISO 8601 Date Time
+  "payload": { ... }          // Full Message Object or System Object
 }
 ```
 
 -----
 
-## 9\. Optimistic UI & Reconciliation Strategy
+### 6\. Optimistic UI & Reconciliation
 
-To ensure a smooth, responsive user experience, the SDK should implement the following flow:
+The SDK implements a robust reconciliation strategy to provide an instant messaging experience:
 
-### Step 1: Sending (Client Side)
-
-1.  User sends a message.
-2.  SDK generates a temporary ID (e.g., `temp_xyz`).
-3.  SDK adds the message to the UI immediately with a **Pending** status (e.g., Clock icon, 0.7 opacity).
-4.  SDK sends the JSON payload including `"client_message_id": "temp_xyz"`.
-
-### Step 2: Receiving & Reconciliation
-
-The server processes the message and broadcasts it via WebSocket.
-
-1.  **SDK receives a message.**
-2.  **Check 1 (Reconciliation):** Does the payload contain a `client_message_id` that matches a pending message in the DOM?
-    * **YES:**
-        * Find the DOM element with ID `temp_xyz`.
-        * Change status to **Sent/Confirmed** (Check icon, 1.0 opacity).
-        * Update the DOM element ID to the real `id` from the server payload.
-        * **Stop processing.** (Do not render a duplicate message).
-3.  **Check 2 (Fallback/Echo Prevention):**
-    * If reconciliation failed (e.g., page refresh), check: `payload.sender_id === current_user_id`.
-    * **YES:** Ignore the message (it's an echo of our own message).
-    * **NO:** Display as a new incoming message from the support agent.
+1.  **On Send:** The SDK generates a `client_message_id`, adds the message to the UI immediately with a **"Pending"** status.
+2.  **On Receive:** The server echoes the message back, including the `client_message_id` and the new database `id`.
+3.  **Reconciliation:** The SDK searches its pending messages for the matching `client_message_id`, updates the message status to **"Sent/Confirmed"**, and replaces the temporary ID with the permanent database ID. **The SDK then skips rendering this message as a new incoming message.**
 
 -----
 
-## 10\. System Messages
+### 7\. System Messages & Heartbeat (Typing Indicators)
 
-System messages are ephemeral (not saved to DB) and used for typing indicators.
+System messages are ephemeral (not saved to the DB) and are used for real-time status updates.
 
-**Sending Typing Started:**
+#### A. Heartbeat (`sub_type: online`)
+
+The client sends a system message every **50 seconds** (50000ms in code) to signal that the user is active on the conversation. This keeps the WebSocket connection alive and helps the agent side track client presence.
+
+**Client $\rightarrow$ Server:**
 
 ```json
 {
   "type": "system",
-  "sub_type": "typing_started",
+  "sub_type": "online",
   "conversation_id": "01K..."
 }
 ```
 
-**Receiving Typing Started:**
+#### B. Typing Indicators
+
+| Event | Logic Rule (Source Code Verified) |
+| :--- | :--- |
+| **Sending (`typing_started`)** | Client sends this event **only if 5 seconds (5000ms) have passed** since the last `typing_started` event was sent. |
+| **Sending (`typing_stopped`)** | Client sends this event when the input box is cleared or the message is sent (`sendMessage`). |
+| **Receiving (Auto-hide)** | Upon receiving `typing_started` from an agent, the UI shows the typing indicator and sets an automatic **6-second (6000ms) timeout** to hide the indicator if no further `typing_started` or `typing_stopped` signal is received. |
+
+**Sending/Receiving Structure Example (Typing Started):**
 
 ```json
 {
   "type": "system",
   "sub_type": "typing_started",
-  "payload": {
-    "conversation_id": "01K...",
-    "sender_id": "01K..."
-  }
+  "conversation_id": "01K...",
+  // When received: "payload": { "conversation_id": "...", "sender_id": "..." }
 }
 ```
-
-**Frontend Logic:**
-
-* **Throttling:** Only send `typing_started` once every 5 seconds.
-* **Display:** When receiving `typing_started`, show "Support is typing..." for 6 seconds, then auto-hide if no further updates or `typing_stopped` events are received.
-
------
-
-## 11\. Implementation Checklist
-
-1.  [ ] **Storage Adapter:** Implement wrapper for `localStorage` / `AsyncStorage`.
-2.  [ ] **Auth Manager:** Handle Guest Registration (save `qc_token`) vs Client Login.
-3.  [ ] **Context Fetch:** Call `/conversations/active` before WS connection to get `conversation_id`.
-4.  [ ] **WebSocket Client:**
-    * Use `Sec-WebSocket-Protocol` for authentication.
-    * Implement **Optimistic UI** (add message immediately as pending).
-    * Implement **Reconciliation** (match `client_message_id` to confirm delivery).
-    * Implement **Typing Indicators** with throttling and timeouts.
