@@ -154,9 +154,125 @@ Quick Connect utilizes a modern, performance-oriented technology stack to ensure
   * **Prometheus:** Metrics collection.
   * **Grafana:** Visualization (optional integration).
 * **CI/CD:** GitHub Actions.
-* **Dev Tools:** `Air` (Live reload), `Make` (Build automation).
+* **Dev Tools:** `Hybrid Development Environment`
 
 ## 🚀 Get Started
+
+Quick Connect offers two deployment modes: **All-in-One** (recommended for testing & small setups) and **Microservices** (for scalable production).
+
+### Option 1: All-in-One (Fastest Way) ⚡
+Run the entire platform as a single monolithic container with minimal resource usage (<30MB image). You don't even need to build the code!
+
+#### Prerequisites
+* [Docker](https://www.docker.com/) & Docker Compose
+
+#### Steps
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/syntaxfa/quick-connect.git](https://github.com/syntaxfa/quick-connect.git)
+    cd quick-connect/deploy/all-in-one/deploy
+    ```
+
+2.  **Setup Environment:**
+    Copy the example configuration file. You can use the default values for a quick start.
+    ```bash
+    cp .env.example .env
+    ```
+
+3.  **Run with Docker Compose:**
+    ```bash
+    docker compose up -d
+    ```
+    *This will pull the `syntaxfa/quickconnect-all-in-one` image, setup Postgres & Redis, run migrations, and create a default superuser.*
+
+4.  **Access the Dashboard:**
+    Once the containers are healthy, open your browser:
+    * **URL:** `http://localhost:2560`
+    * **Default Username:** `alireza`
+    * **Default Password:** `password`
+
+---
+
+### Option 2: Microservices (Production Architecture) 🏗️
+
+For scalable environments, you can run Quick Connect as a set of distributed microservices where each component (Chat, Manager, Admin) runs in its own isolated container.
+
+> **Note:** This Docker Compose setup demonstrates the full architecture running on a single machine for development/testing purposes. In a real production environment, these services would typically be orchestrated via Kubernetes across multiple nodes.
+
+#### Steps
+
+1.  **Navigate to the deployment directory:**
+    If you haven't cloned the repo yet:
+    ```bash
+    git clone [https://github.com/syntaxfa/quick-connect.git](https://github.com/syntaxfa/quick-connect.git)
+    cd quick-connect/deploy/microservice
+    ```
+
+2.  **Setup Environment:**
+    Create the environment file from the sample. The default configuration connects all services automatically.
+    ```bash
+    cp .env.example .env
+    ```
+
+3.  **Run the Stack:**
+    This command orchestrates all services (Manager, Chat, Admin, Infra) using the modular compose files.
+    ```bash
+    docker compose up -d
+    ```
+
+4.  **Access the Services:**
+    Once the containers are healthy (it might take a few seconds for migrations to finish):
+
+    * **Admin Dashboard:** `http://localhost:2560`
+    * **Chat API:** `http://localhost:2530`
+    * **Manager API:** `http://localhost:2520`
+
+    > **Default Credentials:**
+    > * **Username:** `alireza`
+    > * **Password:** `password`
+
+### 💻 For Developers (Build from Source)
+
+If you want to contribute or modify the code, we recommend the **Hybrid Workflow**: run infrastructure via Docker and services locally via Go.
+
+#### 1. Start Infrastructure (DB & Redis)
+First, spin up the required databases (Postgres & Redis) without the application containers:
+```bash
+cd deploy/all-in-one/development
+docker compose up -d
+````
+
+*This ensures you have a ready-to-use database environment mapped to your localhost ports.*
+
+#### 2\. Configuration ⚙️
+
+Quick Connect uses a layered configuration system. The priority order is:
+
+1.  **Environment Variables** (Highest Priority - Overrides everything)
+2.  **YAML Config Files** (Located in `deploy/<service>/config.yml`)
+3.  **Default Values** (Lowest Priority)
+
+> **Tip:** For local development, the services are pre-configured to read from `deploy/<service>/config.yml`. You can modify these files directly.
+
+#### 3\. Run Services
+
+Install dependencies and run each microservice individually. For example, to start the **Manager Service**:
+
+```bash
+# 1. Download Dependencies
+go mod download
+
+# 2. Run Database Migrations
+go run cmd/manager/main.go migrate up
+
+# 3. Start the Server
+go run cmd/manager/main.go server
+```
+
+You can repeat this process for `cmd/chat/main.go`, `cmd/notification/main.go`, etc.
+
+````
+
 ## 📚 Documentation
 ## 🤝 Contributing
 ## 📄 License
