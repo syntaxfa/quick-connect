@@ -276,11 +276,21 @@ You can repeat this process for `cmd/chat/main.go`, `cmd/notification/main.go`, 
 Explore the detailed documentation to understand how to integrate, customize, and extend Quick Connect:
 
 * **[Project Structure](./docs/structure.md):** A deep dive into the directory layout, hexagonal architecture, and module organization.
-* **[Client SDKs](./sdk/README.md):** Official JavaScript and React SDKs to easily integrate the chat widget into your frontend applications.
+* **[Client SDKs](./sdk/README.md):** Official SDKs.
 * **API Reference (OpenAPI/Swagger):**
     * The API definitions are located within each service's directory (e.g., `app/chat/docs/chat_swagger.yaml`).
     * You can import these files into Postman or Swagger UI to inspect endpoints and schemas.
 * **[Deployment Examples](./example/deploy):** Advanced configurations for different environments, including Kubernetes or separate VM setups.
 
 ## 🤝 Contributing
+
+We enthusiastically welcome contributions from the community! Whether it's fixing bugs, improving documentation, or suggesting new features, your help is appreciated.
+
+To get started:
+1.  Read our **[Contributing Guide](CONTRIBUTING.md)** to understand the workflow and coding standards.
+2.  Check out the [Open Issues](https://github.com/syntaxfa/quick-connect/issues) for tasks that interest you.
+3.  Please review our **[Code of Conduct](CODE_OF_CONDUCT.md)** to ensure a welcoming environment for everyone.
+
+> **Need Help?** If you have questions or need coordination before starting a large feature, feel free to reach out to the maintainer on Telegram: **[@Ayeef](https://t.me/Ayeef)**.
+
 ## 📄 License
