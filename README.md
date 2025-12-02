@@ -121,6 +121,41 @@ One of the unique features of Quick Connect is its **"Code-Level Monolith"** des
 * **Abstracted Communication:** The code automatically switches between **gRPC** (remote) and **Function Calls** (local) based on the deployment configuration.
 
 ## 🛠️ Tech Stack
+
+Quick Connect utilizes a modern, performance-oriented technology stack to ensure scalability and ease of maintenance.
+
+### 🔙 Backend
+* **Language:** [Go (Golang)](https://go.dev/) `1.25+` - For high-performance concurrency.
+* **Framework:** [Echo v4](https://echo.labstack.com/) - High performance, extensible web framework.
+* **Communication:**
+  * **gRPC & Protobuf:** For efficient inter-service communication.
+  * **WebSocket:** For real-time bi-directional events (Chat).
+* **Database & Storage:**
+  * **PostgreSQL:** Primary relational database (using `pgx` driver).
+  * **Redis:** For caching, Pub/Sub, and session management.
+  * **S3-Compatible Storage:** For file persistence (MinIO/AWS).
+* **Key Libraries:**
+  * `koanf`: Configuration management.
+  * `ozzo-validation`: Data validation.
+  * `sql-migrate`: Database migrations.
+  * `cobra`: CLI command management.
+
+### 🎨 Frontend (Admin Dashboard)
+* **Architecture:** Server-Side Rendered (SSR).
+* **Core:** [HTMX](https://htmx.org/) - For dynamic interactions without complex JS bundles.
+* **Templating:** Go `html/template`.
+* **Styling:** Custom CSS (No heavy CSS frameworks).
+
+### ⚙️ DevOps & Infrastructure
+* **Containerization:** Docker & Docker Compose.
+* **Orchestration:** Kubernetes ready.
+* **Observability:**
+  * **OpenTelemetry (OTel):** Distributed tracing and metrics.
+  * **Prometheus:** Metrics collection.
+  * **Grafana:** Visualization (optional integration).
+* **CI/CD:** GitHub Actions.
+* **Dev Tools:** `Air` (Live reload), `Make` (Build automation).
+
 ## 🚀 Get Started
 ## 📚 Documentation
 ## 🤝 Contributing
