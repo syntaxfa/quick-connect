@@ -39,7 +39,7 @@ Experience the speed and features yourself on our live demo:
 <div align="center">
   <br>
   <p><b>👇 Preview: Real-time Chat Service</b></p>
-  <img src="https://github.com/user-attachments/assets/ea167049-6322-4eb8-9b7d-b44b2f790a39" alt="Quick Connect Real-time Chat Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+  <img src="https://github.com/user-attachments/assets/24201987-9382-492c-b3ad-d4e00a69076d" alt="Quick Connect Real-time Chat Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
 </div>
 
 ## ✨ Key Features
