@@ -181,3 +181,5 @@ build-errors.log
 tmp
 
 logs*.json
+
+.air
