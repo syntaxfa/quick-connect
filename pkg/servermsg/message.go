@@ -29,6 +29,10 @@ const (
 	MsgTemplateNotFound                    = "this template does not exist"
 	MsgInvalidIgnoreChannel                = "invalid ignore channel"
 
+	// Manager app.
+
+	MsgQuickConnectReservedUsername = "this username is reserved and cannot be changed"
+
 	// Admin app.
 
 	MsgUsernameAndPasswordAreRequired = "username and password are required"

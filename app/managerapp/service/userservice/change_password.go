@@ -24,6 +24,15 @@ func (s Service) ChangePassword(ctx context.Context, userID types.ID, req Change
 			WithKind(richerror.KindNotFound), s.logger)
 	}
 
+	user, guErr := s.repo.GetUserByID(ctx, userID)
+	if guErr != nil {
+		return errlog.ErrContext(ctx, richerror.New(op).WithKind(richerror.KindUnexpected).WithWrapError(guErr), s.logger)
+	}
+
+	if user.Username == DemoUsername {
+		return richerror.New(op).WithMessage(servermsg.MsgQuickConnectReservedUsername).WithKind(richerror.KindForbidden)
+	}
+
 	userHashedPass, gErr := s.repo.GetUserHashedPassword(ctx, userID)
 	if gErr != nil {
 		return errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gErr).WithKind(richerror.KindUnexpected), s.logger)

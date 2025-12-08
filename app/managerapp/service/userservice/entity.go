@@ -17,3 +17,5 @@ type User struct {
 	Roles          []types.Role `json:"roles"`
 	LastOnlineAt   time.Time    `json:"last_online_at"`
 }
+
+const DemoUsername = "quickconnect"
