@@ -25,7 +25,7 @@ services:
       - POSTGRES_USER=${NOTIFICATION_POSTGRES__USERNAME}
       - POSTGRES_PASSWORD=${NOTIFICATION_POSTGRES__PASSWORD}
     volumes:
-      - notification_postgres_data:/var/lib/postgresql/data
+      - notification_postgres_data:/var/lib/postgresql
     ports:
       - ${NOTIFICATION_POSTGRES__PORT}:${NOTIFICATION_POSTGRES__PORT}
     networks:

@@ -34,7 +34,7 @@ services:
       - POSTGRES_USER=${MANAGER_POSTGRES__USERNAME}
       - POSTGRES_PASSWORD=${MANAGER_POSTGRES__PASSWORD}
     volumes:
-      - manager_postgres_data:/var/lib/postgresql/data
+      - manager_postgres_data:/var/lib/postgresql
     networks:
       - app_net
     healthcheck:
@@ -54,7 +54,7 @@ services:
       - POSTGRES_USER=${CHAT_POSTGRES__USERNAME}
       - POSTGRES_PASSWORD=${CHAT_POSTGRES__PASSWORD}
     volumes:
-      - chat_postgres_data:/var/lib/postgresql/data
+      - chat_postgres_data:/var/lib/postgresql
     networks:
       - app_net
     healthcheck:
