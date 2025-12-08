@@ -32,7 +32,7 @@ When we say lightweight, we mean it. You can deploy the entire Quick Connect sta
 
 ### 🌐 Live Demo
 Experience the speed and features yourself on our live demo:
-* **Website:** [Link to Demo Website](https://demo-quick-connect.syntaxfa.ir)
+* **Website:** [Link to Website](https://quick-connect.syntaxfa.ir)
 * **Username:** `quickconnect`
 * **Password:** `quickconnect`
 
