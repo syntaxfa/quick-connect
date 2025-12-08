@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
         tailwind.config = {
@@ -66,166 +66,173 @@
     </script>
 
     <style>
-        /* Custom Utilities */
+        /* Glassmorphism Utilities */
         .glass-panel {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .glass-card {
-            background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .glass-card:hover {
-            border-color: rgba(56, 189, 248, 0.4);
-            box-shadow: 0 0 30px -10px rgba(56, 189, 248, 0.15);
-            transform: translateY(-2px);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 40px -10px rgba(56, 189, 248, 0.1);
+            transform: translateY(-4px);
         }
 
         .text-glow {
-            text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+            text-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
         }
 
         .grid-bg {
-            background-size: 50px 50px;
-            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
             mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
         }
 
-        /* Scrollbar */
+        /* 3D Preserves */
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         ::-webkit-scrollbar-track {
             background: #020617;
         }
         ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 4px;
+            background: #334155;
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #38bdf8;
+            background: #475569;
         }
     </style>
 </head>
-<body class="bg-dark-bg text-slate-300 font-sans selection:bg-brand-500 selection:text-white overflow-x-hidden">
+<body class="bg-dark-bg text-slate-300 font-sans selection:bg-brand-500/30 selection:text-brand-100 overflow-x-hidden">
 
-<div class="fixed inset-0 z-0 pointer-events-none">
-    <div class="absolute top-0 left-1/4 w-96 h-96 bg-brand-500/20 rounded-full mix-blend-screen filter blur-[128px] animate-blob"></div>
-    <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full mix-blend-screen filter blur-[128px] animate-blob animation-delay-2000"></div>
-    <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-indigo-500/20 rounded-full mix-blend-screen filter blur-[128px] animate-blob animation-delay-4000"></div>
-    <div class="absolute inset-0 grid-bg opacity-50"></div>
+<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-600/10 rounded-full mix-blend-screen filter blur-[100px] animate-blob"></div>
+    <div class="absolute top-[20%] right-[-10%] w-[400px] h-[400px] bg-purple-600/10 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full mix-blend-screen filter blur-[120px] animate-blob animation-delay-4000"></div>
+    <div class="absolute inset-0 grid-bg"></div>
 </div>
 
-<nav class="fixed w-full z-50 top-0 border-b border-white/5 glass-panel">
-    <div class="container mx-auto px-6 h-16 flex items-center justify-between">
+<nav class="fixed w-full z-50 top-0 glass-panel transition-all duration-300">
+    <div class="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
                 <i class="fa-solid fa-bolt text-white text-sm"></i>
             </div>
-            <span class="text-white font-bold text-lg tracking-tight">Quick Connect</span>
+            <span class="text-white font-bold text-lg tracking-tight hidden sm:block">Quick Connect</span>
         </div>
 
-        <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="#features" class="hover:text-brand-400 transition-colors">Features</a>
-            <a href="#architecture" class="hover:text-brand-400 transition-colors">Architecture</a>
-            <a href="#stack" class="hover:text-brand-400 transition-colors">Tech Stack</a>
-            <a href="#integration" class="hover:text-brand-400 transition-colors">Integration</a>
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+            <a href="#features" class="hover:text-white transition-colors">Features</a>
+            <a href="#architecture" class="hover:text-white transition-colors">Architecture</a>
+            <a href="#stack" class="hover:text-white transition-colors">Stack</a>
+            <a href="#integration" class="hover:text-white transition-colors">Integration</a>
         </div>
 
-        <div class="flex items-center gap-4">
-            <a href="https://github.com/syntaxfa/quick-connect" target="_blank" class="hidden sm:flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
-                <i class="fa-brands fa-github text-lg"></i>
+        <div class="flex items-center gap-3 md:gap-4">
+            <a href="https://github.com/syntaxfa/quick-connect" target="_blank" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors px-2">
+                <i class="fa-brands fa-github text-xl"></i>
             </a>
-            <a href="https://demo-quick-connect.syntaxfa.ir" target="_blank" class="group relative px-5 py-2 rounded-full bg-white/5 border border-white/10 hover:border-brand-500/50 hover:bg-brand-500/10 transition-all duration-300">
-                <span class="relative z-10 text-sm font-semibold text-white group-hover:text-brand-400">Live Demo</span>
+            <a href="https://dashboard-qc.syntaxfa.ir/login" target="_blank" class="hidden sm:flex group relative px-5 py-2 rounded-full bg-white/5 border border-white/10 hover:border-brand-500/50 hover:bg-brand-500/10 transition-all duration-300">
+                <span class="relative z-10 text-xs font-bold text-white group-hover:text-brand-400 uppercase tracking-wide">Admin Panel</span>
                 <div class="absolute inset-0 rounded-full bg-brand-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </a>
         </div>
     </div>
 </nav>
 
-<main class="relative z-10 pt-32 pb-20 container mx-auto px-6">
-    <div class="flex flex-col lg:flex-row items-center gap-16">
+<main class="relative z-10 pt-28 md:pt-40 pb-20 container mx-auto px-4 md:px-6">
+    <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
-        <div class="lg:w-1/2 space-y-8 animate-fade-up">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-mono font-medium">
-                <span class="flex h-2 w-2 rounded-full bg-brand-400 animate-pulse"></span>
+        <div class="lg:w-1/2 space-y-6 md:space-y-8 animate-fade-up text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-mono font-medium mx-auto lg:mx-0">
+                <span class="flex h-1.5 w-1.5 rounded-full bg-brand-400 animate-pulse"></span>
                 v1.0.0 Stable Release
             </div>
 
-            <h1 class="text-5xl lg:text-7xl font-extrabold text-white leading-[1.1] tracking-tight">
+            <h1 class="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-[1.1] tracking-tight">
                 Better Communication,<br>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-blue-500 to-indigo-600 text-glow">Own Your Data.</span>
             </h1>
 
-            <p class="text-lg text-slate-400 max-w-xl leading-relaxed">
+            <p class="text-base sm:text-lg text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 The open-source, cloud-native engagement platform.
-                <strong class="text-white">Self-hosted</strong>,
-                <strong class="text-white">High-performance (Go)</strong>,
+                <strong class="text-slate-200">Self-hosted</strong>,
+                <strong class="text-slate-200">High-performance (Go)</strong>,
                 and engineered to replace heavy alternatives.
             </p>
 
-            <div class="flex flex-wrap items-center gap-4">
-                <div class="px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2">
+            <div class="flex flex-wrap justify-center lg:justify-start gap-3">
+                <div class="px-3 py-1.5 rounded-md bg-slate-900 border border-slate-800 flex items-center gap-2">
                     <i class="fa-brands fa-docker text-blue-500"></i>
-                    <span class="text-sm font-mono text-slate-300">&lt; 30MB Image</span>
+                    <span class="text-xs sm:text-sm font-mono text-slate-300">&lt; 30MB</span>
                 </div>
-                <div class="px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2">
+                <div class="px-3 py-1.5 rounded-md bg-slate-900 border border-slate-800 flex items-center gap-2">
                     <i class="fa-brands fa-golang text-cyan-400"></i>
-                    <span class="text-sm font-mono text-slate-300">Go 1.25+</span>
+                    <span class="text-xs sm:text-sm font-mono text-slate-300">Go 1.25+</span>
                 </div>
-                <div class="px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2">
+                <div class="px-3 py-1.5 rounded-md bg-slate-900 border border-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-server text-green-400"></i>
-                    <span class="text-sm font-mono text-slate-300">Self-Hosted</span>
+                    <span class="text-xs sm:text-sm font-mono text-slate-300">Self-Hosted</span>
                 </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                <a href="https://github.com/syntaxfa/quick-connect" class="px-8 py-3.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-[0_0_20px_-5px_rgba(14,165,233,0.4)] flex items-center justify-center gap-2">
-                    <i class="fa-brands fa-github"></i>
+            <div class="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
+                <a href="https://github.com/syntaxfa/quick-connect" class="px-8 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-[0_0_20px_-5px_rgba(14,165,233,0.4)] flex items-center justify-center gap-2 group">
+                    <i class="fa-brands fa-github text-lg group-hover:scale-110 transition-transform"></i>
                     Get Started
                 </a>
-                <a href="#architecture" class="px-8 py-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-medium border border-slate-700 transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-layer-group"></i>
-                    See Architecture
+                <a href="#architecture" class="px-8 py-3.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-white font-medium border border-slate-700 hover:border-slate-600 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-layer-group text-slate-400"></i>
+                    Architecture
                 </a>
             </div>
         </div>
 
-        <div class="lg:w-1/2 w-full perspective-1000 animate-fade-up" style="animation-delay: 0.2s;">
-            <div class="relative group transform transition-transform duration-500 hover:rotate-y-2 hover:rotate-x-2 preserve-3d">
+        <div class="lg:w-1/2 w-full perspective-1000 animate-fade-up order-first lg:order-last" style="animation-delay: 0.2s;">
+            <div class="relative group transform transition-transform duration-500 hover:rotate-y-1 hover:rotate-x-1 preserve-3d">
                 <div class="absolute -inset-1 bg-gradient-to-r from-brand-500 to-indigo-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
 
                 <div class="relative bg-[#0d1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden font-mono text-sm leading-6">
-                    <div class="bg-slate-900/50 px-4 py-3 border-b border-slate-800 flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
-                        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
-                        <div class="ml-auto text-xs text-slate-500">bash — 80x24</div>
+                    <div class="bg-slate-900/80 backdrop-blur px-4 py-3 border-b border-slate-800 flex items-center gap-2">
+                        <div class="flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+                        </div>
+                        <div class="ml-auto text-xs text-slate-600 font-sans font-medium">bash — quick-connect</div>
                     </div>
 
-                    <div class="p-6 text-slate-300 h-[340px] overflow-hidden" id="terminal-content">
-                        <div class="mb-2">
-                            <span class="text-green-400">user@dev:~/quick-connect$</span>
-                            <span id="typewriter" class="text-white border-r-2 border-white animate-cursor"></span>
+                    <div class="p-4 sm:p-6 text-slate-300 h-[280px] sm:h-[340px] overflow-hidden flex flex-col justify-end" id="terminal-content">
+                        <div id="output" class="space-y-1.5"></div>
+                        <div class="mt-1">
+                            <span class="text-green-400">user@server:~$</span>
+                            <span id="typewriter" class="text-white border-r-2 border-white animate-cursor ml-1"></span>
                         </div>
-                        <div id="output" class="space-y-1"></div>
                     </div>
                 </div>
 
-                <div class="absolute -bottom-6 -right-6 bg-slate-900 border border-slate-700 p-4 rounded-lg shadow-xl flex items-center gap-3 animate-bounce" style="animation-duration: 3s;">
-                    <div class="w-10 h-10 rounded bg-green-500/10 flex items-center justify-center border border-green-500/20">
-                        <i class="fa-solid fa-check text-green-400"></i>
+                <div class="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 bg-slate-900/90 backdrop-blur border border-slate-700 p-3 sm:p-4 rounded-xl shadow-xl flex items-center gap-3 animate-bounce" style="animation-duration: 3s;">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                        <i class="fa-solid fa-check text-green-400 text-sm sm:text-base"></i>
                     </div>
                     <div>
-                        <div class="text-xs text-slate-400">Status</div>
-                        <div class="text-sm font-bold text-white">Ready in 250ms</div>
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Status</div>
+                        <div class="text-xs sm:text-sm font-bold text-white whitespace-nowrap">Ready in 250ms</div>
                     </div>
                 </div>
             </div>
@@ -233,91 +240,91 @@
     </div>
 </main>
 
-<section id="features" class="py-24 relative z-10">
-    <div class="container mx-auto px-6">
-        <div class="text-center mb-16">
+<section id="features" class="py-20 relative z-10">
+    <div class="container mx-auto px-4 md:px-6">
+        <div class="text-center mb-16 max-w-2xl mx-auto">
             <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Everything You Need.</h2>
-            <p class="text-slate-400 text-lg">Packed with features, stripped of bloat.</p>
+            <p class="text-slate-400 text-lg">Packed with modern engagement features, stripped of enterprise bloat.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
 
-            <div class="md:col-span-2 glass-card rounded-2xl p-8 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+            <div class="md:col-span-2 glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden group min-h-[250px] flex flex-col justify-between">
+                <div class="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-700">
                     <i class="fa-solid fa-comments text-9xl text-brand-500"></i>
                 </div>
-                <div class="relative z-10 h-full flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-lg bg-brand-500/10 flex items-center justify-center mb-4 border border-brand-500/20">
-                            <i class="fa-solid fa-bolt text-brand-400 text-xl"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold text-white mb-2">Real-time Support Chat</h3>
-                        <p class="text-slate-400 max-w-md">Lightning-fast messaging powered by <span class="text-white font-mono">WebSockets</span> & <span class="text-white font-mono">Redis</span>. Zero latency communication.</p>
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 flex items-center justify-center mb-4 border border-brand-500/20">
+                        <i class="fa-solid fa-bolt text-brand-400 text-xl"></i>
                     </div>
-                    <div class="mt-4 flex gap-2">
-                        <span class="px-2 py-1 rounded bg-slate-800 text-xs border border-slate-700">PGX Driver</span>
-                        <span class="px-2 py-1 rounded bg-slate-800 text-xs border border-slate-700">Pub/Sub</span>
-                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Real-time Support Chat</h3>
+                    <p class="text-slate-400 max-w-md text-sm sm:text-base">Lightning-fast messaging powered by <span class="text-brand-200 font-mono">WebSockets</span> & <span class="text-red-200 font-mono">Redis</span>. Zero latency communication.</p>
+                </div>
+                <div class="mt-6 flex flex-wrap gap-2">
+                    <span class="px-2 py-1 rounded bg-slate-800/50 text-xs border border-slate-700 text-slate-300">PGX Driver</span>
+                    <span class="px-2 py-1 rounded bg-slate-800/50 text-xs border border-slate-700 text-slate-300">Pub/Sub</span>
+                    <span class="px-2 py-1 rounded bg-slate-800/50 text-xs border border-slate-700 text-slate-300">Binary Protocol</span>
                 </div>
             </div>
 
-            <div class="row-span-2 glass-card rounded-2xl p-8 relative overflow-hidden group">
-                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900 z-0"></div>
-                <div class="absolute -right-12 top-20 w-[120%] h-full bg-slate-800 rounded-tl-xl border border-slate-700 opacity-80 group-hover:translate-x-[-10px] group-hover:translate-y-[-10px] transition-transform duration-500 shadow-2xl">
-                    <div class="p-4 border-b border-slate-700 flex gap-4">
-                        <div class="w-20 h-2 bg-slate-600 rounded"></div>
-                        <div class="w-20 h-2 bg-slate-600 rounded"></div>
-                    </div>
-                    <div class="p-4 grid grid-cols-2 gap-4">
-                        <div class="h-20 bg-slate-700/50 rounded"></div>
-                        <div class="h-20 bg-slate-700/50 rounded"></div>
-                        <div class="h-32 col-span-2 bg-slate-700/50 rounded"></div>
-                    </div>
-                </div>
-
-                <div class="relative z-10">
-                    <div class="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center mb-4 border border-purple-500/20">
+            <div class="md:row-span-2 glass-card rounded-2xl p-0 relative overflow-hidden group min-h-[400px]">
+                <div class="p-8 relative z-20">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4 border border-purple-500/20">
                         <i class="fa-solid fa-gauge-high text-purple-400 text-xl"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-2">HTMX Admin Dashboard</h3>
-                    <p class="text-slate-400 text-sm">No heavy SPA frameworks. Server-side rendered with Go Templates + HTMX for instant page loads.</p>
+                    <h3 class="text-2xl font-bold text-white mb-2">HTMX Dashboard</h3>
+                    <p class="text-slate-400 text-sm">Server-side rendered with Go Templates + HTMX. Instant page loads, no JS bloat.</p>
                 </div>
+
+                <div class="absolute bottom-0 right-0 w-[90%] h-[55%] bg-slate-900 border-t border-l border-slate-700 rounded-tl-2xl shadow-2xl translate-y-4 translate-x-4 group-hover:translate-y-2 group-hover:translate-x-2 transition-transform duration-500">
+                    <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                        <div class="w-24 h-2 bg-slate-700 rounded"></div>
+                        <div class="flex gap-2">
+                            <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                            <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div class="flex gap-3">
+                            <div class="w-1/3 h-16 bg-slate-800/50 rounded-lg border border-slate-700/50"></div>
+                            <div class="w-1/3 h-16 bg-slate-800/50 rounded-lg border border-slate-700/50"></div>
+                            <div class="w-1/3 h-16 bg-slate-800/50 rounded-lg border border-slate-700/50"></div>
+                        </div>
+                        <div class="w-full h-24 bg-slate-800/30 rounded-lg border border-slate-700/30"></div>
+                    </div>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent z-10 pointer-events-none"></div>
             </div>
 
-            <div class="glass-card rounded-2xl p-8 group">
-                <div class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-4 border border-green-500/20">
+            <div class="glass-card rounded-2xl p-6 sm:p-8 group min-h-[220px]">
+                <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4 border border-green-500/20">
                     <i class="fa-solid fa-bell text-green-400 text-xl"></i>
                 </div>
                 <h3 class="text-xl font-bold text-white mb-2">Smart Notifications</h3>
-                <p class="text-slate-400 text-sm mb-4">Fallback routing: WebSocket -> Push -> Email -> SMS.</p>
-                <div class="flex gap-3 text-2xl text-slate-600">
-                    <i class="fa-solid fa-envelope hover:text-white transition"></i>
-                    <i class="fa-solid fa-mobile-screen hover:text-white transition"></i>
-                    <i class="fa-solid fa-wifi hover:text-white transition"></i>
-                </div>
+                <p class="text-slate-400 text-sm mb-4">Intelligent fallback routing: WebSocket &rarr; Push &rarr; Email &rarr; SMS.</p>
             </div>
 
-            <div class="glass-card rounded-2xl p-8 relative overflow-hidden">
-                <span class="absolute top-4 right-4 px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold border border-blue-500/30">TRENDING</span>
-                <div class="w-12 h-12 rounded-lg bg-pink-500/10 flex items-center justify-center mb-4 border border-pink-500/20">
+            <div class="glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden min-h-[220px]">
+                <span class="absolute top-4 right-4 px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold border border-blue-500/20 tracking-wider">NEW</span>
+                <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4 border border-pink-500/20">
                     <i class="fa-solid fa-circle-notch text-pink-400 text-xl"></i>
                 </div>
                 <h3 class="text-xl font-bold text-white mb-2">Interactive Stories</h3>
-                <p class="text-slate-400 text-sm">Engagement like Instagram. Ephemeral updates directly in your app.</p>
+                <p class="text-slate-400 text-sm">Engagement like Instagram. Ephemeral updates directly inside your app.</p>
             </div>
 
-            <div class="md:col-span-3 glass-card rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="md:col-span-3 glass-card rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div class="flex items-center gap-6">
-                    <div class="w-12 h-12 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                    <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 shrink-0">
                         <i class="fa-solid fa-folder-open text-orange-400 text-xl"></i>
                     </div>
                     <div>
                         <h3 class="text-xl font-bold text-white">Flexible File Handler</h3>
-                        <p class="text-slate-400 text-sm">S3-Compatible (AWS/MinIO) or Local File System storage.</p>
+                        <p class="text-slate-400 text-sm mt-1">S3-Compatible (AWS/MinIO) or Local File System storage. Switch with one config.</p>
                     </div>
                 </div>
-                <div class="font-mono text-sm text-slate-500 border border-slate-700 rounded p-2 bg-slate-900/50">
-                    provider: "s3" | "local"
+                <div class="font-mono text-xs text-orange-300 border border-orange-500/20 rounded px-3 py-2 bg-orange-500/5 w-full md:w-auto text-center md:text-left">
+                    STORAGE_DRIVER="s3"
                 </div>
             </div>
 
@@ -326,27 +333,27 @@
 </section>
 
 <section id="architecture" class="py-24 bg-slate-900/30 border-y border-white/5">
-    <div class="container mx-auto px-6">
+    <div class="container mx-auto px-4 md:px-6">
         <div class="flex flex-col lg:flex-row gap-16 items-center">
             <div class="lg:w-1/2">
-                <h2 class="text-4xl font-bold text-white mb-6">Modular Monolith.<br> The Best of Both Worlds.</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Modular Monolith.<br> The Best of Both Worlds.</h2>
                 <p class="text-slate-400 text-lg mb-8 leading-relaxed">
                     Why choose between speed and scale? Quick Connect utilizes a "Code-Level Monolith" design. Run the exact same codebase in two distinct modes.
                 </p>
 
-                <div class="space-y-6">
-                    <div class="flex gap-4 p-4 rounded-xl border border-slate-800 bg-slate-900/50 hover:border-brand-500/30 transition-colors cursor-default">
-                        <div class="mt-1 w-8 h-8 rounded bg-brand-500/20 flex items-center justify-center text-brand-400">
+                <div class="space-y-4">
+                    <div class="flex gap-4 p-4 rounded-xl border border-brand-500/20 bg-brand-500/5 hover:bg-brand-500/10 transition-colors cursor-default">
+                        <div class="mt-1 w-8 h-8 rounded bg-brand-500/20 flex items-center justify-center text-brand-400 shrink-0">
                             <i class="fa-solid fa-rocket"></i>
                         </div>
                         <div>
                             <h4 class="text-white font-bold text-lg">Monolith Mode (All-in-One)</h4>
-                            <p class="text-sm text-slate-400 mt-1">Single binary. Zero network latency. Direct function calls. <br>Perfect for <span class="text-brand-400">easy ops</span> and <span class="text-brand-400">speed</span>.</p>
+                            <p class="text-sm text-slate-400 mt-1">Single binary. Zero network latency. Direct function calls. <br>Perfect for <span class="text-brand-400">simplicity</span> and <span class="text-brand-400">speed</span>.</p>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-4 rounded-xl border border-slate-800 bg-slate-900/50 hover:border-purple-500/30 transition-colors cursor-default">
-                        <div class="mt-1 w-8 h-8 rounded bg-purple-500/20 flex items-center justify-center text-purple-400">
+                        <div class="mt-1 w-8 h-8 rounded bg-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
                             <i class="fa-solid fa-network-wired"></i>
                         </div>
                         <div>
@@ -357,41 +364,41 @@
                 </div>
             </div>
 
-            <div class="lg:w-1/2 relative">
-                <div class="absolute inset-0 bg-brand-500/10 blur-3xl rounded-full"></div>
+            <div class="lg:w-1/2 w-full relative">
+                <div class="absolute inset-0 bg-brand-500/5 blur-3xl rounded-full"></div>
                 <div class="relative grid grid-cols-2 gap-4 p-6 rounded-2xl border border-slate-700 bg-slate-900/80 backdrop-blur-sm">
 
-                    <div class="col-span-2 text-center text-xs text-slate-500 mb-2 uppercase tracking-widest">Core Modules</div>
+                    <div class="col-span-2 text-center text-[10px] text-slate-500 mb-2 uppercase tracking-widest font-bold">Core Modules</div>
 
-                    <div class="p-4 rounded bg-slate-800 border border-slate-600 text-center">
-                        <div class="text-white font-bold">Manager</div>
-                        <div class="text-xs text-slate-400 mt-1">Auth (JWT) & RBAC</div>
+                    <div class="p-4 rounded bg-slate-800 border border-slate-600 text-center hover:border-brand-500/50 transition-colors">
+                        <div class="text-white font-bold text-sm">Manager</div>
+                        <div class="text-[10px] text-slate-400 mt-1">Auth (JWT) & RBAC</div>
                     </div>
-                    <div class="p-4 rounded bg-slate-800 border border-slate-600 text-center">
-                        <div class="text-white font-bold">Chat</div>
-                        <div class="text-xs text-slate-400 mt-1">WebSocket & Persistence</div>
+                    <div class="p-4 rounded bg-slate-800 border border-slate-600 text-center hover:border-brand-500/50 transition-colors">
+                        <div class="text-white font-bold text-sm">Chat</div>
+                        <div class="text-[10px] text-slate-400 mt-1">WebSocket Hub</div>
                     </div>
-                    <div class="p-4 rounded bg-slate-800 border border-slate-600 text-center">
-                        <div class="text-white font-bold">Notification</div>
-                        <div class="text-xs text-slate-400 mt-1">Outbox Pattern</div>
+                    <div class="p-4 rounded bg-slate-800 border border-slate-600 text-center hover:border-brand-500/50 transition-colors">
+                        <div class="text-white font-bold text-sm">Notification</div>
+                        <div class="text-[10px] text-slate-400 mt-1">Outbox Pattern</div>
                     </div>
-                    <div class="p-4 rounded bg-slate-800 border border-slate-600 text-center">
-                        <div class="text-white font-bold">File Handler</div>
-                        <div class="text-xs text-slate-400 mt-1">S3 / Local</div>
+                    <div class="p-4 rounded bg-slate-800 border border-slate-600 text-center hover:border-brand-500/50 transition-colors">
+                        <div class="text-white font-bold text-sm">File Handler</div>
+                        <div class="text-[10px] text-slate-400 mt-1">Storage Abstraction</div>
                     </div>
 
                     <div class="col-span-2 py-4 flex items-center justify-center gap-4 text-slate-500">
                         <span class="h-px w-full bg-gradient-to-r from-transparent via-slate-500 to-transparent"></span>
-                        <span class="text-xs whitespace-nowrap font-mono px-2 py-1 rounded border border-slate-700 bg-slate-950">
+                        <span class="text-[10px] whitespace-nowrap font-mono px-2 py-1 rounded border border-slate-700 bg-slate-950">
                                 gRPC / Function Calls
                             </span>
                         <span class="h-px w-full bg-gradient-to-r from-transparent via-slate-500 to-transparent"></span>
                     </div>
 
                     <div class="col-span-2 grid grid-cols-3 gap-2">
-                        <div class="p-2 rounded bg-indigo-900/30 border border-indigo-500/30 text-center text-xs text-indigo-300 font-mono">PostgreSQL</div>
-                        <div class="p-2 rounded bg-red-900/30 border border-red-500/30 text-center text-xs text-red-300 font-mono">Redis</div>
-                        <div class="p-2 rounded bg-green-900/30 border border-green-500/30 text-center text-xs text-green-300 font-mono">HTMX</div>
+                        <div class="p-2 rounded bg-indigo-900/20 border border-indigo-500/20 text-center text-[10px] text-indigo-300 font-mono">PostgreSQL</div>
+                        <div class="p-2 rounded bg-red-900/20 border border-red-500/20 text-center text-[10px] text-red-300 font-mono">Redis</div>
+                        <div class="p-2 rounded bg-green-900/20 border border-green-500/20 text-center text-[10px] text-green-300 font-mono">HTMX</div>
                     </div>
                 </div>
             </div>
@@ -402,7 +409,7 @@
 <section id="stack" class="py-20">
     <div class="container mx-auto px-6 text-center">
         <h2 class="text-2xl font-bold text-white mb-12 opacity-80">Powered by Modern Engineering</h2>
-        <div class="flex flex-wrap justify-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+        <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 hover:opacity-100 transition-opacity duration-500 grayscale hover:grayscale-0">
             <i class="fa-brands fa-golang text-5xl hover:text-cyan-400 transition" title="Go 1.25+"></i>
             <i class="fa-brands fa-docker text-5xl hover:text-blue-500 transition" title="Docker"></i>
             <i class="fa-solid fa-database text-5xl hover:text-indigo-400 transition" title="PostgreSQL"></i>
@@ -413,10 +420,10 @@
 </section>
 
 <section id="integration" class="py-24 bg-gradient-to-b from-dark-bg to-slate-900">
-    <div class="container mx-auto px-6">
+    <div class="container mx-auto px-4 md:px-6">
         <div class="flex flex-col lg:flex-row items-center gap-12">
             <div class="lg:w-1/2">
-                <h2 class="text-4xl font-bold text-white mb-6">Stupidly Simple Integration.</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Stupidly Simple Integration.</h2>
                 <p class="text-slate-400 text-lg mb-8">
                     No complex configurations. Deploy the container, then paste one line of code into your website.
                 </p>
@@ -436,15 +443,15 @@
                 </ul>
             </div>
             <div class="lg:w-1/2 w-full">
-                <div class="rounded-xl overflow-hidden border border-slate-700 shadow-2xl bg-[#0d1117]">
+                <div class="rounded-xl overflow-hidden border border-slate-700 shadow-2xl bg-[#0d1117] group">
                     <div class="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700">
                         <span class="text-xs text-slate-400 font-mono">index.html</span>
-                        <button class="text-xs text-brand-400 hover:text-brand-300">Copy</button>
+                        <button class="text-xs text-brand-400 hover:text-brand-300 transition-colors">Copy</button>
                     </div>
                     <div class="p-6 overflow-x-auto">
 <pre class="font-mono text-sm leading-relaxed text-slate-300">
 <span class="text-slate-500">&lt;!-- Add this before &lt;/body&gt; --&gt;</span>
-<span class="text-purple-400">&lt;script</span> <span class="text-orange-400">src</span>=<span class="text-green-400">"https://your-domain.com/sdk.js"</span><span class="text-purple-400">&gt;&lt;/script&gt;</span>
+<span class="text-purple-400">&lt;script</span> <span class="text-orange-400">src</span>=<span class="text-green-400">"https://quick-connect.ir/sdk.js"</span><span class="text-purple-400">&gt;&lt;/script&gt;</span>
 <span class="text-purple-400">&lt;script&gt;</span>
   <span class="text-yellow-200">QuickConnect</span>.<span class="text-blue-400">init</span>({
     appId: <span class="text-green-400">'YOUR_APP_ID'</span>,
@@ -469,20 +476,20 @@
             Access the full Admin Dashboard live. Experience the speed of Go and HTMX.
         </p>
 
-        <div class="inline-block p-1 rounded-2xl bg-gradient-to-br from-brand-500 to-purple-600 mb-12">
-            <div class="bg-slate-900 rounded-xl p-8 max-w-md mx-auto">
-                <div class="text-sm text-slate-400 mb-2 uppercase tracking-wide font-bold">Demo Credentials</div>
-                <div class="grid grid-cols-2 gap-4 text-left font-mono text-sm mb-6">
+        <div class="inline-block p-1 rounded-2xl bg-gradient-to-br from-brand-500 to-purple-600 mb-12 shadow-2xl shadow-brand-500/20">
+            <div class="bg-slate-900 rounded-xl p-6 sm:p-8 max-w-md mx-auto">
+                <div class="text-[10px] text-slate-400 mb-3 uppercase tracking-wide font-bold">Demo Credentials</div>
+                <div class="grid grid-cols-2 gap-3 text-left font-mono text-sm mb-6">
                     <div class="p-3 bg-slate-950 rounded border border-slate-800">
-                        <span class="block text-slate-500 text-xs">Username</span>
+                        <span class="block text-slate-500 text-[10px] uppercase">Username</span>
                         <span class="text-green-400 select-all">quickconnect</span>
                     </div>
                     <div class="p-3 bg-slate-950 rounded border border-slate-800">
-                        <span class="block text-slate-500 text-xs">Password</span>
+                        <span class="block text-slate-500 text-[10px] uppercase">Password</span>
                         <span class="text-green-400 select-all">quickconnect</span>
                     </div>
                 </div>
-                <a href="https://demo-quick-connect.syntaxfa.ir" target="_blank" class="block w-full py-4 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-lg shadow-brand-500/25">
+                <a href="https://dashboard-qc.syntaxfa.ir/login" target="_blank" class="block w-full py-4 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-lg shadow-brand-500/25">
                     Open Admin Dashboard <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i>
                 </a>
             </div>
@@ -496,16 +503,14 @@
             &copy; 2025 Quick Connect. Licensed under <a href="https://github.com/syntaxfa/quick-connect?tab=AGPL-3.0-1-ov-file" class="text-slate-300 hover:underline">AGPL-3.0</a>.
         </div>
         <div class="flex gap-6">
-            <a href="https://github.com/syntaxfa/quick-connect" class="text-slate-500 hover:text-white transition"><i class="fa-brands fa-github text-xl"></i></a>
-            <a href="https://t.me/ayeef" class="text-slate-500 hover:text-white transition"><i class="fa-brands fa-telegram text-xl"></i></a>
+            <a href="https://github.com/syntaxfa/quick-connect" class="text-slate-500 hover:text-white transition transform hover:scale-110"><i class="fa-brands fa-github text-2xl"></i></a>
+            <a href="https://t.me/ayeef" class="text-slate-500 hover:text-white transition transform hover:scale-110"><i class="fa-brands fa-telegram text-2xl"></i></a>
         </div>
     </div>
 </footer>
 
 <div id="quick-connect-widget" class="fixed bottom-6 right-6 z-50 font-sans">
-
     <div id="qc-chat-window" class="hidden flex-col w-[350px] h-[500px] bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl mb-4 overflow-hidden transform transition-all duration-300 origin-bottom-right scale-95 opacity-0">
-
         <div class="bg-brand-600 p-4 flex items-center gap-3">
             <div class="relative">
                 <img src="https://private-user-images.githubusercontent.com/86611004/521466724-6c2c7486-5c6f-46f2-ab1f-da4917082ff6.webp?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjQ2OTU5MTAsIm5iZiI6MTc2NDY5NTYxMCwicGF0aCI6Ii84NjYxMTAwNC81MjE0NjY3MjQtNmMyYzc0ODYtNWM2Zi00NmYyLWFiMWYtZGE0OTE3MDgyZmY2LndlYnA_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMjAyJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTIwMlQxNzEzMzBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1lMWE5ZjgyM2VmNjFiMDJiNzJkNDg5NDI2OGNlNzcxNDI1Y2IyOTE2YWY3ZTdjMGRkODZkNDBjODY3ZDlkMWNlJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.iWRDyPw0XCuPgc1t0FFCSGw0vkXPX2Y6hdTmBSWeLVo" alt="Bot" class="w-10 h-10 rounded-full bg-white object-cover">
@@ -519,7 +524,6 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-
         <div class="flex-1 bg-slate-950 p-4 overflow-y-auto space-y-4">
             <div class="flex gap-3">
                 <div class="w-8 h-8 rounded-full bg-slate-800 flex-shrink-0 flex items-center justify-center text-xs">🤖</div>
@@ -534,16 +538,12 @@
                 </div>
             </div>
         </div>
-
         <div class="p-3 bg-slate-900 border-t border-slate-800">
             <div class="flex gap-2">
                 <input type="text" placeholder="Type a message..." class="w-full bg-slate-950 text-white text-sm rounded-full px-4 py-2 focus:outline-none focus:ring-1 focus:ring-brand-500 border border-slate-800">
                 <button class="w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center hover:bg-brand-500 transition">
                     <i class="fa-solid fa-paper-plane text-xs"></i>
                 </button>
-            </div>
-            <div class="text-center mt-2">
-                <span class="text-[10px] text-slate-600">Powered by Quick Connect</span>
             </div>
         </div>
     </div>
@@ -554,5 +554,100 @@
 </div>
 
 <script src="quick-connect-sdk.js"></script>
+
+<script>
+    // --- 1. Terminal Typing Logic ---
+    const commands = [
+        { text: "git clone https://github.com/syntaxfa/quick-connect.git", type: "input" },
+        { text: "cd quick-connect/deploy/all-in-one", type: "input" },
+        { text: "docker compose up -d", type: "input" },
+        { text: "[+] Running 3/3", type: "success" },
+        { text: " ⠿ Container postgres    Started", type: "output" },
+        { text: " ⠿ Container redis       Started", type: "output" },
+        { text: " ⠿ Container quick-conn  Started", type: "output" },
+        { text: "🚀 Quick Connect is ready on port :2560", type: "success" }
+    ];
+
+    const typewriterElement = document.getElementById('typewriter');
+    const outputElement = document.getElementById('output');
+    let cmdIndex = 0;
+    let charIndex = 0;
+
+    function typeWriter() {
+        if (!typewriterElement) return; // Guard clause
+
+        if (cmdIndex < commands.length) {
+            const cmd = commands[cmdIndex];
+
+            if (cmd.type === 'input') {
+                if (charIndex < cmd.text.length) {
+                    typewriterElement.textContent += cmd.text.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, 50); // Typing speed
+                } else {
+                    // Command finished typing
+                    const line = document.createElement('div');
+                    line.innerHTML = `<span class="text-green-400">user@server:~$</span> <span class="text-white">${cmd.text}</span>`;
+                    outputElement.appendChild(line);
+                    typewriterElement.textContent = '';
+                    charIndex = 0;
+                    cmdIndex++;
+                    setTimeout(typeWriter, 500); // Pause before next line
+                }
+            } else {
+                // Output lines (appear instantly)
+                const line = document.createElement('div');
+                if (cmd.type === 'success') {
+                    line.className = 'text-brand-400 font-bold';
+                } else {
+                    line.className = 'text-slate-400 font-mono text-xs';
+                }
+                line.textContent = cmd.text;
+                outputElement.appendChild(line);
+                cmdIndex++;
+                setTimeout(typeWriter, 150);
+            }
+
+            // Auto scroll
+            const terminalContent = document.getElementById('terminal-content');
+            if(terminalContent) terminalContent.scrollTop = terminalContent.scrollHeight;
+
+        } else {
+            // Loop animation
+            setTimeout(() => {
+                outputElement.innerHTML = '';
+                cmdIndex = 0;
+                typeWriter();
+            }, 5000);
+        }
+    }
+
+    // Start typing when page loads
+    document.addEventListener('DOMContentLoaded', typeWriter);
+
+    // --- 2. Widget Toggle Logic ---
+    function toggleChat() {
+        const window = document.getElementById('qc-chat-window');
+        const launcher = document.getElementById('qc-launcher');
+
+        if (!window || !launcher) return;
+
+        if (window.classList.contains('hidden')) {
+            window.classList.remove('hidden');
+            setTimeout(() => {
+                window.classList.remove('scale-95', 'opacity-0');
+                window.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            launcher.innerHTML = '<i class="fa-solid fa-xmark text-xl"></i>';
+        } else {
+            window.classList.remove('scale-100', 'opacity-100');
+            window.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                window.classList.add('hidden');
+            }, 300);
+            launcher.innerHTML = '<i class="fa-solid fa-comment-dots text-2xl"></i>';
+        }
+    }
+</script>
 </body>
 </html>
