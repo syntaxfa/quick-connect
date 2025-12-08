@@ -21,7 +21,7 @@ services:
       - POSTGRES_USER=${MANAGER_POSTGRES__USERNAME}
       - POSTGRES_PASSWORD=${MANAGER_POSTGRES__PASSWORD}
     volumes:
-      - all_in_one_postgres_data:/var/lib/postgresql/data
+      - all_in_one_postgres_data:/var/lib/postgresql
       - ./postgres-init:/docker-entrypoint-initdb.d
     networks:
       - app_net
