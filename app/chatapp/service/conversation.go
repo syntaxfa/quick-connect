@@ -157,18 +157,23 @@ func (s *Service) GetConversationByID(ctx context.Context, conversationID, userI
 			WithKind(richerror.KindNotFound)
 	}
 
+	var roleOk bool
 	for _, role := range userRoles {
-		if role != types.RoleSupport && role != types.RoleSuperUser {
-			ok, checkErr := s.repo.CheckUserInConversation(ctx, userID, conversationID)
-			if checkErr != nil {
-				return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(checkErr).
-					WithKind(richerror.KindUnexpected), s.logger)
-			}
+		if role == types.RoleSupport || role == types.RoleSuperUser {
+			roleOk = true
+		}
+	}
 
-			if !ok {
-				return ConversationDetailResponse{}, richerror.New(op).WithMessage(servermsg.MsgConversationNotFound).
-					WithKind(richerror.KindNotFound)
-			}
+	if !roleOk {
+		ok, checkErr := s.repo.CheckUserInConversation(ctx, userID, conversationID)
+		if checkErr != nil {
+			return ConversationDetailResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(checkErr).
+				WithKind(richerror.KindUnexpected), s.logger)
+		}
+
+		if !ok {
+			return ConversationDetailResponse{}, richerror.New(op).WithMessage(servermsg.MsgConversationNotFound).
+				WithKind(richerror.KindNotFound)
 		}
 	}
 
