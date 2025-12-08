@@ -8,7 +8,7 @@
 
     const QuickConnect = {
         config: {
-            managerUrl: 'http://localhost:2520',
+            managerUrl: 'http://localhost:2531',
             chatUrl: 'ws://localhost:2530/chats/clients',
             chatApiUrl: 'http://localhost:2530',
             position: 'bottom-right',
