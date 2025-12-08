@@ -1,7 +1,7 @@
 ---
 services:
   manager_init:
-    image: syntaxfa/quickconnect-manager:1.0.1
+    image: syntaxfa/quickconnect-manager:1.0.2
     container_name: manager_init
     command: >
       /bin/sh -c "
@@ -16,7 +16,7 @@ services:
         condition: service_healthy
 
   qc_manager:
-    image: syntaxfa/quickconnect-manager:1.0.1
+    image: syntaxfa/quickconnect-manager:1.0.2
     container_name: qc_manager
     hostname: ${MANAGER_HOSTNAME}
     restart: always
