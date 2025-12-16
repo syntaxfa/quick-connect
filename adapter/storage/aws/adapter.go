@@ -56,7 +56,7 @@ func New(ctx context.Context, cfg Config) (*Adapter, error) {
 	}, nil
 }
 
-func (a *Adapter) Upload(ctx context.Context, file io.Reader, size int64, key string, contentType string, isPublic bool) (string, error) {
+func (a *Adapter) Upload(ctx context.Context, file io.Reader, size int64, key, contentType string, isPublic bool) (string, error) {
 	input := &s3.PutObjectInput{
 		Bucket:        aws.String(a.bucketName),
 		Key:           aws.String(key),
