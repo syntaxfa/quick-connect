@@ -16,3 +16,14 @@ storage:
   local:
     root_path: "./uploads"
     base_url: "http://localhost:2560"
+postgres:
+  host: "localhost"
+  port: 11579
+  db_name: storage_db
+  password: "8SHDSgdihmMH9EQsXfRZzLHes3F3kgxa"
+  username: LoPgYJqYGZ53
+  ssl_mode: disable
+  max_idle_conns: 10
+  max_open_conns: 20
+  conn_max_lifetime: 600
+  path_of_migration: "app/storageapp/repository/migrations"
