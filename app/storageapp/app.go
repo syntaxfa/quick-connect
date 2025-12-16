@@ -23,7 +23,7 @@ type Application struct {
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translation.Translate) (Application, service.Service) {
 	svc := service.New()
 
-	handler := http.NewHandler(t, logger)
+	handler := http.NewHandler(t, cfg.Storage.Local.RootPath, logger)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler, logger)
 
 	return Application{

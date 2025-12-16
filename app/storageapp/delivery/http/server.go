@@ -37,6 +37,9 @@ func (s Server) registerRoutes() {
 	s.registerSwagger()
 
 	s.httpServer.Router.GET("health-check", s.handler.healthCheck)
+
+	fileGR := s.httpServer.Router.Group("files")
+	fileGR.GET("/*", s.handler.ServeFile)
 }
 
 func (s Server) registerSwagger() {

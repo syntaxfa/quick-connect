@@ -183,3 +183,5 @@ tmp
 logs*.json
 
 .air
+
+uploads

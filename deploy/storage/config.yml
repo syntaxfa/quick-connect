@@ -12,3 +12,7 @@ logger:
   max_backup: 0
   compress: false
   write_in_console: true
+storage:
+  local:
+    root_path: "./uploads"
+    base_url: "http://localhost:2560"
