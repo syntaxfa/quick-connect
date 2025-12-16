@@ -10,7 +10,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/syntaxfa/quick-connect/app/storageapp/service"
 )
+
+var _ service.Storage = (*Adapter)(nil)
 
 type Adapter struct {
 	cfg           Config
