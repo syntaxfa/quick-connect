@@ -7,13 +7,15 @@ import (
 )
 
 type Handler struct {
-	t      *translation.Translate
-	logger *slog.Logger
+	t             *translation.Translate
+	logger        *slog.Logger
+	localRootPath string
 }
 
-func NewHandler(t *translation.Translate, logger *slog.Logger) Handler {
+func NewHandler(t *translation.Translate, localRootPath string, logger *slog.Logger) Handler {
 	return Handler{
-		t:      t,
-		logger: logger,
+		t:             t,
+		logger:        logger,
+		localRootPath: localRootPath,
 	}
 }
