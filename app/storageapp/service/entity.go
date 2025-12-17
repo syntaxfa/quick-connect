@@ -10,10 +10,10 @@ type File struct {
 	ID         types.ID `json:"id"`
 	UploaderID types.ID `json:"uploader_id"`
 
-	Name    string `json:"name"`
-	Key     string `json:"key"`
-	MimType string `json:"mim_type"`
-	Size    int64  `json:"size"`
+	Name     string `json:"name"`
+	Key      string `json:"key"`
+	MimeType string `json:"mime_type"`
+	Size     int64  `json:"size"`
 
 	Driver   Driver `json:"driver"`
 	Bucket   string `json:"bucket"`

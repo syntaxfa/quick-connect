@@ -45,6 +45,7 @@ func (s Server) registerRoutes() {
 	downloadGR.GET("/*", s.handler.ServeFile)
 
 	fileGR := s.httpServer.Router.Group("files")
+	fileGR.GET("/:fileID", s.handler.getPublicLink)
 	fileGR.POST("", s.handler.upload, s.authMid.RequireAuth)
 }
 

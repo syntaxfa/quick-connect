@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"log/slog"
+
+	"github.com/syntaxfa/quick-connect/types"
 )
 
 type Storage interface {
@@ -16,6 +18,8 @@ type Storage interface {
 
 type Repository interface {
 	Save(ctx context.Context, file File) error
+	IsExistByID(ctx context.Context, fileID types.ID) (bool, error)
+	GetByID(ctx context.Context, fileID types.ID) (File, error)
 }
 
 type Service struct {

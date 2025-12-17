@@ -1,13 +1,4 @@
 definitions:
-  servermsg.ErrorResponse:
-    properties:
-      errors:
-        additionalProperties:
-          type: string
-        type: object
-      message:
-        type: string
-    type: object
   service.Driver:
     enum:
     - s3
@@ -34,7 +25,7 @@ definitions:
         type: boolean
       key:
         type: string
-      mim_type:
+      mime_type:
         type: string
       name:
         type: string
@@ -91,10 +82,37 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/servermsg.ErrorResponse'
+            type: string
       security:
       - JWT: []
       summary: Upload a file
+      tags:
+      - Storage
+  /files/{fileID}:
+    get:
+      consumes:
+      - application/json
+      description: get public link
+      parameters:
+      - description: file ID
+        in: path
+        name: fileID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: get public link
       tags:
       - Storage
   /health-check:

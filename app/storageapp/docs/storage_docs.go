@@ -76,7 +76,50 @@ const docTemplatestorage = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/files/{fileID}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "get public link",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Storage"
+                ],
+                "summary": "get public link",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "file ID",
+                        "name": "fileID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -113,20 +156,6 @@ const docTemplatestorage = `{
         }
     },
     "definitions": {
-        "servermsg.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "errors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "service.Driver": {
             "type": "string",
             "enum": [
@@ -165,7 +194,7 @@ const docTemplatestorage = `{
                 "key": {
                     "type": "string"
                 },
-                "mim_type": {
+                "mime_type": {
                     "type": "string"
                 },
                 "name": {

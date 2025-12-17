@@ -23,7 +23,7 @@ import (
 // @Failure 400 {string} string "File is required"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 413 {string} string "File size limit exceeded"
-// @Failure 500 {object} servermsg.ErrorResponse
+// @Failure 500 {string} string something went wrong
 // @Security JWT
 // @Router /files [POST].
 func (h Handler) upload(c echo.Context) error {

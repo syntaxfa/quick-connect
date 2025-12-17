@@ -30,7 +30,7 @@ func (s Service) Upload(ctx context.Context, req UploadRequest) (File, error) {
 		UploaderID:  req.UploaderID,
 		Name:        req.Filename,
 		Key:         uploadKey,
-		MimType:     req.ContentType,
+		MimeType:    req.ContentType,
 		Size:        req.Size,
 		Driver:      s.cfg.Driver,
 		Bucket:      s.cfg.Bucket,
