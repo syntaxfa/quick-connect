@@ -53,6 +53,7 @@ const (
 
 	// File App.
 
-	MsgFileInNotPublic = "this file does not public"
-	MsgFileNotFound    = "this file does not exists"
+	MsgFileInNotPublic      = "this file does not public"
+	MsgFileNotFound         = "this file does not exists"
+	MsgFileAlreadyConfirmed = "this file already confirmed!"
 )

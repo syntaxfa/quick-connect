@@ -21,6 +21,7 @@ type Repository interface {
 	IsExistByID(ctx context.Context, fileID types.ID) (bool, error)
 	GetByID(ctx context.Context, fileID types.ID) (File, error)
 	DeleteByID(ctx context.Context, fileID types.ID) error
+	ConfirmFile(ctx context.Context, fileID types.ID) error
 }
 
 type Service struct {
