@@ -5,6 +5,7 @@ type Cors struct {
 }
 
 type Config struct {
-	Port int  `koanf:"port"`
-	Cors Cors `koang:"cors"`
+	Port      int    `koanf:"port"`
+	Cors      Cors   `koang:"cors"`
+	BodyLimit string `koang:"body_limit"`
 }

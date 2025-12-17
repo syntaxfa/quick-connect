@@ -50,4 +50,10 @@ const (
 	MsgYouNotParticipantInThisConversation = "you not participant in this conversation"
 	MsgConversationNotFound                = "this conversation does not exists"
 	MsgConversationAlreadyClosed           = "this conversation already closed"
+
+	// File App.
+
+	MsgFileInNotPublic      = "this file does not public"
+	MsgFileNotFound         = "this file does not exists"
+	MsgFileAlreadyConfirmed = "this file already confirmed!"
 )

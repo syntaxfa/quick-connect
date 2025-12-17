@@ -3,6 +3,9 @@ package service
 import (
 	"context"
 	"io"
+	"log/slog"
+
+	"github.com/syntaxfa/quick-connect/types"
 )
 
 type Storage interface {
@@ -13,8 +16,26 @@ type Storage interface {
 	Exists(ctx context.Context, key string) (bool, error)
 }
 
-type Service struct{}
+type Repository interface {
+	Save(ctx context.Context, file File) error
+	IsExistByID(ctx context.Context, fileID types.ID) (bool, error)
+	GetByID(ctx context.Context, fileID types.ID) (File, error)
+	DeleteByID(ctx context.Context, fileID types.ID) error
+	ConfirmFile(ctx context.Context, fileID types.ID) error
+}
 
-func New() Service {
-	return Service{}
+type Service struct {
+	cfg     Config
+	storage Storage
+	repo    Repository
+	logger  *slog.Logger
+}
+
+func New(cfg Config, storage Storage, repo Repository, logger *slog.Logger) Service {
+	return Service{
+		cfg:     cfg,
+		storage: storage,
+		repo:    repo,
+		logger:  logger,
+	}
 }

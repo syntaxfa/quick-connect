@@ -8,6 +8,116 @@
         "contact": {}
     },
     "paths": {
+        "/files": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Upload a file to storage (S3 or Local)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Storage"
+                ],
+                "summary": "Upload a file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "The file to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Is the file public?",
+                        "name": "is_public",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/service.File"
+                        }
+                    },
+                    "400": {
+                        "description": "File is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "413": {
+                        "description": "File size limit exceeded",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/files/{fileID}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "get public link",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Storage"
+                ],
+                "summary": "get public link",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "file ID",
+                        "name": "fileID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/health-check": {
             "get": {
                 "description": "health check manager service",
@@ -36,6 +146,72 @@
                     }
                 }
             }
+        }
+    },
+    "definitions": {
+        "service.Driver": {
+            "type": "string",
+            "enum": [
+                "s3",
+                "local"
+            ],
+            "x-enum-varnames": [
+                "DriverS3",
+                "DriverLocal"
+            ]
+        },
+        "service.File": {
+            "type": "object",
+            "properties": {
+                "bucket": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "driver": {
+                    "$ref": "#/definitions/service.Driver"
+                },
+                "id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "is_confirmed": {
+                    "type": "boolean"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "mime_type": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "uploader_id": {
+                    "$ref": "#/definitions/types.ID"
+                }
+            }
+        },
+        "types.ID": {
+            "type": "string",
+            "enum": [
+                "01J00000000000000000000BOT"
+            ],
+            "x-enum-varnames": [
+                "BotUserID"
+            ]
         }
     },
     "securityDefinitions": {
