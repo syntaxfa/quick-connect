@@ -13,8 +13,17 @@ type Storage interface {
 	Exists(ctx context.Context, key string) (bool, error)
 }
 
-type Service struct{}
+type Repository interface {
+}
 
-func New() Service {
-	return Service{}
+type Service struct {
+	storage Storage
+	repo    Repository
+}
+
+func New(storage Storage, repo Repository) Service {
+	return Service{
+		storage: storage,
+		repo:    repo,
+	}
 }

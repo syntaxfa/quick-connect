@@ -19,9 +19,10 @@ type File struct {
 	Bucket   string `json:"bucket"`
 	IsPublic bool   `json:"is_public"`
 
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	IsConfirmed bool       `json:"is_confirmed"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
 }
 
 func (f File) IsDeleted() bool {
