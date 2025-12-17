@@ -9,6 +9,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+const defaultBodyLimit = "25M"
+
 type Server struct {
 	Router *echo.Echo
 	cfg    Config
@@ -17,6 +19,12 @@ type Server struct {
 
 func New(cfg Config, log *slog.Logger) Server {
 	e := echo.New()
+
+	if cfg.BodyLimit != "" {
+		e.Use(middleware.BodyLimit(cfg.BodyLimit))
+	} else {
+		e.Use(middleware.BodyLimit(defaultBodyLimit))
+	}
 
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogLatency:       true,

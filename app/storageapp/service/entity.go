@@ -15,7 +15,7 @@ type File struct {
 	MimType string `json:"mim_type"`
 	Size    int64  `json:"size"`
 
-	Driver   string `json:"driver"`
+	Driver   Driver `json:"driver"`
 	Bucket   string `json:"bucket"`
 	IsPublic bool   `json:"is_public"`
 
@@ -25,6 +25,17 @@ type File struct {
 	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
 }
 
+type Driver string
+
+const (
+	DriverS3    Driver = "s3"
+	DriverLocal Driver = "local"
+)
+
 func (f File) IsDeleted() bool {
 	return f.DeletedAt != nil
+}
+
+func IsValidDriver(driver Driver) bool {
+	return driver == DriverS3 || driver == DriverLocal
 }

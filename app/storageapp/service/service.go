@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"io"
+	"log/slog"
 )
 
 type Storage interface {
@@ -14,16 +15,21 @@ type Storage interface {
 }
 
 type Repository interface {
+	Save(ctx context.Context, file File) error
 }
 
 type Service struct {
+	cfg     Config
 	storage Storage
 	repo    Repository
+	logger  *slog.Logger
 }
 
-func New(storage Storage, repo Repository) Service {
+func New(cfg Config, storage Storage, repo Repository, logger *slog.Logger) Service {
 	return Service{
+		cfg:     cfg,
 		storage: storage,
 		repo:    repo,
+		logger:  logger,
 	}
 }

@@ -13,9 +13,10 @@ logger:
   compress: false
   write_in_console: true
 storage:
+  driver: "local"
   local:
     root_path: "./uploads"
-    base_url: "http://localhost:2560"
+    base_url: "http://localhost:2560/downloads"
 postgres:
   host: "localhost"
   port: 11579
@@ -27,3 +28,10 @@ postgres:
   max_open_conns: 20
   conn_max_lifetime: 600
   path_of_migration: "app/storageapp/repository/migrations"
+service:
+  max_file_size: 26214400 # 25M 25×1024×1024
+manager_app_grpc:
+  host: "localhost"
+  port: 2541
+  ssl_mode: false
+  use_otel: false
