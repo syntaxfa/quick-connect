@@ -7,13 +7,14 @@ import (
 
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
 	"github.com/syntaxfa/quick-connect/types"
+	"google.golang.org/grpc"
 )
 
 const defaultTimeAdd = time.Second * 10
 
 type Auth interface {
-	Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error)
-	TokenRefresh(ctx context.Context, req *authpb.TokenRefreshRequest) (*authpb.TokenRefreshResponse, error)
+	Login(ctx context.Context, req *authpb.LoginRequest, opts ...grpc.CallOption) (*authpb.LoginResponse, error)
+	TokenRefresh(ctx context.Context, req *authpb.TokenRefreshRequest, opts ...grpc.CallOption) (*authpb.TokenRefreshResponse, error)
 }
 
 type TokenManager struct {

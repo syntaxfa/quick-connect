@@ -49,3 +49,6 @@ redis:
   host: "localhost"
   port: 12434
   password: "Z9265UQfrFiCYWMMJF4uvTEmJA7rEauJ"
+service_auth_info:
+  username: "chat-service"
+  password: "kbo}idO@I_^tScgq(ZsZ:3luxTeXi_)oQqQCCbn<WO}.BDa*GH).s05j|SW.sp*L"

@@ -13,6 +13,11 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
 )
 
+type ServiceAuthInfo struct {
+	Username string `koanf:"username"`
+	Password string `koanf:"password"`
+}
+
 type Config struct {
 	ShutdownTimeout        time.Duration     `koanf:"shutdown_timeout"`
 	HTTPServer             httpserver.Config `koanf:"http_server"`
@@ -24,4 +29,5 @@ type Config struct {
 	ManagerAppInternalGRPC grpcclient.Config `koanf:"manager_app_internal_grpc"`
 	GRPCServer             grpcserver.Config `koanf:"grpc_server"`
 	Redis                  redis.Config      `koanf:"redis"`
+	ServiceAuthInfo        ServiceAuthInfo   `koanf:"service_auth_info"`
 }
