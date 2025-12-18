@@ -35,6 +35,7 @@ const (
 	Role_ROLE_CLIENT       Role = 6
 	Role_ROLE_GUEST        Role = 7
 	Role_ROLE_BOT          Role = 8
+	Role_ROLE_SERVICE      Role = 9
 )
 
 // Enum value maps for Role.
@@ -49,6 +50,7 @@ var (
 		6: "ROLE_CLIENT",
 		7: "ROLE_GUEST",
 		8: "ROLE_BOT",
+		9: "ROLE_SERVICE",
 	}
 	Role_value = map[string]int32{
 		"ROLE_UNSPECIFIED":  0,
@@ -60,6 +62,7 @@ var (
 		"ROLE_CLIENT":       6,
 		"ROLE_GUEST":        7,
 		"ROLE_BOT":          8,
+		"ROLE_SERVICE":      9,
 	}
 )
 
@@ -819,7 +822,7 @@ const file_manager_proto_user_proto_rawDesc = "" +
 	"\x05users\x18\x05 \x03(\v2\r.manager.UserR\x05users\"a\n" +
 	"\x19UserChangePasswordRequest\x12!\n" +
 	"\fold_password\x18\x01 \x01(\tR\voldPassword\x12!\n" +
-	"\fnew_password\x18\x02 \x01(\tR\vnewPassword*\xa7\x01\n" +
+	"\fnew_password\x18\x02 \x01(\tR\vnewPassword*\xb9\x01\n" +
 	"\x04Role\x12\x14\n" +
 	"\x10ROLE_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eROLE_SUPERUSER\x10\x01\x12\x10\n" +
@@ -831,7 +834,8 @@ const file_manager_proto_user_proto_rawDesc = "" +
 	"\vROLE_CLIENT\x10\x06\x12\x0e\n" +
 	"\n" +
 	"ROLE_GUEST\x10\a\x12\f\n" +
-	"\bROLE_BOT\x10\b*`\n" +
+	"\bROLE_BOT\x10\b\x12\x10\n" +
+	"\fROLE_SERVICE\x10\t*`\n" +
 	"\rSortDirection\x12\x1e\n" +
 	"\x1aSORT_DIRECTION_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12SORT_DIRECTION_ASC\x10\x01\x12\x17\n" +

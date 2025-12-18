@@ -90,6 +90,8 @@ func convertUserPbToUser(userPb *userpb.User) User {
 			roles = append(roles, string(types.RoleGuest))
 		case userpb.Role_ROLE_BOT:
 			roles = append(roles, string(types.RoleBot))
+		case userpb.Role_ROLE_SERVICE:
+			roles = append(roles, string(types.RoleService))
 		case userpb.Role_ROLE_UNSPECIFIED:
 			continue
 		}
