@@ -27,6 +27,7 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/pkg/rolemanager"
+	"github.com/syntaxfa/quick-connect/pkg/tokenmanager"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 	"github.com/syntaxfa/quick-connect/pkg/websocket"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
@@ -54,12 +55,14 @@ type Application struct {
 	mainCancel                context.CancelFunc // Function to cancel main context
 }
 
-type PublicKeyService interface {
+type AuthService interface {
 	GetPublicKey(ctx context.Context, req *empty.Empty, opts ...grpc.CallOption) (*authpb.GetPublicKeyResponse, error)
+	Login(ctx context.Context, req *authpb.LoginRequest, opts ...grpc.CallOption) (*authpb.LoginResponse, error)
+	TokenRefresh(ctx context.Context, req *authpb.TokenRefreshRequest, opts ...grpc.CallOption) (*authpb.TokenRefreshResponse, error)
 }
 
 func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *postgres.Database, re *redis.Adapter,
-	userInternalLocalAd service.UserInternalService, publicKeyInternalAd PublicKeyService) (
+	userInternalLocalAd service.UserInternalService, authInternalAd AuthService) (
 	Application, *service.Service, *jwtvalidator.Validator) {
 	const op = "Setup"
 
@@ -81,11 +84,11 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	chatRepo := postgres2.New(psqAdapter)
 	vld := service.NewValidate(t)
 
-	var publicKeyAd PublicKeyService
+	var authAd AuthService
 	var managerGRPCClient *grpcclient.Client
 
-	if publicKeyInternalAd != nil {
-		publicKeyAd = publicKeyInternalAd
+	if authInternalAd != nil {
+		authAd = authInternalAd
 	} else {
 		var grpcErr error
 		managerGRPCClient, grpcErr = grpcclient.New(cfg.ManagerAppGRPC)
@@ -95,7 +98,7 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 			panic(grpcErr)
 		}
 
-		publicKeyAd = manager.NewAuthAdapter(managerGRPCClient.Conn())
+		authAd = manager.NewAuthAdapter(managerGRPCClient.Conn())
 	}
 
 	var userInternalAd service.UserInternalService
@@ -105,7 +108,8 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		userInternalAd = userInternalLocalAd
 	} else {
 		var grpcInternalErr error
-		managerInternalGRPCClient, grpcInternalErr = grpcclient.New(cfg.ManagerAppInternalGRPC)
+		managerInternalGRPCClient, grpcInternalErr = grpcclient.New(cfg.ManagerAppInternalGRPC,
+			grpc.WithUnaryInterceptor(grpcauth.AuthClientInterceptor))
 		if grpcInternalErr != nil {
 			errlog.WithoutErr(richerror.New(op).WithWrapError(grpcInternalErr).WithKind(richerror.KindUnexpected), logger)
 
@@ -115,12 +119,14 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 		userInternalAd = manager.NewUserInternalAdapter(managerInternalGRPCClient.Conn())
 	}
 
+	tokenManager := tokenmanager.NewTokenManager(cfg.ServiceAuthInfo.Username, cfg.ServiceAuthInfo.Password, authAd)
+
 	chatHub := service.NewHub(cfg.ChatService, logger, pubsubClient)
 
-	chatSvc := service.New(cfg.ChatService, chatRepo, chatHub, pubsubClient, logger, vld, userInternalAd)
+	chatSvc := service.New(cfg.ChatService, chatRepo, chatHub, pubsubClient, logger, vld, userInternalAd, tokenManager)
 	chatHandler := http.NewHandler(mainCtx, upgrader, logger, chatSvc, t)
 
-	resp, pubErr := publicKeyAd.GetPublicKey(context.Background(), nil)
+	resp, pubErr := authAd.GetPublicKey(context.Background(), nil)
 	if pubErr != nil {
 		errlog.WithoutErr(richerror.New(op).WithWrapError(pubErr).WithKind(richerror.KindUnexpected), logger)
 

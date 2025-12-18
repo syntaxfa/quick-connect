@@ -13,6 +13,7 @@ import (
 	paginate "github.com/syntaxfa/quick-connect/pkg/paginate/limitoffset"
 	"github.com/syntaxfa/quick-connect/pkg/pubsub"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/pkg/tokenmanager"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/userinternalpb"
 	"github.com/syntaxfa/quick-connect/types"
 	"google.golang.org/grpc"
@@ -53,11 +54,12 @@ type Service struct {
 	vld             Validate
 	publisher       pubsub.Publisher
 	userInternalSvc UserInternalService
+	tokenManager    *tokenmanager.TokenManager
 }
 
 // New creates a new chat Service.
 func New(cfg Config, repo Repository, hub *Hub, publisher pubsub.Publisher, logger *slog.Logger, vld Validate,
-	userInternalSvc UserInternalService) *Service {
+	userInternalSvc UserInternalService, tokenManager *tokenmanager.TokenManager) *Service {
 	return &Service{
 		cfg:             cfg,
 		hub:             hub,
@@ -66,6 +68,7 @@ func New(cfg Config, repo Repository, hub *Hub, publisher pubsub.Publisher, logg
 		logger:          logger,
 		vld:             vld,
 		userInternalSvc: userInternalSvc,
+		tokenManager:    tokenManager,
 	}
 }
 

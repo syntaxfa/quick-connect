@@ -199,10 +199,15 @@ func (s *Service) GetConversationByID(ctx context.Context, conversationID, userI
 func (s *Service) getClientAndSupportInfo(ctx context.Context, clientID, supportID types.ID) (ClientInfo, SupportInfo, error) {
 	const op = "service.conversation.getClientAndSupportInfo"
 
+	ctxWithAuth, tErr := s.tokenManager.SetTokenInContext(ctx)
+	if tErr != nil {
+		return ClientInfo{}, SupportInfo{}, richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected)
+	}
+
 	var clientInfoPB *userinternalpb.UserInfoResponse
 	if clientID != "" {
 		var gcErr error
-		clientInfoPB, gcErr = s.userInternalSvc.UserInfo(ctx, &userinternalpb.UserInfoRequest{UserId: string(clientID)})
+		clientInfoPB, gcErr = s.userInternalSvc.UserInfo(ctxWithAuth, &userinternalpb.UserInfoRequest{UserId: string(clientID)})
 		if gcErr != nil {
 			return ClientInfo{}, SupportInfo{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gcErr).
 				WithKind(richerror.KindUnexpected), s.logger)
@@ -212,7 +217,7 @@ func (s *Service) getClientAndSupportInfo(ctx context.Context, clientID, support
 	var supportInfoPB *userinternalpb.UserInfoResponse
 	if supportID != "" {
 		var gsErr error
-		supportInfoPB, gsErr = s.userInternalSvc.UserInfo(ctx, &userinternalpb.UserInfoRequest{UserId: string(supportID)})
+		supportInfoPB, gsErr = s.userInternalSvc.UserInfo(ctxWithAuth, &userinternalpb.UserInfoRequest{UserId: string(supportID)})
 		if gsErr != nil {
 			return ClientInfo{}, SupportInfo{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(gsErr).
 				WithKind(richerror.KindUnexpected), s.logger)

@@ -63,8 +63,11 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, psqAdapter *p
 	grpcHandler := grpcdelivery.NewHandler(logger, tokenSvc, userSvc, t)
 	grpcServer := grpcdelivery.New(grpcserver.New(cfg.GRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)), grpcHandler, logger)
 
+	internalRoleManager := SetupInternalRoleManager()
+	internalAuthInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, internalRoleManager)
 	grpcHandlerInternal := grpcdelivery.NewHandlerInternal(logger, userSvc, t)
-	grpcServerInternal := grpcdelivery.NewServerInternal(grpcserver.New(cfg.GRPCServerInternal, logger), grpcHandlerInternal, logger)
+	grpcServerInternal := grpcdelivery.NewServerInternal(grpcserver.New(cfg.GRPCServerInternal, logger,
+		grpc.UnaryInterceptor(internalAuthInterceptor)), grpcHandlerInternal, logger)
 
 	return Application{
 		cfg:                cfg,
@@ -209,6 +212,15 @@ func SetupRoleManager() *rolemanager.RoleManager {
 		"/manager.UserService/UserUpdateFromOwn":       types.AdminRoles,
 		"/manager.UserService/UserInfo":                types.AllUserRole,
 		"/manager.UserService/UserChangePassword":      types.AdminRoles,
+	}
+
+	return rolemanager.NewRoleManager(methodRoles)
+}
+
+func SetupInternalRoleManager() *rolemanager.RoleManager {
+	methodRoles := map[string][]types.Role{
+		// UserService
+		"/manager.UserInternalService/UserInfo": {types.RoleService},
 	}
 
 	return rolemanager.NewRoleManager(methodRoles)
