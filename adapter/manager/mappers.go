@@ -68,6 +68,8 @@ func convertUserRoleToPB(roles []types.Role) []userpb.Role {
 			pbRoles = append(pbRoles, userpb.Role_ROLE_GUEST)
 		case types.RoleBot:
 			pbRoles = append(pbRoles, userpb.Role_ROLE_BOT)
+		case types.RoleService:
+			pbRoles = append(pbRoles, userpb.Role_ROLE_SERVICE)
 		}
 	}
 
@@ -116,6 +118,8 @@ func convertUserRoleToEntity(pbRoles []userpb.Role) []types.Role {
 			roles = append(roles, types.RoleGuest)
 		case userpb.Role_ROLE_BOT:
 			roles = append(roles, types.RoleBot)
+		case userpb.Role_ROLE_SERVICE:
+			roles = append(roles, types.RoleService)
 		case userpb.Role_ROLE_UNSPECIFIED:
 			continue
 		}
