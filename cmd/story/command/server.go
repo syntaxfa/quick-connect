@@ -5,17 +5,16 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/syntaxfa/quick-connect/adapter/postgres"
-	"github.com/syntaxfa/quick-connect/app/storageapp"
+	"github.com/syntaxfa/quick-connect/app/storyapp"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
 
 type Server struct {
-	cfg    storageapp.Config
+	cfg    storyapp.Config
 	logger *slog.Logger
 }
 
-func (s Server) Command(cfg storageapp.Config, logger *slog.Logger, trap chan os.Signal) *cobra.Command {
+func (s Server) Command(cfg storyapp.Config, logger *slog.Logger, trap chan os.Signal) *cobra.Command {
 	s.cfg = cfg
 	s.logger = logger
 
@@ -25,7 +24,7 @@ func (s Server) Command(cfg storageapp.Config, logger *slog.Logger, trap chan os
 
 	return &cobra.Command{
 		Use:   "start",
-		Short: "start storage application",
+		Short: "start story application",
 		Run:   run,
 	}
 }
@@ -38,10 +37,7 @@ func (s Server) run(trap <-chan os.Signal) {
 		return
 	}
 
-	psqAdapter := postgres.New(s.cfg.Postgres, s.logger)
-	defer psqAdapter.Close()
-
-	app, _ := storageapp.Setup(s.cfg, s.logger, trap, t, psqAdapter, nil)
+	app, _ := storyapp.Setup(s.cfg, s.logger, trap, t)
 
 	app.Start()
 }
