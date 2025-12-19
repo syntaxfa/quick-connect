@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS stories (
     "view_count" BIGINT DEFAULT 0,
     "creator_id" VARCHAR(26) NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_stories_feed_schedule ON stories(is_active, publish_at, expire_at);
 CREATE INDEX IF NOT EXISTS idx_stories_creator ON stories(creator_id, created_at DESC);

@@ -51,6 +51,7 @@ func main() {
 
 	root.AddCommand(
 		command.Server{}.Command(cfg, log, trap),
+		command.Migrate{}.Command(cfg.Postgres, log),
 	)
 
 	if exErr := root.Execute(); exErr != nil {
