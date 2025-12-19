@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     "dynamic_title_data" JSONB NULL,
     "is_read" BOOL DEFAULT false,
     "is_in_app" BOOL DEFAULT false,
-    "created_at" TIMESTAMP DEFAULT NOW(),
+    "created_at" TIMESTAMPZ DEFAULT NOW(),
     "overall_status" notification_status NOT NULL DEFAULT 'pending',
     "channel_deliveries" JSONB NOT NULL DEFAULT '[]'::jsonb
 );
