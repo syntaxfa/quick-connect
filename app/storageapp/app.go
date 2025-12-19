@@ -104,8 +104,8 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translatio
 	handler := http.NewHandler(svc, t, cfg.Storage.Local.RootPath, cfg.Service.MaxFileSize, logger)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler, logger, authMid)
 
-	roleManager := SetupRoleManager()
-	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, roleManager)
+	internalRoleManager := SetupInternalRoleManager()
+	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, internalRoleManager)
 	internalGRPCHandler := grpcdelivery.NewInternalHandler(svc, t, logger)
 	internalGRPCServer := grpcdelivery.New(grpcserver.New(cfg.InternalGRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)),
 		internalGRPCHandler)
@@ -194,9 +194,9 @@ func (a Application) stopInternalGRPCServer(wg *sync.WaitGroup) {
 	a.internalGRPCServer.Stop()
 }
 
-func SetupRoleManager() *rolemanager.RoleManager {
+func SetupInternalRoleManager() *rolemanager.RoleManager {
 	methodRoles := map[string][]types.Role{
-		"/storage.StorageService.GetURL": {types.RoleService},
+		"/storage.StorageInternalService/GetLink": {types.RoleService},
 	}
 
 	return rolemanager.NewRoleManager(methodRoles)

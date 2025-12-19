@@ -4,14 +4,14 @@ package storage;
 
 option go_package = "protobuf/storage/golang/storagepb";
 
-message GetURLRequest {
+message GetLinkRequest {
   string file_id = 1;
 }
 
-message GetURLResponse {
+message GetLinkResponse {
   string url = 1;
 }
 
-service StorageService {
-  rpc GetURL (GetURLRequest) returns (GetURLResponse);
+service StorageInternalService {
+  rpc GetLink (GetLinkRequest) returns (GetLinkResponse);
 }

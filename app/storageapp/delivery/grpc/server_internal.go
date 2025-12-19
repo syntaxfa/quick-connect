@@ -20,7 +20,7 @@ func New(server grpcserver.Server, handler InternalHandler) InternalServer {
 }
 
 func (s InternalServer) Start(ctx context.Context) error {
-	storagepb.RegisterStorageServiceServer(s.server.GrpcServer, s.handler)
+	storagepb.RegisterStorageInternalServiceServer(s.server.GrpcServer, s.handler)
 
 	return s.server.Start(ctx)
 }

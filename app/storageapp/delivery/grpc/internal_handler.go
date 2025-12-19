@@ -9,7 +9,7 @@ import (
 )
 
 type InternalHandler struct {
-	storagepb.UnimplementedStorageServiceServer
+	storagepb.UnimplementedStorageInternalServiceServer
 
 	svc    service.Service
 	t      *translation.Translate
