@@ -11,26 +11,32 @@ import (
 	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/adapter/storage/aws"
 	"github.com/syntaxfa/quick-connect/adapter/storage/local"
+	grpcdelivery "github.com/syntaxfa/quick-connect/app/storageapp/delivery/grpc"
 	"github.com/syntaxfa/quick-connect/app/storageapp/delivery/http"
 	postgres2 "github.com/syntaxfa/quick-connect/app/storageapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/storageapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/auth"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
+	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
+	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/jwtvalidator"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
+	"github.com/syntaxfa/quick-connect/pkg/rolemanager"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 	"github.com/syntaxfa/quick-connect/protobuf/manager/golang/authpb"
+	"github.com/syntaxfa/quick-connect/types"
 	"google.golang.org/grpc"
 	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 type Application struct {
-	cfg        Config
-	httpServer http.Server
-	logger     *slog.Logger
-	trap       <-chan os.Signal
+	cfg                Config
+	httpServer         http.Server
+	logger             *slog.Logger
+	trap               <-chan os.Signal
+	internalGRPCServer grpcdelivery.InternalServer
 }
 
 type PublicKeyService interface {
@@ -98,16 +104,24 @@ func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translatio
 	handler := http.NewHandler(svc, t, cfg.Storage.Local.RootPath, cfg.Service.MaxFileSize, logger)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler, logger, authMid)
 
+	internalRoleManager := SetupInternalRoleManager()
+	authInterceptor := grpcauth.NewAuthInterceptor(jwtValidator, internalRoleManager)
+	internalGRPCHandler := grpcdelivery.NewInternalHandler(svc, t, logger)
+	internalGRPCServer := grpcdelivery.New(grpcserver.New(cfg.InternalGRPCServer, logger, grpc.UnaryInterceptor(authInterceptor)),
+		internalGRPCHandler)
+
 	return Application{
-		cfg:        cfg,
-		httpServer: httpServer,
-		logger:     logger,
-		trap:       trap,
+		cfg:                cfg,
+		httpServer:         httpServer,
+		logger:             logger,
+		trap:               trap,
+		internalGRPCServer: internalGRPCServer,
 	}, svc
 }
 
 func (a Application) Start() {
 	httpServerChan := make(chan error, 1)
+	grpcServerChan := make(chan error, 1)
 
 	go func() {
 		a.logger.Info(fmt.Sprintf("http server started on %d", a.cfg.HTTPServer.Port))
@@ -117,9 +131,17 @@ func (a Application) Start() {
 		}
 	}()
 
+	go func() {
+		if sErr := a.internalGRPCServer.Start(context.Background()); sErr != nil {
+			grpcServerChan <- sErr
+		}
+	}()
+
 	select {
 	case err := <-httpServerChan:
 		a.logger.Error(fmt.Sprintf("error in http server on %d", a.cfg.HTTPServer.Port), slog.String("error", err.Error()))
+	case err := <-grpcServerChan:
+		a.logger.Error(fmt.Sprintf("error in grpc server on %d", a.cfg.InternalGRPCServer.Port), slog.String("error", err.Error()))
 	case <-a.trap:
 		a.logger.Info("received http server shutdown signal!!!")
 	}
@@ -145,6 +167,9 @@ func (a Application) Stop(ctx context.Context) bool {
 		shutdownWg.Add(1)
 		go a.stopHTTPServer(ctx, &shutdownWg)
 
+		shutdownWg.Add(1)
+		go a.stopInternalGRPCServer(&shutdownWg)
+
 		shutdownWg.Wait()
 		close(shutdownDone)
 	}()
@@ -162,4 +187,17 @@ func (a Application) stopHTTPServer(ctx context.Context, wg *sync.WaitGroup) {
 	if sErr := a.httpServer.Stop(ctx); sErr != nil {
 		a.logger.ErrorContext(ctx, "http server gracefully shutdown failed", slog.String("error", sErr.Error()))
 	}
+}
+
+func (a Application) stopInternalGRPCServer(wg *sync.WaitGroup) {
+	defer wg.Done()
+	a.internalGRPCServer.Stop()
+}
+
+func SetupInternalRoleManager() *rolemanager.RoleManager {
+	methodRoles := map[string][]types.Role{
+		"/storage.StorageInternalService/GetLink": {types.RoleService},
+	}
+
+	return rolemanager.NewRoleManager(methodRoles)
 }

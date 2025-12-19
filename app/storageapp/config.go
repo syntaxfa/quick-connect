@@ -8,6 +8,7 @@ import (
 	"github.com/syntaxfa/quick-connect/adapter/storage/local"
 	"github.com/syntaxfa/quick-connect/app/storageapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
+	"github.com/syntaxfa/quick-connect/pkg/grpcserver"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/logger"
 )
@@ -19,11 +20,12 @@ type Storage struct {
 }
 
 type Config struct {
-	ShutdownTimeout time.Duration     `koanf:"shutdown_timeout"`
-	HTTPServer      httpserver.Config `koanf:"http_server"`
-	Logger          logger.Config     `koanf:"logger"`
-	Storage         Storage           `koanf:"storage"`
-	Postgres        postgres.Config   `koanf:"postgres"`
-	Service         service.Config    `koanf:"service"`
-	ManagerAppGRPC  grpcclient.Config `koanf:"manager_app_grpc"`
+	ShutdownTimeout    time.Duration     `koanf:"shutdown_timeout"`
+	HTTPServer         httpserver.Config `koanf:"http_server"`
+	Logger             logger.Config     `koanf:"logger"`
+	Storage            Storage           `koanf:"storage"`
+	Postgres           postgres.Config   `koanf:"postgres"`
+	Service            service.Config    `koanf:"service"`
+	ManagerAppGRPC     grpcclient.Config `koanf:"manager_app_grpc"`
+	InternalGRPCServer grpcserver.Config `koanf:"internal_grpc_server"`
 }

@@ -35,3 +35,6 @@ manager_app_grpc:
   port: 2541
   ssl_mode: false
   use_otel: false
+internal_grpc_server:
+  host: "localhost"
+  port: 2561

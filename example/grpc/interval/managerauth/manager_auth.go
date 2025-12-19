@@ -27,8 +27,8 @@ func GetToken() (refreshToken, accessToken string) {
 	authAdapter := manager.NewAuthAdapter(grpcClient.Conn())
 
 	resp, lErr := authAdapter.Login(context.Background(), &authpb.LoginRequest{
-		Username: "alireza",
-		Password: "Password",
+		Username: "story-service",
+		Password: "(30&+)5hfrfAi0M*Tdp$t}qzc@uPKLw#(ZeS*HvuyR*Eu99bxp0B|FXuB0yx5I3u",
 	})
 	if lErr != nil {
 		errorhandler.HandleGRPCError(lErr, slog.Default())

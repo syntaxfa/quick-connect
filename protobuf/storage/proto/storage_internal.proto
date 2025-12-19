@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package storage;
+
+option go_package = "protobuf/storage/golang/storagepb";
+
+message GetLinkRequest {
+  string file_id = 1;
+}
+
+message GetLinkResponse {
+  string url = 1;
+}
+
+service StorageInternalService {
+  rpc GetLink (GetLinkRequest) returns (GetLinkResponse);
+}
