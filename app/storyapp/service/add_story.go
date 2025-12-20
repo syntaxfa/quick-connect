@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/syntaxfa/quick-connect/pkg/errlog"
 	"github.com/syntaxfa/quick-connect/pkg/richerror"
 	"github.com/syntaxfa/quick-connect/pkg/servermsg"
@@ -40,6 +41,8 @@ func (s Service) AddStory(ctx context.Context, req AddStoryRequest, creatorID ty
 	// confirmed file.
 
 	req.CreatorID = creatorID
+	req.ID = types.ID(ulid.Make().String())
+
 	story, saveErr := s.repo.SaveStory(ctx, req)
 	if saveErr != nil {
 		return AddStoryResponse{}, errlog.ErrContext(ctx, richerror.New(op).WithWrapError(saveErr).

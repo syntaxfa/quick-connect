@@ -7,6 +7,7 @@ import (
 )
 
 type AddStoryRequest struct {
+	ID              types.ID  `json:"-"`
 	CreatorID       types.ID  `json:"-"`
 	MediaFileID     types.ID  `json:"media_file_id"`
 	Title           string    `json:"title"`
