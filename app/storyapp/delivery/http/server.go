@@ -3,6 +3,8 @@ package http
 import (
 	"context"
 
+	echoSwagger "github.com/swaggo/echo-swagger"
+	"github.com/syntaxfa/quick-connect/app/storyapp/docs"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 )
 
@@ -34,4 +36,10 @@ func (s Server) registerRoutes() {
 	s.httpServer.Router.GET("health-check", s.handler.healthCheck)
 }
 
-func (s Server) registerSwagger() {}
+func (s Server) registerSwagger() {
+	docs.SwaggerInfostory.Title = "Story API"
+	docs.SwaggerInfostory.Description = "Story restfull API documentation"
+	docs.SwaggerInfostory.Version = "1.x.x"
+
+	s.httpServer.Router.GET("/swagger/*any", echoSwagger.EchoWrapHandler(echoSwagger.InstanceName("story")))
+}

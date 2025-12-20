@@ -214,10 +214,24 @@ const docTemplatestorage = `{
         "types.ID": {
             "type": "string",
             "enum": [
-                "01J00000000000000000000BOT"
+                "01J00000000000000000000BOT",
+                "01J0000000000000000MANAGER",
+                "01J0000000000000000000CHAT",
+                "01J000000000000000000NOTIF",
+                "01J000000000000000000ADMIN",
+                "01J0000000000000000STORAGE",
+                "01J000000000000000000STORY",
+                "01J00000000000000000000RAG"
             ],
             "x-enum-varnames": [
-                "BotUserID"
+                "BotUserID",
+                "ManagerServiceUserID",
+                "ChatServiceUserID",
+                "NotificationUserID",
+                "AdminUserID",
+                "StorageUserID",
+                "StoryUserID",
+                "RAGUserID"
             ]
         }
     },
