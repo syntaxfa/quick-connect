@@ -7,6 +7,7 @@ import (
 	"github.com/syntaxfa/quick-connect/pkg/tokenmanager"
 	"github.com/syntaxfa/quick-connect/protobuf/storage/golang/storagepb"
 	"google.golang.org/grpc"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 type Repository interface {
@@ -15,6 +16,7 @@ type Repository interface {
 
 type StorageService interface {
 	GetFileInfo(ctx context.Context, req *storagepb.GetFileInfoRequest, opts ...grpc.CallOption) (*storagepb.File, error)
+	ConfirmFile(ctx context.Context, req *storagepb.ConfirmFileRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type Service struct {

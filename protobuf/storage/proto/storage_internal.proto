@@ -5,6 +5,7 @@ package storage;
 option go_package = "protobuf/storage/golang/storagepb";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 message GetLinkRequest {
   string file_id = 1;
@@ -34,7 +35,12 @@ message File {
   google.protobuf.Timestamp deleted_at = 13;
 }
 
+message ConfirmFileRequest {
+  string file_id = 1;
+}
+
 service StorageInternalService {
   rpc GetLink (GetLinkRequest) returns (GetLinkResponse);
   rpc GetFileInfo (GetFileInfoRequest) returns (File);
+  rpc ConfirmFile (ConfirmFileRequest) returns (google.protobuf.Empty);
 }

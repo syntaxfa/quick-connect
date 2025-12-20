@@ -38,7 +38,10 @@ func (s Service) AddStory(ctx context.Context, req AddStoryRequest, creatorID ty
 		return AddStoryResponse{}, richerror.New(op).WithMessage(servermsg.MsgStoryMediaRequirePublic).WithKind(richerror.KindBadRequest)
 	}
 
-	// confirmed file.
+	if _, cErr := s.storageSvc.ConfirmFile(ctxWithValue, &storagepb.ConfirmFileRequest{FileId: string(req.MediaFileID)}); cErr != nil {
+		return AddStoryResponse{}, errlog.ErrContext(ctxWithValue, richerror.New(op).WithWrapError(cErr).
+			WithKind(richerror.KindUnexpected), s.logger)
+	}
 
 	req.CreatorID = creatorID
 	req.ID = types.ID(ulid.Make().String())
