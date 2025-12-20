@@ -3,16 +3,16 @@ package storage
 import (
 	"context"
 	"fmt"
-	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
-	"google.golang.org/grpc"
 	"log/slog"
 
 	"github.com/syntaxfa/quick-connect/adapter/storage"
 	"github.com/syntaxfa/quick-connect/example/grpc/interval/errorhandler"
 	"github.com/syntaxfa/quick-connect/example/grpc/interval/managerauth"
+	"github.com/syntaxfa/quick-connect/pkg/grpcauth"
 	"github.com/syntaxfa/quick-connect/pkg/grpcclient"
 	"github.com/syntaxfa/quick-connect/protobuf/storage/golang/storagepb"
 	"github.com/syntaxfa/quick-connect/types"
+	"google.golang.org/grpc"
 )
 
 func Storage() {
@@ -37,7 +37,7 @@ func Storage() {
 
 	storageAd := storage.NewInternalAdapter(grpcClient.Conn())
 
-	getLinkRes, getLinkErr := storageAd.GetLink(ctxWithValue, &storagepb.GetLinkRequest{FileId: "01KCPPS70QY7WSMKS96175MXYD"})
+	getLinkRes, getLinkErr := storageAd.GetLink(ctxWithValue, &storagepb.GetLinkRequest{FileId: "01KCWR8MCTWA9769YFYW7CV779"})
 	if getLinkErr != nil {
 		errorhandler.HandleGRPCError(getLinkErr, logger)
 
@@ -45,4 +45,14 @@ func Storage() {
 	}
 
 	fmt.Printf("%+v\n", getLinkRes)
+
+	fmt.Println("getfileInfo")
+
+	getFileInfoRes, getFileInfoErr := storageAd.GetFileInfo(ctxWithValue, &storagepb.GetFileInfoRequest{FileId: "01KCWR8MCTWA9769YFYW7CV779"})
+	if getFileInfoErr != nil {
+		errorhandler.HandleGRPCError(getFileInfoErr, logger)
+	}
+
+	fmt.Printf("%+v\n", getFileInfoRes)
+	fmt.Println("is confirmed: ", getFileInfoRes.IsConfirmed)
 }

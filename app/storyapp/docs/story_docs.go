@@ -3,7 +3,7 @@ package docs
 
 import "github.com/swaggo/swag"
 
-const docTemplatestorage = `{
+const docTemplatestory = `{
     "schemes": {{ marshal .Schemes }},
     "swagger": "2.0",
     "info": {
@@ -15,116 +15,6 @@ const docTemplatestorage = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/files": {
-            "post": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Upload a file to storage (S3 or Local)",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Storage"
-                ],
-                "summary": "Upload a file",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "The file to upload",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Is the file public?",
-                        "name": "is_public",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/service.File"
-                        }
-                    },
-                    "400": {
-                        "description": "File is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "413": {
-                        "description": "File size limit exceeded",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/files/{fileID}": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "get public link",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Storage"
-                ],
-                "summary": "get public link",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "file ID",
-                        "name": "fileID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/health-check": {
             "get": {
                 "description": "health check manager service",
@@ -135,7 +25,7 @@ const docTemplatestorage = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Storage"
+                    "Story"
                 ],
                 "summary": "health check",
                 "responses": {
@@ -153,61 +43,150 @@ const docTemplatestorage = `{
                     }
                 }
             }
+        },
+        "/stories": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "adding new story",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Story"
+                ],
+                "summary": "Add Story",
+                "parameters": [
+                    {
+                        "description": "create and return story",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.AddStoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/service.AddStoryResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "service.Driver": {
-            "type": "string",
-            "enum": [
-                "s3",
-                "local"
-            ],
-            "x-enum-varnames": [
-                "DriverS3",
-                "DriverLocal"
-            ]
-        },
-        "service.File": {
+        "servermsg.ErrorResponse": {
             "type": "object",
             "properties": {
-                "bucket": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.AddStoryRequest": {
+            "type": "object",
+            "properties": {
+                "caption": {
+                    "type": "string"
+                },
+                "duration_seconds": {
+                    "type": "integer"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "link_text": {
+                    "type": "string"
+                },
+                "link_url": {
+                    "type": "string"
+                },
+                "media_file_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "publish_at": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.AddStoryResponse": {
+            "type": "object",
+            "properties": {
+                "caption": {
                     "type": "string"
                 },
                 "created_at": {
                     "type": "string"
                 },
-                "deleted_at": {
-                    "type": "string"
+                "creator_id": {
+                    "$ref": "#/definitions/types.ID"
                 },
-                "driver": {
-                    "$ref": "#/definitions/service.Driver"
+                "duration_seconds": {
+                    "type": "integer"
+                },
+                "expires_at": {
+                    "type": "string"
                 },
                 "id": {
                     "$ref": "#/definitions/types.ID"
                 },
-                "is_confirmed": {
+                "is_active": {
                     "type": "boolean"
                 },
-                "is_public": {
+                "is_viewed": {
                     "type": "boolean"
                 },
-                "key": {
+                "link_text": {
                     "type": "string"
                 },
-                "mime_type": {
+                "link_url": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "uploader_id": {
+                "media_file_id": {
                     "$ref": "#/definitions/types.ID"
+                },
+                "publish_at": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -245,20 +224,20 @@ const docTemplatestorage = `{
     }
 }`
 
-// SwaggerInfostorage holds exported Swagger Info so clients can modify it
-var SwaggerInfostorage = &swag.Spec{
+// SwaggerInfostory holds exported Swagger Info so clients can modify it
+var SwaggerInfostory = &swag.Spec{
 	Version:          "",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{"http", "https"},
 	Title:            "",
 	Description:      "",
-	InfoInstanceName: "storage",
-	SwaggerTemplate:  docTemplatestorage,
+	InfoInstanceName: "story",
+	SwaggerTemplate:  docTemplatestory,
 	LeftDelim:        "{{",
 	RightDelim:       "}}",
 }
 
 func init() {
-	swag.Register(SwaggerInfostorage.InstanceName(), SwaggerInfostorage)
+	swag.Register(SwaggerInfostory.InstanceName(), SwaggerInfostory)
 }

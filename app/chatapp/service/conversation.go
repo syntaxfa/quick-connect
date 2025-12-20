@@ -201,7 +201,8 @@ func (s *Service) getClientAndSupportInfo(ctx context.Context, clientID, support
 
 	ctxWithAuth, tErr := s.tokenManager.SetTokenInContext(ctx)
 	if tErr != nil {
-		return ClientInfo{}, SupportInfo{}, richerror.New(op).WithWrapError(tErr).WithKind(richerror.KindUnexpected)
+		return ClientInfo{}, SupportInfo{}, errlog.ErrContext(ctxWithAuth, richerror.New(op).WithWrapError(tErr).
+			WithKind(richerror.KindUnexpected), s.logger)
 	}
 
 	var clientInfoPB *userinternalpb.UserInfoResponse

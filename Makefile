@@ -73,6 +73,9 @@ notification-swag-init:
 storage-swag-init:
 	swag init -g cmd/storage/main.go -o app/storageapp/docs/ --tags=Storage --instanceName storage
 
+story-swag-init:
+	swag init -g cmd/story/main.go -o app/storyapp/docs/ --tags=Story --instanceName story
+
 example-micro1-swag-init:
 	swag init -g example/observability/microservice1/main.go -o example/observability/internal/microservice1/docs --tags=Micro1
 

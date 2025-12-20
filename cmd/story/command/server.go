@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/storyapp"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
 )
@@ -37,7 +38,10 @@ func (s Server) run(trap <-chan os.Signal) {
 		return
 	}
 
-	app, _ := storyapp.Setup(s.cfg, s.logger, trap, t)
+	psqAdapter := postgres.New(s.cfg.Postgres, s.logger)
+	defer psqAdapter.Close()
+
+	app, _ := storyapp.Setup(s.cfg, s.logger, trap, t, psqAdapter, nil, nil)
 
 	app.Start()
 }
