@@ -10,6 +10,7 @@ import (
 	"github.com/syntaxfa/quick-connect/protobuf/storage/golang/storagepb"
 	"github.com/syntaxfa/quick-connect/types"
 	"google.golang.org/grpc"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 type InternalLocalAdapter struct {
@@ -42,4 +43,13 @@ func (idl *InternalLocalAdapter) GetFileInfo(ctx context.Context, req *storagepb
 	}
 
 	return convertFileToPB(resp), nil
+}
+
+func (idl *InternalLocalAdapter) ConfirmFile(ctx context.Context, req *storagepb.ConfirmFileRequest,
+	_ ...grpc.CallOption) (*empty.Empty, error) {
+	if sErr := idl.svc.ConfirmFile(ctx, types.ID(req.GetFileId())); sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, idl.t, idl.logger)
+	}
+
+	return &empty.Empty{}, nil
 }

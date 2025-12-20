@@ -7,6 +7,7 @@
 package storagepb
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -294,11 +295,55 @@ func (x *File) GetDeletedAt() *timestamp.Timestamp {
 	return nil
 }
 
+type ConfirmFileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FileId        string                 `protobuf:"bytes,1,opt,name=file_id,json=fileId,proto3" json:"file_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConfirmFileRequest) Reset() {
+	*x = ConfirmFileRequest{}
+	mi := &file_storage_proto_storage_internal_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConfirmFileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConfirmFileRequest) ProtoMessage() {}
+
+func (x *ConfirmFileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_storage_proto_storage_internal_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConfirmFileRequest.ProtoReflect.Descriptor instead.
+func (*ConfirmFileRequest) Descriptor() ([]byte, []int) {
+	return file_storage_proto_storage_internal_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ConfirmFileRequest) GetFileId() string {
+	if x != nil {
+		return x.FileId
+	}
+	return ""
+}
+
 var File_storage_proto_storage_internal_proto protoreflect.FileDescriptor
 
 const file_storage_proto_storage_internal_proto_rawDesc = "" +
 	"\n" +
-	"$storage/proto/storage_internal.proto\x12\astorage\x1a\x1fgoogle/protobuf/timestamp.proto\")\n" +
+	"$storage/proto/storage_internal.proto\x12\astorage\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\")\n" +
 	"\x0eGetLinkRequest\x12\x17\n" +
 	"\afile_id\x18\x01 \x01(\tR\x06fileId\"#\n" +
 	"\x0fGetLinkResponse\x12\x10\n" +
@@ -323,10 +368,13 @@ const file_storage_proto_storage_internal_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"deleted_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt2\x91\x01\n" +
+	"deleted_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"-\n" +
+	"\x12ConfirmFileRequest\x12\x17\n" +
+	"\afile_id\x18\x01 \x01(\tR\x06fileId2\xd5\x01\n" +
 	"\x16StorageInternalService\x12<\n" +
 	"\aGetLink\x12\x17.storage.GetLinkRequest\x1a\x18.storage.GetLinkResponse\x129\n" +
-	"\vGetFileInfo\x12\x1b.storage.GetFileInfoRequest\x1a\r.storage.FileB#Z!protobuf/storage/golang/storagepbb\x06proto3"
+	"\vGetFileInfo\x12\x1b.storage.GetFileInfoRequest\x1a\r.storage.File\x12B\n" +
+	"\vConfirmFile\x12\x1b.storage.ConfirmFileRequest\x1a\x16.google.protobuf.EmptyB#Z!protobuf/storage/golang/storagepbb\x06proto3"
 
 var (
 	file_storage_proto_storage_internal_proto_rawDescOnce sync.Once
@@ -340,24 +388,28 @@ func file_storage_proto_storage_internal_proto_rawDescGZIP() []byte {
 	return file_storage_proto_storage_internal_proto_rawDescData
 }
 
-var file_storage_proto_storage_internal_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_storage_proto_storage_internal_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_storage_proto_storage_internal_proto_goTypes = []any{
 	(*GetLinkRequest)(nil),      // 0: storage.GetLinkRequest
 	(*GetLinkResponse)(nil),     // 1: storage.GetLinkResponse
 	(*GetFileInfoRequest)(nil),  // 2: storage.GetFileInfoRequest
 	(*File)(nil),                // 3: storage.File
-	(*timestamp.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(*ConfirmFileRequest)(nil),  // 4: storage.ConfirmFileRequest
+	(*timestamp.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(*empty.Empty)(nil),         // 6: google.protobuf.Empty
 }
 var file_storage_proto_storage_internal_proto_depIdxs = []int32{
-	4, // 0: storage.File.created_at:type_name -> google.protobuf.Timestamp
-	4, // 1: storage.File.updated_at:type_name -> google.protobuf.Timestamp
-	4, // 2: storage.File.deleted_at:type_name -> google.protobuf.Timestamp
+	5, // 0: storage.File.created_at:type_name -> google.protobuf.Timestamp
+	5, // 1: storage.File.updated_at:type_name -> google.protobuf.Timestamp
+	5, // 2: storage.File.deleted_at:type_name -> google.protobuf.Timestamp
 	0, // 3: storage.StorageInternalService.GetLink:input_type -> storage.GetLinkRequest
 	2, // 4: storage.StorageInternalService.GetFileInfo:input_type -> storage.GetFileInfoRequest
-	1, // 5: storage.StorageInternalService.GetLink:output_type -> storage.GetLinkResponse
-	3, // 6: storage.StorageInternalService.GetFileInfo:output_type -> storage.File
-	5, // [5:7] is the sub-list for method output_type
-	3, // [3:5] is the sub-list for method input_type
+	4, // 5: storage.StorageInternalService.ConfirmFile:input_type -> storage.ConfirmFileRequest
+	1, // 6: storage.StorageInternalService.GetLink:output_type -> storage.GetLinkResponse
+	3, // 7: storage.StorageInternalService.GetFileInfo:output_type -> storage.File
+	6, // 8: storage.StorageInternalService.ConfirmFile:output_type -> google.protobuf.Empty
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
 	3, // [3:3] is the sub-list for extension extendee
 	0, // [0:3] is the sub-list for field type_name
@@ -374,7 +426,7 @@ func file_storage_proto_storage_internal_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_storage_proto_storage_internal_proto_rawDesc), len(file_storage_proto_storage_internal_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

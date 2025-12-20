@@ -8,6 +8,7 @@ package storagepb
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -21,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	StorageInternalService_GetLink_FullMethodName     = "/storage.StorageInternalService/GetLink"
 	StorageInternalService_GetFileInfo_FullMethodName = "/storage.StorageInternalService/GetFileInfo"
+	StorageInternalService_ConfirmFile_FullMethodName = "/storage.StorageInternalService/ConfirmFile"
 )
 
 // StorageInternalServiceClient is the client API for StorageInternalService service.
@@ -29,6 +31,7 @@ const (
 type StorageInternalServiceClient interface {
 	GetLink(ctx context.Context, in *GetLinkRequest, opts ...grpc.CallOption) (*GetLinkResponse, error)
 	GetFileInfo(ctx context.Context, in *GetFileInfoRequest, opts ...grpc.CallOption) (*File, error)
+	ConfirmFile(ctx context.Context, in *ConfirmFileRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type storageInternalServiceClient struct {
@@ -59,12 +62,23 @@ func (c *storageInternalServiceClient) GetFileInfo(ctx context.Context, in *GetF
 	return out, nil
 }
 
+func (c *storageInternalServiceClient) ConfirmFile(ctx context.Context, in *ConfirmFileRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, StorageInternalService_ConfirmFile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StorageInternalServiceServer is the server API for StorageInternalService service.
 // All implementations must embed UnimplementedStorageInternalServiceServer
 // for forward compatibility.
 type StorageInternalServiceServer interface {
 	GetLink(context.Context, *GetLinkRequest) (*GetLinkResponse, error)
 	GetFileInfo(context.Context, *GetFileInfoRequest) (*File, error)
+	ConfirmFile(context.Context, *ConfirmFileRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedStorageInternalServiceServer()
 }
 
@@ -80,6 +94,9 @@ func (UnimplementedStorageInternalServiceServer) GetLink(context.Context, *GetLi
 }
 func (UnimplementedStorageInternalServiceServer) GetFileInfo(context.Context, *GetFileInfoRequest) (*File, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFileInfo not implemented")
+}
+func (UnimplementedStorageInternalServiceServer) ConfirmFile(context.Context, *ConfirmFileRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmFile not implemented")
 }
 func (UnimplementedStorageInternalServiceServer) mustEmbedUnimplementedStorageInternalServiceServer() {
 }
@@ -139,6 +156,24 @@ func _StorageInternalService_GetFileInfo_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StorageInternalService_ConfirmFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageInternalServiceServer).ConfirmFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StorageInternalService_ConfirmFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageInternalServiceServer).ConfirmFile(ctx, req.(*ConfirmFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StorageInternalService_ServiceDesc is the grpc.ServiceDesc for StorageInternalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -153,6 +188,10 @@ var StorageInternalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFileInfo",
 			Handler:    _StorageInternalService_GetFileInfo_Handler,
+		},
+		{
+			MethodName: "ConfirmFile",
+			Handler:    _StorageInternalService_ConfirmFile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

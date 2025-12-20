@@ -198,6 +198,7 @@ func SetupInternalRoleManager() *rolemanager.RoleManager {
 	methodRoles := map[string][]types.Role{
 		"/storage.StorageInternalService/GetLink":     {types.RoleService},
 		"/storage.StorageInternalService/GetFileInfo": {types.RoleService},
+		"/storage.StorageInternalService/ConfirmFile": {types.RoleService},
 	}
 
 	return rolemanager.NewRoleManager(methodRoles)
