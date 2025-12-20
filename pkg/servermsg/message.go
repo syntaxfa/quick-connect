@@ -63,4 +63,6 @@ const (
 	MsgInvalidLengthOfStoryCaption  = "the caption must be between 3 and 2000 characters"
 	MsgInvalidLengthOfStoryLinkURL  = "the link url must be between 10 and 255 characters"
 	MsgInvalidLengthOfStoryLinkText = "the link text must be between 3 and 100 characters"
+	MsgStoryMediaRequirePublic      = "media Story must be public"
+	MsgMediaAlreadyUse              = "this media has already been used."
 )

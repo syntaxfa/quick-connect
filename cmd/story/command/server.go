@@ -41,7 +41,7 @@ func (s Server) run(trap <-chan os.Signal) {
 	psqAdapter := postgres.New(s.cfg.Postgres, s.logger)
 	defer psqAdapter.Close()
 
-	app, _ := storyapp.Setup(s.cfg, s.logger, trap, t, psqAdapter)
+	app, _ := storyapp.Setup(s.cfg, s.logger, trap, t, psqAdapter, nil, nil)
 
 	app.Start()
 }

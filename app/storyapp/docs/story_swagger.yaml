@@ -1,3 +1,81 @@
+definitions:
+  servermsg.ErrorResponse:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      message:
+        type: string
+    type: object
+  service.AddStoryRequest:
+    properties:
+      caption:
+        type: string
+      duration_seconds:
+        type: integer
+      expires_at:
+        type: string
+      link_text:
+        type: string
+      link_url:
+        type: string
+      media_file_id:
+        $ref: '#/definitions/types.ID'
+      publish_at:
+        type: string
+      title:
+        type: string
+    type: object
+  service.AddStoryResponse:
+    properties:
+      caption:
+        type: string
+      created_at:
+        type: string
+      creator_id:
+        $ref: '#/definitions/types.ID'
+      duration_seconds:
+        type: integer
+      expires_at:
+        type: string
+      id:
+        $ref: '#/definitions/types.ID'
+      is_active:
+        type: boolean
+      is_viewed:
+        type: boolean
+      link_text:
+        type: string
+      link_url:
+        type: string
+      media_file_id:
+        $ref: '#/definitions/types.ID'
+      publish_at:
+        type: string
+      title:
+        type: string
+    type: object
+  types.ID:
+    enum:
+    - 01J00000000000000000000BOT
+    - 01J0000000000000000MANAGER
+    - 01J0000000000000000000CHAT
+    - 01J000000000000000000NOTIF
+    - 01J000000000000000000ADMIN
+    - 01J0000000000000000STORAGE
+    - 01J000000000000000000STORY
+    - 01J00000000000000000000RAG
+    type: string
+    x-enum-varnames:
+    - BotUserID
+    - ManagerServiceUserID
+    - ChatServiceUserID
+    - NotificationUserID
+    - AdminUserID
+    - StorageUserID
+    - StoryUserID
+    - RAGUserID
 info:
   contact: {}
 paths:
@@ -18,6 +96,42 @@ paths:
           schema:
             type: string
       summary: health check
+      tags:
+      - Story
+  /stories:
+    post:
+      consumes:
+      - application/json
+      description: adding new story
+      parameters:
+      - description: create and return story
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/service.AddStoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/service.AddStoryResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/servermsg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Add Story
       tags:
       - Story
 schemes:

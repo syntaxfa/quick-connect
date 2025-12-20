@@ -43,6 +43,175 @@ const docTemplatestory = `{
                     }
                 }
             }
+        },
+        "/stories": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "adding new story",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Story"
+                ],
+                "summary": "Add Story",
+                "parameters": [
+                    {
+                        "description": "create and return story",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.AddStoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/service.AddStoryResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/servermsg.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "servermsg.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.AddStoryRequest": {
+            "type": "object",
+            "properties": {
+                "caption": {
+                    "type": "string"
+                },
+                "duration_seconds": {
+                    "type": "integer"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "link_text": {
+                    "type": "string"
+                },
+                "link_url": {
+                    "type": "string"
+                },
+                "media_file_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "publish_at": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.AddStoryResponse": {
+            "type": "object",
+            "properties": {
+                "caption": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "creator_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "duration_seconds": {
+                    "type": "integer"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_viewed": {
+                    "type": "boolean"
+                },
+                "link_text": {
+                    "type": "string"
+                },
+                "link_url": {
+                    "type": "string"
+                },
+                "media_file_id": {
+                    "$ref": "#/definitions/types.ID"
+                },
+                "publish_at": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ID": {
+            "type": "string",
+            "enum": [
+                "01J00000000000000000000BOT",
+                "01J0000000000000000MANAGER",
+                "01J0000000000000000000CHAT",
+                "01J000000000000000000NOTIF",
+                "01J000000000000000000ADMIN",
+                "01J0000000000000000STORAGE",
+                "01J000000000000000000STORY",
+                "01J00000000000000000000RAG"
+            ],
+            "x-enum-varnames": [
+                "BotUserID",
+                "ManagerServiceUserID",
+                "ChatServiceUserID",
+                "NotificationUserID",
+                "AdminUserID",
+                "StorageUserID",
+                "StoryUserID",
+                "RAGUserID"
+            ]
         }
     },
     "securityDefinitions": {

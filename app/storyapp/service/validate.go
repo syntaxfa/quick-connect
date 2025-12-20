@@ -34,6 +34,8 @@ func (v Validate) ValidateAddStoryRequest(req AddStoryRequest) error {
 	const op = "service.validate.ValidateAddStoryRequest"
 
 	if err := validation.ValidateStruct(&req,
+		validation.Field(&req.MediaFileID,
+			validation.Required.Error(servermsg.MsgFieldRequired)),
 		validation.Field(&req.Title,
 			validation.Length(minTitleLength, maxTitleLength).Error(servermsg.MsgInvalidLengthOfStoryTitle)),
 		validation.Field(&req.Caption,
@@ -42,6 +44,12 @@ func (v Validate) ValidateAddStoryRequest(req AddStoryRequest) error {
 			validation.Length(minLinkURLLength, maxLinkURLLength).Error(servermsg.MsgInvalidLengthOfStoryLinkURL)),
 		validation.Field(&req.LinkText,
 			validation.Length(minLinkTextLength, maxLinkTextLength).Error(servermsg.MsgInvalidLengthOfStoryLinkText)),
+		validation.Field(&req.DurationSeconds,
+			validation.Required.Error(servermsg.MsgFieldRequired)),
+		validation.Field(&req.PublishAt,
+			validation.Required.Error(servermsg.MsgFieldRequired)),
+		validation.Field(&req.ExpiresAt,
+			validation.Required.Error(servermsg.MsgFieldRequired)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
 

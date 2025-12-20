@@ -23,3 +23,16 @@ postgres:
   max_open_conns: 20
   conn_max_lifetime: 600
   path_of_migration: "app/storyapp/repository/migrations"
+manager_app_grpc:
+  host: "localhost"
+  port: 2541
+  ssl_mode: false
+  use_otel: false
+storage_app_grpc:
+  host: "localhost"
+  port: 2561
+  ssl_mode: false
+  use_otel: false
+service_auth_info:
+  username: "story-service"
+  password: "(30&+)5hfrfAi0M*Tdp$t}qzc@uPKLw#(ZeS*HvuyR*Eu99bxp0B|FXuB0yx5I3u"
