@@ -56,4 +56,11 @@ const (
 	MsgFileInNotPublic      = "this file does not public"
 	MsgFileNotFound         = "this file does not exists"
 	MsgFileAlreadyConfirmed = "this file already confirmed!"
+
+	// Story App.
+
+	MsgInvalidLengthOfStoryTitle    = "the title must be between 3 and 255 characters"
+	MsgInvalidLengthOfStoryCaption  = "the caption must be between 3 and 2000 characters"
+	MsgInvalidLengthOfStoryLinkURL  = "the link url must be between 10 and 255 characters"
+	MsgInvalidLengthOfStoryLinkText = "the link text must be between 3 and 100 characters"
 )

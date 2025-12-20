@@ -33,3 +33,13 @@ func (idl *InternalLocalAdapter) GetLink(ctx context.Context, req *storagepb.Get
 
 	return &storagepb.GetLinkResponse{Url: resp}, nil
 }
+
+func (idl *InternalLocalAdapter) GetFileInfo(ctx context.Context, req *storagepb.GetFileInfoRequest,
+	_ ...grpc.CallOption) (*storagepb.File, error) {
+	resp, sErr := idl.svc.GetFileInfo(ctx, types.ID(req.GetFileId()))
+	if sErr != nil {
+		return nil, servermsg.GRPCMsg(sErr, idl.t, idl.logger)
+	}
+
+	return convertFileToPB(resp), nil
+}

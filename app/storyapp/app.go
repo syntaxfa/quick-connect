@@ -7,7 +7,9 @@ import (
 	"os"
 	"sync"
 
+	"github.com/syntaxfa/quick-connect/adapter/postgres"
 	"github.com/syntaxfa/quick-connect/app/storyapp/delivery/http"
+	postgres2 "github.com/syntaxfa/quick-connect/app/storyapp/repository/postgres"
 	"github.com/syntaxfa/quick-connect/app/storyapp/service"
 	"github.com/syntaxfa/quick-connect/pkg/httpserver"
 	"github.com/syntaxfa/quick-connect/pkg/translation"
@@ -20,8 +22,11 @@ type Application struct {
 	trap       <-chan os.Signal
 }
 
-func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translation.Translate) (Application, service.Service) {
-	svc := service.New()
+func Setup(cfg Config, logger *slog.Logger, trap <-chan os.Signal, t *translation.Translate,
+	psqAd *postgres.Database) (Application, service.Service) {
+	repo := postgres2.New(psqAd)
+	vld := service.NewValidate(t)
+	svc := service.New(repo, vld)
 
 	handler := http.NewHandler(svc, t, logger)
 	httpServer := http.New(httpserver.New(cfg.HTTPServer, logger), handler)

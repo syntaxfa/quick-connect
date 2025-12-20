@@ -9,13 +9,13 @@ CREATE TABLE IF NOT EXISTS stories (
     "duration_seconds" INT NOT NULL,
     "is_active" BOOLEAN DEFAULT true,
     "publish_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    "expire_at" TIMESTAMPTZ NOT NULL,
+    "expires_at" TIMESTAMPTZ NOT NULL,
     "view_count" BIGINT DEFAULT 0,
     "creator_id" VARCHAR(26) NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stories_feed_schedule ON stories(is_active, publish_at, expire_at);
+CREATE INDEX IF NOT EXISTS idx_stories_feed_schedule ON stories(is_active, publish_at, expires_at);
 CREATE INDEX IF NOT EXISTS idx_stories_creator ON stories(creator_id, created_at DESC);
 
 -- +migrate Down

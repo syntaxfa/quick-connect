@@ -4,6 +4,8 @@ package storage;
 
 option go_package = "protobuf/storage/golang/storagepb";
 
+import "google/protobuf/timestamp.proto";
+
 message GetLinkRequest {
   string file_id = 1;
 }
@@ -12,6 +14,27 @@ message GetLinkResponse {
   string url = 1;
 }
 
+message GetFileInfoRequest {
+  string file_id = 1;
+}
+
+message File {
+  string id = 1;
+  string uploader_id = 2;
+  string name = 3;
+  string key = 4;
+  string mime_type = 5;
+  int64 size = 6;
+  string driver = 7;
+  string bucket = 8;
+  bool is_public = 9;
+  bool is_confirmed = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+  google.protobuf.Timestamp deleted_at = 13;
+}
+
 service StorageInternalService {
   rpc GetLink (GetLinkRequest) returns (GetLinkResponse);
+  rpc GetFileInfo (GetFileInfoRequest) returns (File);
 }

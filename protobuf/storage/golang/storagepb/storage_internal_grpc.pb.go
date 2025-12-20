@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	StorageInternalService_GetLink_FullMethodName = "/storage.StorageInternalService/GetLink"
+	StorageInternalService_GetLink_FullMethodName     = "/storage.StorageInternalService/GetLink"
+	StorageInternalService_GetFileInfo_FullMethodName = "/storage.StorageInternalService/GetFileInfo"
 )
 
 // StorageInternalServiceClient is the client API for StorageInternalService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StorageInternalServiceClient interface {
 	GetLink(ctx context.Context, in *GetLinkRequest, opts ...grpc.CallOption) (*GetLinkResponse, error)
+	GetFileInfo(ctx context.Context, in *GetFileInfoRequest, opts ...grpc.CallOption) (*File, error)
 }
 
 type storageInternalServiceClient struct {
@@ -47,11 +49,22 @@ func (c *storageInternalServiceClient) GetLink(ctx context.Context, in *GetLinkR
 	return out, nil
 }
 
+func (c *storageInternalServiceClient) GetFileInfo(ctx context.Context, in *GetFileInfoRequest, opts ...grpc.CallOption) (*File, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(File)
+	err := c.cc.Invoke(ctx, StorageInternalService_GetFileInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StorageInternalServiceServer is the server API for StorageInternalService service.
 // All implementations must embed UnimplementedStorageInternalServiceServer
 // for forward compatibility.
 type StorageInternalServiceServer interface {
 	GetLink(context.Context, *GetLinkRequest) (*GetLinkResponse, error)
+	GetFileInfo(context.Context, *GetFileInfoRequest) (*File, error)
 	mustEmbedUnimplementedStorageInternalServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedStorageInternalServiceServer struct{}
 
 func (UnimplementedStorageInternalServiceServer) GetLink(context.Context, *GetLinkRequest) (*GetLinkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLink not implemented")
+}
+func (UnimplementedStorageInternalServiceServer) GetFileInfo(context.Context, *GetFileInfoRequest) (*File, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFileInfo not implemented")
 }
 func (UnimplementedStorageInternalServiceServer) mustEmbedUnimplementedStorageInternalServiceServer() {
 }
@@ -105,6 +121,24 @@ func _StorageInternalService_GetLink_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StorageInternalService_GetFileInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFileInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageInternalServiceServer).GetFileInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StorageInternalService_GetFileInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageInternalServiceServer).GetFileInfo(ctx, req.(*GetFileInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StorageInternalService_ServiceDesc is the grpc.ServiceDesc for StorageInternalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -115,6 +149,10 @@ var StorageInternalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLink",
 			Handler:    _StorageInternalService_GetLink_Handler,
+		},
+		{
+			MethodName: "GetFileInfo",
+			Handler:    _StorageInternalService_GetFileInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

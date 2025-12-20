@@ -21,3 +21,8 @@ func (id *InternalAdapter) GetLink(ctx context.Context, req *storagepb.GetLinkRe
 	opts ...grpc.CallOption) (*storagepb.GetLinkResponse, error) {
 	return id.client.GetLink(ctx, req, opts...)
 }
+
+func (id *InternalAdapter) GetFileInfo(ctx context.Context, req *storagepb.GetFileInfoRequest,
+	opts ...grpc.CallOption) (*storagepb.File, error) {
+	return id.client.GetFileInfo(ctx, req, opts...)
+}
