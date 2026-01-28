@@ -11,7 +11,7 @@ COPY . .
 RUN CGO_ENABLED=0 go build -o $APP_NAME cmd/notification/main.go
 
 # run stage
-FROM alpine:3.23.2 AS runtime
+FROM alpine:3.23.3 AS runtime
 
 WORKDIR /app
 
