@@ -100,6 +100,8 @@ Quick Connect is architected as a **Modular Monolith**, giving you the ultimate 
 ### 🔄 Dual Deployment Modes
 One of the unique features of Quick Connect is its **"Code-Level Monolith"** design. You can run the platform in two modes using the exact same codebase:
 
+> 📖 **Deep Dive into the Architecture:** For a comprehensive breakdown of why and how we built this hybrid deployment model, check out the full article on Dev.to: [Code-Level Monolith: The Hybrid Architecture — The Art of Flexible Deployment](https://dev.to/alireza_feizi_2aa9c86cac4/code-level-monolith-the-hybrid-architecture-the-art-of-flexible-deployment-2jm2).
+
 1.  **Microservices Mode (Scale):** Each component (Chat, Manager, Notification) runs as an independent container. Services communicate over the network via **gRPC**. Ideal for high-traffic, distributed environments (Kubernetes).
 2.  **Monolith Mode (Speed & Simplicity):** All services run within a **single binary** (All-in-One). In this mode, inter-service communication bypasses the network completely and occurs via **direct function calls** (in-memory).
   * **Zero Network Latency:** No gRPC overhead between internal services.
