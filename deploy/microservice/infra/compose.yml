@@ -7,7 +7,7 @@ volumes:
 
 services:
   redis:
-    image: redis:8.4.0
+    image: redis:8.8.0
     container_name: redis
     hostname: ${ALL_IN_ONE_REDIS__HOST}
     restart: always
