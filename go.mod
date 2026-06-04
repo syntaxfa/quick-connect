@@ -51,7 +51,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.1
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/golang/protobuf v1.5.4
-	github.com/labstack/echo/v4 v4.13.4
+	github.com/labstack/echo/v4 v4.15.2
 )
 
 require (
