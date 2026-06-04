@@ -301,10 +301,16 @@ go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.64.0 h1:9PCiXc7BmfD7+BI8POoc3bQSoRSEo01eNqPVu1/+pDY=
 go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.64.0/go.mod h1:NGBbj2Bgb5Oe/35f9WaU3qRnOey+7X+bxnnSS5zzvLA=
+go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.69.0 h1:p2oor9jp8aT5uqVuN9p0GCntXn5VX8qXdOH098hgLu4=
+go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.69.0/go.mod h1:NOiuETZRg7aNSNFPWqf4dAszhyFMVdKYXW4V0/DtbNA=
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.64.0 h1:RN3ifU8y4prNWeEnQp2kRRHz8UwonAEYZl8tUzHEXAk=
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.64.0/go.mod h1:habDz3tEWiFANTo6oUE99EmaFUrCNYAAg3wiVmusm70=
+go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.69.0 h1:2yEATaop1/a1I4psnSLgWVPLWwCzkqWakgJy7xTDVy0=
+go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.69.0/go.mod h1:D7J12YRapIekYyPWgGPlA/23pRmpSEZC5xJC/TTLI9U=
 go.opentelemetry.io/contrib/instrumentation/runtime v0.64.0 h1:/+/+UjlXjFcdDlXxKL1PouzX8Z2Vl0OxolRKeBEgYDw=
 go.opentelemetry.io/contrib/instrumentation/runtime v0.64.0/go.mod h1:Ldm/PDuzY2DP7IypudopCR3OCOW42NJlN9+mNEroevo=
+go.opentelemetry.io/contrib/instrumentation/runtime v0.69.0 h1:MtkMsuRo3zEXTTMALfyrszwCDZTkB6wolyPjbwFAdq0=
+go.opentelemetry.io/contrib/instrumentation/runtime v0.69.0/go.mod h1:FYTxnpsm+UPD0erZNq20GvnM8T2YQHiHtT2vokdpoac=
 go.opentelemetry.io/contrib/propagators/b3 v1.39.0 h1:PI7pt9pkSnimWcp5sQhUA9OzLbc3Ba4sL+VEUTNsxrk=
 go.opentelemetry.io/contrib/propagators/b3 v1.39.0/go.mod h1:5gV/EzPnfYIwjzj+6y8tbGW2PKWhcsz5e/7twptRVQY=
 go.opentelemetry.io/otel v1.39.0 h1:8yPrr/S0ND9QEfTfdP9V+SiwT4E0G7Y5MO7p85nis48=
