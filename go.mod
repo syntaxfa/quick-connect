@@ -51,8 +51,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.3
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/golang/protobuf v1.5.4
+	github.com/swaggo/echo-swagger/v2 v2.0.1
 	github.com/labstack/echo/v5 v5.1.1
-	github.com/swaggo/echo-swagger v1.5.2
 )
 
 require (
