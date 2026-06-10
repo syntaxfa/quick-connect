@@ -11,7 +11,7 @@ COPY . .
 RUN CGO_ENABLED=0 go build -o $APP_NAME cmd/chat/main.go
 
 # run stage
-FROM alpine:3.23.4 AS runtime
+FROM alpine:3.24.0 AS runtime
 
 WORKDIR /app
 
