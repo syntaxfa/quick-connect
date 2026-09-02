@@ -1,4 +1,4 @@
-FROM golang:1.26.4 AS builder
+FROM golang:1.27.1 AS builder
 
 ENV APP_NAME=admin
 
