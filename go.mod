@@ -12,7 +12,7 @@ require (
 	github.com/knadh/koanf/parsers/yaml v1.1.0
 	github.com/knadh/koanf/providers/env v1.1.0 // don't migrate to version two, because project have conflict with it.
 	github.com/knadh/koanf/providers/file v1.2.1
-	github.com/knadh/koanf/providers/structs v1.0.0
+	github.com/knadh/koanf/providers/structs v1.0.1
 	github.com/knadh/koanf/v2 v2.3.5
 	github.com/labstack/echo/v5 v5.1.1
 	github.com/lib/pq v1.12.3
@@ -51,8 +51,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.3
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/golang/protobuf v1.5.4
-	github.com/swaggo/echo-swagger/v2 v2.0.1
-	github.com/labstack/echo/v5 v5.1.1
+	github.com/labstack/echo/v4 v4.15.2
+	github.com/swaggo/echo-swagger v1.5.2
 )
 
 require (
