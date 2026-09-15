@@ -3,7 +3,7 @@ module github.com/syntaxfa/quick-connect
 go 1.25.4
 
 require (
-	github.com/exaring/otelpgx v0.11.1
+	github.com/exaring/otelpgx v0.12.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
@@ -51,8 +51,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.3
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/golang/protobuf v1.5.4
-	github.com/swaggo/echo-swagger/v2 v2.0.1
-	github.com/labstack/echo/v5 v5.1.1
+	github.com/labstack/echo/v4 v4.15.2
+	github.com/swaggo/echo-swagger v1.5.2
 )
 
 require (
